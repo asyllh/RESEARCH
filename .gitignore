@@ -1,0 +1,26 @@
+#.gitignore for THESIS
+.vs/*
+Debug/*
+cmake-build-debug/
+.idea/
+*.sln
+*.VC.db
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.out
+*.exe
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.dvi
+*.log
+*.run.xml
+*.synctex.gz
+*.toc
+*.swp
+*.nav
+*.snm
+*.vrb
+
