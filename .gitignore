@@ -1,4 +1,4 @@
-#.gitignore for THESIS
+#.gitignore for RESEARCH
 .vs/*
 Debug/*
 cmake-build-debug/
