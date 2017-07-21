@@ -31,10 +31,12 @@ int main(){
     int minWidth = 1; //minimum width of score (millimeters)
     int maxWidth = 70; //maximum width of score (millimeters)
     int threshold = 70; //adjacency threshold of scores, minimum knife distance
-    int mate; //vertex number for matching algorithm, mate takes the value of the index of the vertex that the current vertex is mates with
+    int mateMatch; //vertex number for matching algorithm, mate takes the value of the index of the vertex that the current vertex is mates with
     int lastMatch;
     int vacant = 999;
     int verticesNotMatched;
+
+    vector<int> mates(numScores, 0);
     vector<int> matchList(numScores, 0);
     vector<int> allScores(numScores, 0); //vector containing all score widths
     vector<vector<int> > adjMatrix(numScores, vector<int>(numScores ,0)); //adjacency matrix, 0 if width sum < threshold, 1 if width sum >= threshold, 2 if scores are mates (either side of same box)
@@ -78,16 +80,6 @@ int main(){
 
     }
 
-
-    //Print out adjacency matrix inc threshold
-    cout << "adjacency matrix\n\n";
-    for(i = 0; i < adjMatrix.size(); ++i){
-        for(j = 0; j < adjMatrix[i].size(); ++j){
-            cout << adjMatrix[i][j] << "\t";
-        }
-        cout << endl;
-    }
-
     //Create vector to be used to assign mates
     vector<int> randOrder(numScores, 0);
 
@@ -95,14 +87,13 @@ int main(){
     for(i = 0; i < numScores-2; ++i){
         randOrder[i] = i;
     }
-    randOrder[numScores-2] = numScores -2;
-    randOrder[numScores-1] = numScores -1;
-
+    randOrder[numScores-2] = numScores - 2;
+    randOrder[numScores-1] = numScores - 1;
     //Randomly shuffle all values in randOrder vector EXCEPT the last two values (dominating vertices, must stay as mates)
     random_shuffle(randOrder.begin(), randOrder.begin()+8);
 
     //Print out randOrder vector
-    cout << "random order:\n";
+    cout << "Random Order:\n";
     for(i = 0; i < randOrder.size(); ++i){
         cout << randOrder[i] << endl;
     }
@@ -112,12 +103,12 @@ int main(){
     //In the adjacency matrix, this will be represented by value 2
     //Therefore there will be a value of 2 in every row and every column, non repeating
     for(i = 0; i < numBox; ++i){
-        adjMatrix[randOrder[2*i]][randOrder[2*i+1]] = 2;
-        adjMatrix[randOrder[2*i+1]][randOrder[2*i]] = 2;
+        adjMatrix[randOrder[2 * i]][randOrder[2 * i + 1]] = 2;
+        adjMatrix[randOrder[2 * i + 1]][randOrder[2 * i]] = 2;
     }
 
     //Print out adjacency matrix inc threshold and mates
-    cout << "adjacency matrix with twin:\n\n";
+    cout << "Adjacency Matrix:\n";
     for(i = 0; i < adjMatrix.size(); ++i){
         for(j = 0; j < adjMatrix[i].size(); ++j){
             cout << adjMatrix[i][j] << "\t";
@@ -135,10 +126,11 @@ int main(){
 
     for(i = 0; i < numScores; ++i){ //check all vertices
         if(matchList[i] == vacant){ //if vertex has not yet been matched
-            for(j = numScores - 1; j > i; --j){ //try match vertex i with largest unmatched vertex, start from largest vertex j, go down list of vertices in decreasing order of size
+            for(j = numScores -1; j > i; --j){ //try match vertex i with largest unmatched vertex, start from largest vertex j, go down list of vertices in decreasing order of size
                 if(adjMatrix[i][j] == 1 && matchList[j] == vacant){ //if vertices i and j are adjacent, and if vertex j has not yet been matched
                     matchList[i] = j;
                     matchList[j] = i;
+                    lastMatch = i;
                     break;
                 }
                 else if(adjMatrix[i][j] == 2 && matchList[j] == vacant){ //if potential match == mate
@@ -148,19 +140,19 @@ int main(){
             if(matchList[i] == vacant){ //if vertex has still not been matched
                 for(k = 0; k < numScores; ++k){
                     if(adjMatrix[i][k] == 2){ //if vertex i and vertex k are mates
-                        mate = k;
+                        mateMatch = k;
                         break;
                     }
                 }
-                if((allScores[i] + allScores[mate] >= threshold) //match with mate?
-                    && (matchList[mate] == vacant) //is mate unmatched?
+                if((allScores[i] + allScores[mateMatch] >= threshold) //match with mate?
+                    && (matchList[mateMatch] == vacant) //is mate unmatched?
                     && (lastMatch != vacant) //has the previous vertex been matched?
-                    && (mate > i) //is the mate larger? (sorted in increasing order of vertex weight, so index will be higher if vertex has larger value)
-                    && (allScores[lastMatch] + allScores[mate] >= threshold)){ //can mate be matched with last matched vertex?
+                    && (mateMatch > i) //is the mate larger? (sorted in increasing order of vertex weight, so index will be higher if vertex has larger value)
+                    && (allScores[lastMatch] + allScores[mateMatch] >= threshold)){ //can mate be matched with last matched vertex?
                     // if so, then swap mates
                     matchList[i] = matchList[lastMatch];
-                    matchList[lastMatch] = mate;
-                    matchList[mate] = lastMatch;
+                    matchList[lastMatch] = mateMatch;
+                    matchList[mateMatch] = lastMatch;
                     matchList[matchList[i]] = i;
                     lastMatch = i;
                 }
@@ -196,6 +188,25 @@ int main(){
     else {
         cout << "Number of unmatched vertices: " << verticesNotMatched << endl;
     }
+
+    //MATE-INDUCED STRUCTURE
+    for(i = 0; i < numScores; ++i){
+        for(j = 0; j < numScores; ++j){
+            if(adjMatrix[i][j] == 2){
+                mates[i] = j;
+                break;
+            }
+        }
+    }
+
+    cout << "Mates Vector:\n";
+    for(i = 0; i < numScores; ++i){
+        cout << mates[i] << endl;
+    }
+
+
+
+
 
 
 
