@@ -22,24 +22,33 @@ using namespace std;
 
 int main(){
 
+    cout << "Minimum Score Separation Problem\nMatching-Based Alternating Hamiltonicity Recognition Algorithm\n\n";
+
     //Variables
     int i, j, k, r;
-    unsigned int randomSeed = 1;
+    unsigned int randomSeed = 3;
     int numInstances = 100; //number of instances of mssp, use in main for loop
     unsigned int numBox = 5; //number of boxes in mssp plus 1 extra box (scores on either side of extra box will be dominating vertices, score widths = 71)
     unsigned int numScores = numBox * 2; //number of scores, 2 per box (1 either side), last two scores are dominating vertices
     int minWidth = 1; //minimum width of score (millimeters)
-    int maxWidth = 70; //maximum width of score (millimeters)
+    int maxWidth = 60; //maximum width of score (millimeters)
     int threshold = 70; //adjacency threshold of scores, minimum knife distance
     int mateMatch; //vertex number for matching algorithm, mate takes the value of the index of the vertex that the current vertex is mates with
     int lastMatch;
     int vacant = 999;
     int verticesNotMatched;
+    int smallestVertex;
+    int currentVertex;
+    int totalCycles;
 
     vector<int> mates(numScores, 0);
     vector<int> matchList(numScores, 0);
     vector<int> allScores(numScores, 0); //vector containing all score widths
     vector<vector<int> > adjMatrix(numScores, vector<int>(numScores ,0)); //adjacency matrix, 0 if width sum < threshold, 1 if width sum >= threshold, 2 if scores are mates (either side of same box)
+    vector<int> checked(numScores, 0);
+    vector<vector<int> > mateInduced; //size numscore by noComp, i.e. number of rows = numScores, number of columns = noComp
+    vector<int> cycle;
+    vector<int> lengthMateInduced; //each element holds the value corresponding to the length of the relative cycle in the mate-induced structure
     srand(randomSeed); //seed
 
     time_t startTime, endTime; //start clock
@@ -55,19 +64,21 @@ int main(){
     allScores[numScores - 1] = 71;
 
     //Print out allScores vector
-    cout << "all scores:\n";
+    cout << "All scores:\n";
     for(i = 0; i < allScores.size(); ++i) {
-        cout << allScores[i] << endl;
+        cout << allScores[i] << " ";
     }
+    cout << endl << endl;
 
     //Sort all of the scores in the allScores vector in ascending order
     sort (allScores.begin(), allScores.end()); //sorts elements of vector in ascending order
 
     //Print out allScores vector (scores now in ascending order)
-    cout << "all scores in increasing order:\n";
+    cout << "All scores - non-decreasing order:\n";
     for(i = 0; i < allScores.size(); ++i) {
-        cout << allScores[i] << endl;
+        cout << allScores[i] << " ";
     }
+    cout << endl << endl;
 
     //Filling in adjacency matrix - if sum of two scores >= threshold (70), then insert 1 into the matrix, else leave as 0
     for(i = 0; i < allScores.size()-1; ++i){
@@ -93,11 +104,11 @@ int main(){
     random_shuffle(randOrder.begin(), randOrder.begin()+8);
 
     //Print out randOrder vector
-    cout << "Random Order:\n";
+    /*cout << "Random Order:\n";
     for(i = 0; i < randOrder.size(); ++i){
         cout << randOrder[i] << endl;
     }
-    cout << endl;
+    cout << endl;*/
 
     //Assign mates to each score (i.e. pair up scores to define which scores are either side of the same box)
     //In the adjacency matrix, this will be represented by value 2
@@ -115,7 +126,7 @@ int main(){
         }
         cout << endl;
     }
-
+    cout << endl;
     //MATCHING ALGORITHM
     //Fill matchingList vector with values 0,..., numScores-1 (i.e. the index of each element)
     for(i = 0; i < numScores; ++i){
@@ -168,8 +179,9 @@ int main(){
 
     cout << "Matching List:\n";
     for(i = 0; i < numScores; ++i){
-        cout << matchList[i] << endl;
+        cout << matchList[i] << " ";
     }
+    cout << endl << endl;
 
     cout << "Matching Vertices Values:\n";
     for(i = 0; i < numScores; ++i){
@@ -178,12 +190,12 @@ int main(){
             ++verticesNotMatched;
         }
         else {
-            cout << i << "\t" << allScores[i] << "\t" << allScores[matchList[i]] << "\t" << matchList[i] << endl;
         }
+        cout << i << "\t" << allScores[i] << "\t" << allScores[matchList[i]] << "\t" << matchList[i] << endl;
     }
 
     if(verticesNotMatched == 0){
-        cout << "All vertices have been matched.\n";
+        cout << "All vertices have been matched.\n\n";
     }
     else {
         cout << "Number of unmatched vertices: " << verticesNotMatched << endl;
@@ -198,11 +210,60 @@ int main(){
             }
         }
     }
-
     cout << "Mates Vector:\n";
     for(i = 0; i < numScores; ++i){
-        cout << mates[i] << endl;
+        cout << mates[i] << " ";
     }
+    cout << endl << endl;
+
+    for(i = 0; i < numScores; ++i){
+        checked[i] = 0;
+    }
+
+    //find the smallest vertex not yet checked for mate-induced structure - start with this vertex
+    for(i = 0; i < numScores; ++i){
+        if(checked[i] == 0){
+            smallestVertex = i;
+            break;
+        }
+    }
+
+
+    do{
+        currentVertex = smallestVertex;
+        do{
+            cycle.push_back(currentVertex);
+            checked[currentVertex] = 1;
+            cycle.push_back(mates[currentVertex]);
+            checked[mates[currentVertex]] = 1;
+            currentVertex = matchList[mates[currentVertex]];
+        } while(currentVertex != smallestVertex);
+
+        mateInduced.push_back(cycle);
+        cycle.clear();
+
+        for(i = 0; i < numScores; ++i){
+            if(checked[i] == 0){
+                smallestVertex = i;
+                break;
+            }
+        }
+
+
+    } while(smallestVertex != currentVertex);
+
+    totalCycles = mateInduced.size();
+
+    cout << "Mate-Induced Structure:\n";
+    for(i = 0; i < mateInduced.size(); ++i){
+        for(j = 0; j < mateInduced[i].size(); ++j){
+            cout << mateInduced[i][j] << "\t";
+        }
+        cout << endl;
+    }
+    cout << endl;
+
+    cout << "Number of cycles in mate-induced structure: " << totalCycles << endl;
 
 
 
