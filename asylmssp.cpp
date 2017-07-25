@@ -22,8 +22,6 @@ using namespace std;
 
 int main(){
 
-    cout << "Minimum Score Separation Problem\nMatching-Based Alternating Hamiltonicity Recognition Algorithm\n\n";
-
     //Variables
     int i, j, k, r;
     unsigned int randomSeed = 3;
@@ -35,21 +33,34 @@ int main(){
     int threshold = 70; //adjacency threshold of scores, minimum knife distance
     int mateMatch; //vertex number for matching algorithm, mate takes the value of the index of the vertex that the current vertex is mates with
     int lastMatch;
+    int matchSize; //size/cardinality of the matching list
     int vacant = 999;
-    int verticesNotMatched;
+    int verticesNotMatched; //counts number of vertices that have not been matched to another vertex in MTGMA
     int smallestVertex;
     int currentVertex;
-    int totalCycles;
+    int totalCycles; //number of cycles in the mate-induced structure, i.e mateInduced.size() (each row in the mate-induced structure matrix represents a cycle)
+    int feasible = 0; //number of feasible instances
+    int infeasible = 0; //number of infeasible instances
+    int currentEdge; //counter used for list of edges
+    int numEdges; //number of (non-empty) edges
 
-    vector<int> mates(numScores, 0);
-    vector<int> matchList(numScores, 0);
+    vector<int> mates(numScores, 0); //contains vertex index for mates, e.g if vertex 0 is mates with vertex 4, then mates[0] = 4
+    vector<int> matchList(numScores, 0); //contains vertex index for matching vertices, e.g. if vertex 0 is matched with vertex 9, then matchList[0] = 9
     vector<int> allScores(numScores, 0); //vector containing all score widths
     vector<vector<int> > adjMatrix(numScores, vector<int>(numScores ,0)); //adjacency matrix, 0 if width sum < threshold, 1 if width sum >= threshold, 2 if scores are mates (either side of same box)
-    vector<int> checked(numScores, 0);
+    vector<int> checked(numScores, 0); //contains 0 if vector i has not yet been included in the mate-induced structure, 1 if vector i has been placed in MIS
     vector<vector<int> > mateInduced; //size numscore by noComp, i.e. number of rows = numScores, number of columns = noComp
-    vector<int> cycle;
+    vector<int> cycle; //used in building the mate-induced structure
     vector<int> lengthMateInduced; //each element holds the value corresponding to the length of the relative cycle in the mate-induced structure
+    vector<int> cycleVertex(numScores, 0); //contains the number of the cycle of the mate-induced structure that the vertex i belongs to
+    // (e.g. if vertex 4 is in the first cycle of the MIS, then cycleVertex[4] = 0 (0 = first cycle, 1 = second cycle etc))
+    vector<int> edge(numBox, 0); //contains the number of lower vertex of each (non-empty) edge
+
     srand(randomSeed); //seed
+
+    //DON'T FORGET TO CLEAR VECTORS AND VARIABLES FOR NEXT INSTANCE
+
+    cout << "Minimum Score Separation Problem\nMatching-Based Alternating Hamiltonicity Recognition Algorithm\n\n";
 
     time_t startTime, endTime; //start clock
     startTime = clock();
@@ -59,7 +70,6 @@ int main(){
         allScores[i] = rand() % (maxWidth - minWidth + 1) + minWidth;
     }
     //add two dominating vertices with score widths = 71 (these scores will be either side of same box, mates)
-
     allScores[numScores - 2] = 71;
     allScores[numScores - 1] = 71;
 
@@ -94,7 +104,7 @@ int main(){
     //Create vector to be used to assign mates
     vector<int> randOrder(numScores, 0);
 
-    //initially, randOrder vector will contain elements in the order 0, ..., numScores -2, numScores -1
+    //Initially, randOrder vector will contain elements in the order 0, ..., numScores -2, numScores -1
     for(i = 0; i < numScores-2; ++i){
         randOrder[i] = i;
     }
@@ -127,11 +137,14 @@ int main(){
         cout << endl;
     }
     cout << endl;
-    //MATCHING ALGORITHM
+
+
+    //MATCHING ALGORITHM MTGMA
     //Fill matchingList vector with values 0,..., numScores-1 (i.e. the index of each element)
     for(i = 0; i < numScores; ++i){
         matchList[i] = vacant;
     }
+    matchSize = 0;
     lastMatch = vacant;
     verticesNotMatched = 0;
 
@@ -142,6 +155,7 @@ int main(){
                     matchList[i] = j;
                     matchList[j] = i;
                     lastMatch = i;
+                    ++matchSize;
                     break;
                 }
                 else if(adjMatrix[i][j] == 2 && matchList[j] == vacant){ //if potential match == mate
@@ -166,6 +180,7 @@ int main(){
                     matchList[mateMatch] = lastMatch;
                     matchList[matchList[i]] = i;
                     lastMatch = i;
+                    ++matchSize;
                 }
                 else{
                     //one more unconnected vertex
@@ -176,6 +191,16 @@ int main(){
 
         }//end if matchList[i] == i
     }//end for i
+
+    //If the number of matches (i.e. the size of the matching list M) is less than the number of boxes (n), then instance is infeasible ( |M| < n )
+    if(matchSize < numBox){
+        ++infeasible;
+        cout << "Instance is infeasible, not enough matching edges available (|M| < n)." << endl;
+        goto End;
+        //continue;
+    }
+    cout << "Size of M (matchSize): " << matchSize << endl;
+
 
     cout << "Matching List:\n";
     for(i = 0; i < numScores; ++i){
@@ -190,8 +215,9 @@ int main(){
             ++verticesNotMatched;
         }
         else {
+            cout << i << "\t" << allScores[i] << "\t" << allScores[matchList[i]] << "\t" << matchList[i] << endl;
         }
-        cout << i << "\t" << allScores[i] << "\t" << allScores[matchList[i]] << "\t" << matchList[i] << endl;
+
     }
 
     if(verticesNotMatched == 0){
@@ -200,6 +226,8 @@ int main(){
     else {
         cout << "Number of unmatched vertices: " << verticesNotMatched << endl;
     }
+
+
 
     //MATE-INDUCED STRUCTURE
     for(i = 0; i < numScores; ++i){
@@ -228,7 +256,7 @@ int main(){
         }
     }
 
-
+    //Building the mate-induced structure
     do{
         currentVertex = smallestVertex;
         do{
@@ -251,8 +279,12 @@ int main(){
 
 
     } while(smallestVertex != currentVertex);
+    cycle.clear(); //clear cycle vector again for next instance
 
     totalCycles = mateInduced.size();
+    for(i = 0; i < mateInduced.size(); ++i){
+        lengthMateInduced.push_back(mateInduced[i].size());
+    }
 
     cout << "Mate-Induced Structure:\n";
     for(i = 0; i < mateInduced.size(); ++i){
@@ -265,6 +297,61 @@ int main(){
 
     cout << "Number of cycles in mate-induced structure: " << totalCycles << endl;
 
+    cout << "Number of vertices in each cycle of the mate-induced structure:\n";
+    for(i = 0; i < lengthMateInduced.size(); ++i){
+        cout << "Cycle " << i+1 << ": " << lengthMateInduced[i] << " vertices" << endl;
+    }
+    cout << endl;
+
+    //If the mate-induced structure only consists of one cycle, then the problem has been solved and is feasible (just remove one matching edge to find feasible path)
+    if(lengthMateInduced[0] == numScores){ //if all of the vertices are in the first (and only) cycle of the mate-induced structure
+        cout << "Instance is feasible, mate-induced structure only consists of one cycle.\n";
+        cout << "Feasible order of scores:\n";
+        for(i = 0; i < mateInduced[0].size()-1; ++i){
+            cout << allScores[mateInduced[0][i]] << " -> ";
+        }
+        cout << allScores[mateInduced[0][mateInduced[0].size()-1]] << endl;
+        ++feasible;
+        goto End;
+        //continue;
+    }
+
+
+
+    //FCA
+    //create list cycleVertex that contains for each vertex the cycle that each edge belongs to
+    for(i = 0; i < mateInduced.size(); ++i){
+        for(j = 0; j < mateInduced[i].size(); ++j){
+            cycleVertex[mateInduced[i][j]] = i;
+        }
+    }
+    cout << "Cycle Vertex:\n";
+    for(i = 0; i < cycleVertex.size(); ++i){
+        cout << cycleVertex[i] << " ";
+    }
+    cout << endl;
+
+    //create list of edges without empty edges (those generated by mate swap)
+    currentEdge = 0;
+    for(i = 0; i < matchSize; ++i){ //matchSize should = numBox, as the edges vector is of size numBox
+        edge[i] = vacant;
+    }
+
+    for(i = 0; i < matchSize; ++i){
+        while(cycleVertex[i] == vacant){
+            ++i;
+        }
+        edge[currentEdge] = i;
+        ++currentEdge;
+    }
+    numEdges = currentEdge;
+
+    cout << "Edges vector:\n";
+    for(i = 0; i < edge.size(); ++i){
+        cout << edge[i] << " ";
+    }
+    cout << endl;
+    cout << "Number of Edges: " << numEdges << endl;
 
 
 
@@ -301,7 +388,8 @@ int main(){
 
 
 
-
+    End:
+    cout << "End of Program.\n"; //for poor matching
 
 	endTime = clock();
 	int totalTime = (int)(((endTime - startTime) / double(CLOCKS_PER_SEC)) * 100);
