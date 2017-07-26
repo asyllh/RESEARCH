@@ -23,13 +23,14 @@ using namespace std;
 int main(){
 
     //Variables
-    int i, j, k, r;
-    unsigned int randomSeed = 3;
+    int i, j, k, r, q, qstar;
+    unsigned int randomSeed = 4;
     int numInstances = 100; //number of instances of mssp, use in main for loop
-    unsigned int numBox = 5; //number of boxes in mssp plus 1 extra box (scores on either side of extra box will be dominating vertices, score widths = 71)
+    unsigned int numBox = 11; //number of boxes in mssp plus 1 extra box (scores on either side of extra box will be dominating vertices, score widths = 71)
     unsigned int numScores = numBox * 2; //number of scores, 2 per box (1 either side), last two scores are dominating vertices
+    unsigned int numComp = (numBox + (numBox % 2)) / 2;
     int minWidth = 1; //minimum width of score (millimeters)
-    int maxWidth = 60; //maximum width of score (millimeters)
+    int maxWidth = 70; //maximum width of score (millimeters)
     int threshold = 70; //adjacency threshold of scores, minimum knife distance
     int mateMatch; //vertex number for matching algorithm, mate takes the value of the index of the vertex that the current vertex is mates with
     int lastMatch;
@@ -38,11 +39,18 @@ int main(){
     int verticesNotMatched; //counts number of vertices that have not been matched to another vertex in MTGMA
     int smallestVertex;
     int currentVertex;
-    int totalCycles; //number of cycles in the mate-induced structure, i.e mateInduced.size() (each row in the mate-induced structure matrix represents a cycle)
+    int numCycles; //number of cycles in the mate-induced structure, i.e mateInduced.size() (each row in the mate-induced structure matrix represents a cycle)
     int feasible = 0; //number of feasible instances
     int infeasible = 0; //number of infeasible instances
     int currentEdge; //counter used for list of edges
     int numEdges; //number of (non-empty) edges
+    int vacantFlag;
+    int SSum; //number of MIS cycles already glued together
+    int SqIntS; // == 0 iff Sq intersection S == emptyset
+    int distStart[numComp];
+    int distEnd[numComp];
+    int lengthFirst[numScores + 1];
+
 
     vector<int> mates(numScores, 0); //contains vertex index for mates, e.g if vertex 0 is mates with vertex 4, then mates[0] = 4
     vector<int> matchList(numScores, 0); //contains vertex index for matching vertices, e.g. if vertex 0 is matched with vertex 9, then matchList[0] = 9
@@ -54,16 +62,32 @@ int main(){
     vector<int> lengthMateInduced; //each element holds the value corresponding to the length of the relative cycle in the mate-induced structure
     vector<int> cycleVertex(numScores, 0); //contains the number of the cycle of the mate-induced structure that the vertex i belongs to
     // (e.g. if vertex 4 is in the first cycle of the MIS, then cycleVertex[4] = 0 (0 = first cycle, 1 = second cycle etc))
-    vector<int> edge(numBox, 0); //contains the number of lower vertex of each (non-empty) edge
+    vector<int> edge; //contains the number of lower vertex of each (non-empty) edge
+    vector<vector<int> > T;
+    vector<vector<int> > S(numComp, vector<int>(numComp, 0));
+    vector<int> t;
+    vector<int> s;
+    vector<int> QSet(numComp, vacant); // Tq-cycles already used for gluing
+    vector<int> SSet(numComp, vacant); //MIS cycles already glued together
 
     srand(randomSeed); //seed
 
     //DON'T FORGET TO CLEAR VECTORS AND VARIABLES FOR NEXT INSTANCE
+    //FUNCTION TO RESET ALL VECTORS
 
     cout << "Minimum Score Separation Problem\nMatching-Based Alternating Hamiltonicity Recognition Algorithm\n\n";
 
     time_t startTime, endTime; //start clock
     startTime = clock();
+
+    for (i = 0; i < (numScores + 1); i++) {
+        lengthFirst[i] = 0;
+    }
+
+    for (i = 0; i < numComp; i++) {
+        distStart[i] = 0;
+        distEnd[i] = 0;
+    }
 
     //Create random values to be used as score widths, put in allScores vector (except last two elements)
     for(i = 0; i < numScores -2; ++i){
@@ -111,7 +135,7 @@ int main(){
     randOrder[numScores-2] = numScores - 2;
     randOrder[numScores-1] = numScores - 1;
     //Randomly shuffle all values in randOrder vector EXCEPT the last two values (dominating vertices, must stay as mates)
-    random_shuffle(randOrder.begin(), randOrder.begin()+8);
+    random_shuffle(randOrder.begin(), randOrder.begin()+(numScores-2));
 
     //Print out randOrder vector
     /*cout << "Random Order:\n";
@@ -143,12 +167,15 @@ int main(){
     //Fill matchingList vector with values 0,..., numScores-1 (i.e. the index of each element)
     for(i = 0; i < numScores; ++i){
         matchList[i] = vacant;
+        cycleVertex[i] = 1; //will be set to vacant if resulting from mate swap
     }
     matchSize = 0;
     lastMatch = vacant;
     verticesNotMatched = 0;
 
+    //THE MTGMA ALGORITHM
     for(i = 0; i < numScores; ++i){ //check all vertices
+        vacantFlag = 0;
         if(matchList[i] == vacant){ //if vertex has not yet been matched
             for(j = numScores -1; j > i; --j){ //try match vertex i with largest unmatched vertex, start from largest vertex j, go down list of vertices in decreasing order of size
                 if(adjMatrix[i][j] == 1 && matchList[j] == vacant){ //if vertices i and j are adjacent, and if vertex j has not yet been matched
@@ -156,10 +183,14 @@ int main(){
                     matchList[j] = i;
                     lastMatch = i;
                     ++matchSize;
+                    if(vacantFlag == 1){ //delete edge for FCA if matching was not with highest vertex due to the highest vertex being its mate
+                        cycleVertex[i] = vacant;
+                        cycleVertex[j] = vacant;
+                    }
                     break;
                 }
                 else if(adjMatrix[i][j] == 2 && matchList[j] == vacant){ //if potential match == mate
-                    // mark for FCA
+                    vacantFlag = 1;
                 }
             }//end for j
             if(matchList[i] == vacant){ //if vertex has still not been matched
@@ -179,27 +210,20 @@ int main(){
                     matchList[lastMatch] = mateMatch;
                     matchList[mateMatch] = lastMatch;
                     matchList[matchList[i]] = i;
+                    cycleVertex[lastMatch] = vacant; //edge from mate swap will not count for FCA
+                    cycleVertex[mateMatch] = vacant; //edge from mate swap will not count for FCA
                     lastMatch = i;
                     ++matchSize;
                 }
-                else{
-                    //one more unconnected vertex
-                }
-
-
-            }//end if
-
+            }//end if matchList == vacant
         }//end if matchList[i] == i
     }//end for i
 
-    //If the number of matches (i.e. the size of the matching list M) is less than the number of boxes (n), then instance is infeasible ( |M| < n )
-    if(matchSize < numBox){
-        ++infeasible;
-        cout << "Instance is infeasible, not enough matching edges available (|M| < n)." << endl;
-        goto End;
-        //continue;
+    cout << "Cycle Vertex vector after MTGMA:\n";
+    for(i = 0; i < cycleVertex.size(); ++i){
+        cout << cycleVertex[i] << " ";
     }
-    cout << "Size of M (matchSize): " << matchSize << endl;
+    cout << endl;
 
 
     cout << "Matching List:\n";
@@ -222,10 +246,20 @@ int main(){
 
     if(verticesNotMatched == 0){
         cout << "All vertices have been matched.\n\n";
+        cout << "Size of M (matchSize): " << matchSize << endl;
     }
     else {
         cout << "Number of unmatched vertices: " << verticesNotMatched << endl;
     }
+
+    //If the number of matches (i.e. the size of the matching list M) is less than the number of boxes (n), then instance is infeasible ( |M| < n )
+    if(matchSize < numBox){
+        ++infeasible;
+        cout << "Instance is infeasible, not enough matching edges available (|M| < n)." << endl;
+        goto End;
+        //continue;
+    }
+
 
 
 
@@ -281,7 +315,8 @@ int main(){
     } while(smallestVertex != currentVertex);
     cycle.clear(); //clear cycle vector again for next instance
 
-    totalCycles = mateInduced.size();
+    numCycles = mateInduced.size(); //number of cycles in the mate-induced structure
+
     for(i = 0; i < mateInduced.size(); ++i){
         lengthMateInduced.push_back(mateInduced[i].size());
     }
@@ -295,7 +330,7 @@ int main(){
     }
     cout << endl;
 
-    cout << "Number of cycles in mate-induced structure: " << totalCycles << endl;
+    cout << "Number of cycles in mate-induced structure: " << numCycles << endl;
 
     cout << "Number of vertices in each cycle of the mate-induced structure:\n";
     for(i = 0; i < lengthMateInduced.size(); ++i){
@@ -315,6 +350,7 @@ int main(){
         goto End;
         //continue;
     }
+    ++distStart[numCycles];
 
 
 
@@ -322,7 +358,9 @@ int main(){
     //create list cycleVertex that contains for each vertex the cycle that each edge belongs to
     for(i = 0; i < mateInduced.size(); ++i){
         for(j = 0; j < mateInduced[i].size(); ++j){
-            cycleVertex[mateInduced[i][j]] = i;
+            if(cycleVertex[mateInduced[i][j]] != vacant){ //if edge is not deleted for FCA
+                cycleVertex[mateInduced[i][j]] = i;
+            }
         }
     }
     cout << "Cycle Vertex:\n";
@@ -333,18 +371,17 @@ int main(){
 
     //create list of edges without empty edges (those generated by mate swap)
     currentEdge = 0;
-    for(i = 0; i < matchSize; ++i){ //matchSize should = numBox, as the edges vector is of size numBox
+    /*for(i = 0; i < matchSize; ++i){ //matchSize should = numBox, as the edges vector is of size numBox
         edge[i] = vacant;
-    }
+    }*/
 
     for(i = 0; i < matchSize; ++i){
         while(cycleVertex[i] == vacant){
             ++i;
         }
-        edge[currentEdge] = i;
-        ++currentEdge;
+        edge.push_back(i);
     }
-    numEdges = currentEdge;
+    numEdges = edge.size();
 
     cout << "Edges vector:\n";
     for(i = 0; i < edge.size(); ++i){
@@ -353,37 +390,119 @@ int main(){
     cout << endl;
     cout << "Number of Edges: " << numEdges << endl;
 
+    //FCA Algorithm
+    qstar = -1;
+    k = 0; //edge from matching that is under consideration
+
+    do{
+        while(k < numEdges - 2 && (adjMatrix[edge[k]][matchList[edge[k+1]]] != 1 || cycleVertex[edge[k]] == cycleVertex[edge[k+1]])){
+            ++k;
+        }
+        if(adjMatrix[edge[k]][matchList[edge[k+1]]] == 1 && cycleVertex[edge[k]] != cycleVertex[edge[k+1]]){
+            ++qstar;
+            t.push_back(k);
+            S[qstar][cycleVertex[edge[k]]] = 1;
+            while(k < numEdges - 1 && adjMatrix[edge[k]][matchList[edge[k+1]]] == 1 && S[qstar][cycleVertex[edge[k+1]]] == 0){ //add more edges to current T-cycle
+                ++k;
+                t.push_back(k);
+                S[qstar][cycleVertex[edge[k]]] = 1;
+            }
+            T.push_back(t);
+            t.clear();
+        } // end if
+        ++k;
+    } while (k < numEdges -1);
+    t.clear();
+
+    cout << "T matrix:\n";
+    for(i = 0; i < T.size(); ++i){
+        for(j = 0; j < T[i].size(); ++j){
+            cout << T[i][j] << "  ";
+        }
+        cout << endl;
+    }
+    cout << endl << endl;
+
+    cout << "S Matrix:\n";
+    for(i = 0; i < S.size(); ++i){
+        for(j = 0; j < S[i].size(); ++j){
+            cout << S[i][j] << "  ";
+        }
+        cout << endl;
+    }
+    cout << endl;
+
+    //cout << "qstar: " << qstar << endl;
+
+    //No family of T-cycle found
+    if(qstar == -1){
+        cout << "Instance is infeasible, no family of Tq-cycles found (q* = 0)." << endl;
+        ++infeasible;
+        goto End;
+    }
 
 
+    //CHECK IF PATCHING GRAPH IS CONNECTED
+    //Setup
+    for(q = 1; q <= qstar; ++q){
+        QSet[q] = 0; // ==1 iff Tq-cycle number q has already been considered
+    }
+    q = 0; //Start with first Tq-cycle
+    QSet[0] = 1;
+
+    SSum = 0; //number of MIS-cycles that have been included
+    for(i = 0; i < numCycles; ++i){
+        SSet[i] = S[q][i]; // ==1 if MIS cycle i has been included
+        SSum = SSum + SSet[i];
+    }
+
+    //Start connectivity check
+    while(q <= qstar && SSum < numCycles){
+        do{
+            ++q;
+            SqIntS = vacant;
+            if(q <= qstar){
+                for(j = 0; j < numCycles; ++j){ //is there a j such that S[q][j] = 1 and SSet[j] = 1?
+                    if(S[q][j] == 1 && SSet[j] == 1){
+                        SqIntS = 1;
+                        //break here? no need to check all other j indices once one has been found such that S[q][j] =1 and SSet[j] = 1
+                    }
+                }
+            }
+        } while (q < qstar + 1 && (QSet[q] == 1 || SqIntS == vacant));
+
+        if(q <= qstar){ //if Tq-cyce for enlargement has been found
+            for(i = 0; i < numCycles; ++i){
+                if(SSet[i] == 0 && S[q][i] == 1){
+                    SSet[i] = 1;
+                    ++SSum;
+                }
+            }
+            QSet[q] = 1;
+            q = 0;
+        }
+    }//end while
 
 
+    //If patching graph is connected, then instance is feasible, else infeasible
+    if(SSum == numCycles){
+        cout << "FEASIBLE: Patching Graph Connected (SSum == numCycles).\n";
+        ++feasible;
+        ++distEnd[numCycles];
+    }
+    else if (SSum < numCycles){
+        cout << "INFEASIBLE: Patching Graph Unconnected (SSum < numCycles).\n";
+        ++infeasible;
+        ++distEnd[numCycles];
+    }
+    else{
+        cout << "PROBLEM: SSum > numCycles.\n";
+        goto End;
+    }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    for (i = 0; i < numComp; ++i) {
+        cout << distStart[i] << " times " << i << " cycles originally, afterwards " << distEnd[i] << " times.\n";
+    }
 
 
 
@@ -396,3 +515,20 @@ int main(){
 	cout << "CPU Time = " << totalTime << " milliseconds.\n";
 
 }
+//*****************************************************/
+
+/*
+for(i = 0; i < totalCycles; ++i){
+    for(j = 0; j < totalCycles; ++j){
+        s.push_back(0);
+    }
+    S.push_back(s);
+}
+
+cout << "S Vector:\n";
+for(i = 0; i < S.size(); ++i){
+    for(j = 0; j < S[i].size(); ++j){
+    cout << S[i][j] << endl;
+    }
+}
+cout << endl;*/
