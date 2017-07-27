@@ -20,17 +20,32 @@ Rewritten Minimum Score Separation Problem
 using namespace std;
 
 
-int main(){
+
+
+int main(int argc, char **argv){
+    if(argc < 5){
+        cout << "Minimum Score Separation Problem: MBAHRA.\n";
+        cout << "Arguments are the following:\n";
+        cout << "- Number of instances (integer)\n";
+        cout << "- Number of boxes (integer)\n";
+        cout << "- Minimum width of scores (millimeters, min = 1)\n";
+        cout << "- Maximum width of scores (millimeters, max = 70)\n";
+        cout << "- Random Seed (integer)\n";
+        exit(1);
+    }
+
+    //Variables from arguments
+    int numInstances = atoi(argv[1]); //number of instances of mssp, use in main for loop
+    int numBox = atoi(argv[2]) + 1; //number of boxes in mssp plus 1 extra box (scores on either side of extra box will be dominating vertices, score widths = 71)
+    int minWidth = atoi(argv[3]); //minimum width of scores (millimeters)
+    int maxWidth = atoi(argv[4]); //maximum width of scores (millimeters)
+    int randomSeed = atoi(argv[5]); // random seed
+
 
     //Variables
-    int i, j, k, r, q, qstar;
-    unsigned int randomSeed = 4;
-    int numInstances = 100; //number of instances of mssp, use in main for loop
-    unsigned int numBox = 11; //number of boxes in mssp plus 1 extra box (scores on either side of extra box will be dominating vertices, score widths = 71)
-    unsigned int numScores = numBox * 2; //number of scores, 2 per box (1 either side), last two scores are dominating vertices
-    unsigned int numComp = (numBox + (numBox % 2)) / 2;
-    int minWidth = 1; //minimum width of score (millimeters)
-    int maxWidth = 70; //maximum width of score (millimeters)
+    int i, j, k, q, qstar;
+    int numScores = numBox * 2; //number of scores, 2 per box (1 either side), last two scores are dominating vertices
+    int numComp = (numBox + (numBox % 2)) / 2;
     int threshold = 70; //adjacency threshold of scores, minimum knife distance
     int mateMatch; //vertex number for matching algorithm, mate takes the value of the index of the vertex that the current vertex is mates with
     int lastMatch;
@@ -47,28 +62,26 @@ int main(){
     int vacantFlag;
     int SSum; //number of MIS cycles already glued together
     int SqIntS; // == 0 iff Sq intersection S == emptyset
-    int distStart[numComp];
-    int distEnd[numComp];
-    int lengthFirst[numScores + 1];
 
 
     vector<int> mates(numScores, 0); //contains vertex index for mates, e.g if vertex 0 is mates with vertex 4, then mates[0] = 4
-    vector<int> matchList(numScores, 0); //contains vertex index for matching vertices, e.g. if vertex 0 is matched with vertex 9, then matchList[0] = 9
+    vector<int> matchList(numScores, vacant); //contains vertex index for matching vertices, e.g. if vertex 0 is matched with vertex 9, then matchList[0] = 9
     vector<int> allScores(numScores, 0); //vector containing all score widths
+    vector<int> randOrder; //vector used to shuffle and assign mates
     vector<vector<int> > adjMatrix(numScores, vector<int>(numScores ,0)); //adjacency matrix, 0 if width sum < threshold, 1 if width sum >= threshold, 2 if scores are mates (either side of same box)
     vector<int> checked(numScores, 0); //contains 0 if vector i has not yet been included in the mate-induced structure, 1 if vector i has been placed in MIS
     vector<vector<int> > mateInduced; //size numscore by noComp, i.e. number of rows = numScores, number of columns = noComp
     vector<int> cycle; //used in building the mate-induced structure
     vector<int> lengthMateInduced; //each element holds the value corresponding to the length of the relative cycle in the mate-induced structure
-    vector<int> cycleVertex(numScores, 0); //contains the number of the cycle of the mate-induced structure that the vertex i belongs to
+    vector<int> cycleVertex(numScores, 1); //contains the number of the cycle of the mate-induced structure that the vertex i belongs to
     // (e.g. if vertex 4 is in the first cycle of the MIS, then cycleVertex[4] = 0 (0 = first cycle, 1 = second cycle etc))
     vector<int> edge; //contains the number of lower vertex of each (non-empty) edge
-    vector<vector<int> > T;
-    vector<vector<int> > S(numComp, vector<int>(numComp, 0));
+    vector<vector<int> > T; //T-cycles
+    vector<vector<int> > S(numComp, vector<int>(numComp, 0)); // == 1 if edge from cycle is used in T-cycle
     vector<int> t;
     vector<int> s;
-    vector<int> QSet(numComp, vacant); // Tq-cycles already used for gluing
-    vector<int> SSet(numComp, vacant); //MIS cycles already glued together
+    vector<int> QSet(numComp, 0); // Tq-cycles already used for gluing
+    vector<int> SSet; //MIS cycles already glued together
 
     srand(randomSeed); //seed
 
@@ -80,17 +93,8 @@ int main(){
     time_t startTime, endTime; //start clock
     startTime = clock();
 
-    for (i = 0; i < (numScores + 1); i++) {
-        lengthFirst[i] = 0;
-    }
-
-    for (i = 0; i < numComp; i++) {
-        distStart[i] = 0;
-        distEnd[i] = 0;
-    }
-
     //Create random values to be used as score widths, put in allScores vector (except last two elements)
-    for(i = 0; i < numScores -2; ++i){
+    for(i = 0; i < numScores - 2; ++i){
         allScores[i] = rand() % (maxWidth - minWidth + 1) + minWidth;
     }
     //add two dominating vertices with score widths = 71 (these scores will be either side of same box, mates)
@@ -125,20 +129,17 @@ int main(){
 
     }
 
-    //Create vector to be used to assign mates
-    vector<int> randOrder(numScores, 0);
 
     //Initially, randOrder vector will contain elements in the order 0, ..., numScores -2, numScores -1
-    for(i = 0; i < numScores-2; ++i){
-        randOrder[i] = i;
+    for(i = 0; i < numScores; ++i){
+        randOrder.push_back(i);
     }
-    randOrder[numScores-2] = numScores - 2;
-    randOrder[numScores-1] = numScores - 1;
+
     //Randomly shuffle all values in randOrder vector EXCEPT the last two values (dominating vertices, must stay as mates)
     random_shuffle(randOrder.begin(), randOrder.begin()+(numScores-2));
 
     //Print out randOrder vector
-    /*cout << "Random Order:\n";
+   /* cout << "Random Order:\n";
     for(i = 0; i < randOrder.size(); ++i){
         cout << randOrder[i] << endl;
     }
@@ -165,10 +166,10 @@ int main(){
 
     //MATCHING ALGORITHM MTGMA
     //Fill matchingList vector with values 0,..., numScores-1 (i.e. the index of each element)
-    for(i = 0; i < numScores; ++i){
+    /*for(i = 0; i < numScores; ++i){
         matchList[i] = vacant;
-        cycleVertex[i] = 1; //will be set to vacant if resulting from mate swap
-    }
+        //cycleVertex[i] = 1; //will be set to vacant if resulting from mate swap
+    }*/
     matchSize = 0;
     lastMatch = vacant;
     verticesNotMatched = 0;
@@ -278,9 +279,9 @@ int main(){
     }
     cout << endl << endl;
 
-    for(i = 0; i < numScores; ++i){
+    /*for(i = 0; i < numScores; ++i){
         checked[i] = 0;
-    }
+    }*/
 
     //find the smallest vertex not yet checked for mate-induced structure - start with this vertex
     for(i = 0; i < numScores; ++i){
@@ -313,6 +314,7 @@ int main(){
 
 
     } while(smallestVertex != currentVertex);
+
     cycle.clear(); //clear cycle vector again for next instance
 
     numCycles = mateInduced.size(); //number of cycles in the mate-induced structure
@@ -350,7 +352,7 @@ int main(){
         goto End;
         //continue;
     }
-    ++distStart[numCycles];
+
 
 
 
@@ -371,9 +373,6 @@ int main(){
 
     //create list of edges without empty edges (those generated by mate swap)
     currentEdge = 0;
-    /*for(i = 0; i < matchSize; ++i){ //matchSize should = numBox, as the edges vector is of size numBox
-        edge[i] = vacant;
-    }*/
 
     for(i = 0; i < matchSize; ++i){
         while(cycleVertex[i] == vacant){
@@ -412,9 +411,10 @@ int main(){
         } // end if
         ++k;
     } while (k < numEdges -1);
+
     t.clear();
 
-    cout << "T matrix:\n";
+    /*cout << "T matrix:\n";
     for(i = 0; i < T.size(); ++i){
         for(j = 0; j < T[i].size(); ++j){
             cout << T[i][j] << "  ";
@@ -430,7 +430,7 @@ int main(){
         }
         cout << endl;
     }
-    cout << endl;
+    cout << endl;*/
 
     //cout << "qstar: " << qstar << endl;
 
@@ -439,20 +439,25 @@ int main(){
         cout << "Instance is infeasible, no family of Tq-cycles found (q* = 0)." << endl;
         ++infeasible;
         goto End;
+        //continue;
     }
 
 
     //CHECK IF PATCHING GRAPH IS CONNECTED
     //Setup
-    for(q = 1; q <= qstar; ++q){
+
+    /*for(q = 1; q <= qstar; ++q){
         QSet[q] = 0; // ==1 iff Tq-cycle number q has already been considered
-    }
+    }*/
+
     q = 0; //Start with first Tq-cycle
     QSet[0] = 1;
 
     SSum = 0; //number of MIS-cycles that have been included
     for(i = 0; i < numCycles; ++i){
-        SSet[i] = S[q][i]; // ==1 if MIS cycle i has been included
+        SSet.push_back(S[q][i]); // ==1 if MIS cycle i has been included
+    }
+    for(i = 0; i < numCycles; ++i){
         SSum = SSum + SSet[i];
     }
 
@@ -488,47 +493,29 @@ int main(){
     if(SSum == numCycles){
         cout << "FEASIBLE: Patching Graph Connected (SSum == numCycles).\n";
         ++feasible;
-        ++distEnd[numCycles];
     }
     else if (SSum < numCycles){
         cout << "INFEASIBLE: Patching Graph Unconnected (SSum < numCycles).\n";
         ++infeasible;
-        ++distEnd[numCycles];
     }
     else{
         cout << "PROBLEM: SSum > numCycles.\n";
         goto End;
+        //continue
     }
 
-    for (i = 0; i < numComp; ++i) {
-        cout << distStart[i] << " times " << i << " cycles originally, afterwards " << distEnd[i] << " times.\n";
-    }
 
 
 
 
     End:
-    cout << "End of Program.\n"; //for poor matching
+    cout << "End of Program.\n";
 
 	endTime = clock();
 	int totalTime = (int)(((endTime - startTime) / double(CLOCKS_PER_SEC)) * 100);
 	cout << "CPU Time = " << totalTime << " milliseconds.\n";
 
 }
-//*****************************************************/
 
-/*
-for(i = 0; i < totalCycles; ++i){
-    for(j = 0; j < totalCycles; ++j){
-        s.push_back(0);
-    }
-    S.push_back(s);
-}
 
-cout << "S Vector:\n";
-for(i = 0; i < S.size(); ++i){
-    for(j = 0; j < S[i].size(); ++j){
-    cout << S[i][j] << endl;
-    }
-}
-cout << endl;*/
+
