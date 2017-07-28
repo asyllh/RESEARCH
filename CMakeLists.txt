@@ -1,9 +1,8 @@
-cmake_minimum_required(VERSION 3.7)
-project(RESEARCH)
+cmake_minimum_required(VERSION 3.7)              # CMake version check
+project(RESEARCH)                                # Create project "RESEARCH"
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 11)                       # Enable C++11 standard
 
-set(SOURCE_FILES
-        asylmssp.cpp)
+set(SOURCE_FILES asylmssp.cpp)                   # Add asylmssp.cpp file of project root directory as source file
 
-add_executable(RESEARCH ${SOURCE_FILES})
+add_executable(RESEARCH ${SOURCE_FILES})         # Add executable target with source files listed in SOURCE_FILES variable
