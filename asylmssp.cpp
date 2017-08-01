@@ -163,8 +163,8 @@ int main(int argc, char **argv){
             allScores[i] = rand() % (maxWidth - minWidth + 1) + minWidth;
         }
         //add two dominating vertices with score widths = 71 (these scores will be either side of same box, mates)
-        allScores[numScores - 2] = 71;
-        allScores[numScores - 1] = 71;
+        allScores[numScores - 2] = 70;
+        allScores[numScores - 1] = 70;
 
         //Sort all of the scores in the allScores vector in ascending order
         sort(allScores.begin(), allScores.end()); //sorts elements of vector in ascending order
