@@ -492,11 +492,13 @@ int main(int argc, char **argv){
            //cout << "FEASIBLE: Patching Graph Connected (SSum == numCycles).\n";
             ++feasible;
             continue;
-        } else if (SSum < numCycles) {
+        }
+        else if (SSum < numCycles) {
             //cout << "INFEASIBLE: Patching Graph Unconnected (SSum < numCycles).\n";
             ++infeasible;
             continue;
-        } else {
+        }
+        else {
             ++problemInstance;
             continue;
         }
