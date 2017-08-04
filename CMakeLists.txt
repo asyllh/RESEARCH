@@ -5,4 +5,5 @@ set(CMAKE_CXX_STANDARD 11)                       # Enable C++11 standard
 
 set(SOURCE_FILES asylmssp.cpp)                   # Add asylmssp.cpp file of project root directory as source file
 
-add_executable(RESEARCH ${SOURCE_FILES})         # Add executable target with source files listed in SOURCE_FILES variable
+add_executable(AsylMSSP asylmssp.cpp)            # Add executable target with source files listed in SOURCE_FILES variable
+add_executable(MSSPOutput msspoutput.cpp)
