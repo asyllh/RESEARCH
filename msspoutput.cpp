@@ -40,7 +40,7 @@ void resetVectors(int vacant, int numScores, int numComp,  vector<vector<int> > 
 
 }
 
-void clearVectors(vector<int> &cycle, vector<int> &edge, vector<int> &lengthMateInduced, vector<vector<int> > &mateInduced, vector<int> &randOrder, vector<int> &t, vector<vector<int> > &T, vector<int> &SSet){
+void clearVectors(vector<int> &cycle, vector<int> &edge, vector<int> &lengthMateInduced, vector<vector<int> > &mateInduced, vector<int> &randOrder, vector<int> &t, vector<vector<int> > &T, vector<int> &SSet, vector<int> &fullCycle){
 	cycle.clear();
 	edge.clear();
 	lengthMateInduced.clear();
@@ -49,9 +49,54 @@ void clearVectors(vector<int> &cycle, vector<int> &edge, vector<int> &lengthMate
 	t.clear();
 	T.clear();
 	SSet.clear();
+    fullCycle.clear();
 
 }
 
+void loopCycle(int v, int full, int save, vector<int> &matchList, vector<int> &cycleVertex, vector<int> &fullCycle, vector<vector<int> > &mateInduced, vector<vector<int> > &T){
+
+    int i;
+
+
+    //CASE ONE: if element matchList[T[full][v]] is before element T[full][v] in the mateInduced cycle
+    //i.e. if the element at position 'save' in the cycle is matchList[T[full][v]] and the element at position "save + 1" is T[full][v]
+    if(mateInduced[cycleVertex[T[full][v]]][save + 1] == T[full][v]){
+        for(i = save + 1; i-- > 0;){ //from element at position 'save' to the first element in the cycle
+            fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][i]);
+        }
+        for(i = mateInduced[cycleVertex[T[full][v]]].size(); i-- > save +1;){ //from end of cycle to element at position save+1
+            fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][i]);
+        }
+    }
+
+    //CASE TWO: if element matchList[T[full][v]] is after element T[full][v] in the mateInduced cycle
+    //i.e. if the element at position 'save' in the cycle is matchList[T[full][v]] and the element at position "save - 1" is T[full][v]
+    else if (mateInduced[cycleVertex[T[full][v]]][save - 1] == T[full][v]){
+        for(i = save; i < mateInduced[cycleVertex[T[full][v]]].size(); ++i){
+            fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][i]);
+        }
+        for(i = 0; i < save; ++i){
+            fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][i]);
+        }
+    }
+
+    //CASE THREE: if element matchList[T[full][v]] is the first element in the cycle, and T[full][v] is the last element in the cycle
+    //i.e. if save = 0 and T[full][v] is at position mateInduced[cycleVertex[T[full][v]]].size()-1
+    else if (save == 0 && mateInduced[cycleVertex[T[full][v]]][mateInduced[cycleVertex[T[full][v]]].size()-1] == T[full][v]){
+        for(i = 0; i < mateInduced[cycleVertex[T[full][v]]].size(); ++i){
+            fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][i]);
+        }
+    }
+
+    //CASE FOUR: if element matchList[T[full][v]] is the last element in the cycle, and T[full][v] is the first element in the cycle
+    //i.e. if save = mateInduced[cycleVertex[T[full][v]]].size()-1 and T[full][v] is at position 0
+    else if(save == mateInduced[cycleVertex[T[full][v]]].size()-1 && mateInduced[cycleVertex[T[full][v]]][0] == T[full][v]){
+        for(i = mateInduced[cycleVertex[T[full][v]]].size(); i-- > 0; ){
+            fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][i]);
+        }
+    }
+
+}
 
 
 int main(int argc, char **argv){
@@ -133,6 +178,11 @@ int main(int argc, char **argv){
 	vector<int> QSet(numComp, vacant); // Tq-cycles already used for gluing
 	vector<int> SSet; //MIS cycles already glued together
 
+    int x;
+    int save = 0;
+    int full = vacant; //the row of the T matrix which has the same number of edges as the number of T cycles
+    int v;
+    vector<int> fullCycle; //vector to hold vertices of final cycle in order
 
 	//*************************************************************************
 
@@ -140,15 +190,16 @@ int main(int argc, char **argv){
 	srand(randomSeed); //seed
 
 
-	cout << "Minimum Score Separation Problem\nMatching-Based Alternating Hamiltonicity Recognition Algorithm\n\n";
+	cout << "Minimum Score Separation Problem - Matching-Based Alternating Hamiltonicity Recognition Algorithm\n";
 
 	time_t startTime, endTime; //start clock
 	startTime = clock();
 
 	for(instance = 0; instance < numInstances; ++instance) {
-
+        x = 0;
+        
 		resetVectors(vacant, numScores, numComp, adjMatrix, allScores, checked, cycleVertex, matchList, mates, QSet, S);
-		clearVectors(cycle, edge, lengthMateInduced, mateInduced, randOrder, t, T, SSet);
+		clearVectors(cycle, edge, lengthMateInduced, mateInduced, randOrder, t, T, SSet, fullCycle);
 
 		//Create random values to be used as score widths, put in allScores vector (except last two elements)
 		for (i = 0; i < numScores - 2; ++i) {
@@ -245,11 +296,11 @@ int main(int argc, char **argv){
 			}//end if matchList[i] == i
 		}//end for i
 
-		cout << "Cycle Vertex vector after MTGMA:\n";
+		/*cout << "Cycle Vertex vector after MTGMA:\n";
 		for (i = 0; i < cycleVertex.size(); ++i) {
 			cout << cycleVertex[i] << " ";
 		}
-		cout << endl;
+		cout << endl;*/
 
 
 		cout << "Matching List:\n";
@@ -413,11 +464,11 @@ int main(int argc, char **argv){
 			}
 			cout << endl;
 		}
-		cout << endl << endl;
+		cout << endl;
 
 		cout << "S Matrix:\n";
-		for(i = 0; i < S.size(); ++i){
-			for(j = 0; j < S[i].size(); ++j){
+		for(i = 0; i < T.size(); ++i){
+			for(j = 0; j < numCycles; ++j){
 				cout << S[i][j] << "  ";
 			}
 			cout << endl;
@@ -501,16 +552,9 @@ int main(int argc, char **argv){
 
 	cout << "Number of feasible instances: " << feasible << endl;
 	cout << "Number of infeasible instances: " << infeasible << endl;
+    cout << "------------------------------------------------------------------\n\n";
 
-	int TSize;
-	unsigned int u;
-	int save;
-	int brokenVertex1 = vacant;
-	int brokenVertex2 = vacant;
-	int full; //the row of the T matrix which has the same number of edges as the number of T cycles
-	int v;
-	vector<int> fullCycle; //vector to hold vertices of final cycle in order
-	vector<int> visited(3, 0);
+
 
 	for(i = 0; i < T.size(); ++i){
 		if(T[i].size() == numCycles){
@@ -519,137 +563,99 @@ int main(int argc, char **argv){
 		}
 	}
 
-	TSize = T[full].size();
+    if(full != vacant) {
+
+        //cout << "Full: " << full << endl;
+
+        for (v = 0; v < T[full].size(); ++v) {
+
+            for (j = 0; j < mateInduced[cycleVertex[T[full][v]]].size(); ++j) {
+                if (mateInduced[cycleVertex[T[full][v]]][j] == matchList[T[full][v]]) {
+                    save = j;
+                    break;
+                }
+            }
+
+            loopCycle(v, full, save, matchList, cycleVertex, fullCycle, mateInduced, T);
+        }
+
+        v = 0;
+
+        for (j = 0; j < mateInduced[cycleVertex[T[full][v]]].size(); ++j) {
+            if (mateInduced[cycleVertex[T[full][v]]][j] == T[full][v]) {
+                save = j;
+                break;
+            }
+        }
 
 
-	cout << full << endl;
-	v = 0;
+        cout << "full cycle:\n";
+        for (i = 0; i < fullCycle.size(); ++i) {
+            cout << fullCycle[i] << " ";
+        }
+        cout << endl;
 
-	for(j = 0; j < mateInduced[cycleVertex[T[full][v]]].size(); ++j){
-		if(mateInduced[cycleVertex[T[full][v]]][j] != T[full][v] && mateInduced[cycleVertex[T[full][v]]][j] != matchList[T[full][v]]){
-			fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][j]);
-		}
-		else if (mateInduced[cycleVertex[T[full][v]]][j] == T[full][v]){
-			brokenVertex1 = j;
-			break;
-		}
-		else if (mateInduced[cycleVertex[T[full][v]]][j] == matchList[T[full][v]]){
-			brokenVertex2 = j;
-			break;
-		}
-	}
-	visited[cycleVertex[T[full][v]]] = 1;
-
-
-	cout << "full cycle\n";
-	for(i = 0; i < fullCycle.size(); ++i){
-		cout << fullCycle[i] << endl;
-	}
-
-	cout << "broken1: " << brokenVertex1 << endl;
-	cout << "broken2: " << brokenVertex2 << endl;
-	if(brokenVertex1 != vacant){
-		fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][brokenVertex1]);
-	 	++v;
-		fullCycle.push_back(matchList[T[full][v]]);
-		brokenVertex1 = vacant;
-	}
-
-
-	if(brokenVertex2 != vacant){
-		fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][brokenVertex2]);
-		v = T[full].size()-1;
-		cout << v << endl;
-		fullCycle.push_back(T[full][v]);
-		brokenVertex2 = vacant;
-	}
-
-	cout << "full cycle\n";
-	for(i = 0; i < fullCycle.size(); ++i){
-		cout << fullCycle[i] << endl;
-	}
-
-	// v = 2
-	for(j = 0; j < mateInduced[cycleVertex[T[full][v]]].size(); ++j){
-		if(mateInduced[cycleVertex[T[full][v]]][j] == T[full][v]){
-			save = j; //save = 3
-			break;
-		}
-	}
-
-	//cout << "Save: "<<  save << endl;
-
-	//THIS NEEDS TO GO IN A FUNCTION ALONG WITH THE OTHER FIVE POSSIBILITIES
-	//CASE 5: if the next element in the cycle is the matching mate for the current element
-	if(mateInduced[cycleVertex[T[full][v]]][save+1] == matchList[T[full][v]]){
-		for(i = save; i-- >0;){
-			fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][i]);
-			//cout << mateInduced[cycleVertex[T[full][v]]][i] << endl;
-		}
-		for(i = mateInduced[cycleVertex[T[full][v]]].size(); i-- > save + 1;){
-			fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][i]);
-		}
-
-	}
-	visited[cycleVertex[T[full][v]]] = 1;
-
-	i = 0;
-	save = 0;
-	--v; // v = 1
-
-	for(j = 0; j < mateInduced[cycleVertex[T[full][v]]].size(); ++j) {
-		if (mateInduced[cycleVertex[T[full][v]]][j] == T[full][v]) {
-			save = j; //save = 18
-			break;
-		}
-	}
-
-	cout << "Save: " << save << endl;
-
-	//CASE 6: if the previous element in the cycle is the matching mate for the current element
-	if(mateInduced[cycleVertex[T[full][v]]][save-1] == matchList[T[full][v]]){
-		for(i = save; i < mateInduced[cycleVertex[T[full][v]]].size(); ++i){
-			fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][i]);
-		}
-		for(i = 0; i < save; ++i){
-			fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][i]);
-		}
-
-	}
-	visited[cycleVertex[T[full][v]]] = 1;
-
-	i = 0;
-	save = 0;
-	--v; //v = 0
-
-	cout << "Visited:\n";
-	for(i = 0; i < visited.size(); ++i){
-		cout << visited[i] << endl;
-	}
-	cout << endl;
-
-	//CONNECTING BACK TO FIRST CYCLE
-	for(j = 0; j < mateInduced[cycleVertex[T[full][v]]].size(); ++j) {
-		if (mateInduced[cycleVertex[T[full][v]]][j] == T[full][v]) {
-			save = j; //save = 4
-			break;
-		}
-	}
-
-	//CYCLE 0 HAS ALREADY BEEN VISITED, CREATE NEW FUNCTION FOR THIS TYPE
-	if(mateInduced[cycleVertex[T[full][v]]][save-1] == matchList[T[full][v]] && visited[cycleVertex[T[full][v]]] == 1){
-		for(i = save; i < mateInduced[cycleVertex[T[full][v]]].size(); ++i){
-			fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][i]);
-		}
-	}
+    }
+    else if(full == vacant){
+        cout << "Full = vacant: multiple t cycles required.\n";
+    }
 
 
 
-	cout << "full cycle\n";
-	for(i = 0; i < fullCycle.size(); ++i){
-		cout << fullCycle[i] << " ";
-	}
-	cout << endl;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -691,10 +697,6 @@ int main(int argc, char **argv){
 	18-25
 
 	*/
-
-
-
-
 
 
 	endTime = clock();
@@ -856,3 +858,131 @@ cout << endl;*/
 /*for(q = 1; q <= qstar; ++q){
     QSet[q] = 0; // ==1 iff Tq-cycle number q has already been considered
 }*/
+
+//********************************************************************************************************************************************
+
+/*for(j = 0; j < mateInduced[cycleVertex[T[full][v]]].size(); ++j){
+		if(mateInduced[cycleVertex[T[full][v]]][j] != T[full][v] && mateInduced[cycleVertex[T[full][v]]][j] != matchList[T[full][v]]){
+			fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][j]);
+		}
+		else if (mateInduced[cycleVertex[T[full][v]]][j] == T[full][v]){
+			brokenVertex1 = j;
+			break;
+		}
+		else if (mateInduced[cycleVertex[T[full][v]]][j] == matchList[T[full][v]]){
+			brokenVertex2 = j;
+			break;
+		}
+	}*/
+//visited[cycleVertex[T[full][v]]] = 1;
+
+
+/*cout << "full cycle\n";
+for(i = 0; i < fullCycle.size(); ++i){
+    cout << fullCycle[i] << endl;
+}*/
+
+/*cout << "broken1: " << brokenVertex1 << endl;
+cout << "broken2: " << brokenVertex2 << endl;
+if(brokenVertex1 != vacant){
+    fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][brokenVertex1]);
+     ++v;
+    fullCycle.push_back(matchList[T[full][v]]);
+    brokenVertex1 = vacant;
+}*/
+
+
+/*if(brokenVertex2 != vacant){
+    fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][brokenVertex2]);
+    v = T[full].size()-1;
+    cout << v << endl;
+    fullCycle.push_back(T[full][v]);
+    brokenVertex2 = vacant;
+}*/
+
+/*cout << "full cycle\n";
+for(i = 0; i < fullCycle.size(); ++i){
+    cout << fullCycle[i] << endl;
+}*/
+
+// v = 2
+/*for(j = 0; j < mateInduced[cycleVertex[T[full][v]]].size(); ++j){
+    if(mateInduced[cycleVertex[T[full][v]]][j] == T[full][v]){
+        save = j; //save = 3
+        break;
+    }
+}*/
+
+//cout << "Save: "<<  save << endl;
+
+//THIS NEEDS TO GO IN A FUNCTION ALONG WITH THE OTHER FIVE POSSIBILITIES
+//CASE 5: if the next element in the cycle is the matching mate for the current element
+/*if(mateInduced[cycleVertex[T[full][v]]][save+1] == matchList[T[full][v]]){
+    for(i = save; i-- >0;){
+        fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][i]);
+        //cout << mateInduced[cycleVertex[T[full][v]]][i] << endl;
+    }
+    for(i = mateInduced[cycleVertex[T[full][v]]].size(); i-- > save + 1;){
+        fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][i]);
+    }
+
+}
+visited[cycleVertex[T[full][v]]] = 1;*/
+
+/*i = 0;
+save = 0;
+--v; // v = 1
+
+for(j = 0; j < mateInduced[cycleVertex[T[full][v]]].size(); ++j) {
+    if (mateInduced[cycleVertex[T[full][v]]][j] == T[full][v]) {
+        save = j; //save = 18
+        break;
+    }
+}*/
+
+//cout << "Save: " << save << endl;
+
+//CASE 6: if the previous element in the cycle is the matching mate for the current element
+/*if(mateInduced[cycleVertex[T[full][v]]][save-1] == matchList[T[full][v]]){
+    for(i = save; i < mateInduced[cycleVertex[T[full][v]]].size(); ++i){
+        fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][i]);
+    }
+    for(i = 0; i < save; ++i){
+        fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][i]);
+    }
+
+}
+visited[cycleVertex[T[full][v]]] = 1;*/
+
+/*i = 0;
+save = 0;
+--v; //v = 0*/
+
+/*cout << "Visited:\n";
+for(i = 0; i < visited.size(); ++i){
+    cout << visited[i] << endl;
+}
+cout << endl;*/
+
+//CONNECTING BACK TO FIRST CYCLE
+/*for(j = 0; j < mateInduced[cycleVertex[T[full][v]]].size(); ++j) {
+    if (mateInduced[cycleVertex[T[full][v]]][j] == T[full][v]) {
+        save = j; //save = 4
+        break;
+    }
+}*/
+
+//CYCLE 0 HAS ALREADY BEEN VISITED, CREATE NEW FUNCTION FOR THIS TYPE
+/*if(mateInduced[cycleVertex[T[full][v]]][save-1] == matchList[T[full][v]] && visited[cycleVertex[T[full][v]]] == 1){
+    for(i = save; i < mateInduced[cycleVertex[T[full][v]]].size(); ++i){
+        fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][i]);
+    }
+}*/
+
+
+
+/*cout << "full cycle\n";
+for(i = 0; i < fullCycle.size(); ++i){
+    cout << fullCycle[i] << " ";
+}
+cout << endl;*/
