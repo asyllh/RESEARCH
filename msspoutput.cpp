@@ -182,6 +182,8 @@ int main(int argc, char **argv){
     int save = 0;
     int full = vacant; //the row of the T matrix which has the same number of edges as the number of T cycles
     int v;
+    int poorT = 0;
+    int fullT = 0;
     vector<int> fullCycle; //vector to hold vertices of final cycle in order
 
 	//*************************************************************************
@@ -190,14 +192,15 @@ int main(int argc, char **argv){
 	srand(randomSeed); //seed
 
 
-	cout << "Minimum Score Separation Problem - Matching-Based Alternating Hamiltonicity Recognition Algorithm\n";
+	cout << "Minimum Score Separation Problem - Matching-Based Alternating Hamiltonicity Recognition Algorithm\n\n";
 
 	time_t startTime, endTime; //start clock
 	startTime = clock();
 
 	for(instance = 0; instance < numInstances; ++instance) {
         x = 0;
-        
+        full = vacant;
+
 		resetVectors(vacant, numScores, numComp, adjMatrix, allScores, checked, cycleVertex, matchList, mates, QSet, S);
 		clearVectors(cycle, edge, lengthMateInduced, mateInduced, randOrder, t, T, SSet, fullCycle);
 
@@ -212,11 +215,11 @@ int main(int argc, char **argv){
 		//Sort all of the scores in the allScores vector in ascending order
 		sort(allScores.begin(), allScores.end()); //sorts elements of vector in ascending order
 
-		cout << "All scores - non-decreasing order:\n";
+		/*cout << "All scores - non-decreasing order:\n";
 		for (i = 0; i < allScores.size(); ++i) {
 			cout << allScores[i] << " ";
 		}
-		cout << endl << endl;
+		cout << endl << endl;*/
 
 		//Filling in adjacency matrix - if sum of two scores >= threshold (70), then insert 1 into the matrix, else leave as 0
 		for (i = 0; i < allScores.size() - 1; ++i) {
@@ -303,15 +306,16 @@ int main(int argc, char **argv){
 		cout << endl;*/
 
 
-		cout << "Matching List:\n";
+		/*cout << "Matching List:\n";
 		for (i = 0; i < numScores; ++i) {
 			cout << matchList[i] << " ";
 		}
-		cout << endl << endl;
+		cout << endl << endl;*/
 
 
 		//If the number of matches (i.e. the size of the matching list M) is less than the number of boxes (n), then instance is infeasible ( |M| < n )
 		if (matchSize < numBox) {
+            cout << instance << ": Not enough matching edges.\n\n";
 			++infeasible;
 			++noMatch;
 			//cout << "Instance is infeasible, not enough matching edges available (|M| < n)." << endl;
@@ -330,11 +334,11 @@ int main(int argc, char **argv){
 			}
 		}
 
-		cout << "Mates Vector:\n";
+		/*cout << "Mates Vector:\n";
 		for (i = 0; i < numScores; ++i) {
 			cout << mates[i] << " ";
 		}
-		cout << endl << endl;
+		cout << endl << endl;*/
 
 		//find the smallest vertex not yet checked for mate-induced structure - start with this vertex
 		for (i = 0; i < numScores; ++i) {
@@ -372,16 +376,16 @@ int main(int argc, char **argv){
 
 		numCycles = mateInduced.size(); //number of cycles in the mate-induced structure
 
-		cout << "Mate-Induced Structure:\n";
+		/*cout << "Mate-Induced Structure:\n";
 		for (i = 0; i < mateInduced.size(); ++i) {
 			for (j = 0; j < mateInduced[i].size(); ++j) {
 				cout << mateInduced[i][j] << "\t";
 			}
 			cout << endl;
 		}
-		cout << endl;
+		cout << endl;*/
 
-		cout << "Number of cycles in mate-induced structure: " << numCycles << endl;
+		//cout << "Number of cycles in mate-induced structure: " << numCycles << endl;
 
 		for (i = 0; i < mateInduced.size(); ++i) {
 			lengthMateInduced.push_back(mateInduced[i].size());
@@ -392,6 +396,12 @@ int main(int argc, char **argv){
 		if (lengthMateInduced[0] == numScores) { //if all of the vertices are in the first (and only) cycle of the mate-induced structure
 			++feasible;
 			++oneCycle;
+            cout << instance << ": Full cycle (MIS):\n";
+            for(j = 0; j < mateInduced[0].size(); ++j){
+                cout << mateInduced[0][j] << " ";
+
+            }
+            cout << endl << endl;
 			continue;
 		}
 
@@ -407,11 +417,11 @@ int main(int argc, char **argv){
 			}
 		}
 
-		cout << "Cycle Vertex:\n";
+		/*cout << "Cycle Vertex:\n";
 		for (i = 0; i < cycleVertex.size(); ++i) {
 			cout << cycleVertex[i] << " ";
 		}
-		cout << endl;
+		cout << endl;*/
 
 
 
@@ -424,13 +434,13 @@ int main(int argc, char **argv){
 		}
 		numEdges = edge.size();
 
-		cout << "Edges vector:\n";
+		/*cout << "Edges vector:\n";
 		for (i = 0; i < edge.size(); ++i) {
 			cout << edge[i] << " ";
 		}
-		cout << endl;
+		cout << endl;*/
 
-		cout << "Number of Edges: " << numEdges << endl;
+		//cout << "Number of Edges: " << numEdges << endl;
 
 		//FCA Algorithm
 		qstar = -1;
@@ -457,16 +467,16 @@ int main(int argc, char **argv){
 
 		t.clear();
 
-		cout << "T matrix:\n";
+		/*cout << "T matrix:\n";
 		for(i = 0; i < T.size(); ++i){
 			for(j = 0; j < T[i].size(); ++j){
 				cout << T[i][j] << "  ";
 			}
 			cout << endl;
 		}
-		cout << endl;
+		cout << endl;*/
 
-		cout << "S Matrix:\n";
+		/*cout << "S Matrix:\n";
 		for(i = 0; i < T.size(); ++i){
 			for(j = 0; j < numCycles; ++j){
 				cout << S[i][j] << "  ";
@@ -474,14 +484,16 @@ int main(int argc, char **argv){
 			cout << endl;
 		}
 		cout << endl;
+		 */
 
-		cout << "qstar: " << qstar << endl;
+		//cout << "qstar: " << qstar << endl;
 
 
 
 		//No family of T-cycle found
 		if (qstar == -1) {
 			//cout << "Instance is infeasible, no family of Tq-cycles found (q* = 0)." << endl;
+            cout << instance << ": Infeasible, qstar = -1\n\n";
 			++infeasible;
 			++noFam;
 			continue;
@@ -534,148 +546,70 @@ int main(int argc, char **argv){
 		if (SSum == numCycles) {
 			//cout << "FEASIBLE: Patching Graph Connected (SSum == numCycles).\n";
 			++feasible;
-			continue;
+			goto End;
 		}
 		else if (SSum < numCycles) {
 			//cout << "INFEASIBLE: Patching Graph Unconnected (SSum < numCycles).\n";
+            cout << instance << ": Infeasible SSum < numCycles\n\n";
 			++infeasible;
 			continue;
 		}
 		else {
+            cout << instance << ": Problem.\n\n";
 			++problemInstance;
 			continue;
 		}
 
 
-	} //end of for loop instances
-
-
-	cout << "Number of feasible instances: " << feasible << endl;
-	cout << "Number of infeasible instances: " << infeasible << endl;
-    cout << "------------------------------------------------------------------\n\n";
-
-
-
-	for(i = 0; i < T.size(); ++i){
-		if(T[i].size() == numCycles){
-			full = i;
-			break;
-		}
-	}
-
-    if(full != vacant) {
-
-        //cout << "Full: " << full << endl;
-
-        for (v = 0; v < T[full].size(); ++v) {
-
-            for (j = 0; j < mateInduced[cycleVertex[T[full][v]]].size(); ++j) {
-                if (mateInduced[cycleVertex[T[full][v]]][j] == matchList[T[full][v]]) {
-                    save = j;
-                    break;
-                }
-            }
-
-            loopCycle(v, full, save, matchList, cycleVertex, fullCycle, mateInduced, T);
-        }
-
-        v = 0;
-
-        for (j = 0; j < mateInduced[cycleVertex[T[full][v]]].size(); ++j) {
-            if (mateInduced[cycleVertex[T[full][v]]][j] == T[full][v]) {
-                save = j;
+        End:
+        for(i = 0; i < T.size(); ++i){
+            if(T[i].size() == numCycles){
+                full = i;
                 break;
             }
         }
 
+        if(full != vacant) {
 
-        cout << "full cycle:\n";
-        for (i = 0; i < fullCycle.size(); ++i) {
-            cout << fullCycle[i] << " ";
+            //cout << "Full: " << full << endl;
+
+            for (v = 0; v < T[full].size(); ++v) {
+
+                for (j = 0; j < mateInduced[cycleVertex[T[full][v]]].size(); ++j) {
+                    if (mateInduced[cycleVertex[T[full][v]]][j] == matchList[T[full][v]]) {
+                        save = j;
+                        break;
+                    }
+                }
+                loopCycle(v, full, save, matchList, cycleVertex, fullCycle, mateInduced, T);
+
+            }
+
+            cout << instance << ": Full cycle after T-cycle analysis:\n";
+            for (i = 0; i < fullCycle.size(); ++i) {
+                cout << fullCycle[i] << " ";
+            }
+            cout << endl << endl;
+            ++fullT;
+            continue;
+
         }
-        cout << endl;
-
-    }
-    else if(full == vacant){
-        cout << "Full = vacant: multiple t cycles required.\n";
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        else if(full == vacant){
+            cout << instance << ": NO SOLN AVAILABLE: multiple t cycles required.\n";
+            ++poorT;
+            continue;
+        }
+
+
+	} //end of for loop instances
+
+    cout << "\n------------------------------------------------------------------\n\n";
+	cout << "Number of feasible instances: " << feasible << endl;
+	cout << "Number of infeasible instances: " << infeasible << endl;
+    cout << "Number of full T cycles: " << fullT << endl;
+    cout << "Number of split T cycles: " << poorT << endl;
+    cout << "Number of poor matchings: " << noMatch << endl;
+    cout << "Number of single cycles: " << oneCycle << endl;
 
 
 
