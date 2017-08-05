@@ -178,7 +178,6 @@ int main(int argc, char **argv){
 	vector<int> QSet(numComp, vacant); // Tq-cycles already used for gluing
 	vector<int> SSet; //MIS cycles already glued together
 
-    int x;
     int save = 0;
     int full = vacant; //the row of the T matrix which has the same number of edges as the number of T cycles
     int v;
@@ -191,14 +190,13 @@ int main(int argc, char **argv){
 
 	srand(randomSeed); //seed
 
-
 	cout << "Minimum Score Separation Problem - Matching-Based Alternating Hamiltonicity Recognition Algorithm\n\n";
 
 	time_t startTime, endTime; //start clock
 	startTime = clock();
 
 	for(instance = 0; instance < numInstances; ++instance) {
-        x = 0;
+
         full = vacant;
 
 		resetVectors(vacant, numScores, numComp, adjMatrix, allScores, checked, cycleVertex, matchList, mates, QSet, S);
@@ -215,11 +213,11 @@ int main(int argc, char **argv){
 		//Sort all of the scores in the allScores vector in ascending order
 		sort(allScores.begin(), allScores.end()); //sorts elements of vector in ascending order
 
-		/*cout << "All scores - non-decreasing order:\n";
+		cout << "All scores - non-decreasing order:\n";
 		for (i = 0; i < allScores.size(); ++i) {
 			cout << allScores[i] << " ";
 		}
-		cout << endl << endl;*/
+		cout << endl << endl;
 
 		//Filling in adjacency matrix - if sum of two scores >= threshold (70), then insert 1 into the matrix, else leave as 0
 		for (i = 0; i < allScores.size() - 1; ++i) {
@@ -306,11 +304,11 @@ int main(int argc, char **argv){
 		cout << endl;*/
 
 
-		/*cout << "Matching List:\n";
+		cout << "Matching List:\n";
 		for (i = 0; i < numScores; ++i) {
 			cout << matchList[i] << " ";
 		}
-		cout << endl << endl;*/
+		cout << endl << endl;
 
 
 		//If the number of matches (i.e. the size of the matching list M) is less than the number of boxes (n), then instance is infeasible ( |M| < n )
@@ -334,11 +332,11 @@ int main(int argc, char **argv){
 			}
 		}
 
-		/*cout << "Mates Vector:\n";
+		cout << "Mates Vector:\n";
 		for (i = 0; i < numScores; ++i) {
 			cout << mates[i] << " ";
 		}
-		cout << endl << endl;*/
+		cout << endl << endl;
 
 		//find the smallest vertex not yet checked for mate-induced structure - start with this vertex
 		for (i = 0; i < numScores; ++i) {
@@ -376,16 +374,17 @@ int main(int argc, char **argv){
 
 		numCycles = mateInduced.size(); //number of cycles in the mate-induced structure
 
-		/*cout << "Mate-Induced Structure:\n";
+		cout << "Mate-Induced Structure:\n";
 		for (i = 0; i < mateInduced.size(); ++i) {
+            cout << "cycle " << i << ":\n";
 			for (j = 0; j < mateInduced[i].size(); ++j) {
 				cout << mateInduced[i][j] << "\t";
 			}
 			cout << endl;
 		}
-		cout << endl;*/
+		cout << endl;
 
-		//cout << "Number of cycles in mate-induced structure: " << numCycles << endl;
+		cout << "Number of cycles in mate-induced structure: " << numCycles << endl;
 
 		for (i = 0; i < mateInduced.size(); ++i) {
 			lengthMateInduced.push_back(mateInduced[i].size());
@@ -417,11 +416,11 @@ int main(int argc, char **argv){
 			}
 		}
 
-		/*cout << "Cycle Vertex:\n";
+		cout << "Cycle Vertex:\n";
 		for (i = 0; i < cycleVertex.size(); ++i) {
 			cout << cycleVertex[i] << " ";
 		}
-		cout << endl;*/
+		cout << endl;
 
 
 
@@ -434,13 +433,13 @@ int main(int argc, char **argv){
 		}
 		numEdges = edge.size();
 
-		/*cout << "Edges vector:\n";
+		cout << "Edges vector:\n";
 		for (i = 0; i < edge.size(); ++i) {
 			cout << edge[i] << " ";
 		}
-		cout << endl;*/
+		cout << endl;
 
-		//cout << "Number of Edges: " << numEdges << endl;
+		cout << "Number of Edges: " << numEdges << endl;
 
 		//FCA Algorithm
 		qstar = -1;
@@ -467,16 +466,16 @@ int main(int argc, char **argv){
 
 		t.clear();
 
-		/*cout << "T matrix:\n";
+		cout << "T matrix:\n";
 		for(i = 0; i < T.size(); ++i){
 			for(j = 0; j < T[i].size(); ++j){
 				cout << T[i][j] << "  ";
 			}
 			cout << endl;
 		}
-		cout << endl;*/
+		cout << endl;
 
-		/*cout << "S Matrix:\n";
+		cout << "S Matrix:\n";
 		for(i = 0; i < T.size(); ++i){
 			for(j = 0; j < numCycles; ++j){
 				cout << S[i][j] << "  ";
@@ -484,7 +483,6 @@ int main(int argc, char **argv){
 			cout << endl;
 		}
 		cout << endl;
-		 */
 
 		//cout << "qstar: " << qstar << endl;
 
@@ -601,7 +599,15 @@ int main(int argc, char **argv){
         }
 
 
+
+
 	} //end of for loop instances
+
+
+
+
+
+
 
     cout << "\n------------------------------------------------------------------\n\n";
 	cout << "Number of feasible instances: " << feasible << endl;
@@ -612,311 +618,14 @@ int main(int argc, char **argv){
     cout << "Number of single cycles: " << oneCycle << endl;
 
 
-
-
-	//matchlist of any of the values in T (i.e the matching mate of 16, 17 and 18) is always linked back to the edge before it, unless it's the first matching mate, in which case
-	//it links to the last edge in T
-	/*i.e.
-	16 is the value in T, its matching mate is 25
-	17 is the value in T, its matching mate is 24
-	18 is the value in T, its matching mate is 23
-
-	in this case
-	16 will link with the matching mate of the next edge, so 24
-	17 will link with the matching mate of the next edge, so 23
-	18 is the last edge in T, so it will link with the matching mate of the first edge, so 25
-
-	16-24
-	17-23
-	18-25
-
-	*/
-
-
 	endTime = clock();
 	int totalTime = (int)(((endTime - startTime) / double(CLOCKS_PER_SEC)) * 100);
 	cout << "CPU Time = " << totalTime << " milliseconds.\n";
 
 
+
+
+
 }//END INT MAIN
 
 
-//********************************************************************************
-
-//Print out allScores vector
-/*cout << "All scores:\n";
-for (i = 0; i < allScores.size(); ++i) {
-    cout << allScores[i] << " ";
-}
-cout << endl << endl;*/
-
-//Print out allScores vector (scores now in ascending order)
-/*if(instance == 0 || instance == 1 || instance == 2 || instance == 3) {
-    cout << "All scores - non-decreasing order:\n";
-    for (i = 0; i < allScores.size(); ++i) {
-        cout << allScores[i] << " ";
-    }
-    cout << endl << endl;
-}*/
-
-//Print out randOrder vector
-/* cout << "Random Order:\n";
- for(i = 0; i < randOrder.size(); ++i){
-     cout << randOrder[i] << endl;
- }
- cout << endl;*/
-
-
-//Print out adjacency matrix inc threshold and mates
-/*cout << "Adjacency Matrix:\n";
-for (i = 0; i < adjMatrix.size(); ++i) {
-    for (j = 0; j < adjMatrix[i].size(); ++j) {
-        cout << adjMatrix[i][j] << "\t";
-    }
-    cout << endl;
-}
-cout << endl;*/
-
-//Fill matchingList vector with values 0,..., numScores-1 (i.e. the index of each element)
-/*for(i = 0; i < numScores; ++i){
-    matchList[i] = vacant;
-    //cycleVertex[i] = 1; //will be set to vacant if resulting from mate swap
-}*/
-
-/*cout << "Cycle Vertex vector after MTGMA:\n";
-        for (i = 0; i < cycleVertex.size(); ++i) {
-            cout << cycleVertex[i] << " ";
-        }
-        cout << endl;*/
-
-
-/*cout << "Matching List:\n";
-for (i = 0; i < numScores; ++i) {
-    cout << matchList[i] << " ";
-}
-cout << endl << endl;*/
-
-/*cout << "Matching Vertices Values:\n";
-for (i = 0; i < numScores; ++i) {
-    if (matchList[i] == vacant) {
-        cout << i << "\t" << allScores[i] << "\t" << "No Match" << endl;
-        ++verticesNotMatched;
-    } else {
-        cout << i << "\t" << allScores[i] << "\t" << allScores[matchList[i]] << "\t" << matchList[i] << endl;
-    }
-
-}*/
-
-/*if (verticesNotMatched == 0) {
-    cout << "All vertices have been matched.\n\n";
-    cout << "Size of M (matchSize): " << matchSize << endl;
-} else {
-    cout << "Number of unmatched vertices: " << verticesNotMatched << endl;
-}*/
-
-/*cout << "Mates Vector:\n";
-        for (i = 0; i < numScores; ++i) {
-            cout << mates[i] << " ";
-        }
-        cout << endl << endl;*/
-
-/*for(i = 0; i < numScores; ++i){
-    checked[i] = 0;
-}*/
-
-/*cout << "Mate-Induced Structure:\n";
-       for (i = 0; i < mateInduced.size(); ++i) {
-           for (j = 0; j < mateInduced[i].size(); ++j) {
-               cout << mateInduced[i][j] << "\t";
-           }
-           cout << endl;
-       }
-       cout << endl;*/
-
-//cout << "Number of cycles in mate-induced structure: " << numCycles << endl;
-
-/*cout << "Number of vertices in each cycle of the mate-induced structure:\n";
-for (i = 0; i < lengthMateInduced.size(); ++i) {
-    cout << "Cycle " << i + 1 << ": " << lengthMateInduced[i] << " vertices" << endl;
-}
-cout << endl;*/
-
-//If the mate-induced structure only consists of one cycle, then the problem has been solved and is feasible (just remove one matching edge to find feasible path)
-//if (lengthMateInduced[0] == numScores) { //if all of the vertices are in the first (and only) cycle of the mate-induced structure
-//cout << "FEASIBLE: mate-induced structure only consists of one cycle.\n";
-//cout << "Feasible order of scores:\n";
-/*for (i = 0; i < mateInduced[0].size() - 1; ++i) {
-    cout << allScores[mateInduced[0][i]] << " -> ";
-}
-cout << allScores[mateInduced[0][mateInduced[0].size() - 1]] << endl;*/
-//++feasible;
-//++oneCycle;
-//continue;
-//}
-
-/*cout << "Cycle Vertex:\n";
-        for (i = 0; i < cycleVertex.size(); ++i) {
-            cout << cycleVertex[i] << " ";
-        }
-        cout << endl;*/
-
-/*cout << "Edges vector:\n";
-        for (i = 0; i < edge.size(); ++i) {
-            cout << edge[i] << " ";
-        }
-        cout << endl;*/
-//cout << "Number of Edges: " << numEdges << endl;
-
-
-/*cout << "T matrix:\n";
-for(i = 0; i < T.size(); ++i){
-    for(j = 0; j < T[i].size(); ++j){
-        cout << T[i][j] << "  ";
-    }
-    cout << endl;
-}
-cout << endl << endl;
-
-cout << "S Matrix:\n";
-for(i = 0; i < S.size(); ++i){
-    for(j = 0; j < S[i].size(); ++j){
-        cout << S[i][j] << "  ";
-    }
-    cout << endl;
-}
-cout << endl;*/
-
-//cout << "qstar: " << qstar << endl;
-
-
-/*for(q = 1; q <= qstar; ++q){
-    QSet[q] = 0; // ==1 iff Tq-cycle number q has already been considered
-}*/
-
-//********************************************************************************************************************************************
-
-/*for(j = 0; j < mateInduced[cycleVertex[T[full][v]]].size(); ++j){
-		if(mateInduced[cycleVertex[T[full][v]]][j] != T[full][v] && mateInduced[cycleVertex[T[full][v]]][j] != matchList[T[full][v]]){
-			fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][j]);
-		}
-		else if (mateInduced[cycleVertex[T[full][v]]][j] == T[full][v]){
-			brokenVertex1 = j;
-			break;
-		}
-		else if (mateInduced[cycleVertex[T[full][v]]][j] == matchList[T[full][v]]){
-			brokenVertex2 = j;
-			break;
-		}
-	}*/
-//visited[cycleVertex[T[full][v]]] = 1;
-
-
-/*cout << "full cycle\n";
-for(i = 0; i < fullCycle.size(); ++i){
-    cout << fullCycle[i] << endl;
-}*/
-
-/*cout << "broken1: " << brokenVertex1 << endl;
-cout << "broken2: " << brokenVertex2 << endl;
-if(brokenVertex1 != vacant){
-    fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][brokenVertex1]);
-     ++v;
-    fullCycle.push_back(matchList[T[full][v]]);
-    brokenVertex1 = vacant;
-}*/
-
-
-/*if(brokenVertex2 != vacant){
-    fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][brokenVertex2]);
-    v = T[full].size()-1;
-    cout << v << endl;
-    fullCycle.push_back(T[full][v]);
-    brokenVertex2 = vacant;
-}*/
-
-/*cout << "full cycle\n";
-for(i = 0; i < fullCycle.size(); ++i){
-    cout << fullCycle[i] << endl;
-}*/
-
-// v = 2
-/*for(j = 0; j < mateInduced[cycleVertex[T[full][v]]].size(); ++j){
-    if(mateInduced[cycleVertex[T[full][v]]][j] == T[full][v]){
-        save = j; //save = 3
-        break;
-    }
-}*/
-
-//cout << "Save: "<<  save << endl;
-
-//THIS NEEDS TO GO IN A FUNCTION ALONG WITH THE OTHER FIVE POSSIBILITIES
-//CASE 5: if the next element in the cycle is the matching mate for the current element
-/*if(mateInduced[cycleVertex[T[full][v]]][save+1] == matchList[T[full][v]]){
-    for(i = save; i-- >0;){
-        fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][i]);
-        //cout << mateInduced[cycleVertex[T[full][v]]][i] << endl;
-    }
-    for(i = mateInduced[cycleVertex[T[full][v]]].size(); i-- > save + 1;){
-        fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][i]);
-    }
-
-}
-visited[cycleVertex[T[full][v]]] = 1;*/
-
-/*i = 0;
-save = 0;
---v; // v = 1
-
-for(j = 0; j < mateInduced[cycleVertex[T[full][v]]].size(); ++j) {
-    if (mateInduced[cycleVertex[T[full][v]]][j] == T[full][v]) {
-        save = j; //save = 18
-        break;
-    }
-}*/
-
-//cout << "Save: " << save << endl;
-
-//CASE 6: if the previous element in the cycle is the matching mate for the current element
-/*if(mateInduced[cycleVertex[T[full][v]]][save-1] == matchList[T[full][v]]){
-    for(i = save; i < mateInduced[cycleVertex[T[full][v]]].size(); ++i){
-        fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][i]);
-    }
-    for(i = 0; i < save; ++i){
-        fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][i]);
-    }
-
-}
-visited[cycleVertex[T[full][v]]] = 1;*/
-
-/*i = 0;
-save = 0;
---v; //v = 0*/
-
-/*cout << "Visited:\n";
-for(i = 0; i < visited.size(); ++i){
-    cout << visited[i] << endl;
-}
-cout << endl;*/
-
-//CONNECTING BACK TO FIRST CYCLE
-/*for(j = 0; j < mateInduced[cycleVertex[T[full][v]]].size(); ++j) {
-    if (mateInduced[cycleVertex[T[full][v]]][j] == T[full][v]) {
-        save = j; //save = 4
-        break;
-    }
-}*/
-
-//CYCLE 0 HAS ALREADY BEEN VISITED, CREATE NEW FUNCTION FOR THIS TYPE
-/*if(mateInduced[cycleVertex[T[full][v]]][save-1] == matchList[T[full][v]] && visited[cycleVertex[T[full][v]]] == 1){
-    for(i = save; i < mateInduced[cycleVertex[T[full][v]]].size(); ++i){
-        fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][i]);
-    }
-}*/
-
-
-
-/*cout << "full cycle\n";
-for(i = 0; i < fullCycle.size(); ++i){
-    cout << fullCycle[i] << " ";
-}
-cout << endl;*/
