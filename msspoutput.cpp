@@ -20,7 +20,7 @@ void resetVectors(int vacant, int numScores, int numComp,  vector<vector<int> > 
 		cycleVertex[i] = 1;
 		mates[i] = 0;
 		checked[i] = 0;
-        patchVertex[i] = 0;
+        patchVertex[i] = vacant;
 	}
 
 	for(i = 0; i < numScores; ++i){
@@ -42,7 +42,7 @@ void resetVectors(int vacant, int numScores, int numComp,  vector<vector<int> > 
 
 }
 
-void clearVectors(vector<int> &cycle, vector<int> &edge, vector<int> &lengthMateInduced, vector<vector<int> > &mateInduced, vector<int> &randOrder, vector<int> &t, vector<vector<int> > &T, vector<int> &SSet, vector<int> &fullCycle, vector<int> &Tpatch){
+void clearVectors(vector<int> &cycle, vector<int> &edge, vector<int> &lengthMateInduced, vector<vector<int> > &mateInduced, vector<int> &randOrder, vector<int> &t, vector<vector<int> > &T, vector<int> &SSet, vector<int> &fullCycle, vector<vector<int> > &Tpatch, vector<int> &temp){
 	cycle.clear();
 	edge.clear();
 	lengthMateInduced.clear();
@@ -53,6 +53,7 @@ void clearVectors(vector<int> &cycle, vector<int> &edge, vector<int> &lengthMate
 	SSet.clear();
     fullCycle.clear();
     Tpatch.clear();
+    temp.clear();
 
 }
 
@@ -101,9 +102,161 @@ void loopCycle(int v, int full, int save, vector<int> &matchList, vector<int> &c
 
 }
 
+void loopCyclePatch(int &u, int v, int save, int vacant, vector<int> &matchList, vector<int> &cycleVertex, vector<int> &fullCycle, vector<vector<int> > &mateInduced, vector<vector<int> > &Tpatch, vector<int> &patchVertex){
+
+    int i;
+    int x = 0;
+
+
+    if (mateInduced[cycleVertex[Tpatch[u][v]]][save - 1] == Tpatch[u][v]){
+        fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][save]);
+        for(i = save + 1; i < mateInduced[cycleVertex[Tpatch[u][v]]].size(); ++i){
+            if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] == vacant) {
+                fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+            }
+            else if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] != vacant){
+                fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+                u = patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]];
+                x = 1;
+                break;
+            }
+        }
+        if(x == 0) {
+            for (i = 0; i < save; ++i) {
+                if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] == vacant) {
+                    fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+                }
+                else if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] != vacant){
+                    fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+                    u = patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]];
+                    break;
+                }
+            }
+        }
+    }
+
+    else if (mateInduced[cycleVertex[Tpatch[u][v]]][save - 1] == matchList[Tpatch[u][v]]){
+        fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][save]);
+        for(i = save + 1; i < mateInduced[cycleVertex[Tpatch[u][v]]].size(); ++i){
+            if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] == vacant) {
+                fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+            }
+            else if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] != vacant){
+                fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+                u = patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]];
+                x = 1;
+                break;
+            }
+        }
+        if(x == 0) {
+            for (i = 0; i < save; ++i) {
+                if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] == vacant) {
+                    fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+                }
+                else if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] != vacant){
+                    fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+                    u = patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]];
+                    break;
+                }
+            }
+        }
+    }
+
+    else if(mateInduced[cycleVertex[Tpatch[u][v]]][save + 1] == matchList[Tpatch[u][v]]){
+        fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][save]);
+        for(i = save; i-- > 0;){ //from element at position 'save' to the first element in the cycle
+            if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] == vacant) {
+                fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+            }
+            else if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] != vacant){
+                fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+                u = patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]];
+                x = 1;
+                break;
+            }
+        }
+        if(x == 0) {
+            for (i = mateInduced[cycleVertex[Tpatch[u][v]]].size(); i-- > save + 1;) { //from end of cycle to element at position save+1
+                if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] == vacant) {
+                    fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+                }
+                else if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] != vacant){
+                    fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+                    u = patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]];
+                    break;
+                }
+            }
+        }
+    }
+
+
+    else if(mateInduced[cycleVertex[Tpatch[u][v]]][save + 1] == Tpatch[u][v]){
+        fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][save]);
+        for(i = save; i-- > 0;){ //from element at position 'save' to the first element in the cycle
+            if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] == vacant) {
+                fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+            }
+            else if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] != vacant){
+                fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+                u = patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]];
+                x = 1;
+                break;
+            }
+        }
+        if(x == 0) {
+            for (i = mateInduced[cycleVertex[Tpatch[u][v]]].size(); i-- > save + 1;) { //from end of cycle to element at position save+1
+                if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] == vacant) {
+                    fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+                }
+                else if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] != vacant){
+                    fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+                    u = patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]];
+                    break;
+                }
+            }
+        }
+    }
+
+
+
+
+
+    else if(save == mateInduced[cycleVertex[Tpatch[u][v]]].size()-1 && mateInduced[cycleVertex[Tpatch[u][v]]][0] == Tpatch[u][v]){
+        fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][save]);
+        for(i = mateInduced[cycleVertex[Tpatch[u][v]]].size()-1; i-- > 0; ){
+            if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] == vacant) {
+                fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+            }
+            else if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] != vacant){
+                fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+                u = patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]];
+                break;
+            }
+        }
+    }
+
+    else if(save == 0 && mateInduced[cycleVertex[Tpatch[u][v]]][mateInduced[cycleVertex[Tpatch[u][v]]].size()-1] == matchList[Tpatch[u][v]]){
+        fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][save]);
+        for(i = 1; i < mateInduced[cycleVertex[Tpatch[u][v]]].size(); ++i){
+            if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] == vacant) {
+                fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+            }
+            else if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] != vacant){
+                fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+                u = patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]];
+                break;
+            }
+        }
+    }
+
+
+
+}
+
 
 int main(int argc, char **argv){
-	if(argc < 5){
+    //region INITIAL DESCRIPTION
+    if(argc < 5){
 		cout << "Minimum Score Separation Problem: MBAHRA.\n";
 		cout << "Arguments are the following:\n";
 		cout << "- Number of instances (integer)\n";
@@ -114,7 +267,8 @@ int main(int argc, char **argv){
 		exit(1);
 	}
 
-	//VARIABLES FROM ARGUMENTS
+    //region Variables
+    //VARIABLES FROM ARGUMENTS
 	int numInstances = atoi(argv[1]); //number of instances of mssp, use in main for loop
 	int numBox = atoi(argv[2]) + 1; //number of boxes in mssp plus 1 extra box (scores on either side of extra box will be dominating vertices, score widths = 71)
 	int minWidth = atoi(argv[3]); //minimum width of scores (millimeters)
@@ -183,14 +337,16 @@ int main(int argc, char **argv){
 
     int save = 0;
     int full = vacant; //the row of the T matrix which has the same number of edges as the number of T cycles
-    int v;
+    int u, v;
     int poorT = 0;
     int fullT = 0;
     vector<int> fullCycle; //vector to hold vertices of final cycle in order
     vector<int> patchCycle(numComp, vacant);
-    vector<int> Tpatch;
-    vector<int> patchVertex(numScores, 0);
+    vector<vector<int> > Tpatch;
+    vector<int> patchVertex(numScores, vacant);
     int x = 0;
+    vector<int> temp;
+    //endregion
 
 	//*************************************************************************
 
@@ -201,13 +357,15 @@ int main(int argc, char **argv){
 
 	time_t startTime, endTime; //start clock
 	startTime = clock();
+    //endregion
 
 	for(instance = 0; instance < numInstances; ++instance) {
+        //region MAIN
         x = 0;
         full = vacant;
 
 		resetVectors(vacant, numScores, numComp, adjMatrix, allScores, checked, cycleVertex, matchList, mates, QSet, S, patchCycle, patchVertex);
-		clearVectors(cycle, edge, lengthMateInduced, mateInduced, randOrder, t, T, SSet, fullCycle, Tpatch);
+		clearVectors(cycle, edge, lengthMateInduced, mateInduced, randOrder, t, T, SSet, fullCycle, Tpatch, temp);
 
 		//Create random values to be used as score widths, put in allScores vector (except last two elements)
 		for (i = 0; i < numScores - 2; ++i) {
@@ -311,11 +469,13 @@ int main(int argc, char **argv){
 		cout << endl;*/
 
 
-		cout << "Matching List:\n";
+
+        cout << "Matching List:\n";
 		for (i = 0; i < numScores; ++i) {
 			cout << matchList[i] << " ";
 		}
 		cout << endl << endl;
+
 
 
 		//If the number of matches (i.e. the size of the matching list M) is less than the number of boxes (n), then instance is infeasible ( |M| < n )
@@ -556,6 +716,7 @@ int main(int argc, char **argv){
 				q = 0;
 			}
 		}//end while
+        //endregion
 
 
 
@@ -569,23 +730,32 @@ int main(int argc, char **argv){
             }
             cout << endl << endl;
 
+
             for (i = 0; i < patchCycle.size(); ++i) {
                 if (patchCycle[i] == 1) {
                     for (j = 0; j < T[i].size(); ++j) {
-                        Tpatch.push_back(T[i][j]);
+                        temp.push_back(T[i][j]);
                     }
+                    Tpatch.push_back(temp);
+                    temp.clear();
                 }
             }
+            temp.clear();
 
             cout << "Tpatch matrix:\n";
             for (i = 0; i < Tpatch.size(); ++i) {
-                cout << Tpatch[i] << " ";
+                for(j = 0; j < Tpatch[i].size(); ++j) {
+                    cout << Tpatch[i][j] << " ";
+                }
+                cout << endl;
             }
             cout << endl << endl;
 
-            for (i = 0; i < Tpatch.size(); ++i) {
-                patchVertex[Tpatch[i]] = 1;
-                patchVertex[matchList[Tpatch[i]]] = 1;
+            for(i = 0; i < Tpatch.size(); ++i){
+                for(j = 0; j < Tpatch[i].size(); ++j){
+                    patchVertex[Tpatch[i][j]] = i;
+                    patchVertex[matchList[Tpatch[i][j]]] = i;
+                }
             }
 
             cout << "patch vertex:\n";
@@ -593,6 +763,82 @@ int main(int argc, char **argv){
                 cout << patchVertex[i] << " ";
             }
             cout << endl << endl;
+
+            u = 0;
+            v = 0;
+            int b = 0;
+            save = 0;
+            //int hello = 1;
+
+            /*cout << "hello:\n";
+            cout << patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][hello]] << endl;*/
+
+            for(j = 0; j < mateInduced[cycleVertex[Tpatch[u][v]]].size(); ++j){
+                if(mateInduced[cycleVertex[Tpatch[u][v]]][j] == matchList[Tpatch[u][v]]){
+                    save = j;
+                    break;
+                }
+            }
+
+            loopCyclePatch(u, v, save, vacant, matchList, cycleVertex, fullCycle, mateInduced, Tpatch, patchVertex);
+
+            cout << "full cycle:\n";
+            for(i = 0; i < fullCycle.size(); ++i){
+                cout << fullCycle[i] << " ";
+            }
+            cout << endl << endl;
+
+            cout << "u: " << u << endl << endl << endl;
+
+            while(fullCycle.size() < numScores) {
+
+                save = 0;
+                for (i = 0; i < Tpatch[u].size(); ++i) {
+                    if (Tpatch[u][i] == fullCycle.back()) {
+                        if (i == Tpatch[u].size() - 1) {
+                            v = 0;
+                        } else {
+                            v = ++i;
+                        }
+                        for (j = 0; j < mateInduced[cycleVertex[Tpatch[u][v]]].size(); ++j) {
+                            if (mateInduced[cycleVertex[Tpatch[u][v]]][j] == matchList[Tpatch[u][v]]) {
+                                save = j;
+                                break;
+                            }
+                        }
+                        break;
+                    } else if (matchList[Tpatch[u][i]] == fullCycle.back()) {
+                        if (i == 0) {
+                            v = Tpatch[u].size() - 1;
+                        } else {
+                            v = --i;
+                        }
+                        for (j = 0; j < mateInduced[cycleVertex[Tpatch[u][v]]].size(); ++j) {
+                            if (mateInduced[cycleVertex[Tpatch[u][v]]][j] == Tpatch[u][v]) {
+                                save = j;
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                }
+
+                cout << "Save: " << save << endl;
+
+                loopCyclePatch(u, v, save, vacant, matchList, cycleVertex, fullCycle, mateInduced, Tpatch, patchVertex);
+
+                cout << "full cycle:\n";
+                for (i = 0; i < fullCycle.size(); ++i) {
+                    cout << fullCycle[i] << " ";
+                }
+                cout << endl;
+
+                cout << "u: " << u << endl << endl;
+                ++b;
+            }
+
+
+
 
 
 
