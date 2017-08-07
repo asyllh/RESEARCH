@@ -11,7 +11,7 @@ MSSP with output of solution.
 #include <iomanip> //header providing parametric manipulators
 using namespace std;
 
-void resetVectors(int vacant, int numScores, int numComp,  vector<vector<int> > &adjMatrix, vector<int> &allScores, vector<int> &checked, vector<int> &cycleVertex, vector<int> &matchList, vector<int> &mates, vector<int> &QSet, vector<vector<int> > &S, vector<int> &patchCycle){
+void resetVectors(int vacant, int numScores, int numComp,  vector<vector<int> > &adjMatrix, vector<int> &allScores, vector<int> &checked, vector<int> &cycleVertex, vector<int> &matchList, vector<int> &mates, vector<int> &QSet, vector<vector<int> > &S, vector<int> &patchCycle, vector<int> &patchVertex){
 	int i, j;
 
 	for(i = 0; i < numScores; ++i){
@@ -20,6 +20,7 @@ void resetVectors(int vacant, int numScores, int numComp,  vector<vector<int> > 
 		cycleVertex[i] = 1;
 		mates[i] = 0;
 		checked[i] = 0;
+        patchVertex[i] = 0;
 	}
 
 	for(i = 0; i < numScores; ++i){
@@ -41,7 +42,7 @@ void resetVectors(int vacant, int numScores, int numComp,  vector<vector<int> > 
 
 }
 
-void clearVectors(vector<int> &cycle, vector<int> &edge, vector<int> &lengthMateInduced, vector<vector<int> > &mateInduced, vector<int> &randOrder, vector<int> &t, vector<vector<int> > &T, vector<int> &SSet, vector<int> &fullCycle){
+void clearVectors(vector<int> &cycle, vector<int> &edge, vector<int> &lengthMateInduced, vector<vector<int> > &mateInduced, vector<int> &randOrder, vector<int> &t, vector<vector<int> > &T, vector<int> &SSet, vector<int> &fullCycle, vector<int> &Tpatch){
 	cycle.clear();
 	edge.clear();
 	lengthMateInduced.clear();
@@ -51,6 +52,7 @@ void clearVectors(vector<int> &cycle, vector<int> &edge, vector<int> &lengthMate
 	T.clear();
 	SSet.clear();
     fullCycle.clear();
+    Tpatch.clear();
 
 }
 
@@ -187,6 +189,8 @@ int main(int argc, char **argv){
     vector<int> fullCycle; //vector to hold vertices of final cycle in order
     vector<int> patchCycle(numComp, vacant);
     vector<int> Tpatch;
+    vector<int> patchVertex(numScores, 0);
+    int x = 0;
 
 	//*************************************************************************
 
@@ -199,11 +203,11 @@ int main(int argc, char **argv){
 	startTime = clock();
 
 	for(instance = 0; instance < numInstances; ++instance) {
-
+        x = 0;
         full = vacant;
 
-		resetVectors(vacant, numScores, numComp, adjMatrix, allScores, checked, cycleVertex, matchList, mates, QSet, S, patchCycle);
-		clearVectors(cycle, edge, lengthMateInduced, mateInduced, randOrder, t, T, SSet, fullCycle);
+		resetVectors(vacant, numScores, numComp, adjMatrix, allScores, checked, cycleVertex, matchList, mates, QSet, S, patchCycle, patchVertex);
+		clearVectors(cycle, edge, lengthMateInduced, mateInduced, randOrder, t, T, SSet, fullCycle, Tpatch);
 
 		//Create random values to be used as score widths, put in allScores vector (except last two elements)
 		for (i = 0; i < numScores - 2; ++i) {
@@ -514,7 +518,14 @@ int main(int argc, char **argv){
 		for (i = 0; i < numCycles; ++i) {
 			SSum = SSum + SSet[i];
 		}
-        if(SSum >= 0){
+
+        if (SSum == numCycles) {
+            //cout << "FEASIBLE: Patching Graph Connected (SSum == numCycles).\n";
+            ++feasible;
+            x = 1;
+            goto End;
+        }
+        else if(SSum >= 1){
             patchCycle[q] = 1;
         }
 
@@ -546,37 +557,85 @@ int main(int argc, char **argv){
 			}
 		}//end while
 
-        cout << "patch cycle:\n";
-        for(i = 0; i < patchCycle.size(); ++i){
-            cout << patchCycle[i] << " ";
-        }
-        cout << endl;
 
-        /*for(i = 0; i < patchCycle.size(); ++i){
-            for(j = 0; j < T[i].size(); ++j){
-                if(patchCycle[i] == 1){
-                    Tpatch.push_back(T[i][j]);
+
+        //If patching graph is connected, then instance is feasible, else infeasible
+        if (SSum == numCycles) {
+            ++poorT;
+
+            cout << "patch cycle:\n";
+            for (i = 0; i < patchCycle.size(); ++i) {
+                cout << patchCycle[i] << " ";
+            }
+            cout << endl << endl;
+
+            for (i = 0; i < patchCycle.size(); ++i) {
+                if (patchCycle[i] == 1) {
+                    for (j = 0; j < T[i].size(); ++j) {
+                        Tpatch.push_back(T[i][j]);
+                    }
                 }
             }
-        }*/
+
+            cout << "Tpatch matrix:\n";
+            for (i = 0; i < Tpatch.size(); ++i) {
+                cout << Tpatch[i] << " ";
+            }
+            cout << endl << endl;
+
+            for (i = 0; i < Tpatch.size(); ++i) {
+                patchVertex[Tpatch[i]] = 1;
+                patchVertex[matchList[Tpatch[i]]] = 1;
+            }
+
+            cout << "patch vertex:\n";
+            for (i = 0; i < patchVertex.size(); ++i) {
+                cout << patchVertex[i] << " ";
+            }
+            cout << endl << endl;
 
 
-        /*cout << "Tpatch matrix:\n";
-        for(i = 0; i < Tpatch.size(); ++i){
-            cout << Tpatch[i] << " ";
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         }
-        cout << endl;*/
 
 
 
 
 
-		//If patching graph is connected, then instance is feasible, else infeasible
-		if (SSum == numCycles) {
-			//cout << "FEASIBLE: Patching Graph Connected (SSum == numCycles).\n";
-			++feasible;
-			goto End;
-		}
 		else if (SSum < numCycles) {
 			//cout << "INFEASIBLE: Patching Graph Unconnected (SSum < numCycles).\n";
             cout << instance << ": Infeasible SSum < numCycles\n\n";
@@ -591,42 +650,44 @@ int main(int argc, char **argv){
 
 
         End:
-        for(i = 0; i < T.size(); ++i){
-            if(T[i].size() == numCycles){
-                full = i;
-                break;
-            }
-        }
+        if(x == 1) {
 
-        if(full != vacant) {
-
-            //cout << "Full: " << full << endl;
-
-            for (v = 0; v < T[full].size(); ++v) {
-
-                for (j = 0; j < mateInduced[cycleVertex[T[full][v]]].size(); ++j) {
-                    if (mateInduced[cycleVertex[T[full][v]]][j] == matchList[T[full][v]]) {
-                        save = j;
-                        break;
-                    }
+            for (i = 0; i < T.size(); ++i) {
+                if (T[i].size() == numCycles) {
+                    full = i;
+                    break;
                 }
-                loopCycle(v, full, save, matchList, cycleVertex, fullCycle, mateInduced, T);
-
             }
 
-            cout << instance << ": Full cycle after T-cycle analysis:\n";
-            for (i = 0; i < fullCycle.size(); ++i) {
-                cout << fullCycle[i] << " ";
-            }
-            cout << endl << endl;
-            ++fullT;
-            continue;
+            if (full != vacant) {
 
-        }
-        else if(full == vacant){
-            cout << instance << ": NO SOLN AVAILABLE: multiple t cycles required.\n";
-            ++poorT;
-            continue;
+                //cout << "Full: " << full << endl;
+
+                for (v = 0; v < T[full].size(); ++v) {
+
+                    for (j = 0; j < mateInduced[cycleVertex[T[full][v]]].size(); ++j) {
+                        if (mateInduced[cycleVertex[T[full][v]]][j] == matchList[T[full][v]]) {
+                            save = j;
+                            break;
+                        }
+                    }
+                    loopCycle(v, full, save, matchList, cycleVertex, fullCycle, mateInduced, T);
+
+                }
+
+                cout << instance << ": Full cycle after T-cycle analysis:\n";
+                for (i = 0; i < fullCycle.size(); ++i) {
+                    cout << fullCycle[i] << " ";
+                }
+                cout << endl << endl;
+                ++fullT;
+                continue;
+
+            } else if (full == vacant) {
+                cout << instance << ": NO SOLN AVAILABLE: multiple t cycles required.\n";
+                ++poorT;
+                continue;
+            }
         }
 
 
