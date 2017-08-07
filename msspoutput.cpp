@@ -11,7 +11,7 @@ MSSP with output of solution.
 #include <iomanip> //header providing parametric manipulators
 using namespace std;
 
-void resetVectors(int vacant, int numScores, int numComp,  vector<vector<int> > &adjMatrix, vector<int> &allScores, vector<int> &checked, vector<int> &cycleVertex, vector<int> &matchList, vector<int> &mates, vector<int> &QSet, vector<vector<int> > &S){
+void resetVectors(int vacant, int numScores, int numComp,  vector<vector<int> > &adjMatrix, vector<int> &allScores, vector<int> &checked, vector<int> &cycleVertex, vector<int> &matchList, vector<int> &mates, vector<int> &QSet, vector<vector<int> > &S, vector<int> &patchCycle){
 	int i, j;
 
 	for(i = 0; i < numScores; ++i){
@@ -30,6 +30,7 @@ void resetVectors(int vacant, int numScores, int numComp,  vector<vector<int> > 
 
 	for(i = 0; i < numComp; ++i){
 		QSet[i] = 0;
+        patchCycle[i] = vacant;
 	}
 
 	for(i = 0; i < numComp; ++i){
@@ -175,7 +176,7 @@ int main(int argc, char **argv){
 	int SSum; //number of MIS cycles already glued together
 	int SqIntS; // == 0 iff Sq intersection S == emptyset
 	int problemInstance = 0; //counter for number of instances with issues (SSum > numCycles)
-	vector<int> QSet(numComp, vacant); // Tq-cycles already used for gluing
+	vector<int> QSet(numComp, 0); // Tq-cycles already used for gluing
 	vector<int> SSet; //MIS cycles already glued together
 
     int save = 0;
@@ -184,6 +185,8 @@ int main(int argc, char **argv){
     int poorT = 0;
     int fullT = 0;
     vector<int> fullCycle; //vector to hold vertices of final cycle in order
+    vector<int> patchCycle(numComp, vacant);
+    vector<int> Tpatch;
 
 	//*************************************************************************
 
@@ -199,7 +202,7 @@ int main(int argc, char **argv){
 
         full = vacant;
 
-		resetVectors(vacant, numScores, numComp, adjMatrix, allScores, checked, cycleVertex, matchList, mates, QSet, S);
+		resetVectors(vacant, numScores, numComp, adjMatrix, allScores, checked, cycleVertex, matchList, mates, QSet, S, patchCycle);
 		clearVectors(cycle, edge, lengthMateInduced, mateInduced, randOrder, t, T, SSet, fullCycle);
 
 		//Create random values to be used as score widths, put in allScores vector (except last two elements)
@@ -484,7 +487,7 @@ int main(int argc, char **argv){
 		}
 		cout << endl;
 
-		//cout << "qstar: " << qstar << endl;
+		cout << "qstar: " << qstar << endl;
 
 
 
@@ -511,6 +514,9 @@ int main(int argc, char **argv){
 		for (i = 0; i < numCycles; ++i) {
 			SSum = SSum + SSet[i];
 		}
+        if(SSum >= 0){
+            patchCycle[q] = 1;
+        }
 
 		//Start connectivity check
 		while (q <= qstar && SSum < numCycles) {
@@ -532,12 +538,37 @@ int main(int argc, char **argv){
 					if (SSet[i] == 0 && S[q][i] == 1) {
 						SSet[i] = 1;
 						++SSum;
+                        patchCycle[q] = 1;
 					}
 				}
 				QSet[q] = 1;
 				q = 0;
 			}
 		}//end while
+
+        cout << "patch cycle:\n";
+        for(i = 0; i < patchCycle.size(); ++i){
+            cout << patchCycle[i] << " ";
+        }
+        cout << endl;
+
+        /*for(i = 0; i < patchCycle.size(); ++i){
+            for(j = 0; j < T[i].size(); ++j){
+                if(patchCycle[i] == 1){
+                    Tpatch.push_back(T[i][j]);
+                }
+            }
+        }*/
+
+
+        /*cout << "Tpatch matrix:\n";
+        for(i = 0; i < Tpatch.size(); ++i){
+            cout << Tpatch[i] << " ";
+        }
+        cout << endl;*/
+
+
+
 
 
 		//If patching graph is connected, then instance is feasible, else infeasible
@@ -619,7 +650,7 @@ int main(int argc, char **argv){
 
 
 	endTime = clock();
-	int totalTime = (int)(((endTime - startTime) / double(CLOCKS_PER_SEC)) * 100);
+	int totalTime = (int)(((endTime - startTime) / double(CLOCKS_PER_SEC)) * 1000);
 	cout << "CPU Time = " << totalTime << " milliseconds.\n";
 
 
@@ -629,3 +660,18 @@ int main(int argc, char **argv){
 }//END INT MAIN
 
 
+/*
+ final solution for 1 45 1 70 3:
+ cycle 0: 90 91 0 1
+ cycle 1: 89 16
+ cycle 3: 74 73
+ cycle 1: 21 33 58 25 66 28 63 84 7 69 22 35 56 50 41 48 43 86 5 83 8 46 45 54 37 4 87 76 15 53 38 65 26 57 34 55 36 2
+ cycle 2: 88 81 10 77 14 60 31 23 68 42 49 11 80 24 67 85 6 61 30 82 9 29 62 72
+ cycle 3: 18 17
+ cycle 1: 75 12 79 70
+ cycle 4: 20 51 40 71
+ cycle 2: 19 44 47 39 52 32 59 13 78 27 64 3
+ then back to cycle 0
+
+
+ */
