@@ -107,7 +107,7 @@ void loopCyclePatch(int &u, int v, int save, int vacant, vector<int> &matchList,
     int i;
     int x = 0;
 
-
+    //CASE ONE: if the current value is matchList[Tpatch[u][v]] and the previous value is Tpatch[u][v]
     if (mateInduced[cycleVertex[Tpatch[u][v]]][save - 1] == Tpatch[u][v]){
         fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][save]);
         for(i = save + 1; i < mateInduced[cycleVertex[Tpatch[u][v]]].size(); ++i){
@@ -135,6 +135,7 @@ void loopCyclePatch(int &u, int v, int save, int vacant, vector<int> &matchList,
         }
     }
 
+    //CASE TWO: if the current value is Tpatch[u][v] and the previous value is matchList[Tpatch[u][v]]
     else if (mateInduced[cycleVertex[Tpatch[u][v]]][save - 1] == matchList[Tpatch[u][v]]){
         fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][save]);
         for(i = save + 1; i < mateInduced[cycleVertex[Tpatch[u][v]]].size(); ++i){
@@ -162,6 +163,7 @@ void loopCyclePatch(int &u, int v, int save, int vacant, vector<int> &matchList,
         }
     }
 
+    //CASE THREE: if the current vertex is Tpatch[u][v] and the next element is matchList[Tpatch[u][v]]
     else if(mateInduced[cycleVertex[Tpatch[u][v]]][save + 1] == matchList[Tpatch[u][v]]){
         fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][save]);
         for(i = save; i-- > 0;){ //from element at position 'save' to the first element in the cycle
@@ -189,7 +191,7 @@ void loopCyclePatch(int &u, int v, int save, int vacant, vector<int> &matchList,
         }
     }
 
-
+    //CASE FOUR: if the current vertex is matchList[Tpatch[u][v]] and the next element is Tpatch[u][v]
     else if(mateInduced[cycleVertex[Tpatch[u][v]]][save + 1] == Tpatch[u][v]){
         fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][save]);
         for(i = save; i-- > 0;){ //from element at position 'save' to the first element in the cycle
@@ -217,10 +219,24 @@ void loopCyclePatch(int &u, int v, int save, int vacant, vector<int> &matchList,
         }
     }
 
+    //CASE FIVE: if the current vertex is matchList[Tpatch[u][v]] and is the first element in the cycle, and
+    //the last element in the cycle is Tpatch[u][v]
+    else if(save == 0 && mateInduced[cycleVertex[Tpatch[u][v]]][mateInduced[cycleVertex[Tpatch[u][v]]].size()-1] == Tpatch[u][v]){
+        fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][save]);
+        for(i = 1; i < mateInduced[cycleVertex[Tpatch[u][v]]].size(); ++i){
+            if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] == vacant) {
+                fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+            }
+            else if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] != vacant){
+                fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+                u = patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]];
+                break;
+            }
+        }
+    }
 
-
-
-
+    //CASE SIX: if the current vertex is matchList[Tpatch[u][v]] and is last element in the cycle, and
+    //the first element in the cycle is Tpatch[u][v]
     else if(save == mateInduced[cycleVertex[Tpatch[u][v]]].size()-1 && mateInduced[cycleVertex[Tpatch[u][v]]][0] == Tpatch[u][v]){
         fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][save]);
         for(i = mateInduced[cycleVertex[Tpatch[u][v]]].size()-1; i-- > 0; ){
@@ -235,9 +251,27 @@ void loopCyclePatch(int &u, int v, int save, int vacant, vector<int> &matchList,
         }
     }
 
+    //CASE SEVEN: if the current vertex is Tpatch[u][v] and is the first element in the cycle, and
+    //and the last element in the cycle is matchList[Tpatch[u][v]]
     else if(save == 0 && mateInduced[cycleVertex[Tpatch[u][v]]][mateInduced[cycleVertex[Tpatch[u][v]]].size()-1] == matchList[Tpatch[u][v]]){
         fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][save]);
         for(i = 1; i < mateInduced[cycleVertex[Tpatch[u][v]]].size(); ++i){
+            if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] == vacant) {
+                fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+            }
+            else if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] != vacant){
+                fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+                u = patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]];
+                break;
+            }
+        }
+    }
+
+    //CASE EIGHT: if the current vertex is Tpatch[u][v] and is last element in the cycle, and
+    //the first element in the cycle is matchList[Tpatch[u][v]]
+    else if(save == mateInduced[cycleVertex[Tpatch[u][v]]].size()-1 && mateInduced[cycleVertex[Tpatch[u][v]]][0] == matchList[Tpatch[u][v]]){
+        fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][save]);
+        for(i = mateInduced[cycleVertex[Tpatch[u][v]]].size()-1; i-- > 0; ){
             if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] == vacant) {
                 fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
             }
@@ -255,7 +289,7 @@ void loopCyclePatch(int &u, int v, int save, int vacant, vector<int> &matchList,
 
 
 int main(int argc, char **argv){
-    //region INITIAL DESCRIPTION
+
     if(argc < 5){
 		cout << "Minimum Score Separation Problem: MBAHRA.\n";
 		cout << "Arguments are the following:\n";
@@ -267,7 +301,7 @@ int main(int argc, char **argv){
 		exit(1);
 	}
 
-    //region Variables
+
     //VARIABLES FROM ARGUMENTS
 	int numInstances = atoi(argv[1]); //number of instances of mssp, use in main for loop
 	int numBox = atoi(argv[2]) + 1; //number of boxes in mssp plus 1 extra box (scores on either side of extra box will be dominating vertices, score widths = 71)
@@ -346,7 +380,7 @@ int main(int argc, char **argv){
     vector<int> patchVertex(numScores, vacant);
     int x = 0;
     vector<int> temp;
-    //endregion
+
 
 	//*************************************************************************
 
@@ -357,10 +391,10 @@ int main(int argc, char **argv){
 
 	time_t startTime, endTime; //start clock
 	startTime = clock();
-    //endregion
+
 
 	for(instance = 0; instance < numInstances; ++instance) {
-        //region MAIN
+
         x = 0;
         full = vacant;
 
@@ -378,11 +412,11 @@ int main(int argc, char **argv){
 		//Sort all of the scores in the allScores vector in ascending order
 		sort(allScores.begin(), allScores.end()); //sorts elements of vector in ascending order
 
-		cout << "All scores - non-decreasing order:\n";
+		/*cout << "All scores - non-decreasing order:\n";
 		for (i = 0; i < allScores.size(); ++i) {
 			cout << allScores[i] << " ";
 		}
-		cout << endl << endl;
+		cout << endl << endl;*/
 
 		//Filling in adjacency matrix - if sum of two scores >= threshold (70), then insert 1 into the matrix, else leave as 0
 		for (i = 0; i < allScores.size() - 1; ++i) {
@@ -469,12 +503,11 @@ int main(int argc, char **argv){
 		cout << endl;*/
 
 
-
-        cout << "Matching List:\n";
+        /*cout << "Matching List:\n";
 		for (i = 0; i < numScores; ++i) {
 			cout << matchList[i] << " ";
 		}
-		cout << endl << endl;
+		cout << endl << endl;*/
 
 
 
@@ -499,11 +532,11 @@ int main(int argc, char **argv){
 			}
 		}
 
-		cout << "Mates Vector:\n";
+		/*cout << "Mates Vector:\n";
 		for (i = 0; i < numScores; ++i) {
 			cout << mates[i] << " ";
 		}
-		cout << endl << endl;
+		cout << endl << endl;*/
 
 		//find the smallest vertex not yet checked for mate-induced structure - start with this vertex
 		for (i = 0; i < numScores; ++i) {
@@ -541,7 +574,7 @@ int main(int argc, char **argv){
 
 		numCycles = mateInduced.size(); //number of cycles in the mate-induced structure
 
-		cout << "Mate-Induced Structure:\n";
+		/*cout << "Mate-Induced Structure:\n";
 		for (i = 0; i < mateInduced.size(); ++i) {
             cout << "cycle " << i << ":\n";
 			for (j = 0; j < mateInduced[i].size(); ++j) {
@@ -551,7 +584,7 @@ int main(int argc, char **argv){
 		}
 		cout << endl;
 
-		cout << "Number of cycles in mate-induced structure: " << numCycles << endl;
+		cout << "Number of cycles in mate-induced structure: " << numCycles << endl;*/
 
 		for (i = 0; i < mateInduced.size(); ++i) {
 			lengthMateInduced.push_back(mateInduced[i].size());
@@ -583,11 +616,11 @@ int main(int argc, char **argv){
 			}
 		}
 
-		cout << "Cycle Vertex:\n";
+		/*cout << "Cycle Vertex:\n";
 		for (i = 0; i < cycleVertex.size(); ++i) {
 			cout << cycleVertex[i] << " ";
 		}
-		cout << endl;
+		cout << endl;*/
 
 
 
@@ -600,13 +633,13 @@ int main(int argc, char **argv){
 		}
 		numEdges = edge.size();
 
-		cout << "Edges vector:\n";
+		/*cout << "Edges vector:\n";
 		for (i = 0; i < edge.size(); ++i) {
 			cout << edge[i] << " ";
 		}
-		cout << endl;
+		cout << endl;*/
 
-		cout << "Number of Edges: " << numEdges << endl;
+		//cout << "Number of Edges: " << numEdges << endl;
 
 		//FCA Algorithm
 		qstar = -1;
@@ -633,25 +666,25 @@ int main(int argc, char **argv){
 
 		t.clear();
 
-		cout << "T matrix:\n";
+		/*cout << "T matrix:\n";
 		for(i = 0; i < T.size(); ++i){
 			for(j = 0; j < T[i].size(); ++j){
 				cout << T[i][j] << "  ";
 			}
 			cout << endl;
 		}
-		cout << endl;
+		cout << endl;*/
 
-		cout << "S Matrix:\n";
+		/*cout << "S Matrix:\n";
 		for(i = 0; i < T.size(); ++i){
 			for(j = 0; j < numCycles; ++j){
 				cout << S[i][j] << "  ";
 			}
 			cout << endl;
 		}
-		cout << endl;
+		cout << endl;*/
 
-		cout << "qstar: " << qstar << endl;
+		//cout << "qstar: " << qstar << endl;
 
 
 
@@ -722,13 +755,14 @@ int main(int argc, char **argv){
 
         //If patching graph is connected, then instance is feasible, else infeasible
         if (SSum == numCycles) {
+            ++feasible;
             ++poorT;
 
-            cout << "patch cycle:\n";
+            /*cout << "patch cycle:\n";
             for (i = 0; i < patchCycle.size(); ++i) {
                 cout << patchCycle[i] << " ";
             }
-            cout << endl << endl;
+            cout << endl << endl;*/
 
 
             for (i = 0; i < patchCycle.size(); ++i) {
@@ -742,14 +776,14 @@ int main(int argc, char **argv){
             }
             temp.clear();
 
-            cout << "Tpatch matrix:\n";
+            /*cout << "Tpatch matrix:\n";
             for (i = 0; i < Tpatch.size(); ++i) {
                 for(j = 0; j < Tpatch[i].size(); ++j) {
                     cout << Tpatch[i][j] << " ";
                 }
                 cout << endl;
             }
-            cout << endl << endl;
+            cout << endl << endl;*/
 
             for(i = 0; i < Tpatch.size(); ++i){
                 for(j = 0; j < Tpatch[i].size(); ++j){
@@ -758,20 +792,15 @@ int main(int argc, char **argv){
                 }
             }
 
-            cout << "patch vertex:\n";
+            /*cout << "patch vertex:\n";
             for (i = 0; i < patchVertex.size(); ++i) {
                 cout << patchVertex[i] << " ";
             }
-            cout << endl << endl;
+            cout << endl << endl;*/
 
             u = 0;
             v = 0;
-            int b = 0;
             save = 0;
-            //int hello = 1;
-
-            /*cout << "hello:\n";
-            cout << patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][hello]] << endl;*/
 
             for(j = 0; j < mateInduced[cycleVertex[Tpatch[u][v]]].size(); ++j){
                 if(mateInduced[cycleVertex[Tpatch[u][v]]][j] == matchList[Tpatch[u][v]]){
@@ -782,13 +811,13 @@ int main(int argc, char **argv){
 
             loopCyclePatch(u, v, save, vacant, matchList, cycleVertex, fullCycle, mateInduced, Tpatch, patchVertex);
 
-            cout << "full cycle:\n";
+            /*cout << "full cycle:\n";
             for(i = 0; i < fullCycle.size(); ++i){
                 cout << fullCycle[i] << " ";
             }
-            cout << endl << endl;
+            cout << endl << endl;*/
 
-            cout << "u: " << u << endl << endl << endl;
+            //cout << "u: " << u << endl << endl << endl;
 
             while(fullCycle.size() < numScores) {
 
@@ -823,63 +852,28 @@ int main(int argc, char **argv){
                     }
                 }
 
-                cout << "Save: " << save << endl;
+                //cout << "Save: " << save << endl;
 
                 loopCyclePatch(u, v, save, vacant, matchList, cycleVertex, fullCycle, mateInduced, Tpatch, patchVertex);
 
-                cout << "full cycle:\n";
+                /*cout << "full cycle:\n";
                 for (i = 0; i < fullCycle.size(); ++i) {
                     cout << fullCycle[i] << " ";
                 }
-                cout << endl;
+                cout << endl;*/
 
-                cout << "u: " << u << endl << endl;
-                ++b;
+                //cout << "u: " << u << endl << endl;
             }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            cout << instance << ": full cycle SPLIT:\n";
+            for (i = 0; i < fullCycle.size(); ++i) {
+                cout << fullCycle[i] << " ";
+            }
+            cout << endl;
 
 
 
         }
-
-
-
 
 
 		else if (SSum < numCycles) {
@@ -943,10 +937,6 @@ int main(int argc, char **argv){
 
 
 
-
-
-
-
     cout << "\n------------------------------------------------------------------\n\n";
 	cout << "Number of feasible instances: " << feasible << endl;
 	cout << "Number of infeasible instances: " << infeasible << endl;
@@ -957,7 +947,7 @@ int main(int argc, char **argv){
 
 
 	endTime = clock();
-	int totalTime = (int)(((endTime - startTime) / double(CLOCKS_PER_SEC)) * 1000);
+	double totalTime = (((endTime - startTime) / double(CLOCKS_PER_SEC)) * 1000);
 	cout << "CPU Time = " << totalTime << " milliseconds.\n";
 
 
