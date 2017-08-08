@@ -368,11 +368,12 @@ int main(int argc, char **argv){
 	int problemInstance = 0; //counter for number of instances with issues (SSum > numCycles)
 	vector<int> QSet(numComp, 0); // Tq-cycles already used for gluing
 	vector<int> SSet; //MIS cycles already glued together
+	int noPatch = 0;
 
     int save = 0;
     int full = vacant; //the row of the T matrix which has the same number of edges as the number of T cycles
     int u, v;
-    int poorT = 0;
+    int splitT = 0;
     int fullT = 0;
     vector<int> fullCycle; //vector to hold vertices of final cycle in order
     vector<int> patchCycle(numComp, vacant);
@@ -699,11 +700,21 @@ int main(int argc, char **argv){
 
 
 		//CHECK IF PATCHING GRAPH IS CONNECTED
-		//Setup
+		x = 0;
+		full = vacant;
+		for (i = 0; i < T.size(); ++i) {
+			if (T[i].size() == numCycles) {
+				full = i;
+				break;
+			}
+		}
+		if(full != vacant){
+			x = 1;
+			goto End;
+		}
+
 		q = 0; //Start with first Tq-cycle
 		QSet[0] = 1;
-
-
 		SSum = 0; //number of MIS-cycles that have been included
 		for (i = 0; i < numCycles; ++i) {
 			SSet.push_back(S[q][i]); // ==1 if MIS cycle i has been included
@@ -712,13 +723,7 @@ int main(int argc, char **argv){
 			SSum = SSum + SSet[i];
 		}
 
-        if (SSum == numCycles) {
-            //cout << "FEASIBLE: Patching Graph Connected (SSum == numCycles).\n";
-            ++feasible;
-            x = 1;
-            goto End;
-        }
-        else if(SSum >= 1){
+        if(SSum >= 1){
             patchCycle[q] = 1;
         }
 
@@ -749,21 +754,18 @@ int main(int argc, char **argv){
 				q = 0;
 			}
 		}//end while
-        //endregion
-
 
 
         //If patching graph is connected, then instance is feasible, else infeasible
         if (SSum == numCycles) {
             ++feasible;
-            ++poorT;
+            ++splitT;
 
             /*cout << "patch cycle:\n";
             for (i = 0; i < patchCycle.size(); ++i) {
                 cout << patchCycle[i] << " ";
             }
             cout << endl << endl;*/
-
 
             for (i = 0; i < patchCycle.size(); ++i) {
                 if (patchCycle[i] == 1) {
@@ -808,16 +810,7 @@ int main(int argc, char **argv){
                     break;
                 }
             }
-
             loopCyclePatch(u, v, save, vacant, matchList, cycleVertex, fullCycle, mateInduced, Tpatch, patchVertex);
-
-            /*cout << "full cycle:\n";
-            for(i = 0; i < fullCycle.size(); ++i){
-                cout << fullCycle[i] << " ";
-            }
-            cout << endl << endl;*/
-
-            //cout << "u: " << u << endl << endl << endl;
 
             while(fullCycle.size() < numScores) {
 
@@ -852,17 +845,7 @@ int main(int argc, char **argv){
                     }
                 }
 
-                //cout << "Save: " << save << endl;
-
                 loopCyclePatch(u, v, save, vacant, matchList, cycleVertex, fullCycle, mateInduced, Tpatch, patchVertex);
-
-                /*cout << "full cycle:\n";
-                for (i = 0; i < fullCycle.size(); ++i) {
-                    cout << fullCycle[i] << " ";
-                }
-                cout << endl;*/
-
-                //cout << "u: " << u << endl << endl;
             }
 
             cout << instance << ": full cycle SPLIT:\n";
@@ -871,14 +854,12 @@ int main(int argc, char **argv){
             }
             cout << endl;
 
-
-
         }
-
 
 		else if (SSum < numCycles) {
 			//cout << "INFEASIBLE: Patching Graph Unconnected (SSum < numCycles).\n";
             cout << instance << ": Infeasible SSum < numCycles\n\n";
+			++noPatch;
 			++infeasible;
 			continue;
 		}
@@ -891,43 +872,27 @@ int main(int argc, char **argv){
 
         End:
         if(x == 1) {
+			save = 0;
+			//cout << "Full: " << full << endl;
+			for (v = 0; v < T[full].size(); ++v) {
+				for (j = 0; j < mateInduced[cycleVertex[T[full][v]]].size(); ++j) {
+					if (mateInduced[cycleVertex[T[full][v]]][j] == matchList[T[full][v]]) {
+						save = j;
+						break;
+					}
+				}
+				loopCycle(v, full, save, matchList, cycleVertex, fullCycle, mateInduced, T);
 
-            for (i = 0; i < T.size(); ++i) {
-                if (T[i].size() == numCycles) {
-                    full = i;
-                    break;
-                }
-            }
+			}
 
-            if (full != vacant) {
-
-                //cout << "Full: " << full << endl;
-
-                for (v = 0; v < T[full].size(); ++v) {
-
-                    for (j = 0; j < mateInduced[cycleVertex[T[full][v]]].size(); ++j) {
-                        if (mateInduced[cycleVertex[T[full][v]]][j] == matchList[T[full][v]]) {
-                            save = j;
-                            break;
-                        }
-                    }
-                    loopCycle(v, full, save, matchList, cycleVertex, fullCycle, mateInduced, T);
-
-                }
-
-                cout << instance << ": Full cycle after T-cycle analysis:\n";
-                for (i = 0; i < fullCycle.size(); ++i) {
-                    cout << fullCycle[i] << " ";
-                }
-                cout << endl << endl;
-                ++fullT;
-                continue;
-
-            } else if (full == vacant) {
-                cout << instance << ": NO SOLN AVAILABLE: multiple t cycles required.\n";
-                ++poorT;
-                continue;
-            }
+			cout << instance << ": Full cycle after T-cycle analysis:\n";
+			for (i = 0; i < fullCycle.size(); ++i) {
+				cout << fullCycle[i] << " ";
+			}
+			cout << endl << endl;
+			++feasible;
+			++fullT;
+			continue;
         }
 
 
@@ -941,9 +906,11 @@ int main(int argc, char **argv){
 	cout << "Number of feasible instances: " << feasible << endl;
 	cout << "Number of infeasible instances: " << infeasible << endl;
     cout << "Number of full T cycles: " << fullT << endl;
-    cout << "Number of split T cycles: " << poorT << endl;
+    cout << "Number of split T cycles: " << splitT << endl;
     cout << "Number of poor matchings: " << noMatch << endl;
     cout << "Number of single cycles: " << oneCycle << endl;
+	cout << "Number of no T-cycles: " << noFam << endl;
+	cout << "Number of unconnected patching: " << noPatch << endl;
 
 
 	endTime = clock();
@@ -956,19 +923,3 @@ int main(int argc, char **argv){
 
 }//END INT MAIN
 
-
-/*
- final solution for 1 45 1 70 3:
- cycle 0: 90 91 0 1
- cycle 1: 89 16
- cycle 3: 74 73
- cycle 1: 21 33 58 25 66 28 63 84 7 69 22 35 56 50 41 48 43 86 5 83 8 46 45 54 37 4 87 76 15 53 38 65 26 57 34 55 36 2
- cycle 2: 88 81 10 77 14 60 31 23 68 42 49 11 80 24 67 85 6 61 30 82 9 29 62 72
- cycle 3: 18 17
- cycle 1: 75 12 79 70
- cycle 4: 20 51 40 71
- cycle 2: 19 44 47 39 52 32 59 13 78 27 64 3
- then back to cycle 0
-
-
- */
