@@ -287,14 +287,12 @@ void loopCyclePatch(int &u, int v, int save, int vacant, vector<int> &matchList,
 
 }
 
-
 void MTGMA(int vacant, int threshold, int numScores, int &matchSize, vector<int> &allScores, vector<vector<int> > &adjMatrix, vector<int> &cycleVertex, vector<int> &matchList){
 
 	int i, j, k;
 	int lastMatch = vacant;
 	int mateMatch = vacant;
 	int vacantFlag = 0;
-	matchSize = 0;
 
 	for (i = 0; i < numScores; ++i) { //check all vertices
 		vacantFlag = 0;
@@ -342,7 +340,6 @@ void MTGMA(int vacant, int threshold, int numScores, int &matchSize, vector<int>
 
 
 }
-
 
 void MIS(int numScores, int &numCycles, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<int> &matchList, vector<vector<int> > &mateInduced, vector<int> &lengthMateInduced){
 	int i, j;
@@ -406,9 +403,7 @@ void MIS(int numScores, int &numCycles, vector<vector<int> > &adjMatrix, vector<
 	}
 
 
-
 }
-
 
 void FCA(int &qstar, int vacant, int matchSize, vector<vector<int> > &adjMatrix, vector<int> &cycleVertex, vector<int> &matchList, vector<vector<int> > &mateInduced, vector<vector<int> > &S, vector<vector<int> > &T){
 	int i, j, k;
@@ -465,7 +460,182 @@ void FCA(int &qstar, int vacant, int matchSize, vector<vector<int> > &adjMatrix,
 
 }
 
+void patchGraph(int vacant, int instance, int numCycles, int &feasible, int &fullT, int qstar, int numScores, int &splitT, int &noPatch, int &infeasible, int &problemInstance, vector<int> &matchList, vector<int> &cycleVertex, vector<vector<int> > &mateInduced, vector<vector<int> > &T, vector<vector<int> > &S){
+	int i, j, q, u, v, save, SSum, SqIntS;
+	int full = vacant;
+	vector<int> QSet(qstar, 0);
+	vector<int> SSet;
+	vector<int> patchCycle(qstar, vacant);
+	vector<int> temp;
+	vector<int> patchVertex(numScores, vacant);
+	vector<vector<int> > Tpatch;
+	vector<int> fullCycle;
 
+	for (i = 0; i < T.size(); ++i) {
+		if (T[i].size() == numCycles) {
+			full = i;
+			break;
+		}
+	}
+
+	if(full != vacant){
+		save = 0;
+		//cout << "Full: " << full << endl;
+		for (v = 0; v < T[full].size(); ++v) {
+			for (j = 0; j < mateInduced[cycleVertex[T[full][v]]].size(); ++j) {
+				if (mateInduced[cycleVertex[T[full][v]]][j] == matchList[T[full][v]]) {
+					save = j;
+					break;
+				}
+			}
+			loopCycle(v, full, save, matchList, cycleVertex, fullCycle, mateInduced, T);
+
+		}
+		cout << instance << ": Full cycle after T-cycle analysis:\n";
+		for (i = 0; i < fullCycle.size(); ++i) {
+			cout << fullCycle[i] << " ";
+		}
+		cout << endl << endl;
+		++feasible;
+		++fullT;
+
+	}
+
+	else {
+		q = 0; //Start with first Tq-cycle
+		QSet[0] = 1;
+		SSum = 0; //number of MIS-cycles that have been included
+		for (i = 0; i < numCycles; ++i) {
+			SSet.push_back(S[q][i]); // ==1 if MIS cycle i has been included
+		}
+		for (i = 0; i < numCycles; ++i) {
+			SSum = SSum + SSet[i];
+		}
+
+		if (SSum >= 1) {
+			patchCycle[q] = 1;
+		}
+
+		//Start connectivity check
+		while (q <= qstar && SSum < numCycles) {
+			do {
+				++q;
+				SqIntS = vacant;
+				if (q <= qstar) {
+					for (j = 0; j < numCycles; ++j) { //is there a j such that S[q][j] = 1 and SSet[j] = 1?
+						if (S[q][j] == 1 && SSet[j] == 1) {
+							SqIntS = 1;
+							//break here? no need to check all other j indices once one has been found such that S[q][j] =1 and SSet[j] = 1
+						}
+					}
+				}
+			} while (q < qstar + 1 && (QSet[q] == 1 || SqIntS == vacant));
+
+			if (q <= qstar) { //if Tq-cyce for enlargement has been found
+				for (i = 0; i < numCycles; ++i) {
+					if (SSet[i] == 0 && S[q][i] == 1) {
+						SSet[i] = 1;
+						++SSum;
+						patchCycle[q] = 1;
+					}
+				}
+				QSet[q] = 1;
+				q = 0;
+			}
+		}//end while
+
+
+		//If patching graph is connected, then instance is feasible, else infeasible
+		if (SSum == numCycles) {
+			for (i = 0; i < patchCycle.size(); ++i) {
+				if (patchCycle[i] == 1) {
+					for (j = 0; j < T[i].size(); ++j) {
+						temp.push_back(T[i][j]);
+					}
+					Tpatch.push_back(temp);
+					temp.clear();
+				}
+			}
+			temp.clear();
+
+			for (i = 0; i < Tpatch.size(); ++i) {
+				for (j = 0; j < Tpatch[i].size(); ++j) {
+					patchVertex[Tpatch[i][j]] = i;
+					patchVertex[matchList[Tpatch[i][j]]] = i;
+				}
+			}
+
+			u = 0;
+			v = 0;
+			save = 0;
+			for (j = 0; j < mateInduced[cycleVertex[Tpatch[u][v]]].size(); ++j) {
+				if (mateInduced[cycleVertex[Tpatch[u][v]]][j] == matchList[Tpatch[u][v]]) {
+					save = j;
+					break;
+				}
+			}
+			loopCyclePatch(u, v, save, vacant, matchList, cycleVertex, fullCycle, mateInduced, Tpatch, patchVertex);
+
+			while (fullCycle.size() < numScores) {
+				save = 0;
+				for (i = 0; i < Tpatch[u].size(); ++i) {
+					if (Tpatch[u][i] == fullCycle.back()) {
+						if (i == Tpatch[u].size() - 1) {
+							v = 0;
+						} else {
+							v = ++i;
+						}
+						for (j = 0; j < mateInduced[cycleVertex[Tpatch[u][v]]].size(); ++j) {
+							if (mateInduced[cycleVertex[Tpatch[u][v]]][j] == matchList[Tpatch[u][v]]) {
+								save = j;
+								break;
+							}
+						}
+						break;
+					} else if (matchList[Tpatch[u][i]] == fullCycle.back()) {
+						if (i == 0) {
+							v = Tpatch[u].size() - 1;
+						} else {
+							v = --i;
+						}
+						for (j = 0; j < mateInduced[cycleVertex[Tpatch[u][v]]].size(); ++j) {
+							if (mateInduced[cycleVertex[Tpatch[u][v]]][j] == Tpatch[u][v]) {
+								save = j;
+								break;
+							}
+						}
+						break;
+					}
+				}
+				loopCyclePatch(u, v, save, vacant, matchList, cycleVertex, fullCycle, mateInduced, Tpatch, patchVertex);
+			}
+
+			cout << instance << ": full cycle SPLIT:\n";
+			for (i = 0; i < fullCycle.size(); ++i) {
+				cout << fullCycle[i] << " ";
+			}
+			cout << endl;
+			++feasible;
+			++splitT;
+		}
+		else if (SSum < numCycles) {
+			//cout << instance << ": Infeasible SSum < numCycles\n\n";
+			++noPatch;
+			++infeasible;
+		}
+		else {
+			//cout << instance << ": Problem.\n\n";
+			++problemInstance;
+		}
+
+
+	}
+
+
+
+
+
+}
 
 
 int main(int argc, char **argv){
@@ -503,56 +673,33 @@ int main(int argc, char **argv){
 	vector<vector<int> > adjMatrix(numScores, vector<int>(numScores ,0)); //adjacency matrix, 0 if width sum < threshold, 1 if width sum >= threshold, 2 if scores are mates (either side of same box)
 
 	//Modified Threshold Graph Matching Algorithm (MTGMA)
-	int lastMatch; //takes value of the index of the last vertex to have been matched
-	int mateMatch; //vertex number for matching algorithm, mate takes the value of the index of the vertex that the current vertex is mates with
-	int matchSize; //size/cardinality of the matching list
+	int matchSize = 0; //size/cardinality of the matching list
 	int noMatch = 0; //counter for number of instances with |M| < n (matchSize < numBox)
-	int vacantFlag; //flag vertices that have not been matched with the highest vertex available due to that vertex being the current vertex's mate
-	//int verticesNotMatched; //counts number of vertices that have not been matched to another vertex in MTGMA
 	vector<int> cycleVertex(numScores, 1); //contains the number of the cycle of the mate-induced structure that the vertex i belongs to
 	//(e.g. if vertex 4 is in the first cycle of the MIS, then cycleVertex[4] = 0 (0 = first cycle, 1 = second cycle etc))
 	vector<int> matchList(numScores, vacant); //contains vertex index for matching vertices, e.g. if vertex 0 is matched with vertex 9, then matchList[0] = 9
 
 	//Mate-Induced Structure (MIS)
-	int smallestVertex; //smallest vertex not yet checked (i.e. not yet included in a cycle in the MIS)
-	int currentVertex; //current vertex being checked for placement in a cycle in the MIS
 	int numCycles; //number of cycles in the mate-induced structure, i.e mateInduced.size() (each row in the mate-induced structure matrix represents a cycle)
 	int oneCycle = 0; //counter for the number of instances where the MIS consists of one one cycle (therefore immediately feasible)
-	vector<int> checked(numScores, 0); //contains 0 if vector i has not yet been included in the mate-induced structure, 1 if vector i has been placed in MIS
-	vector<int> cycle; //used in building the mate-induced structure
 	vector<int> mates(numScores, 0); //contains vertex index for mates, e.g if vertex 0 is mates with vertex 4, then mates[0] = 4
 	vector<vector<int> > mateInduced; //size numscore by noComp, i.e. number of rows = numScores, number of columns = noComp
 	vector<int> lengthMateInduced; //each element holds the value corresponding to the length of the relative cycle in the mate-induced structure
 
 	//Familty Construction Algorithm (FCA)
 	int qstar; //number of T-cycle families found (i.e T.size())
-	int numEdges; //number of (non-empty) edges, (i.e. edge.size())
 	int noFam = 0; //counter for number of instances where no family of T-cycles has been found
-	vector<int> edge; //contains the number of lower vertex of each (non-empty) edge (max size = matchSize)
-	vector<int> t; //used to build T-cycles row by row
 	vector<vector<int> > T; //holds set of edges in T-cycles
 	vector<vector<int> > S(numComp, vector<int>(numComp, 0)); // set of indices of cycles of MIS that have an edge in T, == 1 if edge from cycle j is used in T-cycle q (T[q][j])
 	//FCA also uses the vector cycleVertex from MTGMA
 
 	//Patching Graph Connectivity
-	int SSum; //number of MIS cycles already glued together
-	int SqIntS; // == 0 iff Sq intersection S == emptyset
 	int problemInstance = 0; //counter for number of instances with issues (SSum > numCycles)
-	vector<int> QSet(numComp, 0); // Tq-cycles already used for gluing
-	vector<int> SSet; //MIS cycles already glued together
 	int noPatch = 0;
 
 	//Building solution output
-    int save = 0;
-    int full = vacant; //the row of the T matrix which has the same number of edges as the number of T cycles
-    int u, v;
     int splitT = 0;
     int fullT = 0;
-    vector<int> fullCycle; //vector to hold vertices of final cycle in order
-    vector<int> patchCycle(numComp, vacant);
-    vector<vector<int> > Tpatch;
-    vector<int> patchVertex(numScores, vacant);
-    vector<int> temp;
 	srand(randomSeed); //seed
 
 	cout << "Minimum Score Separation Problem - Matching-Based Alternating Hamiltonicity Recognition Algorithm\n\n";
@@ -648,172 +795,7 @@ int main(int argc, char **argv){
 
 
 		//CHECK IF PATCHING GRAPH IS CONNECTED
-
-		full = vacant;
-		for (i = 0; i < T.size(); ++i) {
-			if (T[i].size() == numCycles) {
-				full = i;
-				break;
-			}
-		}
-
-		if(full != vacant){
-			save = 0;
-			//cout << "Full: " << full << endl;
-			for (v = 0; v < T[full].size(); ++v) {
-				for (j = 0; j < mateInduced[cycleVertex[T[full][v]]].size(); ++j) {
-					if (mateInduced[cycleVertex[T[full][v]]][j] == matchList[T[full][v]]) {
-						save = j;
-						break;
-					}
-				}
-				loopCycle(v, full, save, matchList, cycleVertex, fullCycle, mateInduced, T);
-
-			}
-			cout << instance << ": Full cycle after T-cycle analysis:\n";
-			for (i = 0; i < fullCycle.size(); ++i) {
-				cout << fullCycle[i] << " ";
-			}
-			cout << endl << endl;
-			++feasible;
-			++fullT;
-			continue;
-		}
-
-		else {
-			q = 0; //Start with first Tq-cycle
-			QSet[0] = 1;
-			SSum = 0; //number of MIS-cycles that have been included
-			for (i = 0; i < numCycles; ++i) {
-				SSet.push_back(S[q][i]); // ==1 if MIS cycle i has been included
-			}
-			for (i = 0; i < numCycles; ++i) {
-				SSum = SSum + SSet[i];
-			}
-
-			if (SSum >= 1) {
-				patchCycle[q] = 1;
-			}
-
-			//Start connectivity check
-			while (q <= qstar && SSum < numCycles) {
-				do {
-					++q;
-					SqIntS = vacant;
-					if (q <= qstar) {
-						for (j = 0; j < numCycles; ++j) { //is there a j such that S[q][j] = 1 and SSet[j] = 1?
-							if (S[q][j] == 1 && SSet[j] == 1) {
-								SqIntS = 1;
-								//break here? no need to check all other j indices once one has been found such that S[q][j] =1 and SSet[j] = 1
-							}
-						}
-					}
-				} while (q < qstar + 1 && (QSet[q] == 1 || SqIntS == vacant));
-
-				if (q <= qstar) { //if Tq-cyce for enlargement has been found
-					for (i = 0; i < numCycles; ++i) {
-						if (SSet[i] == 0 && S[q][i] == 1) {
-							SSet[i] = 1;
-							++SSum;
-							patchCycle[q] = 1;
-						}
-					}
-					QSet[q] = 1;
-					q = 0;
-				}
-			}//end while
-
-
-			//If patching graph is connected, then instance is feasible, else infeasible
-			if (SSum == numCycles) {
-				for (i = 0; i < patchCycle.size(); ++i) {
-					if (patchCycle[i] == 1) {
-						for (j = 0; j < T[i].size(); ++j) {
-							temp.push_back(T[i][j]);
-						}
-						Tpatch.push_back(temp);
-						temp.clear();
-					}
-				}
-				temp.clear();
-
-				for (i = 0; i < Tpatch.size(); ++i) {
-					for (j = 0; j < Tpatch[i].size(); ++j) {
-						patchVertex[Tpatch[i][j]] = i;
-						patchVertex[matchList[Tpatch[i][j]]] = i;
-					}
-				}
-
-				u = 0;
-				v = 0;
-				save = 0;
-				for (j = 0; j < mateInduced[cycleVertex[Tpatch[u][v]]].size(); ++j) {
-					if (mateInduced[cycleVertex[Tpatch[u][v]]][j] == matchList[Tpatch[u][v]]) {
-						save = j;
-						break;
-					}
-				}
-				loopCyclePatch(u, v, save, vacant, matchList, cycleVertex, fullCycle, mateInduced, Tpatch, patchVertex);
-
-				while (fullCycle.size() < numScores) {
-					save = 0;
-					for (i = 0; i < Tpatch[u].size(); ++i) {
-						if (Tpatch[u][i] == fullCycle.back()) {
-							if (i == Tpatch[u].size() - 1) {
-								v = 0;
-							} else {
-								v = ++i;
-							}
-							for (j = 0; j < mateInduced[cycleVertex[Tpatch[u][v]]].size(); ++j) {
-								if (mateInduced[cycleVertex[Tpatch[u][v]]][j] == matchList[Tpatch[u][v]]) {
-									save = j;
-									break;
-								}
-							}
-							break;
-						} else if (matchList[Tpatch[u][i]] == fullCycle.back()) {
-							if (i == 0) {
-								v = Tpatch[u].size() - 1;
-							} else {
-								v = --i;
-							}
-							for (j = 0; j < mateInduced[cycleVertex[Tpatch[u][v]]].size(); ++j) {
-								if (mateInduced[cycleVertex[Tpatch[u][v]]][j] == Tpatch[u][v]) {
-									save = j;
-									break;
-								}
-							}
-							break;
-						}
-					}
-					loopCyclePatch(u, v, save, vacant, matchList, cycleVertex, fullCycle, mateInduced, Tpatch,
-								   patchVertex);
-				}
-
-				cout << instance << ": full cycle SPLIT:\n";
-				for (i = 0; i < fullCycle.size(); ++i) {
-					cout << fullCycle[i] << " ";
-				}
-				cout << endl;
-				++feasible;
-				++splitT;
-			}
-			else if (SSum < numCycles) {
-				//cout << instance << ": Infeasible SSum < numCycles\n\n";
-				++noPatch;
-				++infeasible;
-			}
-			else {
-				//cout << instance << ": Problem.\n\n";
-				++problemInstance;
-			}
-
-
-		}
-
-
-
-
+		patchGraph(vacant, instance, numCycles, feasible, fullT, qstar, numScores, splitT, noPatch, infeasible, problemInstance, matchList, cycleVertex, mateInduced, T, S);
 
 	} //end of for loop instances
 
