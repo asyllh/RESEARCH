@@ -8,7 +8,6 @@ MSSP with output of solution.
 #include <vector>
 #include <time.h>
 #include <algorithm>
-#include <iomanip> //header providing parametric manipulators
 using namespace std;
 
 void resetVectors(int vacant, int numScores, int numComp, vector<int> &allScores, vector<vector<int> > &adjMatrix, vector<int> &cycleVertex, vector<int> &matchList, vector<int> &mates, vector<vector<int> > &S){
@@ -376,10 +375,14 @@ void MTGMA(int vacant, int threshold, int numScores, int &matchSize, vector<int>
 	}//end for i
 
 
+    /*cout << "Cycle Vertex vector after MTGMA:\n";*/
+    /*cout << "Matching List:\n";*/
+
+
 }
 
 void MIS(int numScores, int &numCycles, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<int> &matchList, vector<vector<int> > &mateInduced, vector<int> &lengthMateInduced){
-	int i, j;
+	int i;
 	int smallestVertex;
 	int currentVertex;
 	vector<int> cycle;
@@ -488,7 +491,7 @@ void FCA(int &qstar, int vacant, int matchSize, vector<vector<int> > &adjMatrix,
 
 }
 
-void patchGraph(int vacant, int instance, int numCycles, int &feasible, int &fullT, int qstar, int numScores, int &splitT, int &noPatch, int &infeasible, int &problemInstance, vector<int> &matchList, vector<int> &cycleVertex, vector<vector<int> > &mateInduced, vector<vector<int> > &T, vector<vector<int> > &S){
+void patchGraph(int qstar, int vacant, int instance, int numScores, int numCycles, int &feasible, int &infeasible, int &fullT, int &splitT, int &noPatch, int &problem, vector<int> &matchList, vector<int> &cycleVertex, vector<vector<int> > &mateInduced, vector<vector<int> > &S, vector<vector<int> > &T){
 	int i, j, q, u, v, save, SSum, SqIntS;
 	int full = vacant;
 	vector<int> QSet(qstar, 0);
@@ -642,7 +645,7 @@ void patchGraph(int vacant, int instance, int numCycles, int &feasible, int &ful
 			for (i = 0; i < fullCycle.size(); ++i) {
 				cout << fullCycle[i] << " ";
 			}
-			cout << endl;
+			cout << endl << endl;
 			++feasible;
 			++splitT;
 		}
@@ -653,7 +656,7 @@ void patchGraph(int vacant, int instance, int numCycles, int &feasible, int &ful
 		}
 		else {
 			//cout << instance << ": Problem.\n\n";
-			++problemInstance;
+			++problem;
 		}
 
 
@@ -696,7 +699,7 @@ int main(int argc, char **argv){
     int noPatch = 0; //number of instances where T-cycles do not produce a connected patching graph (SSum < numCycles, therefore infeasible)
     int fullT = 0; //number of instances where only one T-cycle is required to connected all cycles in MIS (patching graph is connected using only one T-cycle, therefore feasible)
     int splitT = 0; //number of instances where multiple T-cycles are required to connected all cycles in MIS (patching graph is connected using multiple T-cycles, therefore feasible)
-    int problemInstance = 0; //number of problematic instances, SSum > numCycles (ERROR)
+    int problem = 0; //number of problematic instances, SSum > numCycles (ERROR)
 
     int matchSize; //size (cardinality) of the matching list (matchList.size()) (&MTGMA, FCA)
     int numCycles; //number of cycles in the MIS (mateInduced.size()) (&MIS, patchGraph)
@@ -727,15 +730,12 @@ int main(int argc, char **argv){
 		//MATCHING ALGORITHM MTGMA
 		MTGMA(vacant, threshold, numScores, matchSize, allScores, adjMatrix, cycleVertex, matchList);
 
-		/*cout << "Cycle Vertex vector after MTGMA:\n";*/
-        /*cout << "Matching List:\n";*/
 
 		//If the number of matches (i.e. the size of the matching list M) is less than the number of boxes (n), then instance is infeasible ( |M| < n )
 		if (matchSize < numBox) {
-            cout << instance << ": Not enough matching edges.\n\n";
+            cout << instance << ": INFEASIBLE - Not enough matching edges.\n\n";
 			++infeasible;
 			++noMatch;
-			//cout << "Instance is infeasible, not enough matching edges available (|M| < n)." << endl;
 			continue;
 		}
 
@@ -743,14 +743,14 @@ int main(int argc, char **argv){
 
 		//If the mate-induced structure only consists of one cycle, then the problem has been solved and is feasible (just remove one matching edge to find feasible path)
 		if (lengthMateInduced[0] == numScores) { //if all of the vertices are in the first (and only) cycle of the mate-induced structure
-			++feasible;
-			++oneCycle;
             cout << instance << ": Full cycle (MIS):\n";
             for(j = 0; j < mateInduced[0].size(); ++j){
                 cout << mateInduced[0][j] << " ";
 
             }
             cout << endl << endl;
+            ++feasible;
+            ++oneCycle;
 			continue;
 		}
 
@@ -759,14 +759,14 @@ int main(int argc, char **argv){
 
 		//No family of T-cycle found
 		if (qstar == -1) {
-            //cout << instance << ": Infeasible, qstar = -1\n\n";
+            cout << instance << ": Infeasible, qstar = -1, no family of T-cycles found.\n\n";
 			++infeasible;
 			++noFam;
 			continue;
 		}
 
 		//CHECK IF PATCHING GRAPH IS CONNECTED
-		patchGraph(vacant, instance, numCycles, feasible, fullT, qstar, numScores, splitT, noPatch, infeasible, problemInstance, matchList, cycleVertex, mateInduced, T, S);
+		patchGraph(qstar, vacant, instance, numScores, numCycles, feasible, infeasible, fullT, splitT, noPatch, problem, matchList, cycleVertex, mateInduced, S, T);
 
 	} //end of for loop instances
 
@@ -780,6 +780,7 @@ int main(int argc, char **argv){
     cout << "Number of single cycles: " << oneCycle << endl;
 	cout << "Number of no T-cycles: " << noFam << endl;
 	cout << "Number of unconnected patching: " << noPatch << endl;
+    cout << "Number of problem instances: " << problem << endl;
 
 	endTime = clock();
 	double totalTime = (((endTime - startTime) / double(CLOCKS_PER_SEC)) * 1000);
