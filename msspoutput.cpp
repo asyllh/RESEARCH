@@ -1,16 +1,19 @@
 /*--------------------/
 ALH
 MSSP with output of solution.
-17/07/2017
+02/08/2017 - 09/08/2017
+Start implementing box lengths
+09/08/2017 - 09/08/2017
 /--------------------*/
 
 #include <iostream>
 #include <vector>
 #include <time.h>
 #include <algorithm>
+//#include <random> for shuffle(first iterator, last iterator, default_random_engine(seed));
 using namespace std;
 
-void resetVectors(int vacant, int numScores, int numComp, vector<int> &allScores, vector<vector<int> > &adjMatrix, vector<int> &cycleVertex, vector<int> &matchList, vector<int> &mates, vector<vector<int> > &S){
+void resetVectors(int vacant, int numScores, int numComp, vector<int> &allScores, vector<vector<int> > &adjMatrix, vector<int> &cycleVertex, vector<int> &matchList, vector<int> &mates, vector<vector<int> > &S, vector<vector<int> > &boxWidths){
 	int i, j;
 
 	for(i = 0; i < numScores; ++i){
@@ -20,6 +23,7 @@ void resetVectors(int vacant, int numScores, int numComp, vector<int> &allScores
 		mates[i] = 0;
 		for(j = 0; j < numScores; ++j){
             adjMatrix[i][j] = 0;
+            boxWidths[i][j] = 0;
         }
 	}
 
@@ -268,7 +272,7 @@ void loopCyclePatch(int &u, int v, int save, int vacant, vector<int> &matchList,
 
 }
 
-void createInstance(int threshold, int minWidth, int maxWidth, int numScores, int numBox, vector<int> &allScores, vector<vector<int> > &adjMatrix, vector<int> &mates){
+void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, int maxBoxWidth, int numScores, int numBox, vector<int> &allScores, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths){
     int i, j;
     vector<int> randOrder;
 
@@ -310,6 +314,8 @@ void createInstance(int threshold, int minWidth, int maxWidth, int numScores, in
         adjMatrix[randOrder[2 * i + 1]][randOrder[2 * i]] = 2;
     }
 
+
+
     for (i = 0; i < numScores; ++i) {
         for (j = 0; j < numScores; ++j) {
             if (adjMatrix[i][j] == 2) {
@@ -319,6 +325,28 @@ void createInstance(int threshold, int minWidth, int maxWidth, int numScores, in
         }
     }
     /*cout << "Mates Vector:\n";*/
+
+    for(i = 0; i < numScores; ++i){
+        for(j = 0; j < numScores; ++j){
+            if(adjMatrix[i][j] == 2 && boxWidths[i][j] == 0){
+                boxWidths[i][j] = rand() % (maxBoxWidth - minBoxWidth + 1) + minBoxWidth;
+                boxWidths[j][i] = boxWidths[i][j];
+                break;
+            }
+
+        }
+    }
+
+    boxWidths[numScores - 1][numScores - 2] = 0;
+    boxWidths[numScores - 2][numScores - 1] = 0;
+
+    /*for(i = 0; i < numScores; ++i){
+        for(j = 0; j < numScores; ++j){
+            cout << boxWidths[i][j] << "  ";
+        }
+        cout << endl;
+    }
+    cout << endl;*/
 
 }
 
@@ -491,9 +519,10 @@ void FCA(int &qstar, int vacant, int matchSize, vector<vector<int> > &adjMatrix,
 
 }
 
-void patchGraph(int qstar, int vacant, int instance, int numScores, int numCycles, int &feasible, int &infeasible, int &fullT, int &splitT, int &noPatch, int &problem, vector<int> &matchList, vector<int> &cycleVertex, vector<vector<int> > &mateInduced, vector<vector<int> > &S, vector<vector<int> > &T){
+void patchGraph(int qstar, int vacant, int instance, int numScores, int numCycles, int &feasible, int &infeasible, int &fullT, int &splitT, int &noPatch, int &problem, vector<int> &matchList, vector<int> &cycleVertex, vector<vector<int> > &mateInduced, vector<vector<int> > &S, vector<vector<int> > &T, vector<vector<int> > &boxWidths){
 	int i, j, q, u, v, save, SSum, SqIntS;
 	int full = vacant;
+    int totalLength = 0;
 	vector<int> QSet(qstar, 0);
 	vector<int> SSet;
 	vector<int> patchCycle(qstar, vacant);
@@ -527,6 +556,14 @@ void patchGraph(int qstar, int vacant, int instance, int numScores, int numCycle
 			cout << fullCycle[i] << " ";
 		}
 		cout << endl << endl;
+        for(i = 0; i < fullCycle.size()-1; ++i){
+            if(boxWidths[fullCycle[i]][fullCycle[i+1]] != 0){
+                totalLength = totalLength + boxWidths[fullCycle[i]][fullCycle[i+1]];
+            }
+        }
+        cout << "Total length of cycle: " << totalLength << endl;
+
+
 		++feasible;
 		++fullT;
 
@@ -646,6 +683,12 @@ void patchGraph(int qstar, int vacant, int instance, int numScores, int numCycle
 				cout << fullCycle[i] << " ";
 			}
 			cout << endl << endl;
+            for(i = 0; i < fullCycle.size()-1; ++i){
+                if(boxWidths[fullCycle[i]][fullCycle[i+1]] != 0){
+                    totalLength = totalLength + boxWidths[fullCycle[i]][fullCycle[i+1]];
+                }
+            }
+            cout << "Total length of cycle: " << totalLength << endl;
 			++feasible;
 			++splitT;
 		}
@@ -666,23 +709,30 @@ void patchGraph(int qstar, int vacant, int instance, int numScores, int numCycle
 
 
 int main(int argc, char **argv){
-    if(argc < 5){
+    //region USAGE - ARGUMENTS REQUIRED
+    if(argc < 7){
 		cout << "Minimum Score Separation Problem: MBAHRA.\n";
 		cout << "Arguments are the following:\n";
 		cout << "- Number of instances (integer)\n";
 		cout << "- Number of boxes (integer)\n";
 		cout << "- Minimum width of scores (millimeters, min = 1)\n";
 		cout << "- Maximum width of scores (millimeters, max = 70)\n";
+        cout << "- Minimum width of boxes (millimeters, min = 140)\n";
+        cout << "- Maximum width of boxes (millimeters, max = 1000)\n";
 		cout << "- Random Seed (integer)\n";
 		exit(1);
 	}
+    //endregion
 
+    //region VARIABLES
     //VARIABLES FROM ARGUMENTS
 	int numInstances = atoi(argv[1]); //number of instances of mssp, use in main for loop
 	int numBox = atoi(argv[2]) + 1; //number of boxes in mssp plus 1 extra box (scores on either side of extra box will be dominating vertices, score widths = 71)
 	int minWidth = atoi(argv[3]); //minimum width of scores (millimeters)
 	int maxWidth = atoi(argv[4]); //maximum width of scores (millimeters)
-	int randomSeed = atoi(argv[5]); //random seed
+    int minBoxWidth = atoi(argv[5]); //min box width (mm)
+    int maxBoxWidth = atoi(argv[6]); //max box width (mm)
+	int randomSeed = atoi(argv[7]); //random seed
 
 	//VARIABLES
 	int i, j, k, q;
@@ -704,6 +754,7 @@ int main(int argc, char **argv){
     int matchSize; //size (cardinality) of the matching list (matchList.size()) (&MTGMA, FCA)
     int numCycles; //number of cycles in the MIS (mateInduced.size()) (&MIS, patchGraph)
     int qstar; //number of T-cycles (&FCA, patchGraph)
+    int totalLength = 0;
     vector<int> allScores(numScores, 0); //vector containing all score widths (createInstance, MTGMA)
     vector<vector<int> > adjMatrix(numScores, vector<int>(numScores, 0)); //adjaceny matrix (createInstance, MTGMA, MIS, FCA)
     vector<int> mates(numScores, 0); //contains vertex index for mates, e.g if vertex 0 is mates with vertex 4, then mates[0] = 4 (createInstance, MIS)
@@ -713,24 +764,22 @@ int main(int argc, char **argv){
     vector<int> lengthMateInduced; //each elements holds the value of the length of the corresponding cycle in the MIS (MIS)
     vector<vector<int> > S(numComp, vector<int>(numComp, 0)); // == 1 if edge from cycle j is used in T-cycle q (T[q][j]) (FCA, patchGraph)
     vector<vector<int> > T; //each row hold the lower vertex of the edges that make up one T-cycle
+    vector<vector<int> > boxWidths(numScores, vector<int>(numScores, 0));
 	srand(randomSeed); //seed
+    //endregion
 
 	cout << "Minimum Score Separation Problem - Matching-Based Alternating Hamiltonicity Recognition Algorithm\n\n";
-
 	time_t startTime, endTime; //start clock
 	startTime = clock();
 
 	for(instance = 0; instance < numInstances; ++instance) {
-        resetVectors(vacant, numScores, numComp, allScores, adjMatrix, cycleVertex, matchList, mates, S);
+
+        resetVectors(vacant, numScores, numComp, allScores, adjMatrix, cycleVertex, matchList, mates, S, boxWidths);
         clearVectors(mateInduced, lengthMateInduced, T);
 
+        createInstance(threshold, minWidth, maxWidth, minBoxWidth, maxBoxWidth, numScores, numBox, allScores, adjMatrix, mates, boxWidths);
 
-        createInstance(threshold, minWidth, maxWidth, numScores, numBox, allScores, adjMatrix, mates);
-
-		//MATCHING ALGORITHM MTGMA
 		MTGMA(vacant, threshold, numScores, matchSize, allScores, adjMatrix, cycleVertex, matchList);
-
-
 		//If the number of matches (i.e. the size of the matching list M) is less than the number of boxes (n), then instance is infeasible ( |M| < n )
 		if (matchSize < numBox) {
             cout << instance << ": INFEASIBLE - Not enough matching edges.\n\n";
@@ -740,24 +789,27 @@ int main(int argc, char **argv){
 		}
 
 		MIS(numScores, numCycles, adjMatrix, mates, matchList, mateInduced, lengthMateInduced);
-
 		//If the mate-induced structure only consists of one cycle, then the problem has been solved and is feasible (just remove one matching edge to find feasible path)
 		if (lengthMateInduced[0] == numScores) { //if all of the vertices are in the first (and only) cycle of the mate-induced structure
             cout << instance << ": Full cycle (MIS):\n";
             for(j = 0; j < mateInduced[0].size(); ++j){
                 cout << mateInduced[0][j] << " ";
-
             }
             cout << endl << endl;
+            totalLength = 0;
+            for(i = 0; i < mateInduced[0].size()-1; ++i){
+                if(adjMatrix[mateInduced[0][i]][mateInduced[0][i+1]] == 2){
+                    totalLength = totalLength + boxWidths[mateInduced[0][i]][mateInduced[0][i+1]];
+                }
+            }
+            cout << "total Length: " << totalLength << endl;
             ++feasible;
             ++oneCycle;
 			continue;
 		}
 
 		FCA(qstar, vacant, matchSize, adjMatrix, cycleVertex, matchList, mateInduced, S, T);
-
-
-		//No family of T-cycle found
+		//If no family of T-cycle found
 		if (qstar == -1) {
             cout << instance << ": Infeasible, qstar = -1, no family of T-cycles found.\n\n";
 			++infeasible;
@@ -765,8 +817,8 @@ int main(int argc, char **argv){
 			continue;
 		}
 
-		//CHECK IF PATCHING GRAPH IS CONNECTED
-		patchGraph(qstar, vacant, instance, numScores, numCycles, feasible, infeasible, fullT, splitT, noPatch, problem, matchList, cycleVertex, mateInduced, S, T);
+		//Check if patching graph is connected
+		patchGraph(qstar, vacant, instance, numScores, numCycles, feasible, infeasible, fullT, splitT, noPatch, problem, matchList, cycleVertex, mateInduced, S, T, boxWidths);
 
 	} //end of for loop instances
 
@@ -785,8 +837,6 @@ int main(int argc, char **argv){
 	endTime = clock();
 	double totalTime = (((endTime - startTime) / double(CLOCKS_PER_SEC)) * 1000);
 	cout << "CPU Time = " << totalTime << " milliseconds.\n";
-
-
 
 }//END INT MAIN
 
