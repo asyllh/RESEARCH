@@ -35,13 +35,13 @@ void resetVectors(int vacant, int numScores, int numComp, vector<int> &allScores
 
 }
 
-void clearVectors(vector<vector<int> > &mateInduced, vector<int> &lengthMateInduced, vector<vector<int> > &T, vector<int> &completePath, vector<int> &completeScoresPath){
+void clearVectors(vector<vector<int> > &mateInduced, vector<int> &lengthMateInduced, vector<vector<int> > &T, vector<int> &fullCycle, vector<int> &completePath){
 
     mateInduced.clear();
     lengthMateInduced.clear();
     T.clear();
+    fullCycle.clear();
     completePath.clear();
-    completeScoresPath.clear();
 }
 
 void loopCycle(int v, int full, int save, vector<int> &matchList, vector<int> &cycleVertex, vector<int> &fullCycle, vector<vector<int> > &mateInduced, vector<vector<int> > &T){
@@ -272,9 +272,11 @@ void loopCyclePatch(int &u, int v, int save, int vacant, vector<int> &matchList,
 
 }
 
-void makePath(int numScores, vector<int> &fullCycle, vector<int> &completePath, vector<vector<int> > &boxWidths){
+void makePath(int numScores, vector<int> &fullCycle, vector<int> &completePath, vector<vector<int> > &boxWidths, vector<int> &allScores, vector<vector<int> > &allBoxes){
     int i, j;
     int totalLength = 0;
+    vector<int> completeScoresPath;
+    vector<int> boxOrder;
 
 
     for(i = 0; i < fullCycle.size()-1; ++i){
@@ -299,9 +301,10 @@ void makePath(int numScores, vector<int> &fullCycle, vector<int> &completePath, 
                 for(j = 0; j < i; ++j){
                     completePath.push_back(fullCycle[j]);
                 }
+                break;
 
             }
-            break;
+
         }
     }
 
@@ -309,19 +312,42 @@ void makePath(int numScores, vector<int> &fullCycle, vector<int> &completePath, 
     for(i = 0; i < completePath.size(); ++i){
         cout << completePath[i] << " ";
     }
-    cout << endl;
+    cout << endl << endl;
+
+    for(i = 0; i < completePath.size(); ++i){
+        completeScoresPath.push_back(allScores[completePath[i]]);
+    }
+
+    cout << "Complete Path - Score Widths:\n";
+    for(i = 0; i < completeScoresPath.size(); ++i){
+        cout << completeScoresPath[i] << " ";
+    }
+    cout << endl << endl;
+
+
 
     for(i = 0; i < completePath.size() - 1; ++i){
         if(boxWidths[completePath[i]][completePath[i+1]] != 0){
             totalLength += boxWidths[completePath[i]][completePath[i+1]];
+            boxOrder.push_back(allBoxes[completePath[i]][completePath[i+1]]);
         }
     }
-    cout << "Total Length of Path: " << totalLength << endl << endl;
+    cout << "Total Length of Path: " << totalLength << " millimeters.\n\n";
+
+    cout << "order of boxes:\n";
+    for(i = 0; i < boxOrder.size(); ++i){
+        cout << boxOrder[i] << " ";
+    }
+    cout << endl << endl;
+
+
+
 
 }
 
-void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, int maxBoxWidth, int numScores, int numBox, vector<int> &allScores, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths){
+void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, int maxBoxWidth, int numScores, int numBox, vector<int> &allScores, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths, vector<vector<int> > &allBoxes){
     int i, j;
+    int k;
     vector<int> randOrder;
 
     //Create random values to be used as score widths, put in allScores vector (except last two elements)
@@ -332,8 +358,16 @@ void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, 
     allScores[numScores - 2] = 70;
     allScores[numScores - 1] = 70;
 
+
+
     //Sort all of the scores in the allScores vector in ascending order
     sort(allScores.begin(), allScores.end()); //sorts elements of vector in ascending order
+
+    /*cout << "All scores:\n";
+    for(i = 0; i < allScores.size(); ++i){
+        cout << allScores[i] << " ";
+    }
+    cout << endl <<endl;*/
 
     //Filling in adjacency matrix - if sum of two scores >= threshold (70), then insert 1 into the matrix, else leave as 0
     for (i = 0; i < allScores.size() - 1; ++i) {
@@ -391,6 +425,26 @@ void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, 
     /*for(i = 0; i < numScores; ++i){
         for(j = 0; j < numScores; ++j){
             cout << boxWidths[i][j] << "  ";
+        }
+        cout << endl;
+    }
+    cout << endl;*/
+    k = 1;
+    for(i = 0; i < numScores; ++i){
+        for(j = i+1; j < numScores; ++j){
+            if(adjMatrix[i][j] == 2){
+                allBoxes[i][j] = k;
+                allBoxes[j][i] = k * -1;
+                ++k;
+                break;
+            }
+        }
+    }
+
+    /*cout << "allBoxes:\n";
+    for(i = 0; i < numScores; ++i){
+        for(j = 0; j < numScores; ++j){
+            cout << allBoxes[i][j] << " ";
         }
         cout << endl;
     }
@@ -567,7 +621,7 @@ void FCA(int &qstar, int vacant, int matchSize, vector<vector<int> > &adjMatrix,
 
 }
 
-void patchGraph(int qstar, int vacant, int instance, int numScores, int numCycles, int &feasible, int &infeasible, int &fullT, int &splitT, int &noPatch, int &problem, vector<int> &matchList, vector<int> &cycleVertex, vector<vector<int> > &mateInduced, vector<vector<int> > &S, vector<vector<int> > &T, vector<int> &completePath, vector<vector<int> > &boxWidths){
+void patchGraph(int qstar, int vacant, int instance, int numScores, int numCycles, int &feasible, int &infeasible, int &fullT, int &splitT, int &noPatch, int &problem, vector<int> &matchList, vector<int> &cycleVertex, vector<vector<int> > &mateInduced, vector<vector<int> > &S, vector<vector<int> > &T, vector<int> &fullCycle, vector<int> &completePath, vector<vector<int> > &boxWidths, vector<int> &allScores, vector<vector<int> > &allBoxes){
 	int i, j, q, u, v, save, SSum, SqIntS;
 	int full = vacant;
 	vector<int> QSet(qstar, 0);
@@ -576,7 +630,6 @@ void patchGraph(int qstar, int vacant, int instance, int numScores, int numCycle
 	vector<int> temp;
 	vector<int> patchVertex(numScores, vacant);
 	vector<vector<int> > Tpatch;
-    vector<int> fullCycle;
 
 	for (i = 0; i < T.size(); ++i) {
 		if (T[i].size() == numCycles) {
@@ -602,9 +655,9 @@ void patchGraph(int qstar, int vacant, int instance, int numScores, int numCycle
 		for (i = 0; i < fullCycle.size(); ++i) {
 			cout << fullCycle[i] << " ";
 		}
-		cout << endl;
+		cout << endl << endl;
 
-        makePath(numScores, fullCycle, completePath, boxWidths);
+        makePath(numScores, fullCycle, completePath, boxWidths, allScores, allBoxes);
 
 		++feasible;
 		++fullT;
@@ -724,9 +777,9 @@ void patchGraph(int qstar, int vacant, int instance, int numScores, int numCycle
 			for (i = 0; i < fullCycle.size(); ++i) {
 				cout << fullCycle[i] << " ";
 			}
-			cout << endl;
+			cout << endl << endl;
 
-            makePath(numScores, fullCycle, completePath, boxWidths);
+            makePath(numScores, fullCycle, completePath, boxWidths, allScores, allBoxes);
 
 			++feasible;
 			++splitT;
@@ -792,7 +845,6 @@ int main(int argc, char **argv){
     int matchSize; //size (cardinality) of the matching list (matchList.size()) (&MTGMA, FCA)
     int numCycles; //number of cycles in the MIS (mateInduced.size()) (&MIS, patchGraph)
     int qstar; //number of T-cycles (&FCA, patchGraph)
-    int totalLength = 0;
     vector<int> allScores(numScores, 0); //vector containing all score widths (createInstance, MTGMA)
     vector<vector<int> > adjMatrix(numScores, vector<int>(numScores, 0)); //adjaceny matrix (createInstance, MTGMA, MIS, FCA)
     vector<int> mates(numScores, 0); //contains vertex index for mates, e.g if vertex 0 is mates with vertex 4, then mates[0] = 4 (createInstance, MIS)
@@ -803,8 +855,9 @@ int main(int argc, char **argv){
     vector<vector<int> > S(numComp, vector<int>(numComp, 0)); // == 1 if edge from cycle j is used in T-cycle q (T[q][j]) (FCA, patchGraph)
     vector<vector<int> > T; //each row hold the lower vertex of the edges that make up one T-cycle
     vector<vector<int> > boxWidths(numScores, vector<int>(numScores, 0));
+    vector<int> fullCycle;
     vector<int> completePath;
-    vector<int> completeScoresPath;
+    vector<vector<int> > allBoxes(numScores, vector<int>(numScores, vacant));
 	srand(randomSeed); //seed
     //endregion
 
@@ -815,9 +868,9 @@ int main(int argc, char **argv){
 	for(instance = 0; instance < numInstances; ++instance) {
 
         resetVectors(vacant, numScores, numComp, allScores, adjMatrix, cycleVertex, matchList, mates, S, boxWidths);
-        clearVectors(mateInduced, lengthMateInduced, T, completePath, completeScoresPath);
+        clearVectors(mateInduced, lengthMateInduced, T, fullCycle, completePath);
 
-        createInstance(threshold, minWidth, maxWidth, minBoxWidth, maxBoxWidth, numScores, numBox, allScores, adjMatrix, mates, boxWidths);
+        createInstance(threshold, minWidth, maxWidth, minBoxWidth, maxBoxWidth, numScores, numBox, allScores, adjMatrix, mates, boxWidths, allBoxes);
 
 		MTGMA(vacant, threshold, numScores, matchSize, allScores, adjMatrix, cycleVertex, matchList);
 		//If the number of matches (i.e. the size of the matching list M) is less than the number of boxes (n), then instance is infeasible ( |M| < n )
@@ -831,23 +884,16 @@ int main(int argc, char **argv){
 		MIS(numScores, numCycles, adjMatrix, mates, matchList, mateInduced, lengthMateInduced);
 		//If the mate-induced structure only consists of one cycle, then the problem has been solved and is feasible (just remove one matching edge to find feasible path)
 		if (lengthMateInduced[0] == numScores) { //if all of the vertices are in the first (and only) cycle of the mate-induced structure
-            for(j = 0; j < mateInduced[0].size()-2; ++j){
-                completePath.push_back(mateInduced[0][j]);
+            for(j = 0; j < mateInduced[0].size(); ++j){
+                fullCycle.push_back(mateInduced[0][j]);
             }
-
-            cout << instance << ": Complete Path (MIS):\n";
-            for(i = 0; i < completePath.size(); ++i){
-                cout << completePath[i] << " ";
+            cout << instance << ": Full Cycle (MIS):\n";
+            for(i = 0; i < fullCycle.size(); ++i){
+                cout << fullCycle[i] << " ";
             }
             cout << endl;
 
-            totalLength = 0;
-            for(i = 0; i < completePath.size() - 1; ++i){
-                if(boxWidths[completePath[i]][completePath[i+1]] != 0){
-                    totalLength += boxWidths[completePath[i]][completePath[i+1]];
-                }
-            }
-            cout << "Total Length of Path: " << totalLength << endl << endl;
+            makePath(numScores, fullCycle, completePath, boxWidths, allScores, allBoxes);
             ++feasible;
             ++oneCycle;
 			continue;
@@ -863,21 +909,33 @@ int main(int argc, char **argv){
 		}
 
 		//Check if patching graph is connected
-		patchGraph(qstar, vacant, instance, numScores, numCycles, feasible, infeasible, fullT, splitT, noPatch, problem, matchList, cycleVertex, mateInduced, S, T, completePath, boxWidths);
+		patchGraph(qstar, vacant, instance, numScores, numCycles, feasible, infeasible, fullT, splitT, noPatch, problem, matchList, cycleVertex, mateInduced, S, T, fullCycle, completePath, boxWidths, allScores, allBoxes);
 
 	} //end of for loop instances
 
 
-    cout << "\n------------------------------------------------------------------\n\n";
-	cout << "Number of feasible instances: " << feasible << endl;
-	cout << "Number of infeasible instances: " << infeasible << endl;
-    cout << "Number of full T cycles: " << fullT << endl;
-    cout << "Number of split T cycles: " << splitT << endl;
-    cout << "Number of poor matchings: " << noMatch << endl;
-    cout << "Number of single cycles: " << oneCycle << endl;
-	cout << "Number of no T-cycles: " << noFam << endl;
-	cout << "Number of unconnected patching: " << noPatch << endl;
-    cout << "Number of problem instances: " << problem << endl;
+    cout << "------------------------------------------------------------------\n";
+    cout << "INPUT:\n";
+    cout << "# of instances: " << numInstances << endl;
+    cout << "# of boxes: " << numBox - 1 << endl;
+    cout << "Min score width: " << minWidth << " mm\n";
+    cout << "Max score width: " << maxWidth << " mm\n";
+    cout << "Min box width: " << minBoxWidth << " mm\n";
+    cout << "Max box width: " << maxBoxWidth << " mm\n";
+    cout << "Random seed: " << randomSeed << endl;
+    cout << "# of scores: " << numScores << endl;
+    cout << "Threshold: " << threshold << " mm\n\n";
+
+    cout << "EVALUATION:\n";
+	cout << "# feasible instances: " << feasible << endl;
+    cout << "# infeasible instances: " << infeasible << endl;
+    cout << "# instances that did not have enough matching edges (|M| < n) (I): " << noMatch << endl;
+    cout << "# instances where MIS consisted of one complete cycle (F): " << oneCycle << endl;
+    cout << "# instances where no T-cycles were found (I): " << noFam << endl;
+    cout << "# instances that required one T-cycle to create solution (F): " << fullT << endl;
+    cout << "# instances that required multiple T-cycles to create solution (F): " << splitT << endl;
+	cout << "# instances where patching graph was unconnected (I):  " << noPatch << endl;
+    cout << "# instances that are problematic: " << problem << endl;
 
 	endTime = clock();
 	double totalTime = (((endTime - startTime) / double(CLOCKS_PER_SEC)) * 1000);
