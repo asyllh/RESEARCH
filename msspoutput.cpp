@@ -3,7 +3,7 @@ ALH
 MSSP with output of solution.
 02/08/2017 - 09/08/2017
 Start implementing box lengths
-09/08/2017 - 09/08/2017
+09/08/2017
 /--------------------*/
 
 #include <iostream>
@@ -35,11 +35,13 @@ void resetVectors(int vacant, int numScores, int numComp, vector<int> &allScores
 
 }
 
-void clearVectors(vector<vector<int> > &mateInduced, vector<int> &lengthMateInduced, vector<vector<int> > &T){
+void clearVectors(vector<vector<int> > &mateInduced, vector<int> &lengthMateInduced, vector<vector<int> > &T, vector<int> &completePath, vector<int> &completeScoresPath){
 
     mateInduced.clear();
     lengthMateInduced.clear();
     T.clear();
+    completePath.clear();
+    completeScoresPath.clear();
 }
 
 void loopCycle(int v, int full, int save, vector<int> &matchList, vector<int> &cycleVertex, vector<int> &fullCycle, vector<vector<int> > &mateInduced, vector<vector<int> > &T){
@@ -268,7 +270,53 @@ void loopCyclePatch(int &u, int v, int save, int vacant, vector<int> &matchList,
         }
     }
 
+}
 
+void makePath(int numScores, vector<int> &fullCycle, vector<int> &completePath, vector<vector<int> > &boxWidths){
+    int i, j;
+    int totalLength = 0;
+
+
+    for(i = 0; i < fullCycle.size()-1; ++i){
+        if((fullCycle[i] == numScores - 1 && fullCycle[i+1] == numScores - 2) || (fullCycle[i] == numScores - 2 && fullCycle[i+1] == numScores - 1)){
+            if(i == 0){ //if the dominating vertices are at the beginning of the fullCycle vector
+                for(j = 2; j < fullCycle.size(); ++j){
+                    completePath.push_back(fullCycle[j]);
+                }
+                break;
+            }
+
+            else if(i == fullCycle.size()-2){ //if the dominating vertices are at the end of the fullCycle vector
+                for(j = 0; j < fullCycle.size()-2; ++j){
+                    completePath.push_back(fullCycle[j]);
+                }
+                break;
+            }
+            else{ //if the dominating vertices are in the middle of the fullCycle vector
+                for(j = i+2; j < fullCycle.size(); ++j){
+                    completePath.push_back(fullCycle[j]);
+                }
+                for(j = 0; j < i; ++j){
+                    completePath.push_back(fullCycle[j]);
+                }
+
+            }
+            break;
+        }
+    }
+
+    cout << "Complete Path:\n";
+    for(i = 0; i < completePath.size(); ++i){
+        cout << completePath[i] << " ";
+    }
+    cout << endl;
+
+    for(i = 0; i < completePath.size() - 1; ++i){
+        if(boxWidths[completePath[i]][completePath[i+1]] != 0){
+            totalLength += boxWidths[completePath[i]][completePath[i+1]];
+        }
+    }
+    cout << "Total Length of Path: " << totalLength << endl << endl;
 
 }
 
@@ -519,17 +567,16 @@ void FCA(int &qstar, int vacant, int matchSize, vector<vector<int> > &adjMatrix,
 
 }
 
-void patchGraph(int qstar, int vacant, int instance, int numScores, int numCycles, int &feasible, int &infeasible, int &fullT, int &splitT, int &noPatch, int &problem, vector<int> &matchList, vector<int> &cycleVertex, vector<vector<int> > &mateInduced, vector<vector<int> > &S, vector<vector<int> > &T, vector<vector<int> > &boxWidths){
+void patchGraph(int qstar, int vacant, int instance, int numScores, int numCycles, int &feasible, int &infeasible, int &fullT, int &splitT, int &noPatch, int &problem, vector<int> &matchList, vector<int> &cycleVertex, vector<vector<int> > &mateInduced, vector<vector<int> > &S, vector<vector<int> > &T, vector<int> &completePath, vector<vector<int> > &boxWidths){
 	int i, j, q, u, v, save, SSum, SqIntS;
 	int full = vacant;
-    int totalLength = 0;
 	vector<int> QSet(qstar, 0);
 	vector<int> SSet;
 	vector<int> patchCycle(qstar, vacant);
 	vector<int> temp;
 	vector<int> patchVertex(numScores, vacant);
 	vector<vector<int> > Tpatch;
-	vector<int> fullCycle;
+    vector<int> fullCycle;
 
 	for (i = 0; i < T.size(); ++i) {
 		if (T[i].size() == numCycles) {
@@ -551,18 +598,13 @@ void patchGraph(int qstar, int vacant, int instance, int numScores, int numCycle
 			loopCycle(v, full, save, matchList, cycleVertex, fullCycle, mateInduced, T);
 
 		}
-		cout << instance << ": Full cycle after T-cycle analysis:\n";
+		cout << instance << ": Full Cycle (one T-cycle):\n";
 		for (i = 0; i < fullCycle.size(); ++i) {
 			cout << fullCycle[i] << " ";
 		}
-		cout << endl << endl;
-        for(i = 0; i < fullCycle.size()-1; ++i){
-            if(boxWidths[fullCycle[i]][fullCycle[i+1]] != 0){
-                totalLength = totalLength + boxWidths[fullCycle[i]][fullCycle[i+1]];
-            }
-        }
-        cout << "Total length of cycle: " << totalLength << endl;
+		cout << endl;
 
+        makePath(numScores, fullCycle, completePath, boxWidths);
 
 		++feasible;
 		++fullT;
@@ -678,17 +720,14 @@ void patchGraph(int qstar, int vacant, int instance, int numScores, int numCycle
 				loopCyclePatch(u, v, save, vacant, matchList, cycleVertex, fullCycle, mateInduced, Tpatch, patchVertex);
 			}
 
-			cout << instance << ": full cycle SPLIT:\n";
+			cout << instance << ": Full Cycle (Mutiple T-cycles):\n";
 			for (i = 0; i < fullCycle.size(); ++i) {
 				cout << fullCycle[i] << " ";
 			}
-			cout << endl << endl;
-            for(i = 0; i < fullCycle.size()-1; ++i){
-                if(boxWidths[fullCycle[i]][fullCycle[i+1]] != 0){
-                    totalLength = totalLength + boxWidths[fullCycle[i]][fullCycle[i+1]];
-                }
-            }
-            cout << "Total length of cycle: " << totalLength << endl;
+			cout << endl;
+
+            makePath(numScores, fullCycle, completePath, boxWidths);
+
 			++feasible;
 			++splitT;
 		}
@@ -706,7 +745,6 @@ void patchGraph(int qstar, int vacant, int instance, int numScores, int numCycle
 	}
 
 }
-
 
 int main(int argc, char **argv){
     //region USAGE - ARGUMENTS REQUIRED
@@ -765,6 +803,8 @@ int main(int argc, char **argv){
     vector<vector<int> > S(numComp, vector<int>(numComp, 0)); // == 1 if edge from cycle j is used in T-cycle q (T[q][j]) (FCA, patchGraph)
     vector<vector<int> > T; //each row hold the lower vertex of the edges that make up one T-cycle
     vector<vector<int> > boxWidths(numScores, vector<int>(numScores, 0));
+    vector<int> completePath;
+    vector<int> completeScoresPath;
 	srand(randomSeed); //seed
     //endregion
 
@@ -775,7 +815,7 @@ int main(int argc, char **argv){
 	for(instance = 0; instance < numInstances; ++instance) {
 
         resetVectors(vacant, numScores, numComp, allScores, adjMatrix, cycleVertex, matchList, mates, S, boxWidths);
-        clearVectors(mateInduced, lengthMateInduced, T);
+        clearVectors(mateInduced, lengthMateInduced, T, completePath, completeScoresPath);
 
         createInstance(threshold, minWidth, maxWidth, minBoxWidth, maxBoxWidth, numScores, numBox, allScores, adjMatrix, mates, boxWidths);
 
@@ -791,18 +831,23 @@ int main(int argc, char **argv){
 		MIS(numScores, numCycles, adjMatrix, mates, matchList, mateInduced, lengthMateInduced);
 		//If the mate-induced structure only consists of one cycle, then the problem has been solved and is feasible (just remove one matching edge to find feasible path)
 		if (lengthMateInduced[0] == numScores) { //if all of the vertices are in the first (and only) cycle of the mate-induced structure
-            cout << instance << ": Full cycle (MIS):\n";
-            for(j = 0; j < mateInduced[0].size(); ++j){
-                cout << mateInduced[0][j] << " ";
+            for(j = 0; j < mateInduced[0].size()-2; ++j){
+                completePath.push_back(mateInduced[0][j]);
             }
-            cout << endl << endl;
+
+            cout << instance << ": Complete Path (MIS):\n";
+            for(i = 0; i < completePath.size(); ++i){
+                cout << completePath[i] << " ";
+            }
+            cout << endl;
+
             totalLength = 0;
-            for(i = 0; i < mateInduced[0].size()-1; ++i){
-                if(adjMatrix[mateInduced[0][i]][mateInduced[0][i+1]] == 2){
-                    totalLength = totalLength + boxWidths[mateInduced[0][i]][mateInduced[0][i+1]];
+            for(i = 0; i < completePath.size() - 1; ++i){
+                if(boxWidths[completePath[i]][completePath[i+1]] != 0){
+                    totalLength += boxWidths[completePath[i]][completePath[i+1]];
                 }
             }
-            cout << "total Length: " << totalLength << endl;
+            cout << "Total Length of Path: " << totalLength << endl << endl;
             ++feasible;
             ++oneCycle;
 			continue;
@@ -818,7 +863,7 @@ int main(int argc, char **argv){
 		}
 
 		//Check if patching graph is connected
-		patchGraph(qstar, vacant, instance, numScores, numCycles, feasible, infeasible, fullT, splitT, noPatch, problem, matchList, cycleVertex, mateInduced, S, T, boxWidths);
+		patchGraph(qstar, vacant, instance, numScores, numCycles, feasible, infeasible, fullT, splitT, noPatch, problem, matchList, cycleVertex, mateInduced, S, T, completePath, boxWidths);
 
 	} //end of for loop instances
 
