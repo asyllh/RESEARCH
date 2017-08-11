@@ -866,10 +866,12 @@ int main(int argc, char **argv){
 	vector<int> lengthMateInduced; //each elements holds the value of the length of the corresponding cycle in the MIS (MIS)
 	vector<vector<int> > S(numComp, vector<int>(numComp, 0)); // == 1 if edge from cycle j is used in T-cycle q (T[q][j]) (FCA, patchGraph)
 	vector<vector<int> > T; //each row hold the lower vertex of the edges that make up one T-cycle
-	vector<vector<int> > boxWidths(numScores, vector<int>(numScores, 0));
-	vector<int> fullCycle;
-	vector<int> completePath;
-	vector<vector<int> > allBoxes(numScores, vector<int>(numScores, vacant));
+	vector<vector<int> > boxWidths(numScores, vector<int>(numScores, 0)); // holds widths in mm for the widths of boxes
+	vector<int> fullCycle; //holds initial cycle of final solution
+	vector<int> completePath; //holds final path, i.e. fullCycle without dominating vertices
+	vector<vector<int> > allBoxes(numScores, vector<int>(numScores, vacant)); //contains values from 1 to numBox to denote which box the scores belong to
+    //if value is positive, i.e "3", then the 3rd box has the smallest score on the LHS, and the larger score on the RHS
+    //if value is negative, i.e "-3", then the 3rd box is rotated, i.e. smallest score on RHS and larger score on LHS.
 	srand(randomSeed); //seed
 	//endregion
 

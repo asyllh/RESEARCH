@@ -74,8 +74,20 @@ vector<vector<int> > T; //each row hold the lower vertex of the edges that make 
 
 vector<vector<int> > boxWidths(numScores, vector<int>(numScores, 0));
 
-vector<int> fullCycle;
+vector<int> fullCycle; //holds initial cycle of final solution
 
-vector<int> completePath;
+vector<int> completePath; //holds final path, i.e. fullCycle without dominating vertices
 
-vector<vector<int> > allBoxes(numScores, vector<int>(numScores, vacant));
+vector<vector<int> > allBoxes(numScores, vector<int>(numScores, vacant)); //contains values from 1 to numBox to denote which box the scores belong to
+
+//if value is positive, i.e "3", then the 3rd box has the smallest score on the LHS, and the larger score on the RHS
+
+//if value is negative, i.e "-3", then the 3rd box is rotated, i.e. smallest score on RHS and larger score on LHS.
+
+//VARIABLES IN FUNCTIONS:
+
+**makePath**
+* int totalLength = 0; //holds total length of completePath, i.e. total of all box widths in the path
+* vector<int> completeScoresPath; // output actual score widths in order of completePath
+* vector<int> boxOrder; // output order of boxes from 1 to numBox -1
+* vector<int> boxWidthsOrder; // outputs all box Widths in order (in millimeters)
