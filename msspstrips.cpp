@@ -15,7 +15,7 @@ Start testing strip methods
 //#include <random> for shuffle(first iterator, last iterator, default_random_engine(seed));
 using namespace std;
 
-void resetVectors(int vacant, int numScores, int numComp, vector<int> &allScores, vector<vector<int> > &adjMatrix, vector<int> &cycleVertex, vector<int> &matchList, vector<int> &mates, vector<vector<int> > &S, vector<vector<int> > &boxWidths){
+void resetVectors(int vacant, int numScores, int numComp, vector<int> &allScores, vector<vector<int> > &adjMatrix, vector<int> &cycleVertex, vector<int> &matchList, vector<int> &mates, vector<vector<int> > &S, vector<vector<int> > &boxWidths, vector<vector<int> > &allBoxes){
 	int i, j;
 
 	for(i = 0; i < numScores; ++i){
@@ -26,6 +26,7 @@ void resetVectors(int vacant, int numScores, int numComp, vector<int> &allScores
 		for(j = 0; j < numScores; ++j){
 			adjMatrix[i][j] = 0;
 			boxWidths[i][j] = 0;
+            allBoxes[i][j] = 0;
 		}
 	}
 
@@ -356,9 +357,83 @@ void makePath(int numScores, vector<int> &fullCycle, vector<int> &completePath, 
 
 }
 
+void split(int numScores, vector<int> &mates, vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths){
+    int i, j, x, k;
+    int maxStripWidth = 2000;
+    vector<int> stripSum(numScores, 0);
+    vector<vector<int> > strip(numScores);
+
+    strip[0].push_back(0);
+    strip[0].push_back(mates[0]);
+    stripSum[0] += boxWidths[0][mates[0]];
+    for(k = 0; k < adjMatrix.size(); ++k){
+        adjMatrix[k][0] = 0;
+        adjMatrix[k][mates[0]] = 0;
+    }
+    x = 0;
+
+    for(j = 0; j < numScores - 2; ++j){
+        for(i = 0; i < strip.size(); ++i){
+            if(!strip[i].empty()){
+                if(adjMatrix[strip[i].back()][j] == 1){
+                    if(stripSum[i] + boxWidths[j][mates[j]] <= maxStripWidth){
+                        strip[i].push_back(j);
+                        strip[i].push_back(mates[j]);
+                        stripSum[i] += boxWidths[j][mates[j]];
+                        for(k = 0; k < adjMatrix.size(); ++k){
+                            adjMatrix[k][j] = 0;
+                            adjMatrix[k][mates[j]] = 0;
+                        }
+                        x = 1;
+                        break;
+                    }
+                }
+                else {
+                    break;
+                }
+            }
+            else if (strip[i].empty()){
+                strip[i].push_back(j);
+                strip[i].push_back(mates[j]);
+                stripSum[i] += boxWidths[j][mates[j]];
+                for(k = 0; k < adjMatrix.size(); ++k){
+                    adjMatrix[k][j] = 0;
+                    adjMatrix[k][mates[j]] = 0;
+                }
+                x = 1;
+                break;
+            }
+
+        }
+        if(x == 1) {
+            x = 0;
+            j = 0;
+        }
+    }
+
+    cout << "strips:\n";
+    for(i = 0; i < strip.size(); ++i){
+        if(!strip[i].empty()){
+            for(j = 0; j < strip[i].size(); ++j){
+                cout << strip[i][j] << " ";
+            }
+            cout << endl;
+        }
+    }
+    cout << endl << endl;
+
+    cout << "strip totals:\n";
+    for(i= 0; i < stripSum.size(); ++i){
+        cout << stripSum[i] << " ";
+    }
+    cout << endl << endl;
+
+
+
+}
+
 void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, int maxBoxWidth, int numScores, int numBox, vector<int> &allScores, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths, vector<vector<int> > &allBoxes){
-	int i, j;
-	int k;
+	int i, j, k;
 	vector<int> randOrder;
 
 	//Create random values to be used as score widths, put in allScores vector (except last two elements)
@@ -374,11 +449,11 @@ void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, 
 	//Sort all of the scores in the allScores vector in ascending order
 	sort(allScores.begin(), allScores.end()); //sorts elements of vector in ascending order
 
-	/*cout << "All scores:\n";
+	cout << "All scores:\n";
     for(i = 0; i < allScores.size(); ++i){
         cout << allScores[i] << " ";
     }
-    cout << endl <<endl;*/
+    cout << endl <<endl;
 
 	//Filling in adjacency matrix - if sum of two scores >= threshold (70), then insert 1 into the matrix, else leave as 0
 	for (i = 0; i < allScores.size() - 1; ++i) {
@@ -407,6 +482,15 @@ void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, 
 		adjMatrix[randOrder[2 * i + 1]][randOrder[2 * i]] = 2;
 	}
 
+    cout << "AdjMatrix:\n";
+    for(i = 0; i < numScores; ++i){
+        for(j = 0; j < numScores; ++j){
+            cout << adjMatrix[i][j] << " ";
+        }
+        cout << endl;
+    }
+    cout << endl << endl;
+
 
 
 	for (i = 0; i < numScores; ++i) {
@@ -417,7 +501,11 @@ void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, 
 			}
 		}
 	}
-	/*cout << "Mates Vector:\n";*/
+	cout << "Mates Vector:\n";
+    for(i = 0; i < mates.size(); ++i){
+        cout << mates[i] << " ";
+    }
+    cout << endl << endl;
 
 	for(i = 0; i < numScores; ++i){
 		for(j = 0; j < numScores; ++j){
@@ -433,13 +521,14 @@ void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, 
 	boxWidths[numScores - 1][numScores - 2] = 0;
 	boxWidths[numScores - 2][numScores - 1] = 0;
 
-	/*for(i = 0; i < numScores; ++i){
+    cout << "Box Widths:\n";
+	for(i = 0; i < numScores; ++i){
         for(j = 0; j < numScores; ++j){
             cout << boxWidths[i][j] << "  ";
         }
         cout << endl;
     }
-    cout << endl;*/
+    cout << endl;
 
 	k = 1;
 	for(i = 0; i < numScores; ++i){
@@ -453,14 +542,14 @@ void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, 
 		}
 	}
 
-	/*cout << "allBoxes:\n";
+	cout << "allBoxes:\n";
     for(i = 0; i < numScores; ++i){
         for(j = 0; j < numScores; ++j){
             cout << allBoxes[i][j] << " ";
         }
         cout << endl;
     }
-    cout << endl;*/
+    cout << endl;
 
 }
 
@@ -869,7 +958,7 @@ int main(int argc, char **argv){
 	vector<vector<int> > boxWidths(numScores, vector<int>(numScores, 0)); // holds widths in mm for the widths of boxes
 	vector<int> fullCycle; //holds initial cycle of final solution
 	vector<int> completePath; //holds final path, i.e. fullCycle without dominating vertices
-	vector<vector<int> > allBoxes(numScores, vector<int>(numScores, vacant)); //contains values from 1 to numBox to denote which box the scores belong to
+	vector<vector<int> > allBoxes(numScores, vector<int>(numScores, 0)); //contains values from 1 to numBox to denote which box the scores belong to
     //if value is positive, i.e "3", then the 3rd box has the smallest score on the LHS, and the larger score on the RHS
     //if value is negative, i.e "-3", then the 3rd box is rotated, i.e. smallest score on RHS and larger score on LHS.
 	srand(randomSeed); //seed
@@ -880,11 +969,13 @@ int main(int argc, char **argv){
 	startTime = clock();
 
 	for(instance = 0; instance < numInstances; ++instance) {
-
-		resetVectors(vacant, numScores, numComp, allScores, adjMatrix, cycleVertex, matchList, mates, S, boxWidths);
+		resetVectors(vacant, numScores, numComp, allScores, adjMatrix, cycleVertex, matchList, mates, S, boxWidths, allBoxes);
 		clearVectors(mateInduced, lengthMateInduced, T, fullCycle, completePath);
 
 		createInstance(threshold, minWidth, maxWidth, minBoxWidth, maxBoxWidth, numScores, numBox, allScores, adjMatrix, mates, boxWidths, allBoxes);
+
+        split(numScores, mates, adjMatrix, boxWidths);
+        continue;
 
 		MTGMA(vacant, threshold, numScores, matchSize, allScores, adjMatrix, cycleVertex, matchList);
 		//If the number of matches (i.e. the size of the matching list M) is less than the number of boxes (n), then instance is infeasible ( |M| < n )
@@ -901,12 +992,6 @@ int main(int argc, char **argv){
 			for(j = 0; j < mateInduced[0].size(); ++j){
 				fullCycle.push_back(mateInduced[0][j]);
 			}
-			/*cout << instance << ": Full Cycle (MIS):\n";
-            for(i = 0; i < fullCycle.size(); ++i){
-                cout << fullCycle[i] << " ";
-            }
-            cout << endl;*/
-
 			makePath(numScores, fullCycle, completePath, boxWidths, allScores, allBoxes);
 			++feasible;
 			++oneCycle;
