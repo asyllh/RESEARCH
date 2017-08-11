@@ -4,6 +4,8 @@ MSSP with output of solution.
 02/08/2017 - 09/08/2017
 Start implementing box lengths
 09/08/2017
+Start testing strip methods
+11/08/2017
 /--------------------*/
 
 #include <iostream>
