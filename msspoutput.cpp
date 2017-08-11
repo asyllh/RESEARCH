@@ -277,6 +277,7 @@ void makePath(int numScores, vector<int> &fullCycle, vector<int> &completePath, 
     int totalLength = 0;
     vector<int> completeScoresPath;
     vector<int> boxOrder;
+    vector<int> boxWidthsOrder;
 
 
     for(i = 0; i < fullCycle.size()-1; ++i){
@@ -318,11 +319,11 @@ void makePath(int numScores, vector<int> &fullCycle, vector<int> &completePath, 
         completeScoresPath.push_back(allScores[completePath[i]]);
     }
 
-    cout << "Complete Path - Score Widths:\n";
+    /*cout << "Complete Path - Score Widths:\n";
     for(i = 0; i < completeScoresPath.size(); ++i){
         cout << completeScoresPath[i] << " ";
     }
-    cout << endl << endl;
+    cout << endl << endl;*/
 
 
 
@@ -330,15 +331,23 @@ void makePath(int numScores, vector<int> &fullCycle, vector<int> &completePath, 
         if(boxWidths[completePath[i]][completePath[i+1]] != 0){
             totalLength += boxWidths[completePath[i]][completePath[i+1]];
             boxOrder.push_back(allBoxes[completePath[i]][completePath[i+1]]);
+            boxWidthsOrder.push_back(boxWidths[completePath[i]][completePath[i+1]]);
         }
     }
-    cout << "Total Length of Path: " << totalLength << " millimeters.\n\n";
 
-    cout << "order of boxes:\n";
+    cout << "Order of Boxes:\n";
     for(i = 0; i < boxOrder.size(); ++i){
         cout << boxOrder[i] << " ";
     }
     cout << endl << endl;
+
+    cout << "Box Widths in Order:\n";
+    for(i = 0; i < boxWidthsOrder.size(); ++i){
+        cout << boxWidthsOrder[i] << " ";
+    }
+    cout << endl;
+
+    cout << "Total Length of Path: " << totalLength << " millimeters.\n\n";
 
 
 
@@ -429,6 +438,7 @@ void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, 
         cout << endl;
     }
     cout << endl;*/
+
     k = 1;
     for(i = 0; i < numScores; ++i){
         for(j = i+1; j < numScores; ++j){
@@ -651,11 +661,11 @@ void patchGraph(int qstar, int vacant, int instance, int numScores, int numCycle
 			loopCycle(v, full, save, matchList, cycleVertex, fullCycle, mateInduced, T);
 
 		}
-		cout << instance << ": Full Cycle (one T-cycle):\n";
+		/*cout << instance << ": Full Cycle (one T-cycle):\n";
 		for (i = 0; i < fullCycle.size(); ++i) {
 			cout << fullCycle[i] << " ";
 		}
-		cout << endl << endl;
+		cout << endl << endl;*/
 
         makePath(numScores, fullCycle, completePath, boxWidths, allScores, allBoxes);
 
@@ -773,11 +783,11 @@ void patchGraph(int qstar, int vacant, int instance, int numScores, int numCycle
 				loopCyclePatch(u, v, save, vacant, matchList, cycleVertex, fullCycle, mateInduced, Tpatch, patchVertex);
 			}
 
-			cout << instance << ": Full Cycle (Mutiple T-cycles):\n";
+			/*cout << instance << ": Full Cycle (Mutiple T-cycles):\n";
 			for (i = 0; i < fullCycle.size(); ++i) {
 				cout << fullCycle[i] << " ";
 			}
-			cout << endl << endl;
+			cout << endl << endl;*/
 
             makePath(numScores, fullCycle, completePath, boxWidths, allScores, allBoxes);
 
@@ -887,11 +897,11 @@ int main(int argc, char **argv){
             for(j = 0; j < mateInduced[0].size(); ++j){
                 fullCycle.push_back(mateInduced[0][j]);
             }
-            cout << instance << ": Full Cycle (MIS):\n";
+            /*cout << instance << ": Full Cycle (MIS):\n";
             for(i = 0; i < fullCycle.size(); ++i){
                 cout << fullCycle[i] << " ";
             }
-            cout << endl;
+            cout << endl;*/
 
             makePath(numScores, fullCycle, completePath, boxWidths, allScores, allBoxes);
             ++feasible;
