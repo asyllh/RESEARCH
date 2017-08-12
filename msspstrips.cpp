@@ -21,7 +21,7 @@ void resetVectors(int vacant, int numScores, int numComp, vector<int> &allScores
 	for(i = 0; i < numScores; ++i){
 		allScores[i] = 0;
 		cycleVertex[i] = 1;
-		matchList[i] = vacant;
+		//matchList[i] = vacant;
 		mates[i] = 0;
 		for(j = 0; j < numScores; ++j){
 			adjMatrix[i][j] = 0;
@@ -35,6 +35,9 @@ void resetVectors(int vacant, int numScores, int numComp, vector<int> &allScores
 			S[i][j] = 0;
 		}
 	}
+    for(i = 0; i < numScores - 2; ++i){
+        matchList[i] = vacant;
+    }
 
 }
 
@@ -454,6 +457,68 @@ void packStrips(int numScores, int maxStripWidth, vector<int> &mates, vector<vec
 
 }
 
+void packStripsMIS(int numScores, int maxStripWidth, vector<vector<int> > &mateInduced, vector<vector<int> > &boxWidths){
+    int i, j;
+    int numStrips = 0;
+    vector<int> stripSum(numScores -2, 0);
+    vector<vector<int> > strip(numScores - 2);
+
+    i = 0;
+    for(j = 0; j < mateInduced[0].size()-1; j+=2){
+        if(stripSum[i] + boxWidths[mateInduced[0][j]][mateInduced[0][j+1]] <= maxStripWidth){
+            strip[i].push_back(mateInduced[0][j]);
+            strip[i].push_back(mateInduced[0][j+1]);
+            stripSum[i] += boxWidths[mateInduced[0][j]][mateInduced[0][j+1]];
+        }
+        else{
+            ++i;
+            strip[i].push_back(mateInduced[0][j]);
+            strip[i].push_back(mateInduced[0][j+1]);
+            stripSum[i] += boxWidths[mateInduced[0][j]][mateInduced[0][j+1]];
+        }
+    }
+
+    cout << "Strips:\n";
+    for(i = 0; i < strip.size(); ++i){
+        if(!strip[i].empty()){
+            for(j = 0; j < strip[i].size(); ++j){
+                cout << strip[i][j] << " ";
+            }
+            cout << endl;
+            ++numStrips;
+        }
+    }
+    cout << endl;
+
+    cout << "Total number of strips required: " << numStrips << endl << endl;
+
+    cout << "Number of boxes per strip:\n";
+    for(i = 0; i < strip.size(); ++i){
+        if(!strip[i].empty()){
+            cout << "Strip " << i << ": " << strip[i].size() << endl;
+
+        }
+    }
+    cout << endl;
+
+    cout << "Strip Widths(mm):\n";
+    for(i = 0; i < stripSum.size(); ++i){
+        if(stripSum[i] != 0){
+            cout << "Strip " << i << ": " << stripSum[i] << endl;
+        }
+    }
+    cout << endl;
+
+    cout << "Strip Waste(mm):\n";
+    for(i = 0; i < stripSum.size(); ++i){
+        if(stripSum[i] != 0){
+            cout << "Strip " << i << ": " << maxStripWidth - stripSum[i] << endl;
+        }
+    }
+    cout << endl;
+
+}
+
 void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, int maxBoxWidth, int numScores, int numBox, vector<int> &allScores, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths, vector<vector<int> > &allBoxes){
 	int i, j, k;
 	vector<int> randOrder;
@@ -505,8 +570,8 @@ void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, 
 	}
 
     cout << "AdjMatrix:\n";
-    for(i = 0; i < numScores; ++i){
-        for(j = 0; j < numScores; ++j){
+    for(i = 0; i < numScores -2; ++i){
+        for(j = 0; j < numScores - 2; ++j){
             cout << adjMatrix[i][j] << " ";
         }
         cout << endl;
@@ -543,7 +608,7 @@ void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, 
 	boxWidths[numScores - 1][numScores - 2] = 0;
 	boxWidths[numScores - 2][numScores - 1] = 0;
 
-    cout << "Box Widths:\n";
+   cout << "Box Widths:\n";
 	for(i = 0; i < numScores; ++i){
         for(j = 0; j < numScores; ++j){
             cout << boxWidths[i][j] << "  ";
@@ -564,14 +629,14 @@ void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, 
 		}
 	}
 
-	cout << "allBoxes:\n";
+	/*cout << "allBoxes:\n";
     for(i = 0; i < numScores; ++i){
         for(j = 0; j < numScores; ++j){
             cout << allBoxes[i][j] << " ";
         }
         cout << endl;
     }
-    cout << endl;
+    cout << endl;*/
 
 }
 
@@ -583,10 +648,10 @@ void MTGMA(int vacant, int threshold, int numScores, int &matchSize, vector<int>
 	int vacantFlag = 0;
 	matchSize = 0;
 
-	for (i = 0; i < numScores; ++i) { //check all vertices
+	for (i = 0; i < numScores - 2; ++i) { //check all vertices
 		vacantFlag = 0;
 		if (matchList[i] == vacant) { //if vertex has not yet been matched
-			for (j = numScores - 1; j > i; --j) { //try match vertex i with largest unmatched vertex, start from largest vertex j, go down list of vertices in decreasing order of size
+			for (j = numScores - 3; j > i; --j) { //try match vertex i with largest unmatched vertex, start from largest vertex j, go down list of vertices in decreasing order of size
 				if (adjMatrix[i][j] == 1 && matchList[j] == vacant) { //if vertices i and j are adjacent, and if vertex j has not yet been matched
 					matchList[i] = j;
 					matchList[j] = i;
@@ -597,12 +662,13 @@ void MTGMA(int vacant, int threshold, int numScores, int &matchSize, vector<int>
 						cycleVertex[j] = vacant;
 					}
 					break;
-				} else if (adjMatrix[i][j] == 2 && matchList[j] == vacant) { //if potential match == mate
+				}
+                else if (adjMatrix[i][j] == 2 && matchList[j] == vacant) { //if potential match == mate
 					vacantFlag = 1;
 				}
 			}//end for j
 			if (matchList[i] == vacant) { //if vertex has still not been matched
-				for (k = 0; k < numScores; ++k) {
+				for (k = 0; k < numScores - 2; ++k) {
 					if (adjMatrix[i][k] == 2) { //if vertex i and vertex k are mates
 						mateMatch = k;
 						break;
@@ -628,18 +694,27 @@ void MTGMA(int vacant, int threshold, int numScores, int &matchSize, vector<int>
 	}//end for i
 
 
-	/*cout << "Cycle Vertex vector after MTGMA:\n";*/
-	/*cout << "Matching List:\n";*/
+	cout << "Cycle Vertex vector after MTGMA:\n";
+    for(i = 0; i < cycleVertex.size(); ++i){
+        cout << cycleVertex[i] << " ";
+    }
+    cout << endl << endl;
+
+	cout << "Matching List:\n";
+    for(i = 0; i < matchList.size(); ++i){
+        cout << matchList[i] << " ";
+    }
+    cout << endl << endl;
 
 
 }
 
 void MIS(int numScores, int &numCycles, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<int> &matchList, vector<vector<int> > &mateInduced, vector<int> &lengthMateInduced){
-	int i;
+	int i, j;
 	int smallestVertex;
 	int currentVertex;
 	vector<int> cycle;
-	vector<int> checked(numScores, 0);
+	vector<int> checked(numScores -2, 0);
 	numCycles = 0;
 
 
@@ -679,7 +754,14 @@ void MIS(int numScores, int &numCycles, vector<vector<int> > &adjMatrix, vector<
 
 	numCycles = mateInduced.size(); //number of cycles in the mate-induced structure
 
-	/*cout << "Mate-Induced Structure:\n";*/
+	cout << "Mate-Induced Structure:\n";
+    for(i = 0; i < mateInduced.size(); ++i){
+        for(j = 0; j < mateInduced[i].size(); ++j){
+            cout << mateInduced[i][j] << " ";
+        }
+        cout << endl;
+    }
+    cout << endl << endl;
 	/*cout << "Number of cycles in mate-induced structure: " << numCycles << endl;*/
 
 	for (i = 0; i < mateInduced.size(); ++i) {
@@ -974,7 +1056,7 @@ int main(int argc, char **argv){
 	vector<int> allScores(numScores, 0); //vector containing all score widths (createInstance, MTGMA)
 	vector<vector<int> > adjMatrix(numScores, vector<int>(numScores, 0)); //adjaceny matrix (createInstance, MTGMA, MIS, FCA)
 	vector<int> mates(numScores, 0); //contains vertex index for mates, e.g if vertex 0 is mates with vertex 4, then mates[0] = 4 (createInstance, MIS)
-	vector<int> matchList(numScores, vacant); //contains vertex index for matching vertices, e.g. if vertex 0 is matched with vertex 9, then matchList[0] = 9 (MTGMA, MIS, FCA, patchGraph)
+	vector<int> matchList(numScores - 2, vacant); //contains vertex index for matching vertices, e.g. if vertex 0 is matched with vertex 9, then matchList[0] = 9 (MTGMA, MIS, FCA, patchGraph)
 	vector<int> cycleVertex(numScores, 1); //contains the number of the cycle of the mate-induced structure that the vertex i belongs to (MTGMA, FCA, patchGraph)
 	vector<vector<int> > mateInduced; //each row of the matrix corresponds to one cycle, and contains the indices of the score widths (MIS, FCA, patchGraph)
 	vector<int> lengthMateInduced; //each elements holds the value of the length of the corresponding cycle in the MIS (MIS)
@@ -999,12 +1081,13 @@ int main(int argc, char **argv){
 
 		createInstance(threshold, minWidth, maxWidth, minBoxWidth, maxBoxWidth, numScores, numBox, allScores, adjMatrix, mates, boxWidths, allBoxes);
 
-        packStrips(numScores, maxStripWidth, mates, adjMatrix, boxWidths);
-        continue; //do not do MTGMA/MIS/FCA/PATCH
+        //packStrips(numScores, maxStripWidth, mates, adjMatrix, boxWidths);
+        //continue; //do not do MTGMA/MIS/FCA/PATCH
 
 		MTGMA(vacant, threshold, numScores, matchSize, allScores, adjMatrix, cycleVertex, matchList);
 		//If the number of matches (i.e. the size of the matching list M) is less than the number of boxes (n), then instance is infeasible ( |M| < n )
-		if (matchSize < numBox) {
+        //continue;
+		if (matchSize < numBox - 1) {
 			cout << instance << ": INFEASIBLE - Not enough matching edges.\n\n";
 			++infeasible;
 			++noMatch;
@@ -1012,6 +1095,8 @@ int main(int argc, char **argv){
 		}
 
 		MIS(numScores, numCycles, adjMatrix, mates, matchList, mateInduced, lengthMateInduced);
+        packStripsMIS(numScores, maxStripWidth, mateInduced, boxWidths);
+        continue;
 		//If the mate-induced structure only consists of one cycle, then the problem has been solved and is feasible (just remove one matching edge to find feasible path)
 		if (lengthMateInduced[0] == numScores) { //if all of the vertices are in the first (and only) cycle of the mate-induced structure
 			for(j = 0; j < mateInduced[0].size(); ++j){
