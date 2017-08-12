@@ -357,11 +357,11 @@ void makePath(int numScores, vector<int> &fullCycle, vector<int> &completePath, 
 
 }
 
-void packStrips(int numScores, vector<int> &mates, vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths){
+void packStrips(int numScores, int maxStripWidth, vector<int> &mates, vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths){
     int i, j, x, k;
-    int maxStripWidth = 2000;
     vector<int> stripSum(numScores, 0);
     vector<vector<int> > strip(numScores);
+    int numStrips = 0;
 
     strip[0].push_back(0);
     strip[0].push_back(mates[0]);
@@ -411,22 +411,44 @@ void packStrips(int numScores, vector<int> &mates, vector<vector<int> > &adjMatr
         }
     }
 
-    cout << "strips:\n";
+    cout << "Strips:\n";
     for(i = 0; i < strip.size(); ++i){
         if(!strip[i].empty()){
             for(j = 0; j < strip[i].size(); ++j){
                 cout << strip[i][j] << " ";
             }
             cout << endl;
+            ++numStrips;
         }
     }
-    cout << endl << endl;
+    cout << endl;
 
-    cout << "strip totals:\n";
-    for(i= 0; i < stripSum.size(); ++i){
-        cout << stripSum[i] << " ";
+    cout << "Total number of strips required: " << numStrips << endl << endl;
+
+    cout << "Number of boxes per strip:\n";
+    for(i = 0; i < strip.size(); ++i){
+        if(!strip[i].empty()){
+            cout << "Strip " << i << ": " << strip[i].size() << endl;
+
+        }
     }
-    cout << endl << endl;
+    cout << endl;
+
+    cout << "Strip Widths(mm):\n";
+    for(i = 0; i < stripSum.size(); ++i){
+        if(stripSum[i] != 0){
+            cout << "Strip " << i << ": " << stripSum[i] << endl;
+        }
+    }
+    cout << endl;
+
+    cout << "Strip Waste(mm):\n";
+    for(i = 0; i < stripSum.size(); ++i){
+        if(stripSum[i] != 0){
+            cout << "Strip " << i << ": " << maxStripWidth - stripSum[i] << endl;
+        }
+    }
+    cout << endl;
 
 
 
@@ -902,7 +924,7 @@ void patchGraph(int qstar, int vacant, int instance, int numScores, int numCycle
 
 int main(int argc, char **argv){
 	//region USAGE - ARGUMENTS REQUIRED
-	if(argc < 7){
+	if(argc < 9){
 		cout << "Minimum Score Separation Problem: MBAHRA.\n";
 		cout << "Arguments are the following:\n";
 		cout << "- Number of instances (integer)\n";
@@ -911,6 +933,7 @@ int main(int argc, char **argv){
 		cout << "- Maximum width of scores (millimeters, max = 70)\n";
 		cout << "- Minimum width of boxes (millimeters, min = 140)\n";
 		cout << "- Maximum width of boxes (millimeters, max = 1000)\n";
+        cout << "- Maximum width of strips (millimeters)\n";
 		cout << "- Random Seed (integer)\n";
 		exit(1);
 	}
@@ -924,7 +947,9 @@ int main(int argc, char **argv){
 	int maxWidth = atoi(argv[4]); //maximum width of scores (millimeters)
 	int minBoxWidth = atoi(argv[5]); //min box width (mm)
 	int maxBoxWidth = atoi(argv[6]); //max box width (mm)
-	int randomSeed = atoi(argv[7]); //random seed
+    int maxStripWidth = atoi(argv[7]);
+	int randomSeed = atoi(argv[8]); //random seed
+
 
 	//VARIABLES
 	int i, j, k, q;
@@ -974,8 +999,8 @@ int main(int argc, char **argv){
 
 		createInstance(threshold, minWidth, maxWidth, minBoxWidth, maxBoxWidth, numScores, numBox, allScores, adjMatrix, mates, boxWidths, allBoxes);
 
-        packStrips(numScores, mates, adjMatrix, boxWidths);
-        continue;
+        packStrips(numScores, maxStripWidth, mates, adjMatrix, boxWidths);
+        continue; //do not do MTGMA/MIS/FCA/PATCH
 
 		MTGMA(vacant, threshold, numScores, matchSize, allScores, adjMatrix, cycleVertex, matchList);
 		//If the number of matches (i.e. the size of the matching list M) is less than the number of boxes (n), then instance is infeasible ( |M| < n )
@@ -1017,13 +1042,14 @@ int main(int argc, char **argv){
 	cout << "INPUT:\n";
 	cout << "# of instances: " << numInstances << endl;
 	cout << "# of boxes: " << numBox - 1 << endl;
-	cout << "Min score width: " << minWidth << " mm\n";
-	cout << "Max score width: " << maxWidth << " mm\n";
-	cout << "Min box width: " << minBoxWidth << " mm\n";
-	cout << "Max box width: " << maxBoxWidth << " mm\n";
+	cout << "Min score width: " << minWidth << "mm\n";
+	cout << "Max score width: " << maxWidth << "mm\n";
+	cout << "Min box width: " << minBoxWidth << "mm\n";
+	cout << "Max box width: " << maxBoxWidth << "mm\n";
+    cout << "Max strip width: " << maxStripWidth << "mm\n";
 	cout << "Random seed: " << randomSeed << endl;
 	cout << "# of scores: " << numScores << endl;
-	cout << "Threshold: " << threshold << " mm\n\n";
+	cout << "Threshold: " << threshold << "mm\n\n";
 
 	cout << "EVALUATION:\n";
 	cout << "# feasible instances: " << feasible << endl;
