@@ -357,7 +357,7 @@ void makePath(int numScores, vector<int> &fullCycle, vector<int> &completePath, 
 
 }
 
-void split(int numScores, vector<int> &mates, vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths){
+void packStrips(int numScores, vector<int> &mates, vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths){
     int i, j, x, k;
     int maxStripWidth = 2000;
     vector<int> stripSum(numScores, 0);
@@ -974,7 +974,7 @@ int main(int argc, char **argv){
 
 		createInstance(threshold, minWidth, maxWidth, minBoxWidth, maxBoxWidth, numScores, numBox, allScores, adjMatrix, mates, boxWidths, allBoxes);
 
-        split(numScores, mates, adjMatrix, boxWidths);
+        packStrips(numScores, mates, adjMatrix, boxWidths);
         continue;
 
 		MTGMA(vacant, threshold, numScores, matchSize, allScores, adjMatrix, cycleVertex, matchList);
