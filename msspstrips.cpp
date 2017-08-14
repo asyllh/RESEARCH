@@ -360,7 +360,7 @@ void makePath(int numScores, vector<int> &fullCycle, vector<int> &completePath, 
 
 }
 
-void packStrips(int numScores, int maxStripWidth, vector<int> &mates, vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths){
+void packStripsSmallest(int numScores, int maxStripWidth, vector<int> &mates, vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths){
     int i, j, x, k;
     vector<int> stripSum(numScores, 0);
     vector<vector<int> > strip(numScores);
@@ -457,10 +457,10 @@ void packStrips(int numScores, int maxStripWidth, vector<int> &mates, vector<vec
 
 }
 
-void packStripsMIS(int numScores, int maxStripWidth, vector<vector<int> > &mateInduced, vector<vector<int> > &boxWidths){
-    int i, j;
+void packStripsMIS(int numScores, int maxStripWidth, vector<vector<int> > &adjMatrix, vector<vector<int> > &mateInduced, vector<vector<int> > &boxWidths){
+    int i, j, k;
     int numStrips = 0;
-    vector<int> stripSum(numScores -2, 0);
+    vector<int> stripSum(numScores - 2, 0);
     vector<vector<int> > strip(numScores - 2);
 
     i = 0;
@@ -477,6 +477,39 @@ void packStripsMIS(int numScores, int maxStripWidth, vector<vector<int> > &mateI
             stripSum[i] += boxWidths[mateInduced[0][j]][mateInduced[0][j+1]];
         }
     }
+
+    if(mateInduced.size() > 1){
+        for(k = 1; k < mateInduced.size(); ++k){
+            for(j = 0; j < mateInduced[k].size()-1; j+=2){
+                for(i = 0; i < strip.size(); ++i){
+                    if(!strip[i].empty()){
+                        if(adjMatrix[strip[i].back()][mateInduced[k][j]] == 1){
+                            if(stripSum[i] + boxWidths[mateInduced[k][j]][mateInduced[k][j+1]] <= maxStripWidth){
+                                strip[i].push_back(mateInduced[k][j]);
+                                strip[i].push_back(mateInduced[k][j+1]);
+                                stripSum[i] += boxWidths[mateInduced[k][j]][mateInduced[k][j+1]];
+                                break;
+                            }
+                            else{
+                                continue;
+                            }
+                        }
+                        else{
+                            continue;
+                        }
+                    }
+                    else if(strip[i].empty()){
+                        strip[i].push_back(mateInduced[k][j]);
+                        strip[i].push_back(mateInduced[k][j+1]);
+                        stripSum[i] += boxWidths[mateInduced[k][j]][mateInduced[k][j+1]];
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+
 
     cout << "Strips:\n";
     for(i = 0; i < strip.size(); ++i){
@@ -495,7 +528,7 @@ void packStripsMIS(int numScores, int maxStripWidth, vector<vector<int> > &mateI
     cout << "Number of boxes per strip:\n";
     for(i = 0; i < strip.size(); ++i){
         if(!strip[i].empty()){
-            cout << "Strip " << i << ": " << strip[i].size() << endl;
+            cout << "Strip " << i << ": " << strip[i].size()/2 << endl;
 
         }
     }
@@ -714,7 +747,7 @@ void MIS(int numScores, int &numCycles, vector<vector<int> > &adjMatrix, vector<
 	int smallestVertex;
 	int currentVertex;
 	vector<int> cycle;
-	vector<int> checked(numScores -2, 0);
+	vector<int> checked(numScores - 2, 0);
 	numCycles = 0;
 
 
@@ -762,7 +795,7 @@ void MIS(int numScores, int &numCycles, vector<vector<int> > &adjMatrix, vector<
         cout << endl;
     }
     cout << endl << endl;
-	/*cout << "Number of cycles in mate-induced structure: " << numCycles << endl;*/
+	//cout << "Number of cycles in mate-induced structure: " << numCycles << endl;
 
 	for (i = 0; i < mateInduced.size(); ++i) {
 		lengthMateInduced.push_back(mateInduced[i].size());
@@ -1081,7 +1114,7 @@ int main(int argc, char **argv){
 
 		createInstance(threshold, minWidth, maxWidth, minBoxWidth, maxBoxWidth, numScores, numBox, allScores, adjMatrix, mates, boxWidths, allBoxes);
 
-        //packStrips(numScores, maxStripWidth, mates, adjMatrix, boxWidths);
+        //packStripsSmallest(numScores, maxStripWidth, mates, adjMatrix, boxWidths);
         //continue; //do not do MTGMA/MIS/FCA/PATCH
 
 		MTGMA(vacant, threshold, numScores, matchSize, allScores, adjMatrix, cycleVertex, matchList);
@@ -1095,7 +1128,7 @@ int main(int argc, char **argv){
 		}
 
 		MIS(numScores, numCycles, adjMatrix, mates, matchList, mateInduced, lengthMateInduced);
-        packStripsMIS(numScores, maxStripWidth, mateInduced, boxWidths);
+        packStripsMIS(numScores, maxStripWidth, adjMatrix, mateInduced, boxWidths);
         continue;
 		//If the mate-induced structure only consists of one cycle, then the problem has been solved and is feasible (just remove one matching edge to find feasible path)
 		if (lengthMateInduced[0] == numScores) { //if all of the vertices are in the first (and only) cycle of the mate-induced structure
