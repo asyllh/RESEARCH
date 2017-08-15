@@ -410,7 +410,7 @@ void packStripsSmallest(int numScores, int maxStripWidth, vector<int> &mates, ve
         }
         if(x == 1) {
             x = 0;
-            j = 0;
+            j = -1;
         }
     }
 
