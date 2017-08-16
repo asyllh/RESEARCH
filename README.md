@@ -1,3 +1,38 @@
+**packStripsSmallest(numScores, numBox, maxStripWidth, mates, adjMatrix, boxWidths)**
+* Function is called after createInstances, and MTGMA, MIS, FCA, patchGraph are NOT called after.
+* Initially:
+    * Score 0 and score mates[0] are put into the first strip (strip[0])
+    * update stripSum[0] to add the width of the box corresponding to the scores 0 and mates[0]
+    * clear columns 0 and mates[0] of the adjMatrix (set to 0)
+
+* Main loop:
+    * for the score at the end of the first strip (strip[0]), find the smallest score j that is adjacent to it (adjMatrix == 1)
+    * start with the smallest value of j (0)
+    * if the current strip is not empty
+        * if the score j is adjacent to the score at the end of the current strip
+            * if the box width associated with score j can fit into the current strip
+                * add score j and score mates[j] to the current strip
+                * updated stripSum[current strip]
+                * clear columns j and mates[j] in adjMatrix
+                * go back to strip[0] (i = 0) and smallest score (j = 0)
+            * if the box width associated with score j cannot fit into the current strip
+                * try the next strip (++i)
+        * if the score j is not adjacent to the score at the end of the current strip
+            * try the next largest score (++j)
+    * else if the current strip is empty
+        * add the score j and its mate to the current strip
+        * update stripSum[current strip]
+        * clear columns j and mates[j] in adjMatrix
+        * go back to strip[0] (i = 0) and smallest score (j = 0)
+
+
+* Always going back to the first strip to check if anything can fit in there
+
+
+
+
+
+
 **//VARIABLE FROM ARGUMENTS:**
 * int numInstances = atoi(argv[1]); //number of instances of mssp, use in main for loop
 * int numBox = atoi(argv[2]) + 1; //number of boxes in mssp plus 1 extra box (scores on either side of extra box will be dominating vertices, score widths = 71)

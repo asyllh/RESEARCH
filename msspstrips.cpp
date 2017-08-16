@@ -9,9 +9,11 @@ Start testing strip methods
 /--------------------*/
 
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <time.h>
 #include <algorithm>
+#include <iterator>
 //#include <random> for shuffle(first iterator, last iterator, default_random_engine(seed));
 using namespace std;
 
@@ -20,7 +22,7 @@ void resetVectors(int vacant, int numScores, int numComp, vector<int> &allScores
 	int i, j;
 
 	for(i = 0; i < numScores; ++i){
-		allScores[i] = 0;
+		//allScores[i] = 0;
 		cycleVertex[i] = 1;
 		matchList[i] = vacant;
 		mates[i] = 0;
@@ -42,571 +44,14 @@ void resetVectors(int vacant, int numScores, int numComp, vector<int> &allScores
 
 }
 
-void clearVectors(vector<vector<int> > &mateInduced, vector<int> &lengthMateInduced, vector<vector<int> > &T, vector<int> &fullCycle, vector<int> &completePath){
+void clearVectors(vector<int> &allScores, vector<vector<int> > &mateInduced, vector<int> &lengthMateInduced, vector<vector<int> > &T, vector<int> &fullCycle, vector<int> &completePath){
 
 	mateInduced.clear();
 	lengthMateInduced.clear();
 	T.clear();
 	fullCycle.clear();
 	completePath.clear();
-}
-
-void loopCycle(int v, int full, int save, vector<int> &matchList, vector<int> &cycleVertex, vector<int> &fullCycle, vector<vector<int> > &mateInduced, vector<vector<int> > &T){
-
-	int i;
-
-	//CASE ONE: if element matchList[T[full][v]] is before element T[full][v] in the mateInduced cycle
-	//i.e. if the element at position 'save' in the cycle is matchList[T[full][v]] and the element at position "save + 1" is T[full][v]
-	if(mateInduced[cycleVertex[T[full][v]]][save + 1] == T[full][v]){
-		for(i = save + 1; i-- > 0;){ //from element at position 'save' to the first element in the cycle
-			fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][i]);
-		}
-		for(i = mateInduced[cycleVertex[T[full][v]]].size(); i-- > save +1;){ //from end of cycle to element at position save+1
-			fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][i]);
-		}
-	}
-
-		//CASE TWO: if element matchList[T[full][v]] is after element T[full][v] in the mateInduced cycle
-		//i.e. if the element at position 'save' in the cycle is matchList[T[full][v]] and the element at position "save - 1" is T[full][v]
-	else if (mateInduced[cycleVertex[T[full][v]]][save - 1] == T[full][v]){
-		for(i = save; i < mateInduced[cycleVertex[T[full][v]]].size(); ++i){
-			fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][i]);
-		}
-		for(i = 0; i < save; ++i){
-			fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][i]);
-		}
-	}
-
-		//CASE THREE: if element matchList[T[full][v]] is the first element in the cycle, and T[full][v] is the last element in the cycle
-		//i.e. if save = 0 and T[full][v] is at position mateInduced[cycleVertex[T[full][v]]].size()-1
-	else if (save == 0 && mateInduced[cycleVertex[T[full][v]]][mateInduced[cycleVertex[T[full][v]]].size()-1] == T[full][v]){
-		for(i = 0; i < mateInduced[cycleVertex[T[full][v]]].size(); ++i){
-			fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][i]);
-		}
-	}
-
-		//CASE FOUR: if element matchList[T[full][v]] is the last element in the cycle, and T[full][v] is the first element in the cycle
-		//i.e. if save = mateInduced[cycleVertex[T[full][v]]].size()-1 and T[full][v] is at position 0
-	else if(save == mateInduced[cycleVertex[T[full][v]]].size()-1 && mateInduced[cycleVertex[T[full][v]]][0] == T[full][v]){
-		for(i = mateInduced[cycleVertex[T[full][v]]].size(); i-- > 0; ){
-			fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][i]);
-		}
-	}
-
-}
-
-void loopCyclePatch(int &u, int v, int save, int vacant, vector<int> &matchList, vector<int> &cycleVertex, vector<int> &fullCycle, vector<vector<int> > &mateInduced, vector<vector<int> > &Tpatch, vector<int> &patchVertex){
-
-	int i;
-	int x = 0;
-
-	//CASE ONE: if the current value is matchList[Tpatch[u][v]] and the previous value is Tpatch[u][v]
-	if (mateInduced[cycleVertex[Tpatch[u][v]]][save - 1] == Tpatch[u][v]){
-		fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][save]);
-		for(i = save + 1; i < mateInduced[cycleVertex[Tpatch[u][v]]].size(); ++i){
-			if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] == vacant) {
-				fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
-			}
-			else if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] != vacant){
-				fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
-				u = patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]];
-				x = 1;
-				break;
-			}
-		}
-		if(x == 0) {
-			for (i = 0; i < save; ++i) {
-				if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] == vacant) {
-					fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
-				}
-				else if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] != vacant){
-					fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
-					u = patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]];
-					break;
-				}
-			}
-		}
-	}
-
-		//CASE TWO: if the current value is Tpatch[u][v] and the previous value is matchList[Tpatch[u][v]]
-	else if (mateInduced[cycleVertex[Tpatch[u][v]]][save - 1] == matchList[Tpatch[u][v]]){
-		fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][save]);
-		for(i = save + 1; i < mateInduced[cycleVertex[Tpatch[u][v]]].size(); ++i){
-			if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] == vacant) {
-				fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
-			}
-			else if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] != vacant){
-				fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
-				u = patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]];
-				x = 1;
-				break;
-			}
-		}
-		if(x == 0) {
-			for (i = 0; i < save; ++i) {
-				if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] == vacant) {
-					fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
-				}
-				else if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] != vacant){
-					fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
-					u = patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]];
-					break;
-				}
-			}
-		}
-	}
-
-		//CASE THREE: if the current vertex is Tpatch[u][v] and the next element is matchList[Tpatch[u][v]]
-	else if(mateInduced[cycleVertex[Tpatch[u][v]]][save + 1] == matchList[Tpatch[u][v]]){
-		fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][save]);
-		for(i = save; i-- > 0;){ //from element at position 'save' to the first element in the cycle
-			if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] == vacant) {
-				fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
-			}
-			else if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] != vacant){
-				fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
-				u = patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]];
-				x = 1;
-				break;
-			}
-		}
-		if(x == 0) {
-			for (i = mateInduced[cycleVertex[Tpatch[u][v]]].size(); i-- > save + 1;) { //from end of cycle to element at position save+1
-				if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] == vacant) {
-					fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
-				}
-				else if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] != vacant){
-					fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
-					u = patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]];
-					break;
-				}
-			}
-		}
-	}
-
-		//CASE FOUR: if the current vertex is matchList[Tpatch[u][v]] and the next element is Tpatch[u][v]
-	else if(mateInduced[cycleVertex[Tpatch[u][v]]][save + 1] == Tpatch[u][v]){
-		fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][save]);
-		for(i = save; i-- > 0;){ //from element at position 'save' to the first element in the cycle
-			if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] == vacant) {
-				fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
-			}
-			else if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] != vacant){
-				fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
-				u = patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]];
-				x = 1;
-				break;
-			}
-		}
-		if(x == 0) {
-			for (i = mateInduced[cycleVertex[Tpatch[u][v]]].size(); i-- > save + 1;) { //from end of cycle to element at position save+1
-				if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] == vacant) {
-					fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
-				}
-				else if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] != vacant){
-					fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
-					u = patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]];
-					break;
-				}
-			}
-		}
-	}
-
-		//CASE FIVE: if the current vertex is matchList[Tpatch[u][v]] and is the first element in the cycle, and
-		//the last element in the cycle is Tpatch[u][v]
-	else if(save == 0 && mateInduced[cycleVertex[Tpatch[u][v]]][mateInduced[cycleVertex[Tpatch[u][v]]].size()-1] == Tpatch[u][v]){
-		fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][save]);
-		for(i = 1; i < mateInduced[cycleVertex[Tpatch[u][v]]].size(); ++i){
-			if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] == vacant) {
-				fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
-			}
-			else if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] != vacant){
-				fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
-				u = patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]];
-				break;
-			}
-		}
-	}
-
-		//CASE SIX: if the current vertex is matchList[Tpatch[u][v]] and is last element in the cycle, and
-		//the first element in the cycle is Tpatch[u][v]
-	else if(save == mateInduced[cycleVertex[Tpatch[u][v]]].size()-1 && mateInduced[cycleVertex[Tpatch[u][v]]][0] == Tpatch[u][v]){
-		fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][save]);
-		for(i = mateInduced[cycleVertex[Tpatch[u][v]]].size()-1; i-- > 0; ){
-			if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] == vacant) {
-				fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
-			}
-			else if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] != vacant){
-				fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
-				u = patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]];
-				break;
-			}
-		}
-	}
-
-		//CASE SEVEN: if the current vertex is Tpatch[u][v] and is the first element in the cycle, and
-		//and the last element in the cycle is matchList[Tpatch[u][v]]
-	else if(save == 0 && mateInduced[cycleVertex[Tpatch[u][v]]][mateInduced[cycleVertex[Tpatch[u][v]]].size()-1] == matchList[Tpatch[u][v]]){
-		fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][save]);
-		for(i = 1; i < mateInduced[cycleVertex[Tpatch[u][v]]].size(); ++i){
-			if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] == vacant) {
-				fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
-			}
-			else if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] != vacant){
-				fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
-				u = patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]];
-				break;
-			}
-		}
-	}
-
-		//CASE EIGHT: if the current vertex is Tpatch[u][v] and is last element in the cycle, and
-		//the first element in the cycle is matchList[Tpatch[u][v]]
-	else if(save == mateInduced[cycleVertex[Tpatch[u][v]]].size()-1 && mateInduced[cycleVertex[Tpatch[u][v]]][0] == matchList[Tpatch[u][v]]){
-		fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][save]);
-		for(i = mateInduced[cycleVertex[Tpatch[u][v]]].size()-1; i-- > 0; ){
-			if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] == vacant) {
-				fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
-			}
-			else if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] != vacant){
-				fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
-				u = patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]];
-				break;
-			}
-		}
-	}
-
-}
-
-void makePath(int numScores, vector<int> &fullCycle, vector<int> &completePath, vector<vector<int> > &boxWidths, vector<int> &allScores, vector<vector<int> > &allBoxes){
-
-	int i, j;
-	int totalLength = 0;
-	vector<int> completeScoresPath;
-	vector<int> boxOrder;
-	vector<int> boxWidthsOrder;
-
-
-	for(i = 0; i < fullCycle.size()-1; ++i){
-		if((fullCycle[i] == numScores - 1 && fullCycle[i+1] == numScores - 2) || (fullCycle[i] == numScores - 2 && fullCycle[i+1] == numScores - 1)){
-			if(i == 0){ //if the dominating vertices are at the beginning of the fullCycle vector
-				for(j = 2; j < fullCycle.size(); ++j){
-					completePath.push_back(fullCycle[j]);
-				}
-				break;
-			}
-
-			else if(i == fullCycle.size()-2){ //if the dominating vertices are at the end of the fullCycle vector
-				for(j = 0; j < fullCycle.size()-2; ++j){
-					completePath.push_back(fullCycle[j]);
-				}
-				break;
-			}
-			else{ //if the dominating vertices are in the middle of the fullCycle vector
-				for(j = i+2; j < fullCycle.size(); ++j){
-					completePath.push_back(fullCycle[j]);
-				}
-				for(j = 0; j < i; ++j){
-					completePath.push_back(fullCycle[j]);
-				}
-				break;
-
-			}
-
-		}
-	}
-
-	cout << "Complete Path:\n";
-	for(i = 0; i < completePath.size(); ++i){
-		cout << completePath[i] << " ";
-	}
-	cout << endl << endl;
-
-	for(i = 0; i < completePath.size(); ++i){
-		completeScoresPath.push_back(allScores[completePath[i]]);
-	}
-
-	/*cout << "Complete Path - Score Widths:\n";
-    for(i = 0; i < completeScoresPath.size(); ++i){
-        cout << completeScoresPath[i] << " ";
-    }
-    cout << endl << endl;*/
-
-
-
-	for(i = 0; i < completePath.size() - 1; ++i){
-		if(boxWidths[completePath[i]][completePath[i+1]] != 0){
-			totalLength += boxWidths[completePath[i]][completePath[i+1]];
-			boxOrder.push_back(allBoxes[completePath[i]][completePath[i+1]]);
-			boxWidthsOrder.push_back(boxWidths[completePath[i]][completePath[i+1]]);
-		}
-	}
-
-	cout << "Order of Boxes:\n";
-	for(i = 0; i < boxOrder.size(); ++i){
-		cout << boxOrder[i] << " ";
-	}
-	cout << endl << endl;
-
-	cout << "Box Widths in Order:\n";
-	for(i = 0; i < boxWidthsOrder.size(); ++i){
-		cout << boxWidthsOrder[i] << " ";
-	}
-	cout << endl;
-
-	cout << "Total Length of Path: " << totalLength << " millimeters.\n\n";
-
-
-
-
-}
-
-void packStripsSmallest(int numScores, int maxStripWidth, vector<int> &mates, vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths){
-
-    int i, j, x, k;
-    vector<int> stripSum(numScores, 0);
-    vector<vector<int> > strip(numScores);
-    int numStrips = 0;
-
-    strip[0].push_back(0);
-    strip[0].push_back(mates[0]);
-    stripSum[0] += boxWidths[0][mates[0]];
-    for(k = 0; k < adjMatrix.size(); ++k){
-        adjMatrix[k][0] = 0;
-        adjMatrix[k][mates[0]] = 0;
-    }
-    x = 0;
-
-    for(j = 0; j < numScores - 2; ++j){
-        for(i = 0; i < strip.size(); ++i){
-            if(!strip[i].empty()){
-                if(adjMatrix[strip[i].back()][j] == 1){
-                    if(stripSum[i] + boxWidths[j][mates[j]] <= maxStripWidth){
-                        strip[i].push_back(j);
-                        strip[i].push_back(mates[j]);
-                        stripSum[i] += boxWidths[j][mates[j]];
-                        for(k = 0; k < adjMatrix.size(); ++k){
-                            adjMatrix[k][j] = 0;
-                            adjMatrix[k][mates[j]] = 0;
-                        }
-                        x = 1;
-                        break;
-                    }
-                }
-                else {
-                    break;
-                }
-            }
-            else if (strip[i].empty()){
-                strip[i].push_back(j);
-                strip[i].push_back(mates[j]);
-                stripSum[i] += boxWidths[j][mates[j]];
-                for(k = 0; k < adjMatrix.size(); ++k){
-                    adjMatrix[k][j] = 0;
-                    adjMatrix[k][mates[j]] = 0;
-                }
-                x = 1;
-                break;
-            }
-
-        }
-        if(x == 1) {
-            x = 0;
-            j = -1;
-        }
-    }
-
-    cout << "Strips:\n";
-    for(i = 0; i < strip.size(); ++i){
-        if(!strip[i].empty()){
-            for(j = 0; j < strip[i].size(); ++j){
-                cout << strip[i][j] << " ";
-            }
-            cout << endl;
-            ++numStrips;
-        }
-    }
-    cout << endl;
-
-    cout << "Total number of strips required: " << numStrips << endl << endl;
-
-    cout << "Number of boxes per strip:\n";
-    for(i = 0; i < strip.size(); ++i){
-        if(!strip[i].empty()){
-            cout << "Strip " << i << ": " << strip[i].size() << endl;
-
-        }
-    }
-    cout << endl;
-
-    cout << "Strip Widths(mm):\n";
-    for(i = 0; i < stripSum.size(); ++i){
-        if(stripSum[i] != 0){
-            cout << "Strip " << i << ": " << stripSum[i] << endl;
-        }
-    }
-    cout << endl;
-
-    cout << "Strip Waste(mm):\n";
-    for(i = 0; i < stripSum.size(); ++i){
-        if(stripSum[i] != 0){
-            cout << "Strip " << i << ": " << maxStripWidth - stripSum[i] << endl;
-        }
-    }
-    cout << endl;
-
-
-
-}
-
-void packStripsMIS(int numScores, int maxStripWidth, vector<vector<int> > &adjMatrix, vector<vector<int> > &mateInduced, vector<vector<int> > &boxWidths){
-
-	int i, j, k;
-    int numStrips = 0;
-    vector<int> stripSum(numScores - 2, 0);
-    vector<vector<int> > strip(numScores - 2);
-
-    i = 0;
-    for(j = 0; j < mateInduced[0].size()-1; j+=2){
-        if(stripSum[i] + boxWidths[mateInduced[0][j]][mateInduced[0][j+1]] <= maxStripWidth){
-            strip[i].push_back(mateInduced[0][j]);
-            strip[i].push_back(mateInduced[0][j+1]);
-            stripSum[i] += boxWidths[mateInduced[0][j]][mateInduced[0][j+1]];
-        }
-        else{
-            ++i;
-            strip[i].push_back(mateInduced[0][j]);
-            strip[i].push_back(mateInduced[0][j+1]);
-            stripSum[i] += boxWidths[mateInduced[0][j]][mateInduced[0][j+1]];
-        }
-    }
-
-    if(mateInduced.size() > 1){
-        for(k = 1; k < mateInduced.size(); ++k){
-            for(j = 0; j < mateInduced[k].size()-1; j+=2){
-                for(i = 0; i < strip.size(); ++i){
-                    if(!strip[i].empty()){
-                        if(adjMatrix[strip[i].back()][mateInduced[k][j]] == 1){
-                            if(stripSum[i] + boxWidths[mateInduced[k][j]][mateInduced[k][j+1]] <= maxStripWidth){
-                                strip[i].push_back(mateInduced[k][j]);
-                                strip[i].push_back(mateInduced[k][j+1]);
-                                stripSum[i] += boxWidths[mateInduced[k][j]][mateInduced[k][j+1]];
-                                break;
-                            }
-                            else{
-                                continue;
-                            }
-                        }
-                        else{
-                            continue;
-                        }
-                    }
-                    else if(strip[i].empty()){
-                        strip[i].push_back(mateInduced[k][j]);
-                        strip[i].push_back(mateInduced[k][j+1]);
-                        stripSum[i] += boxWidths[mateInduced[k][j]][mateInduced[k][j+1]];
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-
-
-    cout << "Strips:\n";
-    for(i = 0; i < strip.size(); ++i){
-        if(!strip[i].empty()){
-            for(j = 0; j < strip[i].size(); ++j){
-                cout << strip[i][j] << " ";
-            }
-            cout << endl;
-            ++numStrips;
-        }
-    }
-    cout << endl;
-
-    cout << "Total number of strips required: " << numStrips << endl << endl;
-
-    cout << "Number of boxes per strip:\n";
-    for(i = 0; i < strip.size(); ++i){
-        if(!strip[i].empty()){
-            cout << "Strip " << i << ": " << strip[i].size()/2 << endl;
-
-        }
-    }
-    cout << endl;
-
-    cout << "Strip Widths(mm):\n";
-    for(i = 0; i < stripSum.size(); ++i){
-        if(stripSum[i] != 0){
-            cout << "Strip " << i << ": " << stripSum[i] << endl;
-        }
-    }
-    cout << endl;
-
-    cout << "Strip Waste(mm):\n";
-    for(i = 0; i < stripSum.size(); ++i){
-        if(stripSum[i] != 0){
-            cout << "Strip " << i << ": " << maxStripWidth - stripSum[i] << endl;
-        }
-    }
-    cout << endl;
-
-}
-
-void weakMatchPath(int vacant, int matchSize, vector<int> &matchList, vector<int> &mates){
-
-	int i, j;
-	int startPath = vacant;
-	int endPath = vacant;
-	int currentVertex;
-	vector<int> tempWMP;
-	vector<vector<int> > weakPaths;
-
-
-	for(i = 0; i < matchList.size(); ++i){
-		if(matchList[i] == vacant){
-			if(startPath == vacant){
-				startPath = i;
-				continue;
-			}
-			else if(startPath != vacant){
-				endPath = i;
-				break;
-			}
-		}
-	}
-
-	cout << "startPath: " << startPath << endl;
-	cout << "endPath: " << endPath << endl;
-
-	currentVertex = startPath;
-	do {
-		tempWMP.push_back(currentVertex);
-		tempWMP.push_back(mates[currentVertex]);
-		currentVertex = matchList[mates[currentVertex]];
-	} while(currentVertex != mates[endPath]);
-
-	tempWMP.push_back(currentVertex);
-	tempWMP.push_back(mates[currentVertex]);
-
-	weakPaths.push_back(tempWMP);
-	tempWMP.clear();
-
-	//cout << "current vertex: " << currentVertex << endl;
-
-	for(i = 0; i < weakPaths.size(); ++i){
-		for(j = 0; j < weakPaths[i].size(); ++j){
-			cout << weakPaths[i][j] << " ";
-		}
-		cout << endl;
-	}
-	cout << endl;
-
-
-
-
+    allScores.clear();
 }
 
 void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, int maxBoxWidth, int numScores, int numBox, vector<int> &allScores, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths, vector<vector<int> > &allBoxes){
@@ -616,11 +61,11 @@ void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, 
 
 	//Create random values to be used as score widths, put in allScores vector (except last two elements)
 	for (i = 0; i < numScores - 2; ++i) {
-		allScores[i] = rand() % (maxWidth - minWidth + 1) + minWidth;
+		allScores.push_back(rand() % (maxWidth - minWidth + 1) + minWidth);
 	}
 	//add two dominating vertices with score widths = 71 (these scores will be either side of same box, mates)
-	allScores[numScores - 2] = 70;
-	allScores[numScores - 1] = 70;
+	allScores.push_back(70);
+    allScores.push_back(70);
 
 
 
@@ -728,6 +173,123 @@ void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, 
         cout << endl;
     }
     cout << endl;*/
+
+}
+
+void createInstanceUser(int threshold, int numScores, vector<int> &allScores, vector<vector<int> > &userMates, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths, vector<vector<int> > &allBoxes){
+
+    int i, j, m1, m2, k;
+
+    for(i = 0; i < userMates.size(); ++i){
+        for(j = 0; j < userMates[i].size() - 1; ++j){
+            allScores.push_back(userMates[i][j]);
+        }
+    }
+
+    allScores.push_back(70);
+    allScores.push_back(70);
+
+    sort(allScores.begin(), allScores.end());
+
+    cout << "AllScores User:\n";
+    for(i = 0; i < allScores.size(); ++i){
+        cout << allScores[i] << " ";
+    }
+    cout << endl << endl;
+
+    for (i = 0; i < allScores.size() - 1; ++i) {
+        for (j = i + 1; j < allScores.size(); ++j) {
+            if (allScores[i] + allScores[j] >= threshold) {
+                adjMatrix[i][j] = 1;
+                adjMatrix[j][i] = 1;
+            }
+        }
+
+    }
+
+    /*cout << "Adjmatrix no mates:\n";
+    for(i = 0; i < adjMatrix.size(); ++i){
+        for(j = 0; j < adjMatrix[i].size(); ++j){
+            cout << adjMatrix[i][j] << " ";
+        }
+        cout << endl;
+    }
+    cout << endl;*/
+
+    vector<int>::iterator it1;
+    vector<int>::iterator it2;
+
+    for(i = 0; i < userMates.size(); ++i) {
+        it1 = find(allScores.begin(), allScores.end(), userMates[i][0]);
+        m1 = it1 - allScores.begin();
+        it2 = find(allScores.begin(), allScores.end(), userMates[i][1]);
+        m2 = it2 - allScores.begin();
+        //cout << "position of pairs " << userMates[i][0] << " and " << userMates[i][1] << ": " << m1 << "-" << m2 << endl;
+        adjMatrix[m1][m2] = 2;
+        adjMatrix[m2][m1] = 2;
+        boxWidths[m1][m2] = userMates[i][2];
+        boxWidths[m2][m1] = userMates[i][2];
+    }
+
+
+    adjMatrix[allScores.size()-1][allScores.size()-2] = 2;
+    adjMatrix[allScores.size()-2][allScores.size()-1] = 2;
+
+    /*cout << "AdjMatrix mates:\n";
+    for(i = 0; i < adjMatrix.size(); ++i){
+        for(j = 0; j < adjMatrix[i].size(); ++j){
+            cout << adjMatrix[i][j] << " ";
+        }
+        cout << endl;
+    }
+    cout << endl;*/
+
+    /*cout << "BoxWidths:\n";
+    for(i = 0; i < numScores; ++i){
+        for(j = 0; j < numScores; ++j){
+            cout << boxWidths[i][j] << "  ";
+        }
+        cout << endl;
+    }
+    cout << endl;*/
+
+    for (i = 0; i < numScores; ++i) {
+        for (j = 0; j < numScores; ++j) {
+            if (adjMatrix[i][j] == 2) {
+                mates[i] = j;
+                break;
+            }
+        }
+    }
+
+    /*cout << "Mates:\n";
+    for(i = 0; i < mates.size(); ++i){
+        cout << mates[i] << " ";
+    }
+    cout << endl;*/
+
+    k = 1;
+    for(i = 0; i < numScores; ++i){
+        for(j = i+1; j < numScores; ++j){
+            if(adjMatrix[i][j] == 2){
+                allBoxes[i][j] = k;
+                allBoxes[j][i] = k * -1;
+                ++k;
+                break;
+            }
+        }
+    }
+
+    /*cout << "allBoxes:\n";
+    for(i = 0; i < numScores; ++i){
+        for(j = 0; j < numScores; ++j){
+            cout << allBoxes[i][j] << " ";
+        }
+        cout << endl;
+    }
+    cout << endl;*/
+
+
 
 }
 
@@ -919,6 +481,313 @@ void FCA(int &qstar, int vacant, int matchSize, vector<vector<int> > &adjMatrix,
 
 }
 
+void oneTCyclePatch(int v, int full, int save, vector<int> &matchList, vector<int> &cycleVertex, vector<int> &fullCycle, vector<vector<int> > &mateInduced, vector<vector<int> > &T){
+
+    int i;
+
+    //CASE ONE: if element matchList[T[full][v]] is before element T[full][v] in the mateInduced cycle
+    //i.e. if the element at position 'save' in the cycle is matchList[T[full][v]] and the element at position "save + 1" is T[full][v]
+    if(mateInduced[cycleVertex[T[full][v]]][save + 1] == T[full][v]){
+        for(i = save + 1; i-- > 0;){ //from element at position 'save' to the first element in the cycle
+            fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][i]);
+        }
+        for(i = mateInduced[cycleVertex[T[full][v]]].size(); i-- > save +1;){ //from end of cycle to element at position save+1
+            fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][i]);
+        }
+    }
+
+        //CASE TWO: if element matchList[T[full][v]] is after element T[full][v] in the mateInduced cycle
+        //i.e. if the element at position 'save' in the cycle is matchList[T[full][v]] and the element at position "save - 1" is T[full][v]
+    else if (mateInduced[cycleVertex[T[full][v]]][save - 1] == T[full][v]){
+        for(i = save; i < mateInduced[cycleVertex[T[full][v]]].size(); ++i){
+            fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][i]);
+        }
+        for(i = 0; i < save; ++i){
+            fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][i]);
+        }
+    }
+
+        //CASE THREE: if element matchList[T[full][v]] is the first element in the cycle, and T[full][v] is the last element in the cycle
+        //i.e. if save = 0 and T[full][v] is at position mateInduced[cycleVertex[T[full][v]]].size()-1
+    else if (save == 0 && mateInduced[cycleVertex[T[full][v]]][mateInduced[cycleVertex[T[full][v]]].size()-1] == T[full][v]){
+        for(i = 0; i < mateInduced[cycleVertex[T[full][v]]].size(); ++i){
+            fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][i]);
+        }
+    }
+
+        //CASE FOUR: if element matchList[T[full][v]] is the last element in the cycle, and T[full][v] is the first element in the cycle
+        //i.e. if save = mateInduced[cycleVertex[T[full][v]]].size()-1 and T[full][v] is at position 0
+    else if(save == mateInduced[cycleVertex[T[full][v]]].size()-1 && mateInduced[cycleVertex[T[full][v]]][0] == T[full][v]){
+        for(i = mateInduced[cycleVertex[T[full][v]]].size(); i-- > 0; ){
+            fullCycle.push_back(mateInduced[cycleVertex[T[full][v]]][i]);
+        }
+    }
+
+}
+
+void multipleTCyclePatch(int &u, int v, int save, int vacant, vector<int> &matchList, vector<int> &cycleVertex, vector<int> &fullCycle, vector<vector<int> > &mateInduced, vector<vector<int> > &Tpatch, vector<int> &patchVertex){
+
+    int i;
+    int x = 0;
+
+    //CASE ONE: if the current value is matchList[Tpatch[u][v]] and the previous value is Tpatch[u][v]
+    if (mateInduced[cycleVertex[Tpatch[u][v]]][save - 1] == Tpatch[u][v]){
+        fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][save]);
+        for(i = save + 1; i < mateInduced[cycleVertex[Tpatch[u][v]]].size(); ++i){
+            if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] == vacant) {
+                fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+            }
+            else if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] != vacant){
+                fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+                u = patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]];
+                x = 1;
+                break;
+            }
+        }
+        if(x == 0) {
+            for (i = 0; i < save; ++i) {
+                if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] == vacant) {
+                    fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+                }
+                else if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] != vacant){
+                    fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+                    u = patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]];
+                    break;
+                }
+            }
+        }
+    }
+
+        //CASE TWO: if the current value is Tpatch[u][v] and the previous value is matchList[Tpatch[u][v]]
+    else if (mateInduced[cycleVertex[Tpatch[u][v]]][save - 1] == matchList[Tpatch[u][v]]){
+        fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][save]);
+        for(i = save + 1; i < mateInduced[cycleVertex[Tpatch[u][v]]].size(); ++i){
+            if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] == vacant) {
+                fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+            }
+            else if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] != vacant){
+                fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+                u = patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]];
+                x = 1;
+                break;
+            }
+        }
+        if(x == 0) {
+            for (i = 0; i < save; ++i) {
+                if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] == vacant) {
+                    fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+                }
+                else if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] != vacant){
+                    fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+                    u = patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]];
+                    break;
+                }
+            }
+        }
+    }
+
+        //CASE THREE: if the current vertex is Tpatch[u][v] and the next element is matchList[Tpatch[u][v]]
+    else if(mateInduced[cycleVertex[Tpatch[u][v]]][save + 1] == matchList[Tpatch[u][v]]){
+        fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][save]);
+        for(i = save; i-- > 0;){ //from element at position 'save' to the first element in the cycle
+            if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] == vacant) {
+                fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+            }
+            else if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] != vacant){
+                fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+                u = patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]];
+                x = 1;
+                break;
+            }
+        }
+        if(x == 0) {
+            for (i = mateInduced[cycleVertex[Tpatch[u][v]]].size(); i-- > save + 1;) { //from end of cycle to element at position save+1
+                if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] == vacant) {
+                    fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+                }
+                else if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] != vacant){
+                    fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+                    u = patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]];
+                    break;
+                }
+            }
+        }
+    }
+
+        //CASE FOUR: if the current vertex is matchList[Tpatch[u][v]] and the next element is Tpatch[u][v]
+    else if(mateInduced[cycleVertex[Tpatch[u][v]]][save + 1] == Tpatch[u][v]){
+        fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][save]);
+        for(i = save; i-- > 0;){ //from element at position 'save' to the first element in the cycle
+            if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] == vacant) {
+                fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+            }
+            else if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] != vacant){
+                fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+                u = patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]];
+                x = 1;
+                break;
+            }
+        }
+        if(x == 0) {
+            for (i = mateInduced[cycleVertex[Tpatch[u][v]]].size(); i-- > save + 1;) { //from end of cycle to element at position save+1
+                if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] == vacant) {
+                    fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+                }
+                else if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] != vacant){
+                    fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+                    u = patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]];
+                    break;
+                }
+            }
+        }
+    }
+
+        //CASE FIVE: if the current vertex is matchList[Tpatch[u][v]] and is the first element in the cycle, and
+        //the last element in the cycle is Tpatch[u][v]
+    else if(save == 0 && mateInduced[cycleVertex[Tpatch[u][v]]][mateInduced[cycleVertex[Tpatch[u][v]]].size()-1] == Tpatch[u][v]){
+        fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][save]);
+        for(i = 1; i < mateInduced[cycleVertex[Tpatch[u][v]]].size(); ++i){
+            if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] == vacant) {
+                fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+            }
+            else if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] != vacant){
+                fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+                u = patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]];
+                break;
+            }
+        }
+    }
+
+        //CASE SIX: if the current vertex is matchList[Tpatch[u][v]] and is last element in the cycle, and
+        //the first element in the cycle is Tpatch[u][v]
+    else if(save == mateInduced[cycleVertex[Tpatch[u][v]]].size()-1 && mateInduced[cycleVertex[Tpatch[u][v]]][0] == Tpatch[u][v]){
+        fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][save]);
+        for(i = mateInduced[cycleVertex[Tpatch[u][v]]].size()-1; i-- > 0; ){
+            if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] == vacant) {
+                fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+            }
+            else if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] != vacant){
+                fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+                u = patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]];
+                break;
+            }
+        }
+    }
+
+        //CASE SEVEN: if the current vertex is Tpatch[u][v] and is the first element in the cycle, and
+        //and the last element in the cycle is matchList[Tpatch[u][v]]
+    else if(save == 0 && mateInduced[cycleVertex[Tpatch[u][v]]][mateInduced[cycleVertex[Tpatch[u][v]]].size()-1] == matchList[Tpatch[u][v]]){
+        fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][save]);
+        for(i = 1; i < mateInduced[cycleVertex[Tpatch[u][v]]].size(); ++i){
+            if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] == vacant) {
+                fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+            }
+            else if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] != vacant){
+                fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+                u = patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]];
+                break;
+            }
+        }
+    }
+
+        //CASE EIGHT: if the current vertex is Tpatch[u][v] and is last element in the cycle, and
+        //the first element in the cycle is matchList[Tpatch[u][v]]
+    else if(save == mateInduced[cycleVertex[Tpatch[u][v]]].size()-1 && mateInduced[cycleVertex[Tpatch[u][v]]][0] == matchList[Tpatch[u][v]]){
+        fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][save]);
+        for(i = mateInduced[cycleVertex[Tpatch[u][v]]].size()-1; i-- > 0; ){
+            if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] == vacant) {
+                fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+            }
+            else if(patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]] != vacant){
+                fullCycle.push_back(mateInduced[cycleVertex[Tpatch[u][v]]][i]);
+                u = patchVertex[mateInduced[cycleVertex[Tpatch[u][v]]][i]];
+                break;
+            }
+        }
+    }
+
+}
+
+void makePath(int numScores, vector<int> &fullCycle, vector<int> &completePath, vector<vector<int> > &boxWidths, vector<int> &allScores, vector<vector<int> > &allBoxes){
+
+    int i, j;
+    int totalLength = 0;
+    vector<int> completeScoresPath;
+    vector<int> boxOrder;
+    vector<int> boxWidthsOrder;
+
+
+    for(i = 0; i < fullCycle.size()-1; ++i){
+        if((fullCycle[i] == numScores - 1 && fullCycle[i+1] == numScores - 2) || (fullCycle[i] == numScores - 2 && fullCycle[i+1] == numScores - 1)){
+            if(i == 0){ //if the dominating vertices are at the beginning of the fullCycle vector
+                for(j = 2; j < fullCycle.size(); ++j){
+                    completePath.push_back(fullCycle[j]);
+                }
+                break;
+            }
+
+            else if(i == fullCycle.size()-2){ //if the dominating vertices are at the end of the fullCycle vector
+                for(j = 0; j < fullCycle.size()-2; ++j){
+                    completePath.push_back(fullCycle[j]);
+                }
+                break;
+            }
+            else{ //if the dominating vertices are in the middle of the fullCycle vector
+                for(j = i+2; j < fullCycle.size(); ++j){
+                    completePath.push_back(fullCycle[j]);
+                }
+                for(j = 0; j < i; ++j){
+                    completePath.push_back(fullCycle[j]);
+                }
+                break;
+
+            }
+
+        }
+    }
+
+    cout << "Complete Path:\n";
+    for(i = 0; i < completePath.size(); ++i){
+        cout << completePath[i] << " ";
+    }
+    cout << endl << endl;
+
+    for(i = 0; i < completePath.size(); ++i){
+        completeScoresPath.push_back(allScores[completePath[i]]);
+    }
+
+    /*cout << "Complete Path - Score Widths:\n";
+    for(i = 0; i < completeScoresPath.size(); ++i){
+        cout << completeScoresPath[i] << " ";
+    }
+    cout << endl << endl;*/
+
+
+
+    for(i = 0; i < completePath.size() - 1; ++i){
+        if(boxWidths[completePath[i]][completePath[i+1]] != 0){
+            totalLength += boxWidths[completePath[i]][completePath[i+1]];
+            boxOrder.push_back(allBoxes[completePath[i]][completePath[i+1]]);
+            boxWidthsOrder.push_back(boxWidths[completePath[i]][completePath[i+1]]);
+        }
+    }
+
+    cout << "Order of Boxes:\n";
+    for(i = 0; i < boxOrder.size(); ++i){
+        cout << boxOrder[i] << " ";
+    }
+    cout << endl << endl;
+
+    cout << "Box Widths in Order:\n";
+    for(i = 0; i < boxWidthsOrder.size(); ++i){
+        cout << boxWidthsOrder[i] << " ";
+    }
+    cout << endl;
+
+    cout << "Total Length of Path: " << totalLength << " millimeters.\n\n";
+
+}
+
 void patchGraph(int qstar, int vacant, int instance, int numScores, int numCycles, int &feasible, int &infeasible, int &fullT, int &splitT, int &noPatch, int &problem, vector<int> &matchList, vector<int> &cycleVertex, vector<vector<int> > &mateInduced, vector<vector<int> > &S, vector<vector<int> > &T, vector<int> &fullCycle, vector<int> &completePath, vector<vector<int> > &boxWidths, vector<int> &allScores, vector<vector<int> > &allBoxes){
 
 	int i, j, q, u, v, save, SSum, SqIntS;
@@ -947,7 +816,7 @@ void patchGraph(int qstar, int vacant, int instance, int numScores, int numCycle
 					break;
 				}
 			}
-			loopCycle(v, full, save, matchList, cycleVertex, fullCycle, mateInduced, T);
+            oneTCyclePatch(v, full, save, matchList, cycleVertex, fullCycle, mateInduced, T);
 
 		}
 		/*cout << instance << ": Full Cycle (one T-cycle):\n";
@@ -1036,7 +905,7 @@ void patchGraph(int qstar, int vacant, int instance, int numScores, int numCycle
 					break;
 				}
 			}
-			loopCyclePatch(u, v, save, vacant, matchList, cycleVertex, fullCycle, mateInduced, Tpatch, patchVertex);
+            multipleTCyclePatch(u, v, save, vacant, matchList, cycleVertex, fullCycle, mateInduced, Tpatch, patchVertex);
 
 			while (fullCycle.size() < numScores) {
 				save = 0;
@@ -1069,7 +938,7 @@ void patchGraph(int qstar, int vacant, int instance, int numScores, int numCycle
 						break;
 					}
 				}
-				loopCyclePatch(u, v, save, vacant, matchList, cycleVertex, fullCycle, mateInduced, Tpatch, patchVertex);
+                multipleTCyclePatch(u, v, save, vacant, matchList, cycleVertex, fullCycle, mateInduced, Tpatch, patchVertex);
 			}
 
 			/*cout << instance << ": Full Cycle (Mutiple T-cycles):\n";
@@ -1095,6 +964,289 @@ void patchGraph(int qstar, int vacant, int instance, int numScores, int numCycle
 
 
 	}
+
+}
+
+void packStripsSmallest(int numScores, int numBox, int maxStripWidth, vector<int> &mates, vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths){
+
+    // USE WITH NUMSCORES - 2
+    int i, j, x, k;
+    vector<int> stripSum(numBox, 0);
+    vector<vector<int> > strip(numBox);
+    int numStrips = 0;
+
+    strip[0].push_back(0);
+    strip[0].push_back(mates[0]);
+    stripSum[0] += boxWidths[0][mates[0]];
+    for(k = 0; k < adjMatrix.size(); ++k){
+        adjMatrix[k][0] = 0;
+        adjMatrix[k][mates[0]] = 0;
+    }
+    x = 0;
+
+    for(j = 0; j < numScores - 2; ++j){
+        for(i = 0; i < strip.size(); ++i){
+            if(!strip[i].empty()){
+                if(adjMatrix[strip[i].back()][j] == 1){
+                    if(stripSum[i] + boxWidths[j][mates[j]] <= maxStripWidth){
+                        strip[i].push_back(j);
+                        strip[i].push_back(mates[j]);
+                        stripSum[i] += boxWidths[j][mates[j]];
+                        for(k = 0; k < adjMatrix.size(); ++k){
+                            adjMatrix[k][j] = 0;
+                            adjMatrix[k][mates[j]] = 0;
+                        }
+                        x = 1;
+                        break;
+                    }
+                }
+                else {
+                    break;
+                }
+            }
+            else if (strip[i].empty()){
+                strip[i].push_back(j);
+                strip[i].push_back(mates[j]);
+                stripSum[i] += boxWidths[j][mates[j]];
+                for(k = 0; k < adjMatrix.size(); ++k){
+                    adjMatrix[k][j] = 0;
+                    adjMatrix[k][mates[j]] = 0;
+                }
+                x = 1;
+                break;
+            }
+
+        }
+        if(x == 1) {
+            x = 0;
+            j = -1;
+        }
+    }
+
+    cout << "Strips:\n";
+    for(i = 0; i < strip.size(); ++i){
+        if(!strip[i].empty()){
+            for(j = 0; j < strip[i].size(); ++j){
+                cout << strip[i][j] << " ";
+            }
+            cout << endl;
+            ++numStrips;
+        }
+    }
+    cout << endl;
+
+    cout << "Total number of strips required: " << numStrips << endl << endl;
+
+    cout << "Number of boxes per strip:\n";
+    for(i = 0; i < strip.size(); ++i){
+        if(!strip[i].empty()){
+            cout << "Strip " << i << ": " << strip[i].size() << endl;
+
+        }
+    }
+    cout << endl;
+
+    cout << "Strip Widths(mm):\n";
+    for(i = 0; i < stripSum.size(); ++i){
+        if(stripSum[i] != 0){
+            cout << "Strip " << i << ": " << stripSum[i] << endl;
+        }
+    }
+    cout << endl;
+
+    cout << "Strip Waste(mm):\n";
+    for(i = 0; i < stripSum.size(); ++i){
+        if(stripSum[i] != 0){
+            cout << "Strip " << i << ": " << maxStripWidth - stripSum[i] << endl;
+        }
+    }
+    cout << endl;
+
+
+
+}
+
+void packStripsMIS(int numBox, int maxStripWidth, vector<vector<int> > &adjMatrix, vector<vector<int> > &mateInduced, vector<vector<int> > &boxWidths){
+
+    int i, j, k;
+    int numStrips = 0;
+    vector<int> stripSum(numBox, 0);
+    vector<vector<int> > strip(numBox);
+
+    i = 0;
+    for(j = 0; j < mateInduced[0].size()-1; j+=2){
+        if(stripSum[i] + boxWidths[mateInduced[0][j]][mateInduced[0][j+1]] <= maxStripWidth){
+            strip[i].push_back(mateInduced[0][j]);
+            strip[i].push_back(mateInduced[0][j+1]);
+            stripSum[i] += boxWidths[mateInduced[0][j]][mateInduced[0][j+1]];
+        }
+        else{
+            ++i;
+            strip[i].push_back(mateInduced[0][j]);
+            strip[i].push_back(mateInduced[0][j+1]);
+            stripSum[i] += boxWidths[mateInduced[0][j]][mateInduced[0][j+1]];
+        }
+    }
+
+    if(mateInduced.size() > 1){
+        for(k = 1; k < mateInduced.size(); ++k){
+            for(j = 0; j < mateInduced[k].size()-1; j+=2){
+                for(i = 0; i < strip.size(); ++i){
+                    if(!strip[i].empty()){
+                        if(adjMatrix[strip[i].back()][mateInduced[k][j]] == 1){
+                            if(stripSum[i] + boxWidths[mateInduced[k][j]][mateInduced[k][j+1]] <= maxStripWidth){
+                                strip[i].push_back(mateInduced[k][j]);
+                                strip[i].push_back(mateInduced[k][j+1]);
+                                stripSum[i] += boxWidths[mateInduced[k][j]][mateInduced[k][j+1]];
+                                break;
+                            }
+                            else{
+                                continue;
+                            }
+                        }
+                        else{
+                            continue;
+                        }
+                    }
+                    else if(strip[i].empty()){
+                        strip[i].push_back(mateInduced[k][j]);
+                        strip[i].push_back(mateInduced[k][j+1]);
+                        stripSum[i] += boxWidths[mateInduced[k][j]][mateInduced[k][j+1]];
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+
+
+    cout << "Strips:\n";
+    for(i = 0; i < strip.size(); ++i){
+        if(!strip[i].empty()){
+            for(j = 0; j < strip[i].size(); ++j){
+                cout << strip[i][j] << " ";
+            }
+            cout << endl;
+            ++numStrips;
+        }
+    }
+    cout << endl;
+
+    cout << "Total number of strips required: " << numStrips << endl << endl;
+
+    cout << "Number of boxes per strip:\n";
+    for(i = 0; i < strip.size(); ++i){
+        if(!strip[i].empty()){
+            cout << "Strip " << i << ": " << strip[i].size()/2 << endl;
+
+        }
+    }
+    cout << endl;
+
+    cout << "Strip Widths(mm):\n";
+    for(i = 0; i < stripSum.size(); ++i){
+        if(stripSum[i] != 0){
+            cout << "Strip " << i << ": " << stripSum[i] << endl;
+        }
+    }
+    cout << endl;
+
+    cout << "Strip Waste(mm):\n";
+    for(i = 0; i < stripSum.size(); ++i){
+        if(stripSum[i] != 0){
+            cout << "Strip " << i << ": " << maxStripWidth - stripSum[i] << endl;
+        }
+    }
+    cout << endl;
+
+}
+
+void weakMatchPath(int vacant, int numScores, vector<int> &matchList, vector<int> &mates){
+
+    int i, j;
+    int startPath = vacant;
+    int endPath = vacant;
+    int currentVertex;
+    int smallestVertex;
+    vector<int> checked(numScores, 0);
+    vector<int> tempWMP;
+    vector<vector<int> > weakPaths;
+
+
+    for(i = 0; i < matchList.size(); ++i){
+        if(matchList[i] == vacant){
+            if(startPath == vacant){
+                startPath = i;
+                continue;
+            }
+            else if(startPath != vacant){
+                endPath = i;
+                break;
+            }
+        }
+    }
+
+    cout << "startPath: " << startPath << endl;
+    cout << "endPath: " << endPath << endl;
+
+    currentVertex = startPath;
+
+    do {
+        tempWMP.push_back(currentVertex);
+        checked[currentVertex] = 1;
+        tempWMP.push_back(mates[currentVertex]);
+        checked[mates[currentVertex]] = 1;
+        currentVertex = matchList[mates[currentVertex]];
+    } while(currentVertex != mates[endPath]);
+
+    tempWMP.push_back(currentVertex);
+    checked[currentVertex] = 1;
+    tempWMP.push_back(mates[currentVertex]);
+    checked[mates[currentVertex]] = 1;
+
+    weakPaths.push_back(tempWMP);
+    tempWMP.clear();
+
+    for(i = 0; i < numScores; ++i){
+        if(checked[i] == 0){
+            smallestVertex = i;
+            break;
+        }
+    }
+
+    do {
+        currentVertex = smallestVertex;
+        do {
+            tempWMP.push_back(currentVertex);
+            checked[currentVertex] = 1;
+            tempWMP.push_back(mates[currentVertex]);
+            checked[mates[currentVertex]] = 1;
+            currentVertex = matchList[mates[currentVertex]];
+        } while (currentVertex != smallestVertex);
+
+        weakPaths.push_back(tempWMP);
+        tempWMP.clear();
+
+        for (i = 0; i < numScores; ++i) {
+            if (checked[i] == 0) {
+                smallestVertex = i;
+                break;
+            }
+        }
+
+
+    } while (smallestVertex != currentVertex);
+
+
+    for(i = 0; i < weakPaths.size(); ++i){
+        for(j = 0; j < weakPaths[i].size(); ++j){
+            cout << weakPaths[i][j] << " ";
+        }
+        cout << endl;
+    }
+    cout << endl;
+
 
 }
 
@@ -1128,7 +1280,7 @@ int main(int argc, char **argv){
 
 
 	//VARIABLES
-	int i, j, k, q;
+	int i, j, k, q, n;
 	int instance; //counter for instances loop
 	int numScores = numBox * 2; //number of scores, 2 per box (1 either side), last two scores are dominating vertices
 	int numComp = (numBox + (numBox % 2)) / 2;
@@ -1149,7 +1301,8 @@ int main(int argc, char **argv){
 	int matchSize; //size (cardinality) of the matching list (matchList.size()) (&MTGMA, FCA)
 	int numCycles; //number of cycles in the MIS (mateInduced.size()) (&MIS, patchGraph)
 	int qstar; //number of T-cycles (&FCA, patchGraph)
-	vector<int> allScores(numScores, 0); //vector containing all score widths (createInstance, MTGMA)
+	//vector<int> allScores(numScores, 0); //vector containing all score widths (createInstance, MTGMA)
+    vector<int> allScores;
 	vector<vector<int> > adjMatrix(numScores, vector<int>(numScores, 0)); //adjaceny matrix (createInstance, MTGMA, MIS, FCA)
 	vector<int> mates(numScores, 0); //contains vertex index for mates, e.g if vertex 0 is mates with vertex 4, then mates[0] = 4 (createInstance, MIS)
 	vector<int> matchList(numScores, vacant); //contains vertex index for matching vertices, e.g. if vertex 0 is matched with vertex 9, then matchList[0] = 9 (MTGMA, MIS, FCA, patchGraph)
@@ -1166,29 +1319,87 @@ int main(int argc, char **argv){
     //if value is negative, i.e "-3", then the 3rd box is rotated, i.e. smallest score on RHS and larger score on LHS.
 	srand(randomSeed); //seed
 	//endregion
+    vector<vector<int> > userMates;
+    vector<int> tempUser(3, 0);
+    //vector<int> tempUserBox(n, 0);
 
 	cout << "Minimum Score Separation Problem - Matching-Based Alternating Hamiltonicity Recognition Algorithm\n\n";
+
+    ifstream inStream;
+    inStream.open(argv[9]);
+    if(inStream.fail()){
+        cout << "ERROR: file cannot be opened.\n";
+        exit(1);
+    }
+    inStream >> n;
+
+    for(i = 0; i < n; ++i){
+        for(j = 0; j < 3; ++j) {
+            inStream >> tempUser[j];
+        }
+        userMates.push_back(tempUser);
+    }
+    inStream.close();
+
+    /*for(i = 0; i < userMates.size(); ++i){
+        for(j = 0; j < userMates[i].size(); ++j){
+            cout << userMates[i][j] << " ";
+        }
+        cout << endl;
+    }
+    cout << endl;*/
+
+
+
+
+
+
+
 	time_t startTime, endTime; //start clock
 	startTime = clock();
 
+
+    int choice;
 	for(instance = 0; instance < numInstances; ++instance) {
 		//startPath = vacant;
 		//endPath = vacant;
-		resetVectors(vacant, numScores, numComp, allScores, adjMatrix, cycleVertex, matchList, mates, S, boxWidths, allBoxes);
-		clearVectors(mateInduced, lengthMateInduced, T, fullCycle, completePath);
+		//resetVectors(vacant, numScores, numComp, allScores, adjMatrix, cycleVertex, matchList, mates, S, boxWidths, allBoxes);
+		//clearVectors(allScores, mateInduced, lengthMateInduced, T, fullCycle, completePath);
 
-		createInstance(threshold, minWidth, maxWidth, minBoxWidth, maxBoxWidth, numScores, numBox, allScores, adjMatrix, mates, boxWidths, allBoxes);
+        cout << "1 = random, 2 = own file:";
+        cin >> choice;
+        while(choice !=1 && choice != 2){
+            cout << "Please enter either 1 or 2:";
+            cin >> choice;
+        }
+        switch(choice){
+            case 1:
+                createInstance(threshold, minWidth, maxWidth, minBoxWidth, maxBoxWidth, numScores, numBox, allScores, adjMatrix, mates, boxWidths, allBoxes);
+                break;
 
-        //packStripsSmallest(numScores, maxStripWidth, mates, adjMatrix, boxWidths);
+            case 2:
+                createInstanceUser(threshold, numScores, allScores, userMates, adjMatrix, mates, boxWidths, allBoxes);
+                break;
+
+            default:
+                cout << "Please enter 1 or 2.\n";
+                break;
+
+        }
+
+
+		//createInstance(threshold, minWidth, maxWidth, minBoxWidth, maxBoxWidth, numScores, numBox, allScores, adjMatrix, mates, boxWidths, allBoxes);
+        //continue;
+        //packStripsSmallest(numScores, numBox, maxStripWidth, mates, adjMatrix, boxWidths);
         //continue; //do not do MTGMA/MIS/FCA/PATCH
 
 		MTGMA(vacant, threshold, numScores, matchSize, allScores, adjMatrix, cycleVertex, matchList);
 		//If the number of matches (i.e. the size of the matching list M) is less than the number of boxes (n), then instance is infeasible ( |M| < n )
-        //continue;
-		if(matchSize == numBox - 1){
-			weakMatchPath(vacant, matchSize, matchList, mates);
-		}
-		continue;
+        continue;
+		/*if(matchSize == numBox - 1){
+			weakMatchPath(vacant, numScores, matchList, mates);
+		}*/
+		//continue;
 		if (matchSize < numBox) {
 			cout << instance << ": INFEASIBLE - Not enough matching edges.\n\n";
 			++infeasible;
@@ -1197,7 +1408,7 @@ int main(int argc, char **argv){
 		}
 
 		MIS(numScores, numCycles, adjMatrix, mates, matchList, mateInduced, lengthMateInduced);
-        //packStripsMIS(numScores, maxStripWidth, adjMatrix, mateInduced, boxWidths);
+        //packStripsMIS(numBox, maxStripWidth, adjMatrix, mateInduced, boxWidths);
         //continue;
 		//If the mate-induced structure only consists of one cycle, then the problem has been solved and is feasible (just remove one matching edge to find feasible path)
 		if (lengthMateInduced[0] == numScores) { //if all of the vertices are in the first (and only) cycle of the mate-induced structure
