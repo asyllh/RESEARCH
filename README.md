@@ -1,4 +1,3 @@
-	
 **//VARIABLE FROM ARGUMENTS:**
 * int numInstances = atoi(argv[1]); //number of instances of mssp, use in main for loop
 * int numBox = atoi(argv[2]) + 1; //number of boxes in mssp plus 1 extra box (scores on either side of extra box will be dominating vertices, score widths = 71)
