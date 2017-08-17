@@ -164,6 +164,7 @@ void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, 
 			}
 		}
 	}
+    cout << endl;
 
 	/*cout << "allBoxes:\n";
     for(i = 0; i < numScores; ++i){
@@ -176,13 +177,13 @@ void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, 
 
 }
 
-void createInstanceUser(int threshold, int numScores, vector<int> &allScores, vector<vector<int> > &userMates, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths, vector<vector<int> > &allBoxes){
+void createInstanceUser(int threshold, int numScores, vector<int> &allScores, vector<vector<int> > &userInput, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths, vector<vector<int> > &allBoxes){
 
     int i, j, m1, m2, k;
 
-    for(i = 0; i < userMates.size(); ++i){
-        for(j = 0; j < userMates[i].size() - 1; ++j){
-            allScores.push_back(userMates[i][j]);
+    for(i = 0; i < userInput.size(); ++i){
+        for(j = 0; j < userInput[i].size() - 1; ++j){
+            allScores.push_back(userInput[i][j]);
         }
     }
 
@@ -219,16 +220,16 @@ void createInstanceUser(int threshold, int numScores, vector<int> &allScores, ve
     vector<int>::iterator it1;
     vector<int>::iterator it2;
 
-    for(i = 0; i < userMates.size(); ++i) {
-        it1 = find(allScores.begin(), allScores.end(), userMates[i][0]);
+    for(i = 0; i < userInput.size(); ++i) {
+        it1 = find(allScores.begin(), allScores.end(), userInput[i][0]);
         m1 = it1 - allScores.begin();
-        it2 = find(allScores.begin(), allScores.end(), userMates[i][1]);
+        it2 = find(allScores.begin(), allScores.end(), userInput[i][1]);
         m2 = it2 - allScores.begin();
         //cout << "position of pairs " << userMates[i][0] << " and " << userMates[i][1] << ": " << m1 << "-" << m2 << endl;
         adjMatrix[m1][m2] = 2;
         adjMatrix[m2][m1] = 2;
-        boxWidths[m1][m2] = userMates[i][2];
-        boxWidths[m2][m1] = userMates[i][2];
+        boxWidths[m1][m2] = userInput[i][2];
+        boxWidths[m2][m1] = userInput[i][2];
     }
 
 
@@ -1250,6 +1251,150 @@ void weakMatchPath(int vacant, int numScores, vector<int> &matchList, vector<int
 
 }
 
+void packStripsBFD(int numBox, int maxBoxWidth, int maxStripWidth, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths){
+
+    int i, j, k, mini;
+    int min = 0;
+    int max = maxBoxWidth;
+    vector<int> stripResidual(numBox, maxStripWidth);
+    vector<vector<int> > strip(numBox);
+    vector<int> boxDecrease; //contains the score number of the smallest score of the boxes in decreasing order
+    /* i.e if mates 0-4 have boxwidth 536, mates 1-3 have BW 494, mates 2-5 have BW 940
+     * then boxDecrease will contain the numbers: 2 0 1 (in that specific order)
+     */
+
+    while(boxDecrease.size() < numBox -1) { //numBox -1, doesn't include dominating vertices
+        for (i = 0; i < mates.size(); ++i) {
+            if (boxWidths[i][mates[i]] > min && boxWidths[i][mates[i]] < max) { //what happens if two boxes have the same width?
+                min = boxWidths[i][mates[i]];
+                mini = i;
+            }
+        }
+        boxDecrease.push_back(mini);
+        max = min;
+        min = 0;
+    }
+
+    cout << "Box Decrease:\n";
+    for(i = 0; i < boxDecrease.size(); ++i){
+        cout << boxDecrease[i] << " ";
+    }
+    cout << endl << endl;
+
+    int minRes;
+    int minResj;
+    int minResk;
+    int maxRes;
+    int x;
+
+    strip[0].push_back(boxDecrease[0]);
+    strip[0].push_back(mates[boxDecrease[0]]);
+    stripResidual[0] -= boxWidths[boxDecrease[0]][mates[boxDecrease[0]]];
+
+
+    for(i = 1; i < boxDecrease.size(); ++i){
+        minRes = maxStripWidth + 1;
+        for(j = 0; j < stripResidual.size(); ++j){
+            if(stripResidual[j] < minRes){
+                minRes = stripResidual[j];
+                minResj = j;
+            }
+        }
+
+        x = 0;
+        do {
+            if(!strip[minResj].empty()) {
+                if (stripResidual[minResj] - boxWidths[boxDecrease[i]][mates[boxDecrease[i]]] >= 0) {
+                    if (adjMatrix[strip[minResj].back()][boxDecrease[i]] == 1) {
+                        strip[minResj].push_back(boxDecrease[i]);
+                        strip[minResj].push_back(mates[boxDecrease[i]]);
+                        stripResidual[minResj] -= boxWidths[boxDecrease[i]][mates[boxDecrease[i]]];
+                        x = 1;
+                        continue;
+                    }
+
+                    else if (adjMatrix[strip[minResj].back()][mates[boxDecrease[i]]] == 1) {
+                        strip[minResj].push_back(mates[boxDecrease[i]]);
+                        strip[minResj].push_back(boxDecrease[i]);
+                        stripResidual[minResj] -= boxWidths[boxDecrease[i]][mates[boxDecrease[i]]];
+                        x = 1;
+                        continue;
+                    }
+
+                    else { //if neither score is adjacent, try next strip
+                        maxRes = maxStripWidth + 1;
+                        for (k = 0; k < stripResidual.size(); ++k) {
+                            if (stripResidual[k] > minRes && stripResidual[k] < maxRes) {
+                                maxRes = stripResidual[k];
+                                minResk = k;
+                            }
+
+                            else if (stripResidual[k] == minRes) {
+                                if (minResj != k) {
+                                    maxRes = stripResidual[k];
+                                    minResk = k;
+                                    break;
+                                }
+                            }
+                        }
+                        minRes = maxRes;
+                        minResj = minResk;
+                        continue;
+                    }
+                }
+
+                else { //if box doesn't fit in strip, try next strip
+                    maxRes = maxStripWidth + 1;
+                    for (k = 0; k < stripResidual.size(); ++k) {
+                        if (stripResidual[k] > minRes && stripResidual[k] < maxRes) {
+                            maxRes = stripResidual[k];
+                            minResk = k;
+                        }
+                        else if (stripResidual[k] == minRes) {
+                            if (minResj != k) {
+                                maxRes = stripResidual[k];
+                                minResk = k;
+                                break;
+                            }
+                        }
+                    }
+                    minRes = maxRes;
+                    minResj = minResk;
+                    continue;
+                }
+            }
+
+            else if(strip[minResj].empty()){
+                strip[minResj].push_back(boxDecrease[i]);
+                strip[minResj].push_back(mates[boxDecrease[i]]);
+                stripResidual[minResj] -= boxWidths[boxDecrease[i]][mates[boxDecrease[i]]];
+                x = 1;
+            }
+
+        } while (x == 0); //end while loop
+
+
+    } //end for loop
+
+    cout << "strips Best fit decreasing:\n";
+    for(i = 0; i < strip.size(); ++i){
+        if(!strip[i].empty()){
+            for(j = 0; j < strip[i].size(); ++j){
+                cout << strip[i][j] << " ";
+            }
+            cout << endl;
+        }
+    }
+    cout << endl << endl;
+
+    cout << "strip residuals:\n";
+    for(i = 0; i < 4; ++i){
+        cout << stripResidual[i] << " ";
+    }
+    cout << endl;
+
+}
+
 int main(int argc, char **argv){
 	//region USAGE - ARGUMENTS REQUIRED
 	if(argc < 9){
@@ -1318,14 +1463,15 @@ int main(int argc, char **argv){
     //if value is positive, i.e "3", then the 3rd box has the smallest score on the LHS, and the larger score on the RHS
     //if value is negative, i.e "-3", then the 3rd box is rotated, i.e. smallest score on RHS and larger score on LHS.
 	srand(randomSeed); //seed
-	//endregion
-    vector<vector<int> > userMates;
+    vector<vector<int> > userInput;
     vector<int> tempUser(3, 0);
-    //vector<int> tempUserBox(n, 0);
+    int choice;
+	//endregion
 
 	cout << "Minimum Score Separation Problem - Matching-Based Alternating Hamiltonicity Recognition Algorithm\n\n";
 
-    ifstream inStream;
+    //region READ FILE
+    /*ifstream inStream;
     inStream.open(argv[9]);
     if(inStream.fail()){
         cout << "ERROR: file cannot be opened.\n";
@@ -1337,36 +1483,28 @@ int main(int argc, char **argv){
         for(j = 0; j < 3; ++j) {
             inStream >> tempUser[j];
         }
-        userMates.push_back(tempUser);
+        userInput.push_back(tempUser);
     }
-    inStream.close();
+    inStream.close();*/
 
-    /*for(i = 0; i < userMates.size(); ++i){
-        for(j = 0; j < userMates[i].size(); ++j){
-            cout << userMates[i][j] << " ";
+    /*for(i = 0; i < userInput.size(); ++i){
+        for(j = 0; j < userInput[i].size(); ++j){
+            cout << userInput[i][j] << " ";
         }
         cout << endl;
     }
     cout << endl;*/
-
-
-
-
-
-
+    //endregion
 
 	time_t startTime, endTime; //start clock
 	startTime = clock();
 
-
-    int choice;
 	for(instance = 0; instance < numInstances; ++instance) {
-		//startPath = vacant;
-		//endPath = vacant;
 		//resetVectors(vacant, numScores, numComp, allScores, adjMatrix, cycleVertex, matchList, mates, S, boxWidths, allBoxes);
 		//clearVectors(allScores, mateInduced, lengthMateInduced, T, fullCycle, completePath);
 
-        cout << "1 = random, 2 = own file:";
+        //region READ FILE CHOICE
+        /*cout << "1 = random, 2 = own file:";
         cin >> choice;
         while(choice !=1 && choice != 2){
             cout << "Please enter either 1 or 2:";
@@ -1378,24 +1516,27 @@ int main(int argc, char **argv){
                 break;
 
             case 2:
-                createInstanceUser(threshold, numScores, allScores, userMates, adjMatrix, mates, boxWidths, allBoxes);
+                createInstanceUser(threshold, numScores, allScores, userInput, adjMatrix, mates, boxWidths, allBoxes);
                 break;
 
             default:
                 cout << "Please enter 1 or 2.\n";
                 break;
 
-        }
+        }*/
+        //endregion
 
-
-		//createInstance(threshold, minWidth, maxWidth, minBoxWidth, maxBoxWidth, numScores, numBox, allScores, adjMatrix, mates, boxWidths, allBoxes);
-        //continue;
+        createInstance(threshold, minWidth, maxWidth, minBoxWidth, maxBoxWidth, numScores, numBox, allScores, adjMatrix, mates, boxWidths, allBoxes);
+        packStripsBFD(numBox, maxBoxWidth, maxStripWidth, adjMatrix, mates, boxWidths);
+        continue;
         //packStripsSmallest(numScores, numBox, maxStripWidth, mates, adjMatrix, boxWidths);
         //continue; //do not do MTGMA/MIS/FCA/PATCH
 
-		MTGMA(vacant, threshold, numScores, matchSize, allScores, adjMatrix, cycleVertex, matchList);
+        //region MTGMA
+        //MTGMA(vacant, threshold, numScores, matchSize, allScores, adjMatrix, cycleVertex, matchList);
+        //continue;
 		//If the number of matches (i.e. the size of the matching list M) is less than the number of boxes (n), then instance is infeasible ( |M| < n )
-        continue;
+        //continue;
 		/*if(matchSize == numBox - 1){
 			weakMatchPath(vacant, numScores, matchList, mates);
 		}*/
@@ -1406,8 +1547,10 @@ int main(int argc, char **argv){
 			++noMatch;
 			continue;
 		}
+        //endregion
 
-		MIS(numScores, numCycles, adjMatrix, mates, matchList, mateInduced, lengthMateInduced);
+        //region MIS
+        MIS(numScores, numCycles, adjMatrix, mates, matchList, mateInduced, lengthMateInduced);
         //packStripsMIS(numBox, maxStripWidth, adjMatrix, mateInduced, boxWidths);
         //continue;
 		//If the mate-induced structure only consists of one cycle, then the problem has been solved and is feasible (just remove one matching edge to find feasible path)
@@ -1420,8 +1563,10 @@ int main(int argc, char **argv){
 			++oneCycle;
 			continue;
 		}
+        //endregion
 
-		FCA(qstar, vacant, matchSize, adjMatrix, cycleVertex, matchList, mateInduced, S, T);
+        //region FCA
+        FCA(qstar, vacant, matchSize, adjMatrix, cycleVertex, matchList, mateInduced, S, T);
 		//If no family of T-cycle found
 		if (qstar == -1) {
 			cout << instance << ": Infeasible, qstar = -1, no family of T-cycles found.\n\n";
@@ -1429,14 +1574,17 @@ int main(int argc, char **argv){
 			++noFam;
 			continue;
 		}
+        //endregion
 
-		//Check if patching graph is connected
+        //region patchGraph
+        //Check if patching graph is connected
 		patchGraph(qstar, vacant, instance, numScores, numCycles, feasible, infeasible, fullT, splitT, noPatch, problem, matchList, cycleVertex, mateInduced, S, T, fullCycle, completePath, boxWidths, allScores, allBoxes);
+        //endregion
 
 	} //end of for loop instances
 
 
-	cout << "------------------------------------------------------------------\n";
+	/*cout << "------------------------------------------------------------------\n";
 	cout << "INPUT:\n";
 	cout << "# of instances: " << numInstances << endl;
 	cout << "# of boxes: " << numBox - 1 << endl;
@@ -1459,7 +1607,7 @@ int main(int argc, char **argv){
 	cout << "# instances that required multiple T-cycles to create solution (F): " << splitT << endl;
 	cout << "# instances where patching graph was unconnected (I):  " << noPatch << endl;
 	cout << "# instances that are problematic: " << problem << endl;
-
+    */
 	endTime = clock();
 	double totalTime = (((endTime - startTime) / double(CLOCKS_PER_SEC)) * 1000);
 	cout << "CPU Time = " << totalTime << " milliseconds.\n";
