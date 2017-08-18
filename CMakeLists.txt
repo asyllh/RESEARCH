@@ -8,3 +8,4 @@ set(SOURCE_FILES asylmssp.cpp)                   # Add asylmssp.cpp file of proj
 add_executable(AsylMSSP asylmssp.cpp)            # Add executable target with source files listed in SOURCE_FILES variable
 add_executable(MSSPOutput msspoutput.cpp)
 add_executable(Strips msspstrips.cpp)
+add_executable(MAIN main.cpp mbahra.cpp mbahra.h packing.cpp packing.h)
