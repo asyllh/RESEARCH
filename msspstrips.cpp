@@ -6,6 +6,10 @@ Start implementing box lengths
 09/08/2017
 Start testing strip methods
 11/08/2017
+User Input
+16/08/2017
+packStripsBFD
+17/08/2017
 /--------------------*/
 
 #include <iostream>
@@ -208,15 +212,6 @@ void createInstanceUser(int threshold, int numScores, vector<int> &allScores, ve
 
     }
 
-    /*cout << "Adjmatrix no mates:\n";
-    for(i = 0; i < adjMatrix.size(); ++i){
-        for(j = 0; j < adjMatrix[i].size(); ++j){
-            cout << adjMatrix[i][j] << " ";
-        }
-        cout << endl;
-    }
-    cout << endl;*/
-
     vector<int>::iterator it1;
     vector<int>::iterator it2;
 
@@ -231,28 +226,26 @@ void createInstanceUser(int threshold, int numScores, vector<int> &allScores, ve
         boxWidths[m1][m2] = userInput[i][2];
         boxWidths[m2][m1] = userInput[i][2];
     }
-
-
     adjMatrix[allScores.size()-1][allScores.size()-2] = 2;
     adjMatrix[allScores.size()-2][allScores.size()-1] = 2;
 
-    /*cout << "AdjMatrix mates:\n";
+    cout << "AdjMatrix mates:\n";
     for(i = 0; i < adjMatrix.size(); ++i){
         for(j = 0; j < adjMatrix[i].size(); ++j){
             cout << adjMatrix[i][j] << " ";
         }
         cout << endl;
     }
-    cout << endl;*/
+    cout << endl;
 
-    /*cout << "BoxWidths:\n";
+    cout << "BoxWidths:\n";
     for(i = 0; i < numScores; ++i){
         for(j = 0; j < numScores; ++j){
             cout << boxWidths[i][j] << "  ";
         }
         cout << endl;
     }
-    cout << endl;*/
+    cout << endl;
 
     for (i = 0; i < numScores; ++i) {
         for (j = 0; j < numScores; ++j) {
@@ -263,11 +256,11 @@ void createInstanceUser(int threshold, int numScores, vector<int> &allScores, ve
         }
     }
 
-    /*cout << "Mates:\n";
+    cout << "Mates:\n";
     for(i = 0; i < mates.size(); ++i){
         cout << mates[i] << " ";
     }
-    cout << endl;*/
+    cout << endl;
 
     k = 1;
     for(i = 0; i < numScores; ++i){
@@ -289,8 +282,6 @@ void createInstanceUser(int threshold, int numScores, vector<int> &allScores, ve
         cout << endl;
     }
     cout << endl;*/
-
-
 
 }
 
@@ -1471,7 +1462,7 @@ int main(int argc, char **argv){
 	cout << "Minimum Score Separation Problem - Matching-Based Alternating Hamiltonicity Recognition Algorithm\n\n";
 
     //region READ FILE
-    /*ifstream inStream;
+    ifstream inStream;
     inStream.open(argv[9]);
     if(inStream.fail()){
         cout << "ERROR: file cannot be opened.\n";
@@ -1485,15 +1476,8 @@ int main(int argc, char **argv){
         }
         userInput.push_back(tempUser);
     }
-    inStream.close();*/
+    inStream.close();
 
-    /*for(i = 0; i < userInput.size(); ++i){
-        for(j = 0; j < userInput[i].size(); ++j){
-            cout << userInput[i][j] << " ";
-        }
-        cout << endl;
-    }
-    cout << endl;*/
     //endregion
 
 	time_t startTime, endTime; //start clock
@@ -1504,7 +1488,10 @@ int main(int argc, char **argv){
 		//clearVectors(allScores, mateInduced, lengthMateInduced, T, fullCycle, completePath);
 
         //region READ FILE CHOICE
-        /*cout << "1 = random, 2 = own file:";
+        cout << "Please choose from the following:\n";
+        cout << "1: Create MSSP instance using random values\n";
+        cout << "2: Create MSSP instance from file\n";
+        cout << "Enter choice: ";
         cin >> choice;
         while(choice !=1 && choice != 2){
             cout << "Please enter either 1 or 2:";
@@ -1523,12 +1510,11 @@ int main(int argc, char **argv){
                 cout << "Please enter 1 or 2.\n";
                 break;
 
-        }*/
+        }
         //endregion
-
-        createInstance(threshold, minWidth, maxWidth, minBoxWidth, maxBoxWidth, numScores, numBox, allScores, adjMatrix, mates, boxWidths, allBoxes);
-        packStripsBFD(numBox, maxBoxWidth, maxStripWidth, adjMatrix, mates, boxWidths);
         continue;
+        //packStripsBFD(numBox, maxBoxWidth, maxStripWidth, adjMatrix, mates, boxWidths);
+        //continue;
         //packStripsSmallest(numScores, numBox, maxStripWidth, mates, adjMatrix, boxWidths);
         //continue; //do not do MTGMA/MIS/FCA/PATCH
 
