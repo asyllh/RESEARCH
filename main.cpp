@@ -5,7 +5,7 @@ mbahra.h
 /--------------------*/
 #include <iostream>
 #include <fstream>
-#include <time.h>
+#include <ctime>
 using namespace std;
 
 #include "mbahra.h"
@@ -144,7 +144,9 @@ int main(int argc, char **argv){
         //packStripsNFD(numBox, maxBoxWidth, maxStripWidth, adjMatrix, mates, boxWidths);
         //packStripsBFI(numBox, maxBoxWidth, maxStripWidth, adjMatrix, mates, boxWidths);
         //packStripsFFI(numBox, maxBoxWidth, maxStripWidth, adjMatrix, mates, boxWidths);
-        packStripsNFI(numBox, maxBoxWidth, maxStripWidth, adjMatrix, mates, boxWidths);
+        //packStripsNFI(numBox, maxBoxWidth, maxStripWidth, adjMatrix, mates, boxWidths);
+        //packStripFFDScores(vacant, numBox, maxStripWidth, adjMatrix, mates, boxWidths);
+        packStripFFIScores(vacant, numBox, maxStripWidth, adjMatrix, mates, boxWidths);
 
         continue;
 

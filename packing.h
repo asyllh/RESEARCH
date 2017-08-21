@@ -28,4 +28,8 @@ void packStripsFFI(int numBox, int maxBoxWidth, int maxStripWidth, vector<vector
 
 void packStripsNFI(int numBox, int maxBoxWidth, int maxStripWidth, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths);
 
+void packStripFFDScores(int vacant, int numBox, int maxStripWidth, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths);
+
+void packStripFFIScores(int vacant, int numBox, int maxStripWidth, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths);
+
 #endif
