@@ -145,8 +145,12 @@ int main(int argc, char **argv){
         //packStripsBFI(numBox, maxBoxWidth, maxStripWidth, adjMatrix, mates, boxWidths);
         //packStripsFFI(numBox, maxBoxWidth, maxStripWidth, adjMatrix, mates, boxWidths);
         //packStripsNFI(numBox, maxBoxWidth, maxStripWidth, adjMatrix, mates, boxWidths);
-        //packStripFFDScores(vacant, numBox, maxStripWidth, adjMatrix, mates, boxWidths);
-        packStripFFIScores(vacant, numBox, maxStripWidth, adjMatrix, mates, boxWidths);
+        //packStripsFFDScores(vacant, numBox, maxStripWidth, adjMatrix, mates, boxWidths);
+        //packStripsFFIScores(vacant, numBox, maxStripWidth, adjMatrix, mates, boxWidths);
+        //packStripsBFDScores(vacant, numBox, maxStripWidth, adjMatrix, mates, boxWidths);
+        //packStripsBFIScores(vacant, numBox, maxStripWidth, adjMatrix, mates, boxWidths);
+        //packStripsNFDScores(vacant, numBox, maxStripWidth, adjMatrix, mates, boxWidths);
+        packStripsNFIScores(vacant, numBox, maxStripWidth, adjMatrix, mates, boxWidths);
 
         continue;
 
