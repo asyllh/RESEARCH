@@ -113,6 +113,7 @@ int main(int argc, char **argv){
         //clearVectors(allScores, mateInduced, lengthMateInduced, T, fullCycle, completePath);
 
         //region READ FILE CHOICE
+        /*
         cout << "Please choose from the following:\n";
         cout << "1: Create MSSP instance using random values\n";
         cout << "2: Create MSSP instance from file\n";
@@ -136,9 +137,13 @@ int main(int argc, char **argv){
                 break;
 
         }
+        */
         //endregion
         //continue;
 
+        createInstance(threshold, minWidth, maxWidth, minBoxWidth, maxBoxWidth, numScores, numBox, allScores, adjMatrix, mates, boxWidths, allBoxes);
+
+        //region Packing
         //packStripsBFD(numBox, maxBoxWidth, maxStripWidth, adjMatrix, mates, boxWidths);
         //packStripsFFD(numBox, maxBoxWidth, maxStripWidth, adjMatrix, mates, boxWidths);
         //packStripsNFD(numBox, maxBoxWidth, maxStripWidth, adjMatrix, mates, boxWidths);
@@ -150,15 +155,16 @@ int main(int argc, char **argv){
         //packStripsBFDScores(vacant, numBox, maxStripWidth, adjMatrix, mates, boxWidths);
         //packStripsBFIScores(vacant, numBox, maxStripWidth, adjMatrix, mates, boxWidths);
         //packStripsNFDScores(vacant, numBox, maxStripWidth, adjMatrix, mates, boxWidths);
-        packStripsNFIScores(vacant, numBox, maxStripWidth, adjMatrix, mates, boxWidths);
+        //packStripsNFIScores(vacant, numBox, maxStripWidth, adjMatrix, mates, boxWidths);
 
-        continue;
+        //continue;
 
         //packStripsSmallest(numScores, numBox, maxStripWidth, mates, adjMatrix, boxWidths);
         //continue; //do not do MTGMA/MIS/FCA/PATCH
+        //endregion
 
         //region MTGMA
-        //MTGMA(vacant, threshold, numScores, matchSize, allScores, adjMatrix, cycleVertex, matchList);
+        MTGMA(vacant, threshold, numScores, matchSize, allScores, adjMatrix, cycleVertex, matchList);
         //continue;
         //If the number of matches (i.e. the size of the matching list M) is less than the number of boxes (n), then instance is infeasible ( |M| < n )
         //continue;
@@ -210,7 +216,7 @@ int main(int argc, char **argv){
 
 
     //region OUTPUT
-    /*cout << "------------------------------------------------------------------\n";
+    cout << "------------------------------------------------------------------\n";
     cout << "INPUT:\n";
     cout << "# of instances: " << numInstances << endl;
     cout << "# of boxes: " << numBox - 1 << endl;
@@ -233,7 +239,7 @@ int main(int argc, char **argv){
     cout << "# instances that required multiple T-cycles to create solution (F): " << splitT << endl;
     cout << "# instances where patching graph was unconnected (I):  " << noPatch << endl;
     cout << "# instances that are problematic: " << problem << endl;
-    */
+
     //endregion
     endTime = clock();
     double totalTime = (((endTime - startTime) / double(CLOCKS_PER_SEC)) * 1000);
