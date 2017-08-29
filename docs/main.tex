@@ -1,0 +1,166 @@
+\documentclass[a4paper, 11pt, twoside, onecolumn, openany]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel} % English please
+\usepackage{subfiles}
+\usepackage{standalone}
+\usepackage[a4paper, tmargin=2cm, rmargin = 2cm]{geometry}
+\usepackage{tikz}
+\usepackage{graphicx}
+\usepackage{multirow}
+
+
+\usepackage[final]{microtype} % Less badboxes
+\usepackage{color}
+\usepackage{standalone}
+
+\usepackage{amsmath,amssymb,mathtools,amsthm} % Math
+\mathtoolsset{centercolon} %to make the colon and the equal sign in := on the same line
+\title{Packing Boxes with Score Constraints}
+\author{Asyl L. Hawa}
+\date{\today}
+
+\begin{document}
+\maketitle
+% example, n = 9, + extra box = 10
+% add one more box with dominating vertices, i.e. score widths 70mm
+% use indices, not actual score widths 
+% sort scores in increasing order
+% assign random mates, except dom vertices, they must be on the same box, assign them as mates to each other
+% assign box widths except dominating box, doesn't need a width (doesn't get used)
+% talk about MTGMA matchList vector
+% talk about MIS - mateInduced vector - length of MIS
+% talk about T-cycles FCA
+% patch together - fullT vs split T
+% final cycle, final path
+
+\section{Example}
+\subsection{Creating problem instance}
+In this example, we will attempt to find a feasible alignment of nine boxes, with score widths ranging between 1mm and 70mm. The minimum score separation constraint, or ``threshold'', will be set at 70mm, the industry standard. 
+
+Initially, we create 18 random values between 1 and 70, which will be our score widths. We also need to add an extra box with two score of widths 70mm, which will be our ``dominating scores'', giving us a total of 10 boxes and 20 scores. These dominating scores will eventually be discarded. 
+
+We then sort the scores in non-decreasing order, and place them in a vector. The scores will now be addressed by their indices throughout the rest of the algorithm (see Table \ref{table:allScores}). 
+
+\begin{table}[htb]
+\centering
+\begin{tabular}{|l*{20}{|c}|}
+	\hline
+	Index & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 & 13 & 14 & 15 & 16 & 17 & 18 & 19 \\ \hline
+	Scores & 3 & 4 & 12 & 22 & 25 & 35 & 36 & 37 & 38 & 45 & 49 & 54 & 54 & 55 & 55 & 64 & 65 & 66 & 70 & 70 \\
+	\hline	
+\end{tabular}
+\caption{allScores vector.}
+\label{table:allScores}
+\end{table}
+
+Since every box consists of two scores, each score is randomly assigned a ``mate'', so that one score (the smaller score) represents the left-hand side of the box, and the other score represents the right-hand side of the box. The only exceptions to the random allocation of mates are the dominating scores - they must be assigned to one another. We can then assign measurements to each pair of mates to represent the width of each individual box. %except dominating box, score not needed
+
+\begin{table}[htb]
+	\centering
+	\begin{tabular}{|c|c|c|}
+	\hline
+	\multicolumn{2}{|c|}{Mates} & Box Width \\ \hline
+	0 & 6 & 314 \\ \hline
+	1 & 10 & 372 \\ \hline
+	2 & 16 & 297 \\ \hline
+	3 & 11 & 220 \\ \hline
+	4 & 17 & 959 \\ \hline
+	5 & 9 & 738 \\ \hline
+	7 & 12 & 622 \\ \hline
+	8 & 15 & 635 \\ \hline
+	13 & 14 & 859 \\ \hline
+	18 & 19 & 0 \\
+	\hline
+	\end{tabular}
+	\caption{Mates.}
+\end{table}	
+
+Next, we create an adjaceny matrix. This adjaceny matrix contains information regarding threshold constraint. If the sum of two scores is greater than or equal to the threshold, the adjaceny matrix contains ``1'' in the relevant cell. If two scores are mates, the adjaceny matrix contains ``2''. Else, the adjaceny matrix contains ``0''. %change this, also explain that the adjMatrix is of size numScore x numScore, square matrix
+
+% Modified matching
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\begin{table}[htb]
+	\centering
+	\begin{tabular}{|c|c|}
+		\hline
+		\multicolumn{2}{|c|}{Match}\\ \hline
+		0 & 19 \\ \hline
+		1 & 18 \\ \hline
+		2 & 17 \\ \hline
+		3 & 16 \\ \hline
+		4 & 15 \\ \hline
+		5 & 14 \\ \hline
+		6 & 13 \\ \hline
+		7 & 11 \\ \hline
+		8 & 12 \\ \hline
+		9 & 10 \\
+		\hline
+	\end{tabular}
+	\caption{Match List.}
+\end{table}	
+
+
+\begin{table}[htb]
+	\centering
+	\begin{tabular}{|l*{10}{|c}|}
+		\hline
+		Cycle 0 & 0 & 6 & 13 & 14 & 15 & 9 & 10 & 1 & 18 & 19 \\ \hline
+		Cycle 1 & 2 & 16 & 3 & 11 & 7 & 12 & 8 & 15 & 4 & 17 \\
+		\hline
+	\end{tabular}
+	\caption{Mate-Induced Cycles.}	
+\end{table}
+
+
+\begin{table}[htb]
+	\centering
+	\begin{tabular}{c|c|c|}
+		\cline{2-3}
+		& \multicolumn{2}{|c|}{Edges} \\ \hline
+		\multicolumn{1}{|c|}{cycle 1} & 1 & 2 \\ \hline
+		\multicolumn{1}{|c|}{cycle 2} & 4 & 5 \\ \hline
+		\multicolumn{1}{|c|}{cycle 3} & 6 & 8 \\
+		\hline
+	\end{tabular}
+	\caption{T-Matrix.}
+\end{table}	
+
+
+
+
+
+
+
+\begin{figure}
+	\centering
+	\includestandalone[width=0.9\textwidth]{patch}
+	\caption{Patching MIS blue = mates, red = matching, explain dotted lines.}	
+\end{figure}
+
+
+
+
+
+
+
+
+
+\end{document}
