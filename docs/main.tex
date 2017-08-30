@@ -107,29 +107,9 @@ Once the matching algorithm is complete, we then examine the size of the matchin
 \end{table}	
 
 \subsection{Mate-Induced Structure}
+Now that we have a list of matched scores, we can now attempt to create an \textit{alternating cycle} which consists of an edge between scores that are mates, followed by an edge between scores that are matched. Therefore each score will either be preceded by a mate and followed by a match, or vice versa. The cycles are easily formed using the mate list and match list. 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+If the mate-induced structure consists of only one cycle, then the instance is instantly feasible. In this example we have two cycles, and so we must find a way to connect, or ``patch'', these two cycles together to create a single cycle.
 
 
 \begin{table}[htb]
@@ -142,6 +122,25 @@ Once the matching algorithm is complete, we then examine the size of the matchin
 	\end{tabular}
 	\caption{Mate-Induced Cycles.}	
 \end{table}
+
+\subsection{FCA}%change this title
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 \begin{table}[htb]
