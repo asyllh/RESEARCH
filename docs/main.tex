@@ -8,6 +8,9 @@
 \usepackage{tikz}
 \usepackage{graphicx}
 \usepackage{multirow}
+\usepackage{verbatim}
+\definecolor{light-gray}{gray}{0.95} 
+\newcommand{\code}[1]{\colorbox{light-gray}{\texttt{#1}}}
 
 
 \usepackage[final]{microtype} % Less badboxes
@@ -116,60 +119,93 @@ If the mate-induced structure consists of only one cycle, then the instance is i
 	\centering
 	\begin{tabular}{|l*{10}{|c}|}
 		\hline
-		Cycle 0 & 0 & 6 & 13 & 14 & 15 & 9 & 10 & 1 & 18 & 19 \\ \hline
-		Cycle 1 & 2 & 16 & 3 & 11 & 7 & 12 & 8 & 15 & 4 & 17 \\
+		Cycle 1 & 0 & 6 & 13 & 14 & 15 & 9 & 10 & 1 & 18 & 19 \\ \hline
+		Cycle 2 & 2 & 16 & 3 & 11 & 7 & 12 & 8 & 15 & 4 & 17 \\
 		\hline
 	\end{tabular}
-	\caption{Mate-Induced Cycles.}	
+	\caption{Mate-induced structure consisting of two cycles.}	
 \end{table}
 
 \subsection{FCA}%change this title
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+In order to join these two cycles together to create a single cycle, we must find scores from different cycles that are able to be matched, i.e the sum of the scores are greater than or equal to the threshold. If we are able to find such scores, then we simply remove the old matches, and add the new ones. In this case, there are three possible sets of scores that can be used to connect the cycles together. For simplicity and speed, we choose the first set of scores found. This is depicted in FIGURE.
+ 
 
 \begin{table}[htb]
 	\centering
-	\begin{tabular}{c|c|c|}
-		\cline{2-3}
-		& \multicolumn{2}{|c|}{Edges} \\ \hline
-		\multicolumn{1}{|c|}{cycle 1} & 1 & 2 \\ \hline
-		\multicolumn{1}{|c|}{cycle 2} & 4 & 5 \\ \hline
-		\multicolumn{1}{|c|}{cycle 3} & 6 & 8 \\
+	\begin{tabular}{c|c|}
+		\cline{2-2}
+		& Scores \\ \hline
+		\multicolumn{1}{|c|}{Cycle 1} & 1 - 18 - 2 - 17 \\ \hline
+		\multicolumn{1}{|c|}{Cycle 2} & 4 - 15 - 5 - 14 \\ \hline
+		\multicolumn{1}{|c|}{Cycle 3} & 6 - 13 - 8 - 12 \\
 		\hline
 	\end{tabular}
 	\caption{T-Matrix.}
 \end{table}	
 
 
-
-
-
-
-
-\begin{figure}
+\begin{figure}[htb]
 	\centering
 	\includestandalone[width=0.9\textwidth]{patch}
 	\caption{Patching MIS blue = mates, red = matching, explain dotted lines.}	
 \end{figure}
 
+Now that the cycle has been formed, we simply remove the dominating scores, and obtain a single path.\\
+\\
+\code{Complete Path: 0 6 13 14 5 9 10 1 17 4 15 8 12 7 11 3 16 2}\\
+\code{Order of Boxes: 1 9 6 -2 -5 -8 -7 -4 -3}\\
+\code{Total Length of Path: 5043 millimeters.}
 
 
+
+
+
+\begin{figure}[htb]
+	\centering
+	\includestandalone[width=0.6\textwidth]{boxes}
+	\caption{Individual boxes.}	
+\end{figure}
+
+
+
+\begin{figure}[htb]
+	\centering
+	\includestandalone[width=\textwidth]{path}
+	\caption{Final feasible alignment of boxes.}	
+\end{figure}
+
+
+\begin{comment}
+\begin{table}[htb]
+\centering
+\begin{tabular}{c|c|c|c|c|}
+\cline{2-5}
+& \multicolumn{4}{|c|}{Scores} \\ \hline
+\multicolumn{1}{|c|}{cycle 1} & 1 & 18 & 2 & 17 \\ \hline
+\multicolumn{1}{|c|}{cycle 2} & 4 & 15 & 5 & 14 \\ \hline
+\multicolumn{1}{|c|}{cycle 3} & 6 & 13 & 8 & 12 \\
+\hline
+\end{tabular}
+\caption{T-Matrix.}
+\end{table}	
+\end{comment}
+
+
+
+\begin{comment}
+\begin{table}[htb]
+\centering
+\begin{tabular}{c|c|c|}
+\cline{2-3}
+& \multicolumn{2}{|c|}{Edges} \\ \hline
+\multicolumn{1}{|c|}{cycle 1} & 1 & 2 \\ \hline
+\multicolumn{1}{|c|}{cycle 2} & 4 & 5 \\ \hline
+\multicolumn{1}{|c|}{cycle 3} & 6 & 8 \\
+\hline
+\end{tabular}
+\caption{T-Matrix.}
+\end{table}	
+\end{comment}
 
 
 
