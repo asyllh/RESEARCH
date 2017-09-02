@@ -3,6 +3,9 @@
 Debug/*
 cmake-build-debug/
 .idea/
+boxes.pdf
+path.pdf
+patch.pdf
 *.sln
 *.VC.db
 *.vcxproj
