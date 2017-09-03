@@ -6,6 +6,8 @@ cmake-build-debug/
 boxes.pdf
 path.pdf
 patch.pdf
+thresholdgraph.pdf
+matchgraph.pdf
 *.sln
 *.VC.db
 *.vcxproj
