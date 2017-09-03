@@ -18,7 +18,8 @@
 \usepackage{standalone}
 
 \usepackage{amsmath,amssymb,mathtools,amsthm} % Math
-\mathtoolsset{centercolon} %to make the colon and the equal sign in := on the same line
+\mathtoolsset{centercolon} % to make the colon and the equal sign in := on the same line
+
 \title{Packing Boxes with Score Constraints}
 \author{Asyl L. Hawa}
 \date{\today}
@@ -77,6 +78,7 @@ Since every box consists of two scores, each score is randomly assigned a ``mate
 	\hline
 	\end{tabular}
 	\caption{Mates.}
+	\label{table:mates}
 \end{table}	
 
 Next, we create an adjaceny matrix. This adjaceny matrix contains information regarding threshold constraint. If the sum of two scores is greater than or equal to the threshold, the adjaceny matrix contains ``1'' in the relevant cell. If two scores are mates, the adjaceny matrix contains ``2''. Else, the adjaceny matrix contains ``0''. %change this, also explain that the adjMatrix is of size numScore x numScore, square matrix
@@ -124,6 +126,7 @@ If the mate-induced structure consists of only one cycle, then the instance is i
 		\hline
 	\end{tabular}
 	\caption{Mate-induced structure consisting of two cycles.}	
+	\label{table:mis}
 \end{table}
 
 \subsection{FCA}%change this title
@@ -141,13 +144,15 @@ In order to join these two cycles together to create a single cycle, we must fin
 		\hline
 	\end{tabular}
 	\caption{T-Matrix.}
+	\label{table:tcycles}
 \end{table}	
 
 
 \begin{figure}[htb]
 	\centering
 	\includestandalone[width=0.9\textwidth]{patch}
-	\caption{Patching MIS blue = mates, red = matching, explain dotted lines.}	
+	\caption{Patching MIS blue = mates, red = matching, explain dotted lines.}
+	\label{fig:patch}	
 \end{figure}
 
 Now that the cycle has been formed, we simply remove the dominating scores, and obtain a single path.\\
@@ -157,13 +162,11 @@ Now that the cycle has been formed, we simply remove the dominating scores, and 
 \code{Total Length of Path: 5043 millimeters.}
 
 
-
-
-
-\begin{figure}[htb]
+\begin{figure}[htb]	
 	\centering
 	\includestandalone[width=0.6\textwidth]{boxes}
 	\caption{Individual boxes.}	
+	\label{fig:boxes}
 \end{figure}
 
 
@@ -172,40 +175,79 @@ Now that the cycle has been formed, we simply remove the dominating scores, and 
 	\centering
 	\includestandalone[width=\textwidth]{path}
 	\caption{Final feasible alignment of boxes.}	
+	\label{fig:path}
 \end{figure}
 
 
-\begin{comment}
-\begin{table}[htb]
-\centering
-\begin{tabular}{c|c|c|c|c|}
-\cline{2-5}
-& \multicolumn{4}{|c|}{Scores} \\ \hline
-\multicolumn{1}{|c|}{cycle 1} & 1 & 18 & 2 & 17 \\ \hline
-\multicolumn{1}{|c|}{cycle 2} & 4 & 15 & 5 & 14 \\ \hline
-\multicolumn{1}{|c|}{cycle 3} & 6 & 13 & 8 & 12 \\
-\hline
-\end{tabular}
-\caption{T-Matrix.}
-\end{table}	
-\end{comment}
+\section{Improvements}
+\begin{itemize}
+	\item Becker used arrays and set a specific size for each one - wastes memory and is inefficient. Instead I used vectors that could be expanded as required.
+	\item Becker's code only evaluates whether a specific instance is feasible or infeasible. My code now outputs a solution to an instance in full, including the following:
+	\begin{itemize}
+		\item Outputs final solution with score indices in order.
+		\item Outputs final solution with score widths in millimeters in order.
+		\item Outputs box widths in millimeters in order.
+		\item Outputs box number in order: if the number is positive, then the box's orientation is ``regular'' (the smallest score width is on the left-hand side), and if the number is negative, then the box's orientation is ``rotated'' (the smallest score is on the right-hand side).
+		\item Outputs the total length of the boxes in millimeters.
+	\end{itemize}
+	\item All methods in the algorithm are now in separate functions, which makes the code easier to read and edit.
+	\item The code determines whether only one T-cycle is required to connect all the cycles together, or whether multiple T-cycles are required. 
+	\item Box widths have now been added - each box has a width in millimeters.
+	\item User input - users can create a simple text file containing score width, mates and box widths to use with the program.
+	
+	
+	
+\end{itemize}
+
+\section{Things to find out/do}
+\begin{itemize}
+	\item What are the industry standard strip lengths?
+	\item Goulimis $n$ = 10, is this true? Are there cases where more boxes are needed?
+	\item Current speed of scoring in industry
+	\item What happens before/after scoring in industry?
+	\item Output to csv file?
+	\item Calculate complexity
+	\item Martello and Toth (1990b) MTP algorithm, adapt with additional constraints
+	\item Exemptions on threshold, what if the instance in infeasible due to one box, can that box be held back and attempt to use in the next instance? Or can it still be used, but scoring run slower?
+	\item How many scoring knives are used?
+	\begin{itemize}
+		\item If only one set of scoring knives is used, then are the boxes placed on a conveyor belt? Does this affect the time?
+		\item If there are a specific number of scoring knives used, should we look at how many boxes are on each strip? I.e. if there are 4 scoring knives, then there should be only 4 scores on the strip, even if there is space available left on the strip?
+		
+	\end{itemize}
+	
+\end{itemize}
 
 
 
-\begin{comment}
-\begin{table}[htb]
-\centering
-\begin{tabular}{c|c|c|}
-\cline{2-3}
-& \multicolumn{2}{|c|}{Edges} \\ \hline
-\multicolumn{1}{|c|}{cycle 1} & 1 & 2 \\ \hline
-\multicolumn{1}{|c|}{cycle 2} & 4 & 5 \\ \hline
-\multicolumn{1}{|c|}{cycle 3} & 6 & 8 \\
-\hline
-\end{tabular}
-\caption{T-Matrix.}
-\end{table}	
-\end{comment}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
