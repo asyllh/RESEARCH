@@ -26,17 +26,6 @@
 
 \begin{document}
 \maketitle
-% example, n = 9, + extra box = 10
-% add one more box with dominating vertices, i.e. score widths 70mm
-% use indices, not actual score widths 
-% sort scores in increasing order
-% assign random mates, except dom vertices, they must be on the same box, assign them as mates to each other
-% assign box widths except dominating box, doesn't need a width (doesn't get used)
-% talk about MTGMA matchList vector
-% talk about MIS - mateInduced vector - length of MIS
-% talk about T-cycles FCA
-% patch together - fullT vs split T
-% final cycle, final path
 
 \section{Example}
 \subsection{Creating problem instance}
@@ -46,7 +35,7 @@ Initially, we create 18 random values between 1 and 70, which will be our score 
 
 We then sort the scores in non-decreasing order, and place them in a vector. The scores will now be addressed by their indices throughout the rest of the algorithm (see Table \ref{table:allScores}). 
 
-\begin{table}[htb]
+\begin{table}[!htb]
 \centering
 \begin{tabular}{|l*{20}{|c}|}
 	\hline
@@ -60,7 +49,7 @@ We then sort the scores in non-decreasing order, and place them in a vector. The
 
 Since every box consists of two scores, each score is randomly assigned a ``mate'', so that one score (the smaller score) represents the left-hand side of the box, and the other score represents the right-hand side of the box. The only exceptions to the random allocation of mates are the dominating scores - they must be assigned to one another. We can then assign measurements to each pair of mates to represent the width of each individual box. %except dominating box, score not needed
 
-\begin{table}[htb]
+\begin{table}[!htb]
 	\centering
 	\begin{tabular}{|c|c|c|}
 	\hline
@@ -81,7 +70,23 @@ Since every box consists of two scores, each score is randomly assigned a ``mate
 	\label{table:mates}
 \end{table}	
 
+\begin{figure}[!htb]	
+	\centering
+	\includestandalone[width=0.6\textwidth]{boxes}
+	\caption{Individual boxes.}	
+	\label{fig:boxes}
+\end{figure}
+
 Next, we create an adjaceny matrix. This adjaceny matrix contains information regarding threshold constraint. If the sum of two scores is greater than or equal to the threshold, the adjaceny matrix contains ``1'' in the relevant cell. If two scores are mates, the adjaceny matrix contains ``2''. Else, the adjaceny matrix contains ``0''. %change this, also explain that the adjMatrix is of size numScore x numScore, square matrix
+
+\begin{figure}[!htb]
+	\centering
+	\includestandalone[width=0.7\textwidth]{thresholdgraph}
+	\caption{Threshold graph.}
+	\label{fig:threshold}	
+\end{figure}
+
+
 
 \subsection{Matching scores}
 Once we have created the problem instance, we then have to attempt to match the scores together. If two scores can be matched, it means that the boxes can be placed next to each other, and the total width of the two scores from the boxes is equal to or exceeds the threshold, and can therefore be scored using the knives in the scoring machine. 
@@ -90,7 +95,7 @@ The matching is performed as follows: starting from the smallest score (0), we a
 
 Once the matching algorithm is complete, we then examine the size of the matching list. For the instance to be feasible, all of the scores must be matched. If not all of the scores are matched, i.e. there are less than $n$ matchings in the matching list, then there are not enough matching edges to create a path, and the instance is infeasible. 
 
-\begin{table}[htb]
+\begin{table}[!htb]
 	\centering
 	\begin{tabular}{|c|c|}
 		\hline
@@ -111,13 +116,20 @@ Once the matching algorithm is complete, we then examine the size of the matchin
 	\label{table:match}
 \end{table}	
 
+\begin{figure}[!htb]
+	\centering
+	\includestandalone[width=0.7\textwidth]{matchgraph}
+	\caption{Match graph.}
+	\label{fig:match}	
+\end{figure}
+
 \subsection{Mate-Induced Structure}
 Now that we have a list of matched scores, we can now attempt to create an \textit{alternating cycle} which consists of an edge between scores that are mates, followed by an edge between scores that are matched. Therefore each score will either be preceded by a mate and followed by a match, or vice versa. The cycles are easily formed using the mate list and match list. 
 
 If the mate-induced structure consists of only one cycle, then the instance is instantly feasible. In this example we have two cycles, and so we must find a way to connect, or ``patch'', these two cycles together to create a single cycle.
 
 
-\begin{table}[htb]
+\begin{table}[!htb]
 	\centering
 	\begin{tabular}{|l*{10}{|c}|}
 		\hline
@@ -129,11 +141,20 @@ If the mate-induced structure consists of only one cycle, then the instance is i
 	\label{table:mis}
 \end{table}
 
+\begin{figure}[!htb]
+	\centering
+	\includestandalone[width=0.9\textwidth]{mis}
+	\caption{Match graph.}
+	\label{fig:mis}	
+\end{figure}
+
+
+
 \subsection{FCA}%change this title
 In order to join these two cycles together to create a single cycle, we must find scores from different cycles that are able to be matched, i.e the sum of the scores are greater than or equal to the threshold. If we are able to find such scores, then we simply remove the old matches, and add the new ones. In this case, there are three possible sets of scores that can be used to connect the cycles together. For simplicity and speed, we choose the first set of scores found. This is depicted in FIGURE.
  
 
-\begin{table}[htb]
+\begin{table}[!htb]
 	\centering
 	\begin{tabular}{c|c|}
 		\cline{2-2}
@@ -148,12 +169,14 @@ In order to join these two cycles together to create a single cycle, we must fin
 \end{table}	
 
 
-\begin{figure}[htb]
+\begin{figure}[!htb]
 	\centering
 	\includestandalone[width=0.9\textwidth]{patch}
 	\caption{Patching MIS blue = mates, red = matching, explain dotted lines.}
 	\label{fig:patch}	
 \end{figure}
+
+
 
 Now that the cycle has been formed, we simply remove the dominating scores, and obtain a single path.\\
 \\
@@ -162,16 +185,11 @@ Now that the cycle has been formed, we simply remove the dominating scores, and 
 \code{Total Length of Path: 5043 millimeters.}
 
 
-\begin{figure}[htb]	
-	\centering
-	\includestandalone[width=0.6\textwidth]{boxes}
-	\caption{Individual boxes.}	
-	\label{fig:boxes}
-\end{figure}
 
 
 
-\begin{figure}[htb]
+
+\begin{figure}[!htb]
 	\centering
 	\includestandalone[width=\textwidth]{path}
 	\caption{Final feasible alignment of boxes.}	
