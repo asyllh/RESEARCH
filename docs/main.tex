@@ -29,9 +29,9 @@
 
 \section{Example}
 \subsection{Creating problem instance}
-In this example, we will attempt to find a feasible alignment of nine boxes, with score widths ranging between 1mm and 70mm. The minimum score separation constraint, or ``threshold'', will be set at 70mm, the industry standard. 
+In this example, we will attempt to find a feasible alignment of nine boxes, with score widths ranging between 1mm and 70mm. The minimum score separation constraint, or ``threshold'', is the minimum distance allowed between two scores from different boxes, and will be set at 70mm, the industry standard. 
 
-Initially, we create 18 random values between 1 and 70, which will be our score widths. We also need to add an extra box with two score of widths 70mm, which will be our ``dominating scores'', giving us a total of $n$ = 10 boxes and 20 scores. These dominating scores will eventually be discarded. 
+Initially, we create 18 random values between 1 and 70, which will be our score widths. We also need to add an extra ``dominating box'' with two scores of widths 70mm, which will be our ``dominating scores'', giving us a total of $n$ = 10 boxes and 20 scores. These dominating scores will eventually be discarded. 
 
 We then sort the scores in non-decreasing order, and place them in a vector. The scores will now be addressed by their indices throughout the rest of the algorithm (see Table \ref{table:allScores}). 
 
@@ -47,28 +47,30 @@ We then sort the scores in non-decreasing order, and place them in a vector. The
 \label{table:allScores}
 \end{table}
 
-Since every box consists of two scores, each score is randomly assigned a ``mate'', so that one score (the smaller score) represents the left-hand side of the box, and the other score represents the right-hand side of the box. The only exceptions to the random allocation of mates are the dominating scores - they must be assigned to one another. We can then assign measurements to each pair of mates to represent the width of each individual box. %except dominating box, score not needed
+Since every box consists of two scores, each score is randomly assigned a ``mate'', so that one score (the smaller score) represents the left-hand side of the box, and the other score represents the right-hand side of the box. Therefore, each pair of mates represents a box. The only exceptions to the random allocation of mates are the dominating scores - they must be assigned to one another. We can then assign measurements to each pair of mates to represent the width of each individual box. Note that we do not assign a box width to the dominating box, as it will not be used in the final solution. 
 
 \begin{table}[!htb]
 	\centering
-	\begin{tabular}{|c|c|c|}
+	\begin{tabular}{|c|c|c|c|}
 	\hline
-	\multicolumn{2}{|c|}{Mates} & Box Width \\ \hline
-	0 & 6 & 314 \\ \hline
-	1 & 10 & 372 \\ \hline
-	2 & 16 & 297 \\ \hline
-	3 & 11 & 220 \\ \hline
-	4 & 17 & 959 \\ \hline
-	5 & 9 & 738 \\ \hline
-	7 & 12 & 622 \\ \hline
-	8 & 15 & 635 \\ \hline
-	13 & 14 & 859 \\ \hline
-	18 & 19 & 0 \\
+	Box & \multicolumn{2}{|c|}{Scores} & Box Width \\ \hline
+	1 & 0 & 6 & 314 \\ \hline
+	2 & 1 & 10 & 372 \\ \hline
+	3 & 2 & 16 & 297 \\ \hline
+	4 & 3 & 11 & 220 \\ \hline
+	5 & 4 & 17 & 959 \\ \hline
+	6 & 5 & 9 & 738 \\ \hline
+	7 & 7 & 12 & 622 \\ \hline
+	8 & 8 & 15 & 635 \\ \hline
+	9 & 13 & 14 & 859 \\ \hline
+	10 & 18 & 19 & 0 \\
 	\hline
 	\end{tabular}
 	\caption{Mates.}
 	\label{table:mates}
 \end{table}	
+
+Figure \ref{fig:boxes} shows the individual boxes with their respective score widths and box number. The box number will be used in the final solution to show the order in which the boxes should be placed.
 
 \begin{figure}[!htb]	
 	\centering
@@ -77,11 +79,15 @@ Since every box consists of two scores, each score is randomly assigned a ``mate
 	\label{fig:boxes}
 \end{figure}
 
-Next, we create an adjaceny matrix. This adjaceny matrix contains information regarding threshold constraint. If the sum of two scores is greater than or equal to the threshold, the adjaceny matrix contains ``1'' in the relevant cell. If two scores are mates, the adjaceny matrix contains ``2''. Else, the adjaceny matrix contains ``0''. %change this, also explain that the adjMatrix is of size numScore x numScore, square matrix
+We then create an adjacency matrix, which contains information regarding which pairs of scores meet the minimum score separation constraint, as well as which pairs of scores are mates.
+
+We can also depict this problem graphically (Figure \ref{fig:threshold}) by representing each score as a vertex with an assigned value corresponding to the score width. A red edge between two vertices shows that the scores meet the minimum score separation constraint, and can be feasibly matched, and a blue edge between two vertices shows that the corresponding scores are mates, and therefore represent a box. 
+
+
 
 \begin{figure}[!htb]
 	\centering
-	\includestandalone[width=0.7\textwidth]{thresholdgraph}
+	\includestandalone[width=0.5\textwidth]{thresholdgraph}
 	\caption{Threshold graph.}
 	\label{fig:threshold}	
 \end{figure}
@@ -91,43 +97,34 @@ Next, we create an adjaceny matrix. This adjaceny matrix contains information re
 \subsection{Matching scores}
 Once we have created the problem instance, we then have to attempt to match the scores together. If two scores can be matched, it means that the boxes can be placed next to each other, and the total width of the two scores from the boxes is equal to or exceeds the threshold, and can therefore be scored using the knives in the scoring machine. 
 
-The matching is performed as follows: starting from the smallest score (0), we attempt to match it with the largest possible score it is adjacent to ( = 1 in the adjaceny matrix), and that has not yet been matched (in this case, 19). We continue until all scores have been matched. If a score cannot be matched due to the largest score being its mate, we match the score with the second largest score available. As we can see in Table \ref{table:match}, score 7 was unable to be matched with the largest possible score, 12, as they are mates. Instead, 7 was matched with the next largest score, 11.
-
-Once the matching algorithm is complete, we then examine the size of the matching list. For the instance to be feasible, all of the scores must be matched. If not all of the scores are matched, i.e. there are less than $n$ matchings in the matching list, then there are not enough matching edges to create a path, and the instance is infeasible. 
+We already have a list of all the scores that any one score is adjacent to. For each score $u$, we now have to choose just one score $v$ that score $u$ will be matched with. Starting from the smallest score, we use the adjacent matrix to match each score to the largest possible score available. If a score $u$ cannot be matched with the largest possible score $v$, due to $v$ being $u$'s mate, we instead match $u$ with the second largest score available. As we can see in Table \ref{table:match}, score 7 was unable to be matched with the largest possible score, 12, as they are mates. Instead, 7 was matched with the next largest score, 11.
 
 \begin{table}[!htb]
 	\centering
-	\begin{tabular}{|c|c|}
+	\begin{tabular}{|l*{20}{|c}|}
 		\hline
-		\multicolumn{2}{|c|}{Match}\\ \hline
-		0 & 19 \\ \hline
-		1 & 18 \\ \hline
-		2 & 17 \\ \hline
-		3 & 16 \\ \hline
-		4 & 15 \\ \hline
-		5 & 14 \\ \hline
-		6 & 13 \\ \hline
-		7 & 11 \\ \hline
-		8 & 12 \\ \hline
-		9 & 10 \\
-		\hline
+		Score & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 & 13 & 14 & 15 & 16 & 17 & 18 & 19 \\ \hline
+		Match & 19 & 18 & 17 & 16 & 15 & 14 & 13 & 11 & 12 & 10 & 9 & 7 & 8 & 6 & 5 & 4 & 3 & 2 & 1 & 0 \\
+		\hline	
 	\end{tabular}
-	\caption{Match List.}
+	\caption{Match list.}
 	\label{table:match}
-\end{table}	
+\end{table}
+
+Once the matching algorithm is complete, each score should be associated with exactly two other scores: its mate, and its match. For the instance to be feasible, all of the scores must be matched. If there are one or more scores that are unmatched, the instance is immediately infeasible.
+
+Graphically, as depicted in Figure \ref{fig:match}, if the instance is feasible, each vertex will be adjacent to two other vertices via two edges of different colours, one red edge, and one blue edge. The resulting graph is a 2-regular graph.
+
 
 \begin{figure}[!htb]
 	\centering
-	\includestandalone[width=0.7\textwidth]{matchgraph}
+	\includestandalone[width=0.45\textwidth]{matchgraph}
 	\caption{Match graph.}
 	\label{fig:match}	
 \end{figure}
 
 \subsection{Mate-Induced Structure}
-Now that we have a list of matched scores, we can now attempt to create an \textit{alternating cycle} which consists of an edge between scores that are mates, followed by an edge between scores that are matched. Therefore each score will either be preceded by a mate and followed by a match, or vice versa. The cycles are easily formed using the mate list and match list. 
-
-If the mate-induced structure consists of only one cycle, then the instance is instantly feasible. In this example we have two cycles, and so we must find a way to connect, or ``patch'', these two cycles together to create a single cycle.
-
+Now that we have a list of matched scores, we can now attempt to create an \textit{alternating cycle}, which is a cycle consisting of edges of alternating colours. In other words, the cycle will consist of an edge between scores that are mates, followed by an edge between scores that are matched. Therefore, each score will either be preceded by a mate and followed by a match, or vice versa. The cycles are easily formed using the mate list and match list, and are collectively called the mate-induced structure.
 
 \begin{table}[!htb]
 	\centering
@@ -141,32 +138,23 @@ If the mate-induced structure consists of only one cycle, then the instance is i
 	\label{table:mis}
 \end{table}
 
+If the mate-induced structure consists of only one cycle, then the instance is instantly feasible. We simply remove the dominating vertices and obtain a feasible alignment of the boxes. In this example we have two cycles, and so we must find a way to connect, or ``patch'', these two cycles together to create a single cycle.
+
+
+
+
 \begin{figure}[!htb]
 	\centering
 	\includestandalone[width=0.9\textwidth]{mis}
-	\caption{Match graph.}
+	\caption{MIS.}
 	\label{fig:mis}	
 \end{figure}
 
 
 
-\subsection{FCA}%change this title
-In order to join these two cycles together to create a single cycle, we must find scores from different cycles that are able to be matched, i.e the sum of the scores are greater than or equal to the threshold. If we are able to find such scores, then we simply remove the old matches, and add the new ones. In this case, there are three possible sets of scores that can be used to connect the cycles together. For simplicity and speed, we choose the first set of scores found. This is depicted in FIGURE.
+\subsection{Connecting cycles}%change this title
+In order to join these two cycles together to create a single cycle, we must find scores from different cycles that are able to be matched. If we are able to find such scores, then we simply remove the old matching edges, and add the new ones. In this case, we can use the edges $\{1,18\}$ and $\{2,17\}$, which are from different cycles. Score 1 can be feasibly matched with score 17, and score 2 can be feasibly matched with score 18. Therefore, we remove the original edges $\{1,18\}$, $\{2,17\}$, and create two new edges, $\{1,17\}$ and $\{2,18\}$. The two cycles have now been connect to create a single cycle, as shown in Figure \ref{fig:patch}.
  
-
-\begin{table}[!htb]
-	\centering
-	\begin{tabular}{c|c|}
-		\cline{2-2}
-		& Scores \\ \hline
-		\multicolumn{1}{|c|}{Cycle 1} & 1 - 18 - 2 - 17 \\ \hline
-		\multicolumn{1}{|c|}{Cycle 2} & 4 - 15 - 5 - 14 \\ \hline
-		\multicolumn{1}{|c|}{Cycle 3} & 6 - 13 - 8 - 12 \\
-		\hline
-	\end{tabular}
-	\caption{T-Matrix.}
-	\label{table:tcycles}
-\end{table}	
 
 
 \begin{figure}[!htb]
@@ -177,16 +165,7 @@ In order to join these two cycles together to create a single cycle, we must fin
 \end{figure}
 
 
-
-Now that the cycle has been formed, we simply remove the dominating scores, and obtain a single path.\\
-\\
-\code{Complete Path: 0 6 13 14 5 9 10 1 17 4 15 8 12 7 11 3 16 2}\\
-\code{Order of Boxes: 1 9 6 -2 -5 -8 -7 -4 -3}\\
-\code{Total Length of Path: 5043 millimeters.}
-
-
-
-
+Now that we have a single alternating cycle containing all of the scores, we can remove the dominating scores, and obtain a feasible solution to the problem. The final feasible alignment of the boxes is shown in Figure \ref{fig:path}.
 
 
 \begin{figure}[!htb]
@@ -195,6 +174,16 @@ Now that the cycle has been formed, we simply remove the dominating scores, and 
 	\caption{Final feasible alignment of boxes.}	
 	\label{fig:path}
 \end{figure}
+
+\section{Output}
+Becker's original algorithm was designed to output a statement of feasibility or infeasibility for a large number of instances. This is useful to test the efficiency of the algorithm, but it does not allow a user to obtain an explicit solution for any given instance. In Becker's algorithm, he determines whether the cycles of the mate-induced structure can be connected, and if so, outputs a statement of feasibility - his program does not actually proceed to connect the cycles together. I have extended the program, and created functions that connect the cycles together, removes the dominating scores, and outputs the scores and box numbers in the order that will produce a feasible alignment of the boxes. The output corresponding to the above example is as follows:\\
+\\
+\code{Complete Path: 0 6 13 14 5 9 10 1 17 4 15 8 12 7 11 3 16 2}\\
+\code{Order of Boxes: 1 9 6 -2 -5 -8 -7 -4 -3}\\
+\code{Total Length of Path: 5043 millimeters.}\\
+
+
+If the box is aligned in its original form, i.e. with the smallest score on the left-hand side, the box number in the \texttt{Order of Boxes} output is positive. If the box needs to be rotated in the alignment, i.e. with the smallest score on the right-hand side, the box number is negative. This immediately provides the user with the information required to form a feasible alignment of the boxes.
 
 
 \section{Improvements}
@@ -236,35 +225,45 @@ Now that the cycle has been formed, we simply remove the dominating scores, and 
 	
 \end{itemize}
 
+\begin{comment}
+\begin{table}[!htb]
+\centering
+\begin{tabular}{|c|c|}
+\hline
+\multicolumn{2}{|c|}{Match}\\ \hline
+0 & 19 \\ \hline
+1 & 18 \\ \hline
+2 & 17 \\ \hline
+3 & 16 \\ \hline
+4 & 15 \\ \hline
+5 & 14 \\ \hline
+6 & 13 \\ \hline
+7 & 11 \\ \hline
+8 & 12 \\ \hline
+9 & 10 \\
+\hline
+\end{tabular}
+\caption{Match List.}
+%\label{table:match}
+\end{table}	
+\end{comment}
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+\begin{comment}
+\begin{table}[!htb]
+\centering
+\begin{tabular}{c|c|}
+\cline{2-2}
+& Scores \\ \hline
+\multicolumn{1}{|c|}{Cycle 1} & 1 - 18 - 2 - 17 \\ \hline
+\multicolumn{1}{|c|}{Cycle 2} & 4 - 15 - 5 - 14 \\ \hline
+\multicolumn{1}{|c|}{Cycle 3} & 6 - 13 - 8 - 12 \\
+\hline
+\end{tabular}
+\caption{T-Matrix.}
+\label{table:tcycles}
+\end{table}	
+\end{comment}
 
 
 
