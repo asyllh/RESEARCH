@@ -40,4 +40,6 @@ void packStripsNFDScores(int vacant, int numBox, int maxStripWidth, vector<vecto
 
 void packStripsNFIScores(int vacant, int numBox, int maxStripWidth, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths);
 
+void packStripsSmallestSearch(int numScores, int numBox, int maxStripWidth, vector<int> &mates, vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths);
+
 #endif
