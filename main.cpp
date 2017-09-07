@@ -161,6 +161,9 @@ int main(int argc, char **argv){
 
         //packStripsSmallest(numScores, numBox, maxStripWidth, mates, adjMatrix, boxWidths);
         //continue; //do not do MTGMA/MIS/FCA/PATCH
+
+        //packStripsSmallestSearch(numScores, numBox, maxStripWidth, mates, adjMatrix, boxWidths);
+        //continue;
         //endregion
 
         //region MTGMA
