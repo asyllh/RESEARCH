@@ -8,23 +8,31 @@ packing.cpp
 using namespace std;
 
 void packStripsSmallest(int numScores, int numBox, int maxStripWidth, vector<int> &mates, vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths){
-
+//REDO THIS ALGORITHM
     // USE WITH NUMSCORES - 2
     int i, j, x, k;
     vector<int> stripSum(numBox, 0);
     vector<vector<int> > strip(numBox);
     int numStrips = 0;
+    vector<int> checked(numScores - 2, 0);
 
     strip[0].push_back(0);
     strip[0].push_back(mates[0]);
     stripSum[0] += boxWidths[0][mates[0]];
-    for(k = 0; k < adjMatrix.size(); ++k){
+    /*for(k = 0; k < adjMatrix.size(); ++k){
         adjMatrix[k][0] = 0;
         adjMatrix[k][mates[0]] = 0;
-    }
+    }*/
+    checked[0] = 1;
+    checked[mates[0]] = 1;
     x = 0;
 
+    //cout << "NS: " << numScores << endl;
+
     for(j = 0; j < numScores - 2; ++j){
+        if (checked[j] == 1) {
+            continue;
+        }
         for(i = 0; i < strip.size(); ++i){
             if(!strip[i].empty()){
                 if(adjMatrix[strip[i].back()][j] == 1){
@@ -32,10 +40,8 @@ void packStripsSmallest(int numScores, int numBox, int maxStripWidth, vector<int
                         strip[i].push_back(j);
                         strip[i].push_back(mates[j]);
                         stripSum[i] += boxWidths[j][mates[j]];
-                        for(k = 0; k < adjMatrix.size(); ++k){
-                            adjMatrix[k][j] = 0;
-                            adjMatrix[k][mates[j]] = 0;
-                        }
+                        checked[j] = 1;
+                        checked[mates[j]] = 1;
                         x = 1;
                         break;
                     }
@@ -48,10 +54,8 @@ void packStripsSmallest(int numScores, int numBox, int maxStripWidth, vector<int
                 strip[i].push_back(j);
                 strip[i].push_back(mates[j]);
                 stripSum[i] += boxWidths[j][mates[j]];
-                for(k = 0; k < adjMatrix.size(); ++k){
-                    adjMatrix[k][j] = 0;
-                    adjMatrix[k][mates[j]] = 0;
-                }
+                checked[j] = 1;
+                checked[mates[j]] = 1;
                 x = 1;
                 break;
             }

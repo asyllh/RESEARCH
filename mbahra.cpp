@@ -134,14 +134,14 @@ void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, 
     boxWidths[numScores - 1][numScores - 2] = 0;
     boxWidths[numScores - 2][numScores - 1] = 0;
 
-    /*cout << "Box Widths:\n";
+    cout << "Box Widths:\n";
     for(i = 0; i < numScores; ++i){
         for(j = 0; j < numScores; ++j){
             cout << boxWidths[i][j] << "  ";
         }
         cout << endl;
     }
-    cout << endl;*/
+    cout << endl;
 
     k = 1;
     for(i = 0; i < numScores; ++i){
