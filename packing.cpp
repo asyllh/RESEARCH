@@ -7,109 +7,6 @@ packing.cpp
 #include "packing.h"
 using namespace std;
 
-void packStripsSmallest(int numScores, int numBox, int maxStripWidth, vector<int> &mates, vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths){
-//REDO THIS ALGORITHM
-    // USE WITH NUMSCORES - 2
-    int i, j, x, k;
-    vector<int> stripSum(numBox, 0);
-    vector<vector<int> > strip(numBox);
-    int numStrips = 0;
-    vector<int> checked(numScores - 2, 0);
-
-    strip[0].push_back(0);
-    strip[0].push_back(mates[0]);
-    stripSum[0] += boxWidths[0][mates[0]];
-    /*for(k = 0; k < adjMatrix.size(); ++k){
-        adjMatrix[k][0] = 0;
-        adjMatrix[k][mates[0]] = 0;
-    }*/
-    checked[0] = 1;
-    checked[mates[0]] = 1;
-    x = 0;
-
-    //cout << "NS: " << numScores << endl;
-
-    for(j = 0; j < numScores - 2; ++j){
-        if (checked[j] == 1) {
-            continue;
-        }
-        for(i = 0; i < strip.size(); ++i){
-            if(!strip[i].empty()){
-                if(adjMatrix[strip[i].back()][j] == 1){
-                    if(stripSum[i] + boxWidths[j][mates[j]] <= maxStripWidth){
-                        strip[i].push_back(j);
-                        strip[i].push_back(mates[j]);
-                        stripSum[i] += boxWidths[j][mates[j]];
-                        checked[j] = 1;
-                        checked[mates[j]] = 1;
-                        x = 1;
-                        break;
-                    }
-                }
-                else {
-                    break;
-                }
-            }
-            else if (strip[i].empty()){
-                strip[i].push_back(j);
-                strip[i].push_back(mates[j]);
-                stripSum[i] += boxWidths[j][mates[j]];
-                checked[j] = 1;
-                checked[mates[j]] = 1;
-                x = 1;
-                break;
-            }
-
-        }
-        if(x == 1) {
-            x = 0;
-            j = -1;
-        }
-    }
-
-    cout << "Strips:\n";
-    for(i = 0; i < strip.size(); ++i){
-        if(!strip[i].empty()){
-            for(j = 0; j < strip[i].size(); ++j){
-                cout << strip[i][j] << " ";
-            }
-            cout << endl;
-            ++numStrips;
-        }
-    }
-    cout << endl;
-
-    cout << "Total number of strips required: " << numStrips << endl << endl;
-
-    cout << "Number of boxes per strip:\n";
-    for(i = 0; i < strip.size(); ++i){
-        if(!strip[i].empty()){
-            cout << "Strip " << i << ": " << strip[i].size() << endl;
-
-        }
-    }
-    cout << endl;
-
-    cout << "Strip Widths(mm):\n";
-    for(i = 0; i < stripSum.size(); ++i){
-        if(stripSum[i] != 0){
-            cout << "Strip " << i << ": " << stripSum[i] << endl;
-        }
-    }
-    cout << endl;
-
-    cout << "Strip Waste(mm):\n";
-    for(i = 0; i < stripSum.size(); ++i){
-        if(stripSum[i] != 0){
-            cout << "Strip " << i << ": " << maxStripWidth - stripSum[i] << endl;
-        }
-    }
-    cout << endl;
-
-
-
-}
-
 void packStripsMIS(int numBox, int maxStripWidth, vector<vector<int> > &adjMatrix, vector<vector<int> > &mateInduced, vector<vector<int> > &boxWidths){
 
     int i, j, k;
@@ -1972,7 +1869,7 @@ void packStripsNFIScores(int vacant, int numBox, int maxStripWidth, vector<vecto
 
 }
 
-void packStripsSmallestSearch(int numScores, int numBox, int maxStripWidth, vector<int> &mates, vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths){
+void packStripsSmallest(int numScores, int numBox, int maxStripWidth, vector<int> &mates, vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths){
 
     // USE WITH NUMSCORES - 2
     int i, j, x, k, u, v;

@@ -159,11 +159,11 @@ int main(int argc, char **argv){
 
         //continue;
 
-        //packStripsSmallest(numScores, numBox, maxStripWidth, mates, adjMatrix, boxWidths);
-        //continue; //do not do MTGMA/MIS/FCA/PATCH
 
-        packStripsSmallestSearch(numScores, numBox, maxStripWidth, mates, adjMatrix, boxWidths);
-        continue;
+
+        packStripsSmallest(numScores, numBox, maxStripWidth, mates, adjMatrix, boxWidths);
+        continue; //do not do MTGMA/MIS/FCA/PATCH
+
         //endregion
 
         //region MTGMA
