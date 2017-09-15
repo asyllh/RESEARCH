@@ -9,6 +9,7 @@ patch.pdf
 thresholdgraph.pdf
 matchgraph.pdf
 mis.pdf
+packsmallest.pdf
 *.sln
 *.VC.db
 *.vcxproj
