@@ -54,7 +54,7 @@ Since every box consists of two scores, each score is randomly assigned a ``mate
 	\begin{tabular}{|c|c|c|c|}
 	\hline
 	Box & \multicolumn{2}{|c|}{Scores} & Box Width \\ \hline
-	1 & 0 & 6 & 314 \\ \hline
+	1 & 0 & 6 & 341 \\ \hline
 	2 & 1 & 10 & 372 \\ \hline
 	3 & 2 & 16 & 297 \\ \hline
 	4 & 3 & 11 & 220 \\ \hline
@@ -182,8 +182,12 @@ Becker's original algorithm was designed to output a statement of feasibility or
 \code{Order of Boxes: 1 9 6 -2 -5 -8 -7 -4 -3}\\
 \code{Total Length of Path: 5043 millimeters.}\\
 
-
 If the box is aligned in its original form, i.e. with the smallest score on the left-hand side, the box number in the \texttt{Order of Boxes} output is positive. If the box needs to be rotated in the alignment, i.e. with the smallest score on the right-hand side, the box number is negative. This immediately provides the user with the information required to form a feasible alignment of the boxes.
+
+\section{Packing}
+\subsection{packStripsSmallest}
+
+
 
 
 \section{Improvements}
