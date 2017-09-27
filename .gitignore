@@ -3,6 +3,7 @@
 Debug/*
 cmake-build-debug/
 .idea/
+main.pdf
 boxes.pdf
 path.pdf
 patch.pdf
