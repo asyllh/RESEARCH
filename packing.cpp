@@ -1962,7 +1962,7 @@ void packStripsSmallest(int numScores, int numBox, int maxStripWidth, vector<int
     cout << "Number of boxes per strip:\n";
     for(i = 0; i < strip.size(); ++i){
         if(!strip[i].empty()){
-            cout << "Strip " << i << ": " << strip[i].size() << endl;
+            cout << "Strip " << i << ": " << strip[i].size() / 2 << endl;
 
         }
     }
