@@ -48,6 +48,7 @@ void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, 
 
     int i, j, k;
     vector<int> randOrder;
+    vector<int> checkBox(numScores, 0);
 
     //Create random values to be used as score widths, put in allScores vector (except last two elements)
     for (i = 0; i < numScores - 2; ++i) {
@@ -95,14 +96,14 @@ void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, 
         adjMatrix[randOrder[2 * i + 1]][randOrder[2 * i]] = 2;
     }
 
-    cout << "AdjMatrix:\n";
+    /*cout << "AdjMatrix:\n";
     for(i = 0; i < numScores; ++i){
         for(j = 0; j < numScores; ++j){
             cout << adjMatrix[i][j] << " ";
         }
         cout << endl;
     }
-    cout << endl << endl;
+    cout << endl << endl;*/
 
 
 
@@ -136,12 +137,13 @@ void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, 
 
     cout << "Box Widths:\n";
     for(i = 0; i < numScores; ++i){
-        for(j = 0; j < numScores; ++j){
-            cout << boxWidths[i][j] << "  ";
+        if(checkBox[i] == 1){
+            continue;
         }
-        cout << endl;
+        cout << i << "-" << mates[i] << ": " << boxWidths[i][mates[i]] << endl;
+        checkBox[i] = 1;
+        checkBox[mates[i]] = 1;
     }
-    cout << endl;
 
     k = 1;
     for(i = 0; i < numScores; ++i){
@@ -170,6 +172,7 @@ void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, 
 void createInstanceUser(int threshold, int numScores, vector<int> &allScores, vector<vector<int> > &userInput, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths, vector<vector<int> > &allBoxes){
 
     int i, j, m1, m2, k;
+    vector<int> checkBox(numScores, 0);
 
     for(i = 0; i < userInput.size(); ++i){
         for(j = 0; j < userInput[i].size() - 1; ++j){
@@ -226,12 +229,13 @@ void createInstanceUser(int threshold, int numScores, vector<int> &allScores, ve
 
     cout << "BoxWidths:\n";
     for(i = 0; i < numScores; ++i){
-        for(j = 0; j < numScores; ++j){
-            cout << boxWidths[i][j] << "  ";
+        if(checkBox[i] == 1){
+            continue;
         }
-        cout << endl;
+        cout << i << "-" << mates[i] << ": " << boxWidths[i][mates[i]] << endl;
+        checkBox[i] = 1;
+        checkBox[mates[i]] = 1;
     }
-    cout << endl;
 
     for (i = 0; i < numScores; ++i) {
         for (j = 0; j < numScores; ++j) {
