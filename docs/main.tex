@@ -185,9 +185,10 @@ Becker's original algorithm was designed to output a statement of feasibility or
 If the box is aligned in its original form, i.e. with the smallest score on the left-hand side, the box number in the \texttt{Order of Boxes} output is positive. If the box needs to be rotated in the alignment, i.e. with the smallest score on the right-hand side, the box number is negative. This immediately provides the user with the information required to form a feasible alignment of the boxes.
 
 \section{Packing}
-\subsection{packStripsSmallest}
 
+One of the algorithms currently implemented into the program packs the boxes into strips by aligning each score next to the smallest possible score avaialable. Each strip is packed in turn, and the box with the smallest score that has not yet been packed is the first to be placed at the beginning of the strip. We then search through the list of remaining scores in non-decreasing order to find the smallest score that can be feasibly placed next to the score at the end of the first strip, and whose corresponding box width fits onto the strip. If such a box is found, we add it to the strip, and repeat. Once the first strip is fully packed, either because there are no scores that meet the minimum score separation constraint, or because the remaining box widths cannot fit onto the strip, we move onto the next strip. This continues until all of the boxes have been packed. 
 
+There are also functions that perform best-fit, first-fit, or next-fit algorithms on box widths sorted in both increasing and decreasing order of widths.
 
 
 \section{Improvements}
@@ -210,24 +211,6 @@ If the box is aligned in its original form, i.e. with the smallest score on the 
 	
 \end{itemize}
 
-\section{Things to find out/do}
-\begin{itemize}
-	\item What are the industry standard strip lengths?
-	\item Goulimis $n$ = 10, is this true? Are there cases where more boxes are needed?
-	\item Current speed of scoring in industry
-	\item What happens before/after scoring in industry?
-	\item Output to csv file?
-	\item Calculate complexity
-	\item Martello and Toth (1990b) MTP algorithm, adapt with additional constraints
-	\item Exemptions on threshold, what if the instance in infeasible due to one box, can that box be held back and attempt to use in the next instance? Or can it still be used, but scoring run slower?
-	\item How many scoring knives are used?
-	\begin{itemize}
-		\item If only one set of scoring knives is used, then are the boxes placed on a conveyor belt? Does this affect the time?
-		\item If there are a specific number of scoring knives used, should we look at how many boxes are on each strip? I.e. if there are 4 scoring knives, then there should be only 4 scores on the strip, even if there is space available left on the strip?
-		
-	\end{itemize}
-	
-\end{itemize}
 
 \begin{comment}
 \begin{table}[!htb]
