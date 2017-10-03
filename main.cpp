@@ -1,6 +1,6 @@
 /*--------------------/
 ALH
-mbahra.h
+main.cpp
 18/08/2017
 /--------------------*/
 #include <iostream>
@@ -24,6 +24,7 @@ int main(int argc, char **argv){
         cout << "- Maximum width of boxes (millimeters, max = 1000)\n";
         cout << "- Maximum width of strips (millimeters)\n";
         cout << "- Random Seed (integer)\n";
+        cout << "- Name of input file (must have .txt extension)\n";
         exit(1);
     }
     //endregion
@@ -62,7 +63,6 @@ int main(int argc, char **argv){
     int matchSize; //size (cardinality) of the matching list (matchList.size()) (&MTGMA, FCA)
     int numCycles; //number of cycles in the MIS (mateInduced.size()) (&MIS, patchGraph)
     int qstar; //number of T-cycles (&FCA, patchGraph)
-    //vector<int> allScores(numScores, 0); //vector containing all score widths (createInstance, MTGMA)
     vector<int> allScores;
     vector<vector<int> > adjMatrix(numScores, vector<int>(numScores, 0)); //adjaceny matrix (createInstance, MTGMA, MIS, FCA)
     vector<int> mates(numScores, 0); //contains vertex index for mates, e.g if vertex 0 is mates with vertex 4, then mates[0] = 4 (createInstance, MIS)
@@ -139,7 +139,6 @@ int main(int argc, char **argv){
         }
         */
         //endregion
-        //continue;
 
         createInstance(threshold, minWidth, maxWidth, minBoxWidth, maxBoxWidth, numScores, numBox, allScores, adjMatrix, mates, boxWidths, allBoxes);
 
@@ -156,11 +155,6 @@ int main(int argc, char **argv){
         //packStripsBFIScores(vacant, numBox, maxStripWidth, adjMatrix, mates, boxWidths);
         //packStripsNFDScores(vacant, numBox, maxStripWidth, adjMatrix, mates, boxWidths);
         //packStripsNFIScores(vacant, numBox, maxStripWidth, adjMatrix, mates, boxWidths);
-
-        //continue;
-
-
-
         packStripsSmallest(numScores, numBox, maxStripWidth, mates, adjMatrix, boxWidths);
         continue; //do not do MTGMA/MIS/FCA/PATCH
 
