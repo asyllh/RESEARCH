@@ -143,19 +143,7 @@ int main(int argc, char **argv){
         createInstance(threshold, minWidth, maxWidth, minBoxWidth, maxBoxWidth, numScores, numBox, allScores, adjMatrix, mates, boxWidths, allBoxes);
 
         //region Packing
-        //packStripsBFD(numBox, maxBoxWidth, maxStripWidth, adjMatrix, mates, boxWidths);
-        //packStripsFFD(numBox, maxBoxWidth, maxStripWidth, adjMatrix, mates, boxWidths);
-        //packStripsNFD(numBox, maxBoxWidth, maxStripWidth, adjMatrix, mates, boxWidths);
-        //packStripsBFI(numBox, maxBoxWidth, maxStripWidth, adjMatrix, mates, boxWidths);
-        //packStripsFFI(numBox, maxBoxWidth, maxStripWidth, adjMatrix, mates, boxWidths);
-        //packStripsNFI(numBox, maxBoxWidth, maxStripWidth, adjMatrix, mates, boxWidths);
-        //packStripsFFDScores(vacant, numBox, maxStripWidth, adjMatrix, mates, boxWidths);
-        //packStripsFFIScores(vacant, numBox, maxStripWidth, adjMatrix, mates, boxWidths);
-        //packStripsBFDScores(vacant, numBox, maxStripWidth, adjMatrix, mates, boxWidths);
-        //packStripsBFIScores(vacant, numBox, maxStripWidth, adjMatrix, mates, boxWidths);
-        //packStripsNFDScores(vacant, numBox, maxStripWidth, adjMatrix, mates, boxWidths);
-        //packStripsNFIScores(vacant, numBox, maxStripWidth, adjMatrix, mates, boxWidths);
-        packStripsSmallest(numScores, numBox, maxStripWidth, mates, adjMatrix, boxWidths);
+        packStripsFFD(numBox, maxBoxWidth, maxStripWidth, adjMatrix, mates, boxWidths);
         continue; //do not do MTGMA/MIS/FCA/PATCH
 
         //endregion
