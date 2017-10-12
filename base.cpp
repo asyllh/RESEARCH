@@ -4,17 +4,15 @@ base.cpp
 12/10/17
 /--------------*/
 #include <algorithm>
+#include <iomanip>
 #include "base.h"
 using namespace std;
 
-void resetVectors(int vacant, int numScores, int numComp, vector<int> &allScores, vector<vector<int> > &adjMatrix, vector<int> &cycleVertex, vector<int> &matchList, vector<int> &mates, vector<vector<int> > &S, vector<vector<int> > &boxWidths, vector<vector<int> > &allBoxes){
+void resetVectors(int numScores, vector<int> &allScores, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths, vector<vector<int> > &allBoxes){
 
     int i, j;
 
     for(i = 0; i < numScores; ++i){
-        //allScores[i] = 0;
-        cycleVertex[i] = 1;
-        matchList[i] = vacant;
         mates[i] = 0;
         for(j = 0; j < numScores; ++j){
             adjMatrix[i][j] = 0;
@@ -23,41 +21,19 @@ void resetVectors(int vacant, int numScores, int numComp, vector<int> &allScores
         }
     }
 
-    for(i = 0; i < numComp; ++i){
-        for(j = 0; j < numComp; ++j){
-            S[i][j] = 0;
-        }
-    }
-    /*for(i = 0; i < numScores - 2; ++i){
-        matchList[i] = vacant;
-    }*/
-
 }
 
-void clearVectors(vector<int> &allScores, vector<vector<int> > &mateInduced, vector<int> &lengthMateInduced, vector<vector<int> > &T, vector<int> &fullCycle, vector<int> &completePath){
-
-    mateInduced.clear();
-    lengthMateInduced.clear();
-    T.clear();
-    fullCycle.clear();
-    completePath.clear();
-    allScores.clear();
-}
-
-void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, int maxBoxWidth, int numScores, int numBox, vector<int> &allScores, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths, vector<vector<int> > &allBoxes){
+void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, int maxBoxWidth, int numScores, int numBox, double &totalBoxWidth, vector<int> &allScores, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths, vector<vector<int> > &allBoxes){
 
     int i, j, k;
+    int count = 1;
     vector<int> randOrder;
     vector<int> checkBox(numScores, 0);
 
     //Create random values to be used as score widths, put in allScores vector (except last two elements)
-    for (i = 0; i < numScores - 2; ++i) {
+    for (i = 0; i < numScores; ++i) {
         allScores.push_back(rand() % (maxWidth - minWidth + 1) + minWidth);
     }
-    //add two dominating vertices with score widths = 71 (these scores will be either side of same box, mates)
-    allScores.push_back(70);
-    allScores.push_back(70);
-
 
 
     //Sort all of the scores in the allScores vector in ascending order
@@ -86,7 +62,7 @@ void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, 
     }
 
     //Randomly shuffle all values in randOrder vector EXCEPT the last two values (dominating vertices, must stay as mates)
-    random_shuffle(randOrder.begin(), randOrder.begin() + (numScores - 2));
+    random_shuffle(randOrder.begin(), randOrder.end());
 
     //Assign mates to each score (i.e. pair up scores to define which scores are either side of the same box)
     //In the adjacency matrix, this will be represented by value 2
@@ -96,14 +72,14 @@ void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, 
         adjMatrix[randOrder[2 * i + 1]][randOrder[2 * i]] = 2;
     }
 
-    /*cout << "AdjMatrix:\n";
+    cout << "AdjMatrix:\n";
     for(i = 0; i < numScores; ++i){
         for(j = 0; j < numScores; ++j){
             cout << adjMatrix[i][j] << " ";
         }
         cout << endl;
     }
-    cout << endl << endl;*/
+    cout << endl << endl;
 
 
 
@@ -135,16 +111,6 @@ void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, 
     boxWidths[numScores - 1][numScores - 2] = 0;
     boxWidths[numScores - 2][numScores - 1] = 0;
 
-    cout << "Box Widths:\n";
-    for(i = 0; i < numScores; ++i){
-        if(checkBox[i] == 1){
-            continue;
-        }
-        cout << i << "-" << mates[i] << ": " << boxWidths[i][mates[i]] << endl;
-        checkBox[i] = 1;
-        checkBox[mates[i]] = 1;
-    }
-
     k = 1;
     for(i = 0; i < numScores; ++i){
         for(j = i+1; j < numScores; ++j){
@@ -157,6 +123,23 @@ void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, 
         }
     }
     cout << endl;
+
+    cout << "Box#" << setw(10) << "Mates" << setw(10) << "Width\n";
+    for(i = 0; i < numScores; ++i){
+        if(checkBox[i] == 1){
+            continue;
+        }
+        cout << count << setw(11) << i << "-" << mates[i] << setw(11) << boxWidths[i][mates[i]] << endl;
+        totalBoxWidth += boxWidths[i][mates[i]];
+        checkBox[i] = 1;
+        checkBox[mates[i]] = 1;
+        ++count;
+
+    }
+
+    cout << "Total Box Widths: " << totalBoxWidth << endl;
+
+
 
     /*cout << "allBoxes:\n";
     for(i = 0; i < numScores; ++i){
@@ -179,9 +162,6 @@ void createInstanceUser(int threshold, int numScores, vector<int> &allScores, ve
             allScores.push_back(userInput[i][j]);
         }
     }
-
-    allScores.push_back(70);
-    allScores.push_back(70);
 
     sort(allScores.begin(), allScores.end());
 
@@ -215,8 +195,6 @@ void createInstanceUser(int threshold, int numScores, vector<int> &allScores, ve
         boxWidths[m1][m2] = userInput[i][2];
         boxWidths[m2][m1] = userInput[i][2];
     }
-    adjMatrix[allScores.size()-1][allScores.size()-2] = 2;
-    adjMatrix[allScores.size()-2][allScores.size()-1] = 2;
 
     cout << "AdjMatrix:\n";
     for(i = 0; i < adjMatrix.size(); ++i){
@@ -264,13 +242,13 @@ void createInstanceUser(int threshold, int numScores, vector<int> &allScores, ve
         }
     }
 
-    /*cout << "allBoxes:\n";
+    cout << "allBoxes:\n";
     for(i = 0; i < numScores; ++i){
         for(j = 0; j < numScores; ++j){
             cout << allBoxes[i][j] << " ";
         }
         cout << endl;
     }
-    cout << endl;*/
+    cout << endl;
 
 }
