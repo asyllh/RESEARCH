@@ -129,7 +129,7 @@ void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, 
         if(checkBox[i] == 1){
             continue;
         }
-        cout << count << setw(11) << i << "-" << mates[i] << setw(11) << boxWidths[i][mates[i]] << endl;
+        cout << count << setw(10) << i << "-" << mates[i] << setw(8) << boxWidths[i][mates[i]] << endl;
         totalBoxWidth += boxWidths[i][mates[i]];
         checkBox[i] = 1;
         checkBox[mates[i]] = 1;
@@ -137,7 +137,7 @@ void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, 
 
     }
 
-    cout << "Total Box Widths: " << totalBoxWidth << endl;
+    cout << "Total Box Widths: " << totalBoxWidth << endl << endl;
 
 
 

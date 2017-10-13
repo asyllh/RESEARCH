@@ -55,6 +55,10 @@ int main(int argc, char **argv){
     vector<int> tempUser(3, 0);
     int choice;
     double totalBoxWidth = 0.0;
+    vector<int> stripSum(numBox, 0);
+    vector<vector<int> > strip(numBox);
+    vector<vector<int> > stripWidth(numBox);
+    vector<int> stripNumBoxes;
 
 
     cout << "MSSP - MBAHRA\n-------------\n";
@@ -111,7 +115,7 @@ int main(int argc, char **argv){
 
     createInstance(threshold, minWidth, maxWidth, minBoxWidth, maxBoxWidth, numScores, numBox, totalBoxWidth, allScores, adjMatrix, mates, boxWidths, allBoxes);
 
-    packStripsFFD(numBox, maxBoxWidth, maxStripWidth, totalBoxWidth, adjMatrix, mates, boxWidths);
+    packStripsFFD(numBox, maxBoxWidth, maxStripWidth, totalBoxWidth, adjMatrix, mates, boxWidths, stripSum, stripNumBoxes, strip, stripWidth);
 
 
 

@@ -5,6 +5,7 @@ packing.cpp
 /--------------*/
 #include <algorithm>
 #include <cmath>
+#include <iomanip>
 #include "packing.h"
 using namespace std;
 
@@ -15,19 +16,15 @@ int lowerBound(double totalBoxWidth, int maxStripWidth){
     return lBound;
 }
 
-void packStripsFFD(int numBox, int maxBoxWidth, int maxStripWidth, double totalBoxWidth, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths){
+void packStripsFFD(int numBox, int maxBoxWidth, int maxStripWidth, double totalBoxWidth, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<int> &stripNumBoxes, vector<vector<int> > &strip, vector<vector<int> > &stripWidth){
 
-    int i, j, mini;
+    int i, j, mini, k, l, m;
     int min = 0;
     int max = maxBoxWidth;
     int numStrips = 0;
-    vector<int> stripSum(numBox, 0);
-    vector<vector<int> > strip(numBox);
     vector<int> boxDecrease;
-    vector<vector<int> > stripWidth(numBox);
-    vector<int> stripNumBoxes(numBox, 0);
 
-    while(boxDecrease.size() < numBox) { //numBox -1, doesn't include dominating vertices
+    while(boxDecrease.size() < numBox) {
         for (i = 0; i < mates.size(); ++i) {
             if (boxWidths[i][mates[i]] > min && boxWidths[i][mates[i]] < max) { //what happens if two boxes have the same width?
                 min = boxWidths[i][mates[i]];
@@ -69,12 +66,6 @@ void packStripsFFD(int numBox, int maxBoxWidth, int maxStripWidth, double totalB
                         stripWidth[i].push_back(boxWidths[boxDecrease[j]][mates[boxDecrease[j]]]);
                         break;
                     }
-                    else{
-                        continue;
-                    }
-                }
-                else{
-                    continue;
                 }
             }
             else if (strip[i].empty()){
@@ -87,53 +78,64 @@ void packStripsFFD(int numBox, int maxBoxWidth, int maxStripWidth, double totalB
         }
     }
 
+    k = strip.size() - 1;
+    while(strip[k].empty()){
+        strip.pop_back();
+        --k;
+    }
+
+    l = stripWidth.size() -1;
+    while(stripWidth[l].empty()){
+        stripWidth.pop_back();
+        --l;
+    }
+
+    m = stripSum.size() -1;
+    while(stripSum[m] == 0){
+        stripSum.pop_back();
+        --m;
+    }
 
     for(i = 0; i < strip.size(); ++i){
-        if(!strip[i].empty()){
-            stripNumBoxes[i] = strip[i].size() / 2;
-            ++numStrips;
-        }
+        stripNumBoxes.push_back(strip[i].size() / 2);
+        ++numStrips;
     }
 
 
-    cout << "FFD: " << numStrips << " strips\n-----------------------\n";
+    cout << "FFD: " << numStrips << " strips\n";
 
     cout << "Lower Bound: " << lowerBound(totalBoxWidth, maxStripWidth) << " strips\n---------------\n";
 
+
     cout << "Strips FFD (scores):\n";
     for(i = 0; i < strip.size(); ++i){
-        if(!strip[i].empty()){
-            cout << "Strip " << i << ": ";
-            for(j = 0; j < strip[i].size(); ++j){
-                cout << strip[i][j] << " ";
-            }
-            cout << endl;
+        cout << "Strip " << i << ": ";
+        for(j = 0; j < strip[i].size(); ++j){
+            cout << strip[i][j] << " ";
         }
+        cout << endl;
     }
     cout << endl;
 
     cout << "Strips FFD (boxWidths):\n";
     for(i = 0; i < stripWidth.size(); ++i){
-        if(!stripWidth[i].empty()){
-            cout << "Strip " << i << ": ";
-            for(j = 0; j < stripWidth[i].size(); ++j){
-                cout << stripWidth[i][j] << " ";
-            }
-            cout << endl;
+        cout << "Strip " << i << ": ";
+        for(j = 0; j < stripWidth[i].size(); ++j){
+            cout << stripWidth[i][j] << " ";
         }
+        cout << endl;
     }
     cout << endl;
 
-    cout << "Strip Widths FFD:\n";
-    cout << "Strip\t#Boxes\tWidth\tResidual\n";
+    cout << "Strip" << setw(8) << "#Boxes" << setw(8) << "Width" << setw(12) << "Residual\n";
     for(i = 0; i < stripSum.size(); ++i){
         if(stripSum[i] !=0) {
-            cout << i << "\t" << stripNumBoxes[i] << "\t" <<  stripSum[i] << "\t" << maxStripWidth - stripSum[i] << endl;
+            cout << i << setw(9) << stripNumBoxes[i] << setw(10) <<  stripSum[i] << setw(9) << maxStripWidth - stripSum[i] << endl;
         }
     }
     cout << endl << endl;
 
-
-
 }
+
+
 
