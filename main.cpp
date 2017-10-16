@@ -117,6 +117,8 @@ int main(int argc, char **argv){
 
     packStripsFFD(numBox, maxBoxWidth, maxStripWidth, totalBoxWidth, adjMatrix, mates, boxWidths, stripSum, stripNumBoxes, strip, stripWidth);
 
+    swapBox(maxStripWidth, adjMatrix, boxWidths, strip, stripSum);
+
 
 
 

@@ -9,6 +9,12 @@ packing.cpp
 #include "packing.h"
 using namespace std;
 
+void swap(int &a, int &b){
+    int temp = a;
+    a = b;
+    b = temp;
+}
+
 int lowerBound(double totalBoxWidth, int maxStripWidth){
     int lBound;
 
@@ -134,6 +140,228 @@ void packStripsFFD(int numBox, int maxBoxWidth, int maxStripWidth, double totalB
         }
     }
     cout << endl << endl;
+
+}
+
+void checkSwap(int i, int j, int k, int l, vector<vector<int> > &adjMatrix, vector<vector<int> > &strip){
+
+    int u, v;
+
+    if(j == 0){
+        if(l == 0){ //CASE 1
+            if(adjMatrix[strip[i][1]][strip[k][2]] == 1 && adjMatrix[strip[k][1]][strip[i][2]] == 1){
+                swap(strip[i][0], strip[k][0]);
+                swap(strip[i][1], strip[k][1]);
+
+                /*for(u = 0; u < strip.size(); ++u){
+                    cout << "Strip " << u << ": ";
+                    for(v = 0; v < strip[u].size(); ++v){
+                        cout << strip[u][v] << " ";
+                    }
+                    cout << endl;
+                }
+                cout << endl;*/
+            }
+            else if(adjMatrix[strip[i][0]][strip[k][2]] == 1 && adjMatrix[strip[k][1]][strip[i][2]] == 1){
+                swap(strip[i][0], strip[k][0]);
+                swap(strip[i][1], strip[k][1]);
+                swap(strip[k][0], strip[k][1]);
+            }
+            else if(adjMatrix[strip[i][1]][strip[k][2]] == 1 && adjMatrix[strip[k][0]][strip[i][2]] == 1){
+                swap(strip[i][0], strip[k][0]);
+                swap(strip[i][1], strip[k][1]);
+                swap(strip[i][0], strip[i][1]);
+            }
+            else if(adjMatrix[strip[i][0]][strip[k][2]] == 1 && adjMatrix[strip[k][0]][strip[i][2]] == 1){
+                swap(strip[i][0], strip[k][0]);
+                swap(strip[i][1], strip[k][1]);
+                swap(strip[i][0], strip[i][1]);
+                swap(strip[k][0], strip[k][1]);
+            }
+        }
+        else if (l == strip[k].size()-2){ //CASE 2A
+            if(adjMatrix[strip[i][0]][strip[k][strip[k].size()-3]] == 1 && adjMatrix[strip[k][strip[k].size()-1]][strip[i][2]] == 1){
+                swap(strip[i][0], strip[k][l]);
+                swap(strip[i][1], strip[k][l+1]);
+            }
+            else if(adjMatrix[strip[i][1]][strip[k][strip[k].size()-3]] == 1 && adjMatrix[strip[k][strip[k].size()-1]][strip[i][2]] == 1){
+                swap(strip[i][0], strip[k][l]);
+                swap(strip[i][1], strip[k][l+1]);
+                swap(strip[k][l], strip[k][l+1]);
+
+            }
+            else if(adjMatrix[strip[i][0]][strip[k][strip[k].size()-3]] == 1 && adjMatrix[strip[k][l]][strip[i][2]] == 1){
+                swap(strip[i][0], strip[k][l]);
+                swap(strip[i][1], strip[k][l+1]);
+                swap(strip[i][0], strip[i][1]);
+            }
+            else if(adjMatrix[strip[i][1]][strip[k][strip[k].size()-3]] == 1 && adjMatrix[strip[k][l]][strip[i][2]] == 1){
+                swap(strip[i][0], strip[k][l]);
+                swap(strip[i][1], strip[k][l+1]);
+                swap(strip[i][0], strip[i][1]);
+                swap(strip[k][l], strip[k][l+1]);
+            }
+
+        }
+        else { //CASE 4a: l is in the middle of the strip/vector
+            if(adjMatrix[strip[k][l+1]][strip[i][2]] == 1 && adjMatrix[strip[i][0]][strip[k][l-1]] == 1 && adjMatrix[strip[i][1]][strip[k][l+2]] == 1){
+                //perform swap
+            }
+            else if(adjMatrix[strip[k][l+1]][strip[i][2]] == 1 && adjMatrix[strip[i][1]][strip[k][l-1]] == 1 && adjMatrix[strip[i][0]][strip[k][l+2]] == 1){
+                //perform swap
+            }
+            else if(adjMatrix[strip[k][l]][strip[i][2]] == 1 && adjMatrix[strip[i][0]][strip[k][l-1]] == 1 && adjMatrix[strip[i][1]][strip[k][l+2]] == 1){
+                //perform swap
+            }
+            else if(adjMatrix[strip[k][l]][strip[i][2]] == 1 && adjMatrix[strip[i][1]][strip[k][l-1]] == 1 && adjMatrix[strip[i][0]][strip[k][l+2]] == 1){
+                //perform swap
+            }
+        }
+    }
+
+    else if(j == strip[i].size() - 2){
+        if(l == 0){ //CASE 2b
+            if(adjMatrix[strip[i][j+1]][strip[k][2]] == 1 && adjMatrix[strip[k][0]][strip[i][j-1]] == 1){
+                swap(strip[i][j], strip[k][0]);
+                swap(strip[i][j+1], strip[k][1]);
+            }
+            else if(adjMatrix[strip[i][j]][strip[k][2]] == 1 && adjMatrix[strip[k][0]][strip[i][j-1]] == 1){
+                swap(strip[i][j], strip[k][0]);
+                swap(strip[i][j+1], strip[k][1]);
+                swap(strip[k][0], strip[k][1]);
+            }
+            else if(adjMatrix[strip[i][j+1]][strip[k][2]] == 1 && adjMatrix[strip[k][l]][strip[i][j-1]] == 1){
+                swap(strip[i][j], strip[k][0]);
+                swap(strip[i][j+1], strip[k][1]);
+                swap(strip[i][j], strip[i][j+1]);
+            }
+            else if(adjMatrix[strip[i][j]][strip[k][2]] == 1 && adjMatrix[strip[k][l]][strip[i][j-1]] == 1){
+                swap(strip[i][j], strip[k][0]);
+                swap(strip[i][j+1], strip[k][1]);
+                swap(strip[k][0], strip[k][1]);
+                swap(strip[i][j], strip[i][j+1]);
+            }
+
+
+
+        }
+        else if (l == strip[k].size() - 2){ //CASE 3
+            if(adjMatrix[strip[i][j]][strip[k][l-1]] == 1 && adjMatrix[strip[k][l]][strip[i][j-1]] == 1){
+                //perform swap
+            }
+            else if(adjMatrix[strip[i][j+1]][strip[k][l-1]] == 1 && adjMatrix[strip[k][l]][strip[i][j-1]] == 1){
+                //perform swap
+            }
+            else if(adjMatrix[strip[i][j]][strip[k][l-1]] == 1 && adjMatrix[strip[k][l+1]][strip[i][j-1]] == 1){
+                //perform swap
+            }
+            else if(adjMatrix[strip[i][j+1]][strip[k][l-1]] == 1 && adjMatrix[strip[k][l+1]][strip[i][j-1]] == 1){
+                //perform swap
+            }
+
+
+        }
+        else { //CASE 4b: l is in the middle of the strip/vector
+            if(adjMatrix[strip[k][l]][strip[i][j-1]] == 1 && adjMatrix[strip[i][j]][strip[k][l-1]] == 1 && adjMatrix[strip[i][j+1]][strip[k][l+2]] == 1){
+                //perform swap
+            }
+            else if(adjMatrix[strip[k][l]][strip[i][j-1]] == 1 && adjMatrix[strip[i][j+1]][strip[k][l-1]] == 1 && adjMatrix[strip[i][j]][strip[k][l+2]] == 1){
+                //perform swap
+            }
+            else if(adjMatrix[strip[k][l+1]][strip[i][j-1]] == 1 && adjMatrix[strip[i][j]][strip[k][l-1]] == 1 && adjMatrix[strip[i][j+1]][strip[k][l+2]] == 1){
+                //perform swap
+            }
+            else if(adjMatrix[strip[k][l+1]][strip[i][j-1]] == 1 && adjMatrix[strip[i][j+1]][strip[k][l-1]] == 1 && adjMatrix[strip[i][j]][strip[k][l+2]] == 1){
+                //perform swap
+            }
+        }
+
+    }
+
+    else if (l == 0){ //CASE 4c: j is in the middle of the strip/vector
+        if(adjMatrix[strip[i][j+1]][strip[k][2]] == 1 && adjMatrix[strip[k][0]][strip[i][j-1]] == 1 && adjMatrix[strip[k][1]][strip[i][j+2]] == 1){
+            //perform swap
+        }
+        else if(adjMatrix[strip[i][j+1]][strip[k][2]] == 1 && adjMatrix[strip[k][1]][strip[i][j-1]] == 1 && adjMatrix[strip[k][0]][strip[i][j+2]] == 1){
+            //perform swap
+        }
+        else if(adjMatrix[strip[i][j]][strip[k][2]] == 1 && adjMatrix[strip[k][0]][strip[i][j-1]] == 1 && adjMatrix[strip[k][1]][strip[i][j+2]] == 1){
+            //perform swap
+        }
+        else if(adjMatrix[strip[i][j]][strip[k][2]] == 1 && adjMatrix[strip[k][1]][strip[i][j-1]] == 1 && adjMatrix[strip[k][0]][strip[i][j+2]] == 1){
+            //perform swap
+        }
+
+    }
+
+    else if (l == strip[k].size() - 2){ //CASE 4d: j is in the middle of the strip/vector
+        if(adjMatrix[strip[i][j]][strip[k][l-1]] == 1 && adjMatrix[strip[k][l]][strip[i][j-1]] == 1 && adjMatrix[strip[k][l+1]][strip[i][j+2]] == 1){
+            //perform swap
+        }
+        else if(adjMatrix[strip[i][j]][strip[k][l-1]] == 1 && adjMatrix[strip[k][l+1]][strip[i][j-1]] == 1 && adjMatrix[strip[k][l]][strip[i][j+2]] == 1){
+            //perform swap
+        }
+        else if(adjMatrix[strip[i][j+1]][strip[k][l-1]] == 1 && adjMatrix[strip[k][l]][strip[i][j-1]] == 1 && adjMatrix[strip[k][l+1]][strip[i][j+2]] == 1){
+            //perform swap
+        }
+        else if(adjMatrix[strip[i][j+1]][strip[k][l-1]] == 1 && adjMatrix[strip[k][l+1]][strip[i][j-1]] == 1 && adjMatrix[strip[k][l]][strip[i][j+2]] == 1){
+            //perform swap
+        }
+    }
+
+    else{ //CASE 5: both j and l are in the middle of their respective strips/vectors
+        if(adjMatrix[strip[i][j]][strip[k][l-1]] == 1 && adjMatrix[strip[i][j+1]][strip[k][l+2]] == 1
+           && adjMatrix[strip[k][l]][strip[i][j-1]] == 1 && adjMatrix[strip[k][l+1]][strip[i][j+2]] == 1){
+            //perform swap
+        }
+        else if(adjMatrix[strip[i][j+1]][strip[k][l-1]] == 1 && adjMatrix[strip[i][j]][strip[k][l+2]] == 1
+                && adjMatrix[strip[k][l]][strip[i][j-1]] == 1 && adjMatrix[strip[k][l+1]][strip[i][j+2]] == 1){
+            //perform swap
+        }
+        else if(adjMatrix[strip[i][j]][strip[k][l-1]] == 1 && adjMatrix[strip[i][j+1]][strip[k][l+2]] == 1
+                && adjMatrix[strip[k][l+1]][strip[i][j-1]] == 1 && adjMatrix[strip[k][l]][strip[i][j+2]] == 1){
+            //perform swap
+        }
+        else if(adjMatrix[strip[i][j+1]][strip[k][l-1]] == 1 && adjMatrix[strip[i][j]][strip[k][l+2]] == 1
+                && adjMatrix[strip[k][l+1]][strip[i][j-1]] == 1 && adjMatrix[strip[k][l]][strip[i][j+2]] == 1){
+            //perform swap
+        }
+    }
+
+
+
+}
+
+void swapBox(int maxStripWidth, vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths, vector<vector<int> > &strip, vector<int> &stripSum){
+
+    int i, j, k, l;
+
+    for(i = 0; i < strip.size() - 1; ++i){
+        for(j = 0; j < strip[i].size() -1; j += 2){
+            for(k = i+1; k < 3; ++k){
+                for(l = 0; l < strip[k].size()-1; l += 2){
+                    if(stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]] <= maxStripWidth
+                       && stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]] <= maxStripWidth){
+                        checkSwap(i, j, k, l, adjMatrix, strip);
+                        //break;
+
+
+
+
+
+                    }//end if
+
+                    //else move onto next pair in strip[k]
+
+                }//end for l
+                //break;
+            }//end for k
+            //break;
+        }//end for j
+        //break;
+    }//end for i
+
+    cout << "END\n";
 
 }
 
