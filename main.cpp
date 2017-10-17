@@ -59,6 +59,7 @@ int main(int argc, char **argv){
     vector<vector<int> > strip(numBox);
     vector<vector<int> > stripWidth(numBox);
     vector<int> stripNumBoxes;
+    int totalCost;
 
 
     cout << "MSSP - MBAHRA\n-------------\n";
@@ -117,7 +118,7 @@ int main(int argc, char **argv){
 
     packStripsFFD(numBox, maxBoxWidth, maxStripWidth, totalBoxWidth, adjMatrix, mates, boxWidths, stripSum, stripNumBoxes, strip, stripWidth);
 
-    swapBox(maxStripWidth, adjMatrix, boxWidths, strip, stripSum);
+    checkSwap(totalCost, maxStripWidth, adjMatrix, boxWidths, strip, stripSum);
 
 
 
