@@ -158,10 +158,21 @@ int initCost(int &totalCost, int maxStripWidth, vector<int> &stripSum){
 
 void costEval(int i, int j, int k, int l, int &totalCost, int maxStripWidth, vector<vector<int> > &boxWidths, vector<vector<int> > &strip, vector<int> &stripSum){
 
+    int u, v;
     totalCost = totalCost - pow((maxStripWidth - stripSum[i]), 2) - pow((maxStripWidth - stripSum[k]), 2);
     stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
     stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
     totalCost = totalCost + pow((maxStripWidth - stripSum[i]), 2) + pow((maxStripWidth - stripSum[k]), 2);
+    cout << "Swap\n";
+    for(u = 0; u < strip.size(); ++u){
+        cout << "Strip " << u << ": ";
+        for(v = 0; v < strip[u].size(); ++v){
+            cout << strip[u][v] << " ";
+        }
+        cout << endl;
+    }
+    cout << endl;
+    //cout << "Current cost: " << totalCost << endl;
 
 
 
@@ -604,15 +615,20 @@ void checkSwap(int totalCost, int maxStripWidth, vector<vector<int> > &adjMatrix
     int startCost = initCost(totalCost, maxStripWidth, stripSum);
     cout << "start cost: " << startCost << endl;
 
-    for(i = 0; i < 1; ++i){ // ******************
-        for(j = 0; j < 2; j += 2){ //**************
+    for(i = 0; i < strip.size() -1; ++i){ // ******************
+        for(j = 0; j < strip[i].size() -1; j += 2){ //**************
             for(k = i+1; k < strip.size(); ++k){
                 for(l = 0; l < strip[k].size()-1; l += 2){
-                    if(stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]] <= maxStripWidth
+                    cout << "i: " << i << "\tj: " << j << "\tk: " << k << "\tl: " << l << "\tCurrent cost: " << totalCost << endl;
+                    if(strip[i].size() == 2 && strip[k].size() == 2){
+                        continue;
+                    }
+                    else if(stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]] <= maxStripWidth
                        && stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]] <= maxStripWidth){
                         swapBox(i, j, k, l, totalCost, maxStripWidth, adjMatrix, boxWidths, strip, stripSum);
 
-                        cout << "Current cost: " << totalCost << endl;
+
+                        //cout << "Current cost: " << totalCost << endl;
 
 
 
