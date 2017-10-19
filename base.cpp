@@ -152,9 +152,10 @@ void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, 
 
 }
 
-void createInstanceUser(int threshold, int numScores, vector<int> &allScores, vector<vector<int> > &userInput, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths, vector<vector<int> > &allBoxes){
+void createInstanceUser(int threshold, int numScores, double &totalBoxWidth, vector<int> &allScores, vector<vector<int> > &userInput, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths, vector<vector<int> > &allBoxes){
 
     int i, j, m1, m2, k;
+    int count = 1;
     vector<int> checkBox(numScores, 0);
 
     for(i = 0; i < userInput.size(); ++i){
@@ -205,7 +206,7 @@ void createInstanceUser(int threshold, int numScores, vector<int> &allScores, ve
     }
     cout << endl;
 
-    cout << "BoxWidths:\n";
+    /*cout << "BoxWidths:\n";
     for(i = 0; i < numScores; ++i){
         if(checkBox[i] == 1){
             continue;
@@ -213,7 +214,7 @@ void createInstanceUser(int threshold, int numScores, vector<int> &allScores, ve
         cout << i << "-" << mates[i] << ": " << boxWidths[i][mates[i]] << endl;
         checkBox[i] = 1;
         checkBox[mates[i]] = 1;
-    }
+    }*/
 
     for (i = 0; i < numScores; ++i) {
         for (j = 0; j < numScores; ++j) {
@@ -241,6 +242,21 @@ void createInstanceUser(int threshold, int numScores, vector<int> &allScores, ve
             }
         }
     }
+
+    cout << "Box#" << setw(10) << "Mates" << setw(10) << "Width\n";
+    for(i = 0; i < numScores; ++i){
+        if(checkBox[i] == 1){
+            continue;
+        }
+        cout << count << setw(10) << i << "-" << mates[i] << setw(8) << boxWidths[i][mates[i]] << endl;
+        totalBoxWidth += boxWidths[i][mates[i]];
+        checkBox[i] = 1;
+        checkBox[mates[i]] = 1;
+        ++count;
+
+    }
+
+    cout << "Total Box Widths: " << totalBoxWidth << endl << endl;
 
     cout << "allBoxes:\n";
     for(i = 0; i < numScores; ++i){
