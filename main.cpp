@@ -87,7 +87,7 @@ int main(int argc, char **argv){
     startTime = clock();
 
     //region READ FILE CHOICE
-        /*
+
         cout << "Please choose from the following:\n";
         cout << "1: Create MSSP instance using random values\n";
         cout << "2: Create MSSP instance from file\n";
@@ -99,11 +99,11 @@ int main(int argc, char **argv){
         }
         switch(choice){
             case 1:
-                createInstance(threshold, minWidth, maxWidth, minBoxWidth, maxBoxWidth, numScores, numBox, allScores, adjMatrix, mates, boxWidths, allBoxes);
+                createInstance(threshold, minWidth, maxWidth, minBoxWidth, maxBoxWidth, numScores, numBox, totalBoxWidth, allScores, adjMatrix, mates, boxWidths, allBoxes);
                 break;
 
             case 2:
-                createInstanceUser(threshold, numScores, allScores, userInput, adjMatrix, mates, boxWidths, allBoxes);
+                createInstanceUser(threshold, numScores, totalBoxWidth, allScores, userInput, adjMatrix, mates, boxWidths, allBoxes);
                 break;
 
             default:
@@ -111,10 +111,10 @@ int main(int argc, char **argv){
                 break;
 
         }
-        */
+
         //endregion
 
-    createInstance(threshold, minWidth, maxWidth, minBoxWidth, maxBoxWidth, numScores, numBox, totalBoxWidth, allScores, adjMatrix, mates, boxWidths, allBoxes);
+    //createInstance(threshold, minWidth, maxWidth, minBoxWidth, maxBoxWidth, numScores, numBox, totalBoxWidth, allScores, adjMatrix, mates, boxWidths, allBoxes);
 
     packStripsFFD(numBox, maxBoxWidth, maxStripWidth, totalBoxWidth, adjMatrix, mates, boxWidths, stripSum, stripNumBoxes, strip, stripWidth);
 
