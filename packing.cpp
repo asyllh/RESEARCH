@@ -659,6 +659,14 @@ void checkSwap(int totalCost, int maxStripWidth, vector<vector<int> > &adjMatrix
     }
     cout << "Final Cost: " << totalCost << endl << endl;
 
+    cout << "Strip" << setw(8) << "Width" << setw(12) << "Residual\n";
+    for(i = 0; i < stripSum.size(); ++i){
+        if(stripSum[i] !=0) {
+            cout << i << setw(11) << stripSum[i] << setw(9) << maxStripWidth - stripSum[i] << endl;
+        }
+    }
+    cout << endl << endl;
+
 
 }
 
