@@ -665,10 +665,54 @@ void checkSwap(int totalCost, int maxStripWidth, vector<vector<int> > &adjMatrix
             cout << i << setw(11) << stripSum[i] << setw(9) << maxStripWidth - stripSum[i] << endl;
         }
     }
-    cout << endl << endl;
+    cout << endl;
 
 
 }
+
+void checkMove(int maxStripWidth, vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths, vector<vector<int> > &strip, vector<int> &stripSum){
+
+    int i, j, l;
+
+
+    int k = min_element(stripSum.begin(), stripSum.end()) - stripSum.begin(); //strip with smallest width of boxes, i.e. largest residual
+
+
+    cout << "smallest stripSum: " << k << endl;
+
+
+    l = 0;
+
+    for(i = 0; i < strip.size(); ++i){
+        if(i == k){
+            continue; //to avoid moving box onto the strip it's already on!
+        }
+        for(j = 0; j < strip[i].size()-1; j+=2){
+            if(stripSum[i] + boxWidths[strip[k][l]][strip[k][l+1]] <= maxStripWidth){
+                //check moveBox
+                //recalculate
+            }
+            else{
+                break; //ignore whole strip
+            }
+
+        }
+
+
+    }
+
+
+
+
+
+
+
+
+
+}
+
+
+
 
 
 

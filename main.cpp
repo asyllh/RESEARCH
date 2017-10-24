@@ -88,7 +88,7 @@ int main(int argc, char **argv){
 
     //region READ FILE CHOICE
 
-        cout << "Please choose from the following:\n";
+        /*cout << "Please choose from the following:\n";
         cout << "1: Create MSSP instance using random values\n";
         cout << "2: Create MSSP instance from file\n";
         cout << "Enter choice:  ";
@@ -110,15 +110,19 @@ int main(int argc, char **argv){
                 cout << "Please enter 1 or 2.\n";
                 break;
 
-        }
+        }*/
 
         //endregion
 
     //createInstance(threshold, minWidth, maxWidth, minBoxWidth, maxBoxWidth, numScores, numBox, totalBoxWidth, allScores, adjMatrix, mates, boxWidths, allBoxes);
 
+    createInstanceUser(threshold, numScores, totalBoxWidth, allScores, userInput, adjMatrix, mates, boxWidths, allBoxes);
+
     packStripsFFD(numBox, maxBoxWidth, maxStripWidth, totalBoxWidth, adjMatrix, mates, boxWidths, stripSum, stripNumBoxes, strip, stripWidth);
 
     checkSwap(totalCost, maxStripWidth, adjMatrix, boxWidths, strip, stripSum);
+
+    checkMove(maxStripWidth, adjMatrix, boxWidths, strip, stripSum);
 
 
 
