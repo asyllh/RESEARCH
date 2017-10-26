@@ -139,7 +139,7 @@ void packStripsFFD(int numBox, int maxBoxWidth, int maxStripWidth, double totalB
             cout << i << setw(9) << stripNumBoxes[i] << setw(10) <<  stripSum[i] << setw(9) << maxStripWidth - stripSum[i] << endl;
         }
     }
-    cout << endl << endl;
+    cout << "-------------------------------\n\n";
 
 }
 
@@ -159,11 +159,13 @@ int initCost(int &totalCost, int maxStripWidth, vector<int> &stripSum){
 void costEval(int i, int j, int k, int l, int &totalCost, int maxStripWidth, vector<vector<int> > &boxWidths, vector<vector<int> > &strip, vector<int> &stripSum){
 
     int u, v;
+
     totalCost = totalCost - pow((maxStripWidth - stripSum[i]), 2) - pow((maxStripWidth - stripSum[k]), 2);
     stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
     stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
     totalCost = totalCost + pow((maxStripWidth - stripSum[i]), 2) + pow((maxStripWidth - stripSum[k]), 2);
-    cout << "Swap\n";
+
+    /*cout << "Swap\n";
     for(u = 0; u < strip.size(); ++u){
         cout << "Strip " << u << ": ";
         for(v = 0; v < strip[u].size(); ++v){
@@ -171,12 +173,14 @@ void costEval(int i, int j, int k, int l, int &totalCost, int maxStripWidth, vec
         }
         cout << endl;
     }
-    cout << endl;
+    cout << endl;*/
+
     //cout << "Current cost: " << totalCost << endl;
 
 
 
 }
+
 void swapBox(int i, int j, int k, int l, int &totalCost, int maxStripWidth, vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths, vector<vector<int> > &strip, vector<int> &stripSum){
 
     if(strip[i].size() == 2){
@@ -613,26 +617,20 @@ void checkSwap(int totalCost, int maxStripWidth, vector<vector<int> > &adjMatrix
     int i, j, k, l;
 
     int startCost = initCost(totalCost, maxStripWidth, stripSum);
-    cout << "start cost: " << startCost << endl;
+    //cout << "start cost: " << startCost << endl;
 
     for(i = 0; i < strip.size() -1; ++i){ // ******************
         for(j = 0; j < strip[i].size() -1; j += 2){ //**************
             for(k = i+1; k < strip.size(); ++k){
                 for(l = 0; l < strip[k].size()-1; l += 2){
-                    cout << "i: " << i << "\tj: " << j << "\tk: " << k << "\tl: " << l << "\tCurrent cost: " << totalCost << endl;
+                    //cout << "i: " << i << "\tj: " << j << "\tk: " << k << "\tl: " << l << "\tCurrent cost: " << totalCost << endl;
                     if(strip[i].size() == 2 && strip[k].size() == 2){
                         continue;
                     }
                     else if(stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]] <= maxStripWidth
                        && stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]] <= maxStripWidth){
                         swapBox(i, j, k, l, totalCost, maxStripWidth, adjMatrix, boxWidths, strip, stripSum);
-
-
                         //cout << "Current cost: " << totalCost << endl;
-
-
-
-
 
                     }//end if
 
@@ -648,7 +646,7 @@ void checkSwap(int totalCost, int maxStripWidth, vector<vector<int> > &adjMatrix
 
 
 
-    cout << "END\n\n";
+    cout << "After Swap:\n";
 
     for(i = 0; i < strip.size(); ++i){
         cout << "Strip " << i << ": ";
@@ -657,7 +655,7 @@ void checkSwap(int totalCost, int maxStripWidth, vector<vector<int> > &adjMatrix
         }
         cout << endl;
     }
-    cout << "Final Cost: " << totalCost << endl << endl;
+    cout << endl;
 
     cout << "Strip" << setw(8) << "Width" << setw(12) << "Residual\n";
     for(i = 0; i < stripSum.size(); ++i){
@@ -665,14 +663,64 @@ void checkSwap(int totalCost, int maxStripWidth, vector<vector<int> > &adjMatrix
             cout << i << setw(11) << stripSum[i] << setw(9) << maxStripWidth - stripSum[i] << endl;
         }
     }
-    cout << endl;
+    cout << "-------------------------\n\n";
 
 
 }
 
-void checkMove(int maxStripWidth, vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths, vector<vector<int> > &strip, vector<int> &stripSum){
+void moveBox(int i, int j, int k, int l, int &moved, vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths, vector<vector<int> > &strip, vector<int> &stripSum){
+
+    if(j == 0){
+        if(adjMatrix[strip[k][l]][strip[i][j]] == 1){
+            strip[i].insert(strip[i].begin(), strip[k][l]);
+            strip[i].insert(strip[i].begin(), strip[k][l+1]);
+            strip[k].erase(strip[k].begin(), strip[k].begin()+2);
+            stripSum[i] += boxWidths[strip[k][l]][strip[k][l+1]];
+            stripSum[k] -= boxWidths[strip[k][l]][strip[k][l+1]];
+            moved = 1;
+        }
+    }
+
+
+
+
+
+}
+
+void checkMove(int moved, int maxStripWidth, vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths, vector<vector<int> > &strip, vector<int> &stripSum){
+
+    /* We find the strip with the largest residual/smallest stripSum, this will be strip k
+     * We then use the first box (box at the beginning) of this strip, and attempt to place it onto all the other strips (*)
+     * We check all other strips i in order from largest stripSum to smallest stripSum
+     * This is because the cost will be higher if we move a box from a strip k to a strip with a large stripSum, than to a
+     * strip with a smaller stripSum
+     * If the box can't fit onto a strip i, dont bother testing the mssc, move onto the next strip i+1
+     * If a box can fit onto a strip i, check to see if we can move the box from strip k onto the strip i, at either
+     * the beginning, middle or end of the strip i
+     *
+     * We then need to change the stripSum values for the two strips that have gained/lost a box
+     * Then we go back and check which of the strips now has the largest residual/smallest total strip width
+     *    - SHOULD BE THE SAME STRIP!
+     * Continue until the strip is empty, or until none of the boxes can be moved
+     *
+     * Check for empty strips - if we end up with a strip that is empty, i.e. no elements/stripSum == maxStripWidth, we remove this strip entirely
+     *
+     * We also have to remember to remove the spaces from strip k where the box used to be before it was moved.
+     *
+     * (*) Is it better to start with the box at the end of strip k, or beginning? - try end first
+     * What if box cannot be moved onto any strip, try next box on strip k (i.e. second box from beginning/end)?
+     * What if strip k only contains one box (or multiple boxes), and that box (or none of the boxes) does/do not fit onto any of the other strips?
+     *    - Need to find strip S with the second largest residual/second smallest stripSum
+     * Then, if a move is performed, and the algorithm moves a box from strip S to another strip, when we find the strip with the
+     * largest residual/smallest stripSum, it might find the other strip which has a box/boxes than cannot be moved
+     * We need to find a way of blocking that strip from being chosen as strip k (unless a box is moved onto it?)
+     *
+     * USE VECTOR OF POINTERS
+     */
 
     int i, j, l;
+    moved = 0;
+
 
 
     int k = min_element(stripSum.begin(), stripSum.end()) - stripSum.begin(); //strip with smallest width of boxes, i.e. largest residual
@@ -687,19 +735,43 @@ void checkMove(int maxStripWidth, vector<vector<int> > &adjMatrix, vector<vector
         if(i == k){
             continue; //to avoid moving box onto the strip it's already on!
         }
-        for(j = 0; j < strip[i].size()-1; j+=2){
-            if(stripSum[i] + boxWidths[strip[k][l]][strip[k][l+1]] <= maxStripWidth){
-                //check moveBox
-                //recalculate
-            }
-            else{
-                break; //ignore whole strip
-            }
 
+        if(stripSum[i] + boxWidths[strip[k][l]][strip[k][l+1]] <= maxStripWidth){
+            for(j = 0; j < strip[i].size()-1; j+=2){
+                moveBox(i, j, k, l, moved, adjMatrix, boxWidths, strip, stripSum);
+                if(moved == 1){
+                    cout << "moved\n";
+                    break;
+                }
+
+            }
         }
+        else{ //if box from strip k cannot fit onto strip i
+            continue; //ignore whole strip, go to strip i+1
+        }
+        break;
+        /*if(moved == 1){
+            moved = 0;
+            k = min_element(stripSum.begin(), stripSum.end()) - stripSum.begin();
+            i = -1;
+        }*/
 
 
     }
+
+    for(i = 0; i < strip.size(); ++i){
+        cout << "Strip " << i << ": ";
+        for(j = 0; j < strip[i].size(); ++j){
+            cout << strip[i][j] << " ";
+        }
+        cout << endl;
+    }
+
+    cout << "stripSum: ";
+    for(i = 0; i < stripSum.size(); ++i){
+        cout << stripSum[i] << " ";
+    }
+    cout << endl;
 
 
 

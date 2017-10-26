@@ -60,6 +60,7 @@ int main(int argc, char **argv){
     vector<vector<int> > stripWidth(numBox);
     vector<int> stripNumBoxes;
     int totalCost;
+    int moved;
 
 
     cout << "MSSP - MBAHRA\n-------------\n";
@@ -122,7 +123,7 @@ int main(int argc, char **argv){
 
     checkSwap(totalCost, maxStripWidth, adjMatrix, boxWidths, strip, stripSum);
 
-    checkMove(maxStripWidth, adjMatrix, boxWidths, strip, stripSum);
+    checkMove(moved, maxStripWidth, adjMatrix, boxWidths, strip, stripSum);
 
 
 
