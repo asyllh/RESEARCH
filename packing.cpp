@@ -22,7 +22,7 @@ int lowerBound(double totalBoxWidth, int maxStripWidth){
     return lBound;
 }
 
-void packStripsFFD(int numBox, int maxBoxWidth, int maxStripWidth, double totalBoxWidth, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<int> &stripNumBoxes, vector<vector<int> > &strip, vector<vector<int> > &stripWidth){
+void packStripsFFD(int &totalCost, int numBox, int maxBoxWidth, int maxStripWidth, double totalBoxWidth, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<int> &stripNumBoxes, vector<vector<int> > &strip, vector<vector<int> > &stripWidth){
 
     int i, j, mini, k, l, m;
     int min = 0;
@@ -139,6 +139,8 @@ void packStripsFFD(int numBox, int maxBoxWidth, int maxStripWidth, double totalB
             cout << i << setw(9) << stripNumBoxes[i] << setw(10) <<  stripSum[i] << setw(9) << maxStripWidth - stripSum[i] << endl;
         }
     }
+    int costFFD = initCost(totalCost, maxStripWidth, stripSum);
+    cout << "Initial Cost (cost from FFD): " << costFFD << endl;
     cout << "-------------------------------\n\n";
 
 }
@@ -156,7 +158,7 @@ int initCost(int &totalCost, int maxStripWidth, vector<int> &stripSum){
 
 }
 
-void costEval(int i, int j, int k, int l, int &totalCost, int maxStripWidth, vector<vector<int> > &boxWidths, vector<vector<int> > &strip, vector<int> &stripSum){
+void costEvalSwap(int i, int j, int k, int l, int &totalCost, int maxStripWidth, vector<vector<int> > &boxWidths, vector<vector<int> > &strip, vector<int> &stripSum){
 
     int u, v;
 
@@ -187,16 +189,12 @@ void swapBox(int i, int j, int k, int l, int &totalCost, int maxStripWidth, vect
         if(l == 0){ //CASE 9
             if(boxWidths[strip[i][j]][strip[i][j+1]] > boxWidths[strip[k][l]][strip[k][l+1]]){
                 if(adjMatrix[strip[i][1]][strip[k][2]] == 1){
-                    costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-                    //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-                    //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+                    costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
                     swap(strip[i][0], strip[k][0]);
                     swap(strip[i][1], strip[k][1]);
                 }
                 else if(adjMatrix[strip[i][0]][strip[k][2]] == 1){
-                    costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-                    //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-                    //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+                    costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
                     swap(strip[i][0], strip[k][0]);
                     swap(strip[i][1], strip[k][1]);
                     swap(strip[k][0], strip[k][1]);
@@ -206,16 +204,12 @@ void swapBox(int i, int j, int k, int l, int &totalCost, int maxStripWidth, vect
         else if (l == strip[k].size() - 2){ //CASE 10
             if(boxWidths[strip[i][j]][strip[i][j+1]] > boxWidths[strip[k][l]][strip[k][l+1]]){
                 if(adjMatrix[strip[i][0]][strip[k][l-1]] == 1){
-                    costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-                    //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-                    //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+                    costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
                     swap(strip[i][0], strip[k][l]);
                     swap(strip[i][1], strip[k][l+1]);
                 }
                 else if(adjMatrix[strip[i][1]][strip[k][l-1]] == 1){
-                    costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-                    //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-                    //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+                    costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
                     swap(strip[i][0], strip[k][l]);
                     swap(strip[i][1], strip[k][l+1]);
                     swap(strip[k][l], strip[k][l+1]);
@@ -225,16 +219,12 @@ void swapBox(int i, int j, int k, int l, int &totalCost, int maxStripWidth, vect
         else { //CASE 11: l middle vector
             if(boxWidths[strip[i][j]][strip[i][j+1]] > boxWidths[strip[k][l]][strip[k][l+1]]){
                 if(adjMatrix[strip[i][0]][strip[k][l-1]] == 1 && adjMatrix[strip[i][1]][strip[k][l+2]] == 1){
-                    costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-                    //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-                    //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+                    costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
                     swap(strip[i][0], strip[k][l]);
                     swap(strip[i][1], strip[k][l+1]);
                 }
                 else if(adjMatrix[strip[i][1]][strip[k][l-1]] == 1 && adjMatrix[strip[i][0]][strip[k][l+2]] == 1){
-                    costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-                    //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-                    //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+                    costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
                     swap(strip[i][0], strip[k][l]);
                     swap(strip[i][1], strip[k][l+1]);
                     swap(strip[k][l], strip[k][l+1]);
@@ -247,16 +237,12 @@ void swapBox(int i, int j, int k, int l, int &totalCost, int maxStripWidth, vect
         if(j == 0){ //CASE 6
             if(boxWidths[strip[i][j]][strip[i][j+1]] < boxWidths[strip[k][l]][strip[k][l+1]]){
                 if(adjMatrix[strip[k][1]][strip[i][2]] == 1){
-                    costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-                    //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-                    //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+                    costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
                     swap(strip[i][0], strip[k][0]);
                     swap(strip[i][1], strip[k][1]);
                 }
                 else if(adjMatrix[strip[k][0]][strip[i][2]] == 1){
-                    costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-                    //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-                    //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+                    costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
                     swap(strip[i][0], strip[k][0]);
                     swap(strip[i][1], strip[k][1]);
                     swap(strip[i][0], strip[i][1]);
@@ -266,16 +252,12 @@ void swapBox(int i, int j, int k, int l, int &totalCost, int maxStripWidth, vect
         else if(j == strip[i].size() -2){ //CASE 7
             if(boxWidths[strip[i][j]][strip[i][j+1]] < boxWidths[strip[k][l]][strip[k][l+1]]){
                 if(adjMatrix[strip[k][0]][strip[i][j-1]] == 1){
-                    costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-                    //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-                    //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+                    costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
                     swap(strip[k][0], strip[i][j]);
                     swap(strip[k][1], strip[i][j+1]);
                 }
                 else if(adjMatrix[strip[k][1]][strip[i][j-1]] == 1){
-                    costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-                    //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-                    //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+                    costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
                     swap(strip[k][0], strip[i][j]);
                     swap(strip[k][1], strip[i][j+1]);
                     swap(strip[i][j], strip[i][j+1]);
@@ -285,16 +267,12 @@ void swapBox(int i, int j, int k, int l, int &totalCost, int maxStripWidth, vect
         else{ //CASE 8: j middle vector
             if(boxWidths[strip[i][j]][strip[i][j+1]] < boxWidths[strip[k][l]][strip[k][l+1]]){
                 if(adjMatrix[strip[k][0]][strip[i][j-1]] == 1 && adjMatrix[strip[k][1]][strip[i][j+2]] == 1){
-                    costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-                    //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-                    //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+                    costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
                     swap(strip[k][0], strip[i][j]);
                     swap(strip[k][1], strip[i][j+1]);
                 }
                 else if(adjMatrix[strip[k][1]][strip[i][j-1]] == 1 && adjMatrix[strip[k][0]][strip[i][j+2]] == 1){
-                    costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-                    //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-                    //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+                    costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
                     swap(strip[k][0], strip[i][j]);
                     swap(strip[k][1], strip[i][j+1]);
                     swap(strip[i][j], strip[i][j+1]);
@@ -306,65 +284,49 @@ void swapBox(int i, int j, int k, int l, int &totalCost, int maxStripWidth, vect
     else if(j == 0){
         if(l == 0){ //CASE 1
             if(adjMatrix[strip[i][1]][strip[k][2]] == 1 && adjMatrix[strip[k][1]][strip[i][2]] == 1){
-                costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-                //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-                //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+                costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
                 swap(strip[i][0], strip[k][0]);
                 swap(strip[i][1], strip[k][1]);
             }
             else if(adjMatrix[strip[i][0]][strip[k][2]] == 1 && adjMatrix[strip[k][1]][strip[i][2]] == 1){
-                costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-                //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-                //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+                costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
                 swap(strip[i][0], strip[k][0]);
                 swap(strip[i][1], strip[k][1]);
                 swap(strip[k][0], strip[k][1]);
             }
             else if(adjMatrix[strip[i][1]][strip[k][2]] == 1 && adjMatrix[strip[k][0]][strip[i][2]] == 1){
-                costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-                //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-                //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+                costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
                 swap(strip[i][0], strip[k][0]);
                 swap(strip[i][1], strip[k][1]);
                 swap(strip[i][0], strip[i][1]);
             }
             else if(adjMatrix[strip[i][0]][strip[k][2]] == 1 && adjMatrix[strip[k][0]][strip[i][2]] == 1){
-                costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-                //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-                //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+                costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
                 swap(strip[i][0], strip[k][1]);
                 swap(strip[i][1], strip[k][0]);
             }
         }
         else if (l == strip[k].size()-2){ //CASE 2A
             if(adjMatrix[strip[i][0]][strip[k][strip[k].size()-3]] == 1 && adjMatrix[strip[k][strip[k].size()-1]][strip[i][2]] == 1){
-                costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-                //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-                //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+                costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
                 swap(strip[i][0], strip[k][l]);
                 swap(strip[i][1], strip[k][l+1]);
             }
             else if(adjMatrix[strip[i][1]][strip[k][strip[k].size()-3]] == 1 && adjMatrix[strip[k][strip[k].size()-1]][strip[i][2]] == 1){
-                costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-                //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-                //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+                costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
                 swap(strip[i][0], strip[k][l]);
                 swap(strip[i][1], strip[k][l+1]);
                 swap(strip[k][l], strip[k][l+1]);
 
             }
             else if(adjMatrix[strip[i][0]][strip[k][strip[k].size()-3]] == 1 && adjMatrix[strip[k][l]][strip[i][2]] == 1){
-                costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-                //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-                //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+                costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
                 swap(strip[i][0], strip[k][l]);
                 swap(strip[i][1], strip[k][l+1]);
                 swap(strip[i][0], strip[i][1]);
             }
             else if(adjMatrix[strip[i][1]][strip[k][strip[k].size()-3]] == 1 && adjMatrix[strip[k][l]][strip[i][2]] == 1){
-                costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-                //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-                //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+                costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
                 swap(strip[i][0], strip[k][l+1]);
                 swap(strip[i][1], strip[k][l]);
             }
@@ -372,32 +334,24 @@ void swapBox(int i, int j, int k, int l, int &totalCost, int maxStripWidth, vect
         }
         else { //CASE 4a: l is in the middle of the strip/vector
             if(adjMatrix[strip[k][l+1]][strip[i][2]] == 1 && adjMatrix[strip[i][0]][strip[k][l-1]] == 1 && adjMatrix[strip[i][1]][strip[k][l+2]] == 1){
-                costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-                //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-                //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+                costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
                 swap(strip[i][0], strip[k][l]);
                 swap(strip[i][1], strip[k][l+1]);
             }
             else if(adjMatrix[strip[k][l+1]][strip[i][2]] == 1 && adjMatrix[strip[i][1]][strip[k][l-1]] == 1 && adjMatrix[strip[i][0]][strip[k][l+2]] == 1){
-                costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-                //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-                //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+                costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
                 swap(strip[i][0], strip[k][l]);
                 swap(strip[i][1], strip[k][l+1]);
                 swap(strip[k][l], strip[k][l+1]);
             }
             else if(adjMatrix[strip[k][l]][strip[i][2]] == 1 && adjMatrix[strip[i][0]][strip[k][l-1]] == 1 && adjMatrix[strip[i][1]][strip[k][l+2]] == 1){
-                costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-                //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-                //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+                costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
                 swap(strip[i][0], strip[k][l]);
                 swap(strip[i][1], strip[k][l+1]);
                 swap(strip[i][0], strip[i][1]);
             }
             else if(adjMatrix[strip[k][l]][strip[i][2]] == 1 && adjMatrix[strip[i][1]][strip[k][l-1]] == 1 && adjMatrix[strip[i][0]][strip[k][l+2]] == 1){
-                costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-                //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-                //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+                costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
                 swap(strip[i][0], strip[k][l+1]);
                 swap(strip[i][1], strip[k][l]);
             }
@@ -407,96 +361,72 @@ void swapBox(int i, int j, int k, int l, int &totalCost, int maxStripWidth, vect
     else if(j == strip[i].size() - 2){
         if(l == 0){ //CASE 2b
             if(adjMatrix[strip[i][j+1]][strip[k][2]] == 1 && adjMatrix[strip[k][0]][strip[i][j-1]] == 1){
-                costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-                //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-                //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+                costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
                 swap(strip[i][j], strip[k][0]);
                 swap(strip[i][j+1], strip[k][1]);
             }
             else if(adjMatrix[strip[i][j]][strip[k][2]] == 1 && adjMatrix[strip[k][0]][strip[i][j-1]] == 1){
-                costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-                //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-                //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+                costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
                 swap(strip[i][j], strip[k][0]);
                 swap(strip[i][j+1], strip[k][1]);
                 swap(strip[k][0], strip[k][1]);
             }
             else if(adjMatrix[strip[i][j+1]][strip[k][2]] == 1 && adjMatrix[strip[k][l]][strip[i][j-1]] == 1){
-                costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-                //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-                //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+                costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
                 swap(strip[i][j], strip[k][0]);
                 swap(strip[i][j+1], strip[k][1]);
                 swap(strip[i][j], strip[i][j+1]);
             }
             else if(adjMatrix[strip[i][j]][strip[k][2]] == 1 && adjMatrix[strip[k][l]][strip[i][j-1]] == 1){
-                costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-                //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-                //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+                costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
                 swap(strip[i][j], strip[k][1]);
                 swap(strip[i][j+1], strip[k][0]);
             }
         }
         else if (l == strip[k].size() - 2){ //CASE 3
             if(adjMatrix[strip[i][j]][strip[k][l-1]] == 1 && adjMatrix[strip[k][l]][strip[i][j-1]] == 1){
-                costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-                //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-                //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+                costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
                 swap(strip[i][j], strip[k][l]);
                 swap(strip[i][j+1], strip[k][l+1]);
             }
             else if(adjMatrix[strip[i][j+1]][strip[k][l-1]] == 1 && adjMatrix[strip[k][l]][strip[i][j-1]] == 1){
-                costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-                //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-                //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+                costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
                 swap(strip[i][j], strip[k][l]);
                 swap(strip[i][j+1], strip[k][l+1]);
                 swap(strip[k][l], strip[k][l+1]);
             }
             else if(adjMatrix[strip[i][j]][strip[k][l-1]] == 1 && adjMatrix[strip[k][l+1]][strip[i][j-1]] == 1){
-                costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-                //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-                //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+                costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
                 swap(strip[i][j], strip[k][l]);
                 swap(strip[i][j+1], strip[k][l+1]);
                 swap(strip[i][j], strip[i][j+1]);
             }
             else if(adjMatrix[strip[i][j+1]][strip[k][l-1]] == 1 && adjMatrix[strip[k][l+1]][strip[i][j-1]] == 1){
-                costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-                //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-                //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+                costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
                 swap(strip[i][j], strip[k][l+1]);
                 swap(strip[i][j+1], strip[k][l]);
             }
         }
         else { //CASE 4b: l is in the middle of the strip/vector
             if(adjMatrix[strip[k][l]][strip[i][j-1]] == 1 && adjMatrix[strip[i][j]][strip[k][l-1]] == 1 && adjMatrix[strip[i][j+1]][strip[k][l+2]] == 1){
-                costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-                //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-                //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+                costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
                 swap(strip[i][j], strip[k][l]);
                 swap(strip[i][j+1], strip[k][l+1]);
             }
             else if(adjMatrix[strip[k][l]][strip[i][j-1]] == 1 && adjMatrix[strip[i][j+1]][strip[k][l-1]] == 1 && adjMatrix[strip[i][j]][strip[k][l+2]] == 1){
-                costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-                //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-                //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+                costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
                 swap(strip[i][j], strip[k][l]);
                 swap(strip[i][j+1], strip[k][l+1]);
                 swap(strip[k][l], strip[k][l+1]);
             }
             else if(adjMatrix[strip[k][l+1]][strip[i][j-1]] == 1 && adjMatrix[strip[i][j]][strip[k][l-1]] == 1 && adjMatrix[strip[i][j+1]][strip[k][l+2]] == 1){
-                costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-                //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-                //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+                costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
                 swap(strip[i][j], strip[k][l]);
                 swap(strip[i][j+1], strip[k][l+1]);
                 swap(strip[i][j], strip[i][j+1]);
             }
             else if(adjMatrix[strip[k][l+1]][strip[i][j-1]] == 1 && adjMatrix[strip[i][j+1]][strip[k][l-1]] == 1 && adjMatrix[strip[i][j]][strip[k][l+2]] == 1){
-                costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-                //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-                //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+                costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
                 swap(strip[i][j], strip[k][l+1]);
                 swap(strip[i][j+1], strip[k][l]);
             }
@@ -506,32 +436,24 @@ void swapBox(int i, int j, int k, int l, int &totalCost, int maxStripWidth, vect
 
     else if (l == 0){ //CASE 4c: j is in the middle of the strip/vector
         if(adjMatrix[strip[i][j+1]][strip[k][2]] == 1 && adjMatrix[strip[k][0]][strip[i][j-1]] == 1 && adjMatrix[strip[k][1]][strip[i][j+2]] == 1){
-            costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-            //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-            //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+            costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
             swap(strip[i][j], strip[k][0]);
             swap(strip[i][j+1], strip[k][1]);
         }
         else if(adjMatrix[strip[i][j]][strip[k][2]] == 1 && adjMatrix[strip[k][0]][strip[i][j-1]] == 1 && adjMatrix[strip[k][1]][strip[i][j+2]] == 1){
-            costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-            //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-            //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+            costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
             swap(strip[i][j], strip[k][0]);
             swap(strip[i][j+1], strip[k][1]);
             swap(strip[k][0], strip[k][1]);
         }
         else if(adjMatrix[strip[i][j+1]][strip[k][2]] == 1 && adjMatrix[strip[k][1]][strip[i][j-1]] == 1 && adjMatrix[strip[k][0]][strip[i][j+2]] == 1){
-            costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-            //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-            //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+            costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
             swap(strip[i][j], strip[k][0]);
             swap(strip[i][j+1], strip[k][1]);
             swap(strip[i][j], strip[i][j+1]);
         }
         else if(adjMatrix[strip[i][j]][strip[k][2]] == 1 && adjMatrix[strip[k][1]][strip[i][j-1]] == 1 && adjMatrix[strip[k][0]][strip[i][j+2]] == 1){
-            costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-            //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-            //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+            costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
             swap(strip[i][j], strip[k][1]);
             swap(strip[i][j+1], strip[k][0]);
         }
@@ -540,32 +462,24 @@ void swapBox(int i, int j, int k, int l, int &totalCost, int maxStripWidth, vect
 
     else if (l == strip[k].size() - 2){ //CASE 4d: j is in the middle of the strip/vector
         if(adjMatrix[strip[i][j]][strip[k][l-1]] == 1 && adjMatrix[strip[k][l]][strip[i][j-1]] == 1 && adjMatrix[strip[k][l+1]][strip[i][j+2]] == 1){
-            costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-            //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-            //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+            costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
             swap(strip[i][j], strip[k][l]);
             swap(strip[i][j+1], strip[k][l+1]);
         }
         else if(adjMatrix[strip[i][j+1]][strip[k][l-1]] == 1 && adjMatrix[strip[k][l]][strip[i][j-1]] == 1 && adjMatrix[strip[k][l+1]][strip[i][j+2]] == 1){
-            costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-            //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-            //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+            costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
             swap(strip[i][j], strip[k][l]);
             swap(strip[i][j+1], strip[k][l+1]);
             swap(strip[k][l], strip[k][l+1]);
         }
         else if(adjMatrix[strip[i][j]][strip[k][l-1]] == 1 && adjMatrix[strip[k][l+1]][strip[i][j-1]] == 1 && adjMatrix[strip[k][l]][strip[i][j+2]] == 1){
-            costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-            //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-            //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+            costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
             swap(strip[i][j], strip[k][l]);
             swap(strip[i][j+1], strip[k][l+1]);
             swap(strip[i][j], strip[i][j+1]);
         }
         else if(adjMatrix[strip[i][j+1]][strip[k][l-1]] == 1 && adjMatrix[strip[k][l+1]][strip[i][j-1]] == 1 && adjMatrix[strip[k][l]][strip[i][j+2]] == 1){
-            costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-            //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-            //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+            costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
             swap(strip[i][j], strip[k][l+1]);
             swap(strip[i][j+1], strip[k][l]);
         }
@@ -574,35 +488,27 @@ void swapBox(int i, int j, int k, int l, int &totalCost, int maxStripWidth, vect
     else{ //CASE 5: both j and l are in the middle of their respective strips/vectors
         if(adjMatrix[strip[i][j]][strip[k][l-1]] == 1 && adjMatrix[strip[i][j+1]][strip[k][l+2]] == 1
            && adjMatrix[strip[k][l]][strip[i][j-1]] == 1 && adjMatrix[strip[k][l+1]][strip[i][j+2]] == 1){
-            costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-            //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-            //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+            costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
             swap(strip[i][j], strip[k][l]);
             swap(strip[i][j+1], strip[k][l+1]);
         }
         else if(adjMatrix[strip[i][j+1]][strip[k][l-1]] == 1 && adjMatrix[strip[i][j]][strip[k][l+2]] == 1
                 && adjMatrix[strip[k][l]][strip[i][j-1]] == 1 && adjMatrix[strip[k][l+1]][strip[i][j+2]] == 1){
-            costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-            //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-            //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+            costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
             swap(strip[i][j], strip[k][l]);
             swap(strip[i][j+1], strip[k][l+1]);
             swap(strip[k][l], strip[k][l+1]);
         }
         else if(adjMatrix[strip[i][j]][strip[k][l-1]] == 1 && adjMatrix[strip[i][j+1]][strip[k][l+2]] == 1
                 && adjMatrix[strip[k][l+1]][strip[i][j-1]] == 1 && adjMatrix[strip[k][l]][strip[i][j+2]] == 1){
-            costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-            //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-            //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+            costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
             swap(strip[i][j], strip[k][l]);
             swap(strip[i][j+1], strip[k][l+1]);
             swap(strip[i][j], strip[i][j+1]);
         }
         else if(adjMatrix[strip[i][j+1]][strip[k][l-1]] == 1 && adjMatrix[strip[i][j]][strip[k][l+2]] == 1
                 && adjMatrix[strip[k][l+1]][strip[i][j-1]] == 1 && adjMatrix[strip[k][l]][strip[i][j+2]] == 1){
-            costEval(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
-            //stripSum[i] = stripSum[i] - boxWidths[strip[i][j]][strip[i][j+1]] + boxWidths[strip[k][l]][strip[k][l+1]];
-            //stripSum[k] = stripSum[k] - boxWidths[strip[k][l]][strip[k][l+1]] + boxWidths[strip[i][j]][strip[i][j+1]];
+            costEvalSwap(i, j, k, l, totalCost, maxStripWidth, boxWidths, strip, stripSum);
             swap(strip[i][j], strip[k][l+1]);
             swap(strip[i][j+1], strip[k][l]);
         }
@@ -612,12 +518,9 @@ void swapBox(int i, int j, int k, int l, int &totalCost, int maxStripWidth, vect
 
 }
 
-void checkSwap(int totalCost, int maxStripWidth, vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths, vector<vector<int> > &strip, vector<int> &stripSum){
+void checkSwap(int &totalCost, int maxStripWidth, vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths, vector<vector<int> > &strip, vector<int> &stripSum){
 
     int i, j, k, l;
-
-    int startCost = initCost(totalCost, maxStripWidth, stripSum);
-    //cout << "start cost: " << startCost << endl;
 
     for(i = 0; i < strip.size() -1; ++i){ // ******************
         for(j = 0; j < strip[i].size() -1; j += 2){ //**************
@@ -646,7 +549,7 @@ void checkSwap(int totalCost, int maxStripWidth, vector<vector<int> > &adjMatrix
 
 
 
-    cout << "After Swap:\n";
+    cout << "\nAfter Swap:\n";
 
     for(i = 0; i < strip.size(); ++i){
         cout << "Strip " << i << ": ";
@@ -663,6 +566,10 @@ void checkSwap(int totalCost, int maxStripWidth, vector<vector<int> > &adjMatrix
             cout << i << setw(11) << stripSum[i] << setw(9) << maxStripWidth - stripSum[i] << endl;
         }
     }
+
+    cout << "Cost after swapping boxes:" << totalCost << endl;
+
+
     cout << "-------------------------\n\n";
 
 
@@ -689,44 +596,15 @@ void moveBox(int i, int j, int k, int l, int &moved, vector<vector<int> > &adjMa
 
 void checkMove(int moved, int maxStripWidth, vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths, vector<vector<int> > &strip, vector<int> &stripSum){
 
-    /* We find the strip with the largest residual/smallest stripSum, this will be strip k
-     * We then use the first box (box at the beginning) of this strip, and attempt to place it onto all the other strips (*)
-     * We check all other strips i in order from largest stripSum to smallest stripSum
-     * This is because the cost will be higher if we move a box from a strip k to a strip with a large stripSum, than to a
-     * strip with a smaller stripSum
-     * If the box can't fit onto a strip i, dont bother testing the mssc, move onto the next strip i+1
-     * If a box can fit onto a strip i, check to see if we can move the box from strip k onto the strip i, at either
-     * the beginning, middle or end of the strip i
-     *
-     * We then need to change the stripSum values for the two strips that have gained/lost a box
-     * Then we go back and check which of the strips now has the largest residual/smallest total strip width
-     *    - SHOULD BE THE SAME STRIP!
-     * Continue until the strip is empty, or until none of the boxes can be moved
-     *
-     * Check for empty strips - if we end up with a strip that is empty, i.e. no elements/stripSum == maxStripWidth, we remove this strip entirely
-     *
-     * We also have to remember to remove the spaces from strip k where the box used to be before it was moved.
-     *
-     * (*) Is it better to start with the box at the end of strip k, or beginning? - try end first
-     * What if box cannot be moved onto any strip, try next box on strip k (i.e. second box from beginning/end)?
-     * What if strip k only contains one box (or multiple boxes), and that box (or none of the boxes) does/do not fit onto any of the other strips?
-     *    - Need to find strip S with the second largest residual/second smallest stripSum
-     * Then, if a move is performed, and the algorithm moves a box from strip S to another strip, when we find the strip with the
-     * largest residual/smallest stripSum, it might find the other strip which has a box/boxes than cannot be moved
-     * We need to find a way of blocking that strip from being chosen as strip k (unless a box is moved onto it?)
-     *
-     * USE VECTOR OF POINTERS
-     */
-
-    int i, j, l;
+    int i, j, k, l, u;
+    int maxSS, minSS, minu;
     moved = 0;
 
+    k = min_element(stripSum.begin(), stripSum.end()) - stripSum.begin(); //strip with smallest width of boxes, i.e. largest residual
+    i = max_element(stripSum.begin(), stripSum.end()) - stripSum.begin();
 
-
-    int k = min_element(stripSum.begin(), stripSum.end()) - stripSum.begin(); //strip with smallest width of boxes, i.e. largest residual
-
-
-    cout << "smallest stripSum: " << k << endl;
+    cout << "Strip with smallest stripSum is strip " << k << ".\n\n";
+    cout << "Strip with largest stripSum is strip " << i << ".\n\n";
 
 
     l = 0;
@@ -767,17 +645,40 @@ void checkMove(int moved, int maxStripWidth, vector<vector<int> > &adjMatrix, ve
         cout << endl;
     }
 
-    cout << "stripSum: ";
+    cout << "\nstripSum: ";
     for(i = 0; i < stripSum.size(); ++i){
         cout << stripSum[i] << " ";
     }
     cout << endl;
 
-
-
-
-
-
+/* We find the strip with the largest residual/smallest stripSum, this will be strip k
+     * We then use the first box (box at the beginning) of this strip, and attempt to place it onto all the other strips (*)
+     * We check all other strips i in order from largest stripSum to smallest stripSum
+     * This is because the cost will be higher if we move a box from a strip k to a strip with a large stripSum, than to a
+     * strip with a smaller stripSum
+     * If the box can't fit onto a strip i, dont bother testing the mssc, move onto the next strip i+1
+     * If a box can fit onto a strip i, check to see if we can move the box from strip k onto the strip i, at either
+     * the beginning, middle or end of the strip i
+     *
+     * We then need to change the stripSum values for the two strips that have gained/lost a box
+     * Then we go back and check which of the strips now has the largest residual/smallest total strip width
+     *    - SHOULD BE THE SAME STRIP!
+     * Continue until the strip is empty, or until none of the boxes can be moved
+     *
+     * Check for empty strips - if we end up with a strip that is empty, i.e. no elements/stripSum == maxStripWidth, we remove this strip entirely
+     *
+     * We also have to remember to remove the spaces from strip k where the box used to be before it was moved.
+     *
+     * (*) Is it better to start with the box at the end of strip k, or beginning? - try end first
+     * What if box cannot be moved onto any strip, try next box on strip k (i.e. second box from beginning/end)?
+     * What if strip k only contains one box (or multiple boxes), and that box (or none of the boxes) does/do not fit onto any of the other strips?
+     *    - Need to find strip S with the second largest residual/second smallest stripSum
+     * Then, if a move is performed, and the algorithm moves a box from strip S to another strip, when we find the strip with the
+     * largest residual/smallest stripSum, it might find the other strip which has a box/boxes than cannot be moved
+     * We need to find a way of blocking that strip from being chosen as strip k (unless a box is moved onto it?)
+     *
+     * USE VECTOR OF POINTERS
+     */
 
 
 
