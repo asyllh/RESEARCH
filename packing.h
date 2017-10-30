@@ -18,7 +18,7 @@ void packStripsFFD(int &totalCost, int numBox, int maxBoxWidth, int maxStripWidt
 
 int initCost(int &totalCost, int maxStripWidth, vector<int> &stripSum);
 
-void costEvalSwap(int i, int j, int k, int l, int &totalCost, int maxStripWidth, vector<vector<int> > &boxWidths, vector<vector<int> > &strip, vector<int> &stripSum);
+void costSwap(int i, int j, int k, int l, int &totalCost, int maxStripWidth, vector<vector<int> > &boxWidths, vector<vector<int> > &strip, vector<int> &stripSum);
 
 void swapBox(int i, int j, int k, int l, int &totalCost, int maxStripWidth, vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths, vector<vector<int> > &strip, vector<int> &stripSum);
 
