@@ -108,9 +108,6 @@ void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, 
         }
     }
 
-    boxWidths[numScores - 1][numScores - 2] = 0;
-    boxWidths[numScores - 2][numScores - 1] = 0;
-
     k = 1;
     for(i = 0; i < numScores; ++i){
         for(j = i+1; j < numScores; ++j){
