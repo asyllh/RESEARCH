@@ -743,45 +743,162 @@ void moveBox(int i, int j, int k, int l, int &moved, vector<vector<int> > &adjMa
 
 void checkMove(int moved, int maxStripWidth, vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths, vector<vector<int> > &strip, vector<int> &stripSum){
 
-    int i, j, k, l, u, x;
-    int maxSS, minSS, minu;
+    int i, j, k, l, u, v;
+    int maxSSi, minSSi, minu;
+    int maxSSk, minSSk, maxv;
     moved = 0;
 
-    k = min_element(stripSum.begin(), stripSum.end()) - stripSum.begin(); //strip with smallest width of boxes, i.e. largest residual
+
+    //find strip k with smallest stripSum
+    k = min_element(stripSum.begin(), stripSum.end()) - stripSum.begin();
+
+    //find strip i with largest stripSum
     i = max_element(stripSum.begin(), stripSum.end()) - stripSum.begin();
 
     cout << "Strip with smallest stripSum is strip " << k << ".\n\n";
     cout << "Strip with largest stripSum is strip " << i << ".\n\n";
-
     l = 0;
 
-    for(i = 0; i < strip.size(); ++i){
-        if(i == k){
-            continue; //to avoid moving box onto the strip it's already on!
-        }
+    //3-> YES: CAN BOX l FIT ONTO STRIP i?
+    Beginning:
+    if(stripSum[i] + boxWidths[strip[k][l]][strip[k][l+1]] <= maxStripWidth){
 
-        if(stripSum[i] + boxWidths[strip[k][l]][strip[k][l+1]] <= maxStripWidth){
-            for(j = 0; j < strip[i].size()-1; j+=2){
+        //4: DOES BOX l MEET MSSC ON STRIP i?
+        //try moveBox for all cases of j, when moved = 1, break
+        for(j = 0; j < strip[i].size() - 1; j+=2) { //go through all boxes on strip i and see if box l can fit next to/between them
+            if(moved == 0) { //if box has not yet been moved, attempt to move the box
                 moveBox(i, j, k, l, moved, adjMatrix, boxWidths, strip, stripSum);
-                if(moved == 1){
-                    cout << "moved\n";
-                    break;
-                }
-
+            }
+            else if (moved == 1){ //else if the box has finally been moved, exit for loop, no need to try to fit anywhere else
+                break;
             }
         }
-        else{ //if box from strip k cannot fit onto strip i
-            continue; //ignore whole strip, go to strip i+1
-        }
-        break;
-        /*if(moved == 1){
+
+        //5: BOX HAS BEEN MOVED AND STRIPSUM UPDATED
+        if(moved == 1){ //i.e. if box meets mssc on strip i, and a box has been moved from strip k to strip i
             moved = 0;
-            k = min_element(stripSum.begin(), stripSum.end()) - stripSum.begin();
-            i = -1;
-        }*/
+            //6: IS STRIP k EMPTY?
+            if(strip[k].empty()){ //7: REMOVE STRIP AND STRIPSUM (is strip k empty now that a box has been removed from it?)
+                strip.erase(strip.begin() + k); //delete strip k
+                stripSum.erase(stripSum.begin() + k); //delete stripSum
+                k = min_element(stripSum.begin(), stripSum.end()) - stripSum.begin();
+                i = max_element(stripSum.begin(), stripSum.end()) - stripSum.begin();
+                goto Beginning;
+            }
+            else{ //strip[k] not empty
+                //l stays the same, k stays the same
+                i = max_element(stripSum.begin(), stripSum.end()) - stripSum.begin();
+                goto Beginning;
+            }
+        }
+
+        else if(moved == 0){ // if box doesn't meet mssc on strip i (so box has not been moved)
+            //8: is strip i the last strip to be checked that is larger than k (in terms of stripSum)?
+            checkStripi:
+            maxSSi = stripSum[i];
+            minSSi = stripSum[k];
+            minu = i;
+            for(u = 0; u < stripSum.size(); ++u){
+                if(u == i || u == k){
+                    continue;
+                }
+                else if (stripSum[u] > minSSi && stripSum[u] < maxSSi){
+                    minSSi = stripSum[u];
+                    minu = u;
+                }
+            }
+            if(minu == i){ // i.e. current strip is last strip checked, no more strips available
+                i = max_element(stripSum.begin(), stripSum.end()) - stripSum.begin();
+                if(l == strip[k].size() - 2){ //if we are on the last box in strip k
+                    maxSSk = stripSum[i];
+                    minSSk = stripSum[k];
+                    maxv = k;
+                    for(v = 0; v < stripSum.size(); ++v){
+                        if(v == i || v == k){
+                            continue;
+                        }
+                        else if(stripSum[v] > minSSk && stripSum[v] < maxSSk){
+                            maxSSk = stripSum[v];
+                            maxv = v;
+                        }
+                    }
+                    if(maxv == k){
+                        goto End;
+                    }
+                    else{ //next smallest strip k has been found
+                        k = maxv;
+                        l = 0;
+                        goto Beginning;
+                    }
+                }
+                else{ // if there are more boxes on strip k that have not yet been checked
+                    l += 2; // move to the next box on strip k
+                    goto Beginning;
+                }
+            }
+            else { //if we have found the next largest strip i, i.e. there are more strips to be checked
+                i = minu; //strip i is now the next largest strip
+                goto Beginning;
+            }
+
+        }
+
+    }
+
+    else{ //3 -> NO: box cannot fit onto strip
+        //8: is strip i the last strip to be checked that is larger than k (in terms of stripSum)?
+        goto checkStripi;
+
+
 
 
     }
+
+    End:
+    cout << "THE END\n\n";
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     for(i = 0; i < strip.size(); ++i){
         cout << "Strip " << i << ": ";
