@@ -61,7 +61,7 @@ void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, 
         randOrder.push_back(i);
     }
 
-    //Randomly shuffle all values in randOrder vector EXCEPT the last two values (dominating vertices, must stay as mates)
+    //Randomly shuffle all values in randOrder vector
     random_shuffle(randOrder.begin(), randOrder.end());
 
     //Assign mates to each score (i.e. pair up scores to define which scores are either side of the same box)
