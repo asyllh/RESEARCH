@@ -72,14 +72,14 @@ void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, 
         adjMatrix[randOrder[2 * i + 1]][randOrder[2 * i]] = 2;
     }
 
-    cout << "AdjMatrix:\n";
+    /*cout << "AdjMatrix:\n";
     for(i = 0; i < numScores; ++i){
         for(j = 0; j < numScores; ++j){
             cout << adjMatrix[i][j] << " ";
         }
         cout << endl;
     }
-    cout << endl << endl;
+    cout << endl << endl;*/
 
 
 
@@ -91,11 +91,11 @@ void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, 
             }
         }
     }
-    cout << "Mates Vector:\n";
+    /*cout << "Mates Vector:\n";
     for(i = 0; i < mates.size(); ++i){
         cout << mates[i] << " ";
     }
-    cout << endl << endl;
+    cout << endl << endl;*/
 
     for(i = 0; i < numScores; ++i){
         for(j = 0; j < numScores; ++j){
