@@ -752,55 +752,47 @@ void checkMove(int moved, int maxStripWidth, vector<vector<int> > &adjMatrix, ve
 
     cout << "After Moving Boxes:\n";
 
-    //find strip k with smallest stripSum
+    //find strip k with smallest stripSum and strip i with largest stripSum
     k = min_element(stripSum.begin(), stripSum.end()) - stripSum.begin();
-
-    //find strip i with largest stripSum
     i = max_element(stripSum.begin(), stripSum.end()) - stripSum.begin();
-
-    //cout << "Strip with smallest stripSum is strip " << k << ".\n";
-    //cout << "Strip with largest stripSum is strip " << i << ".\n\n";
     l = 0;
 
-    //3-> YES: CAN BOX l FIT ONTO STRIP i?
     Beginning:
-    if(stripSum[i] + boxWidths[strip[k][l]][strip[k][l+1]] <= maxStripWidth){
-        //cout << "point1\n";
-
-        //4: DOES BOX l MEET MSSC ON STRIP i?
+    if(stripSum[i] + boxWidths[strip[k][l]][strip[k][l+1]] <= maxStripWidth){ //If box kl can fit onto strip i
+        //Check to see if box kl meets mssc on strip i
         //try moveBox for all cases of j, when moved = 1, break
-        for(j = 0; j < strip[i].size() - 1; j+=2) { //go through all boxes on strip i and see if box l can fit next to/between them
+        for(j = 0; j < strip[i].size() - 1; j+=2) { //go through all boxes on strip i and see if box ll can fit next to/between them
             if(moved == 0) { //if box has not yet been moved, attempt to move the box
                 moveBox(i, j, k, l, moved, adjMatrix, boxWidths, strip, stripSum);
-                //cout << "point2\n";
             }
             else if (moved == 1){ //else if the box has finally been moved, exit for loop, no need to try to fit anywhere else
-                //cout << "point3\n";
                 break;
             }
         }
-
-        //5: BOX HAS BEEN MOVED AND STRIPSUM UPDATED
-        if(moved == 1){ //i.e. if box meets mssc on strip i, and a box has been moved from strip k to strip i
+        if(moved == 1){ //If box kl meets mssc on strip i and has been moved from strip k to strip i
             moved = 0;
-            //6: IS STRIP k EMPTY?
-            if(strip[k].empty()){ //7: REMOVE STRIP AND STRIPSUM (is strip k empty now that a box has been removed from it?)
+            if(strip[k].empty()){ //If strip k is empty (due to box kl being moved from strip k to strip i
                 strip.erase(strip.begin() + k); //delete strip k
                 stripSum.erase(stripSum.begin() + k); //delete stripSum
-                k = min_element(stripSum.begin(), stripSum.end()) - stripSum.begin();
-                i = max_element(stripSum.begin(), stripSum.end()) - stripSum.begin();
-                goto Beginning;
+                k = min_element(stripSum.begin(), stripSum.end()) - stripSum.begin(); //find smallest strip k
+                i = max_element(stripSum.begin(), stripSum.end()) - stripSum.begin(); //find largest strip i
+                l = 0;
+                goto Beginning; //restart
             }
-            else{ //strip[k] not empty
-                //l stays the same, k stays the same
+            else{ //If strip k is not empty, still has boxes available to be moved
                 i = max_element(stripSum.begin(), stripSum.end()) - stripSum.begin();
-                goto Beginning;
+                //k stays the same, l only stays the same if it is not out of bounds, i.e. larger than strip[k].size()-2
+                //this might happen if l is the last box in strip k and then gets moved to strip i, so strip[k] decreases in size, but l
+                //stays the same, which means l is larger than strip[k].size()
+                if(l >= strip[k].size()){
+                    l = 0;
+                }
+                goto Beginning; //restart
             }
         }
-
-        else if(moved == 0){ // if box doesn't meet mssc on strip i (so box has not been moved)
-            //8: is strip i the last strip to be checked that is larger than k (in terms of stripSum)?
-            checkStripi:
+        else if(moved == 0){ //If box kl doesn't meet mssc on strip i (so box has not been moved)
+            //Find strip i with next largest stripSum that is not smaller than stripSum[k]/check if strip i is the last strip available
+            checkStripi: //This is a goto label
             maxSSi = stripSum[i];
             minSSi = stripSum[k];
             minu = i;
@@ -813,9 +805,10 @@ void checkMove(int moved, int maxStripWidth, vector<vector<int> > &adjMatrix, ve
                     minu = u;
                 }
             }
-            if(minu == i){ // i.e. current strip is last strip checked, no more strips available
+            if(minu == i){ //If current strip i is last strip checked and there are no more strips available
                 i = max_element(stripSum.begin(), stripSum.end()) - stripSum.begin();
-                if(l == strip[k].size() - 2){ //if we are on the last box in strip k
+                if(l == strip[k].size() - 2){ //If we are on the last box in strip k
+                    //Find strip k with next smallest stripSum that is not larger than stripSum[i]
                     maxSSk = stripSum[i];
                     minSSk = stripSum[k];
                     maxv = k;
@@ -828,41 +821,34 @@ void checkMove(int moved, int maxStripWidth, vector<vector<int> > &adjMatrix, ve
                             maxv = v;
                         }
                     }
-                    if(maxv == k){
-                        goto End;
+                    if(maxv == k){ //All moves possible have been made, exit
+                        goto End; //Exit
                     }
-                    else{ //next smallest strip k has been found
+                    else{ //If next smallest strip k has been found
                         k = maxv;
                         l = 0;
-                        goto Beginning;
+                        goto Beginning; //restart
                     }
                 }
-                else{ // if there are more boxes on strip k that have not yet been checked
+                else{ //If there are more boxes on strip k that have not yet been checked
                     l += 2; // move to the next box on strip k
-                    goto Beginning;
+                    goto Beginning; //restart
                 }
             }
-            else { //if we have found the next largest strip i, i.e. there are more strips to be checked
+            else { //If we have found the next largest strip i, i.e. there are more strips to be checked
                 i = minu; //strip i is now the next largest strip
-                goto Beginning;
+                //k stays the same, l stays the same
+                goto Beginning; //restart
             }
 
         }
 
     }
-
-    else{ //3 -> NO: box cannot fit onto strip
-        //8: is strip i the last strip to be checked that is larger than k (in terms of stripSum)?
+    else{ //If box kl cannot fit onto strip i
         goto checkStripi;
-
-
-
-
     }
 
     End:
-    //cout << "THE END\n\n";
-
     cout << "Number of strips: " << strip.size() << "\n\n";
 
     for(i = 0; i < strip.size(); ++i){
@@ -881,37 +867,6 @@ void checkMove(int moved, int maxStripWidth, vector<vector<int> > &adjMatrix, ve
         }
     }
     cout << endl;
-
-
-/* We find the strip with the largest residual/smallest stripSum, this will be strip k
-     * We then use the first box (box at the beginning) of this strip, and attempt to place it onto all the other strips (*)
-     * We check all other strips i in order from largest stripSum to smallest stripSum
-     * This is because the cost will be higher if we move a box from a strip k to a strip with a large stripSum, than to a
-     * strip with a smaller stripSum
-     * If the box can't fit onto a strip i, dont bother testing the mssc, move onto the next strip i+1
-     * If a box can fit onto a strip i, check to see if we can move the box from strip k onto the strip i, at either
-     * the beginning, middle or end of the strip i
-     *
-     * We then need to change the stripSum values for the two strips that have gained/lost a box
-     * Then we go back and check which of the strips now has the largest residual/smallest total strip width
-     *    - SHOULD BE THE SAME STRIP!
-     * Continue until the strip is empty, or until none of the boxes can be moved
-     *
-     * Check for empty strips - if we end up with a strip that is empty, i.e. no elements/stripSum == maxStripWidth, we remove this strip entirely
-     *
-     * We also have to remember to remove the spaces from strip k where the box used to be before it was moved.
-     *
-     * (*) Is it better to start with the box at the end of strip k, or beginning? - try end first
-     * What if box cannot be moved onto any strip, try next box on strip k (i.e. second box from beginning/end)?
-     * What if strip k only contains one box (or multiple boxes), and that box (or none of the boxes) does/do not fit onto any of the other strips?
-     *    - Need to find strip S with the second largest residual/second smallest stripSum
-     * Then, if a move is performed, and the algorithm moves a box from strip S to another strip, when we find the strip with the
-     * largest residual/smallest stripSum, it might find the other strip which has a box/boxes than cannot be moved
-     * We need to find a way of blocking that strip from being chosen as strip k (unless a box is moved onto it?)
-     *
-     * USE VECTOR OF POINTERS
-     */
-
 
 
 }
