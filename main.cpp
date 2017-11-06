@@ -133,7 +133,7 @@ int main(int argc, char **argv){
 
     endTime = clock();
     double totalTime = (((endTime - startTime) / double(CLOCKS_PER_SEC)) * 1000);
-    cout << "CPU Time = " << totalTime << " milliseconds.\n";
+    cout << "CPU Time = " << totalTime << " milliseconds.\nEND.\n";
 
 }//END INT MAIN
 
