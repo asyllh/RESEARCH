@@ -28,12 +28,5 @@ void moveBox(int i, int j, int k, int l, int &moved, vector<vector<int> > &adjMa
 
 void checkMove(int moved, int maxStripWidth, vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths, vector<vector<int> > &strip, vector<int> &stripSum);
 
-int costEvalSwap(int i, int j, int k, int l, int totalCost, int maxStripWidth, vector<vector<int> > &boxWidths, vector<vector<int> > &strip, vector<int> &stripSum);
-
-void checkSwapTabu(int &c1, int i, int j, int k, int l, int &totalCost, int maxStripWidth, vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths, vector<vector<int> > &strip, vector<int> &stripSum);
-
-void packTabu(int c1, int &totalCost, int maxStripWidth, vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths, vector<vector<int> > &strip, vector<int> &stripSum);
-
-
 #endif
 
