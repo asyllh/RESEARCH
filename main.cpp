@@ -61,6 +61,10 @@ int main(int argc, char **argv){
     vector<int> stripNumBoxes;
     int totalCost;
     int moved;
+    vector<vector<int> > stripX;
+    vector<vector<int> > stripY;
+    vector<int> stripSumX;
+    vector<int> stripSumY;
 
 
     cout << "MSSP - MBAHRA\n-------------\n";
@@ -121,14 +125,11 @@ int main(int argc, char **argv){
 
     packStripsFFD(totalCost, numBox, maxBoxWidth, maxStripWidth, totalBoxWidth, adjMatrix, mates, boxWidths, stripSum, stripNumBoxes, strip, stripWidth);
 
-    checkSwap(totalCost, maxStripWidth, adjMatrix, boxWidths, strip, stripSum);
-    
-    checkMove(moved, maxStripWidth, adjMatrix, boxWidths, strip, stripSum);
+    //checkSwap(totalCost, maxStripWidth, adjMatrix, boxWidths, strip, stripSum);
 
+    //checkMove(moved, maxStripWidth, adjMatrix, boxWidths, strip, stripSum);
 
-
-
-
+    localSearch(maxStripWidth, boxWidths, stripSum, stripSumX, stripSumY, strip, stripX, stripY);
 
 
 
