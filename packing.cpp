@@ -864,8 +864,145 @@ void checkMove(int moved, int maxStripWidth, vector<vector<int> > &adjMatrix, ve
 
 }
 
-/* ******************************************************************************************************************************************************************************** */
+/* ****************************************************************************************************************************************************/
 
+void localSearch(int maxStripWidth, vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<int> &stripSumX, vector<int> &stripSumY, vector<vector<int> > &strip, vector<vector<int> > &stripX, vector<vector<int> > &stripY){
+
+    int a, b, c, d, i, j, k, l, half, pairSizeX, pairSizeY;
+
+    /* Initially:
+     * We split the strips into two sets of strips, stripX and stripY
+     * If the total number of strips is even, then we put half the strips in each set
+     * If the total number of strips is odd, then stripX will have one more strip than stripY
+     * We also have to create two new vectors to hold the total strip widths, stripSumX and stripSumY
+     */
+
+    /*if(strip.size() % 2 == 1){
+        half = (strip.size() / 2) + 1;
+    }
+    else{
+        half = strip.size() / 2;
+    }
+
+    for(i = 0; i < half; ++i){
+        stripX.push_back(strip[i]);
+    }
+    for(i = half; i < strip.size(); ++i){
+        stripY.push_back(strip[i]);
+    }
+    for(i = 0; i < half; ++i){
+        stripSumX.push_back(stripSum[i]);
+    }
+    for(i = half; i < strip.size(); ++i){
+        stripSumY.push_back(stripSum[i]);
+    }*/
+
+    if(strip.size() % 2 == 1){
+        for(i = 0; i < strip.size() - 1; i+=2){
+            stripX.push_back(strip[i]);
+            stripSumX.push_back(stripSum[i]);
+            stripY.push_back(strip[i+1]);
+            stripSumY.push_back(stripSum[i+1]);
+        }
+        stripX.push_back(strip[strip.size()-1]);
+        stripSumX.push_back(stripSum[stripSum.size()-1]);
+    }
+    else{
+        for(i = 0; i < strip.size(); i+=2){
+            stripX.push_back(strip[i]);
+            stripSumX.push_back(stripSum[i]);
+            stripY.push_back(strip[i+1]);
+            stripSumY.push_back(stripSum[i+1]);
+        }
+    }
+
+
+    cout << "stripX:\n";
+    for(i = 0; i < stripX.size(); ++i){
+        for(j = 0; j < stripX[i].size(); ++j){
+            cout << stripX[i][j] << " ";
+        }
+        cout << endl;
+    }
+    cout << "stripSumX: ";
+    for(i = 0; i < stripSumX.size(); ++i){
+        cout << stripSumX[i] << " ";
+    }
+    cout << endl << endl;
+
+    cout << "stripY:\n";
+    for(i = 0; i < stripY.size(); ++i){
+        for(j = 0; j < stripY[i].size(); ++j){
+            cout << stripY[i][j] << " ";
+        }
+        cout << endl;
+    }
+    cout << "stripSumY: ";
+    for(i = 0; i < stripSumY.size(); ++i){
+        cout << stripSumY[i] << " ";
+    }
+    cout << endl << endl;
+
+    /*SWAPPING A PAIR OF BOXES FROM EACH SET*/
+    for(i = 0; i < stripX.size(); ++i){ //For each strip in the set stripX
+        if(stripX[i].size() >= 4){ //If there are at least 2 boxes on stripX[i] (note that each element represents a score, so 4 elements = 2 boxes)
+            //Go through each pair of boxes on stripX[i]
+            for(a = 0; a < stripX[i].size()-3; a+=2){ //Starting from the first score on the first box until the first score on the penultimate box
+                for(b = a+2; b < stripX[i].size()-1; b+=2){ //Starting from the first score on the second box until the first score on the last box
+                    pairSizeX = boxWidths[stripX[i][a]][stripX[i][a+1]] + boxWidths[stripX[i][b]][stripX[i][b+1]]; //Sum box widths
+                    //Check if there exists a pair of boxes on a strip in set stripY that have a combined width larger than pairSizeX
+                    for(j = 0; j < stripY.size(); ++j){ //For each strip in the set stripY
+                        if(stripY[j].size() >= 4){ //If there are at least 2 boxes on stripY[j]
+                            //Go through each pair of boxes on stripY[j]
+                            for(c = 0; c < stripY[j].size()-3; c+=2){ //Starting from the first score on the first box until the first score on the penultimate box
+                                for(d = c+2; d < stripY[j].size()-1; d+=2){ //Starting from the first score on the second box until the first score on the last box
+                                    pairSizeY = boxWidths[stripY[j][c]][stripY[j][c+1]] + boxWidths[stripY[j][d]][stripY[j][d+1]]; //Sum box widths
+                                    //Check if pairSizeX < pairSizeY and that boxes can fit onto strip
+                                    if(pairSizeX < pairSizeY && stripSumX[i] - pairSizeX + pairSizeY <= maxStripWidth){
+                                        //Check if boxes meet mssc on opposite strips
+                                        //If so, perform swap, update stripSums, and move onto PairSin
+                                        //If not, continue
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    cout << "NO PAIR PAIR SWAP PERFORMED.\n";
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}
 
 
 

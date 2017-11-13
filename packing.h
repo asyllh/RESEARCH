@@ -28,5 +28,8 @@ void moveBox(int i, int j, int k, int l, int &moved, vector<vector<int> > &adjMa
 
 void checkMove(int moved, int maxStripWidth, vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths, vector<vector<int> > &strip, vector<int> &stripSum);
 
+void localSearch(int maxStripWidth, vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<int> &stripSumX, vector<int> &stripSumY, vector<vector<int> > &strip, vector<vector<int> > &stripX, vector<vector<int> > &stripY);
+
+
 #endif
 
