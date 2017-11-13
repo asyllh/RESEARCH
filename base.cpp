@@ -194,14 +194,14 @@ void createInstanceUser(int threshold, int numScores, double &totalBoxWidth, vec
         boxWidths[m2][m1] = userInput[i][2];
     }
 
-    cout << "AdjMatrix:\n";
+    /*cout << "AdjMatrix:\n";
     for(i = 0; i < adjMatrix.size(); ++i){
         for(j = 0; j < adjMatrix[i].size(); ++j){
             cout << adjMatrix[i][j] << " ";
         }
         cout << endl;
     }
-    cout << endl;
+    cout << endl;*/
 
     /*cout << "BoxWidths:\n";
     for(i = 0; i < numScores; ++i){
@@ -255,13 +255,13 @@ void createInstanceUser(int threshold, int numScores, double &totalBoxWidth, vec
 
     cout << "Total Box Widths: " << totalBoxWidth << endl << endl;
 
-    cout << "allBoxes:\n";
+    /*cout << "allBoxes:\n";
     for(i = 0; i < numScores; ++i){
         for(j = 0; j < numScores; ++j){
             cout << allBoxes[i][j] << " ";
         }
         cout << endl;
     }
-    cout << endl;
+    cout << endl;*/
 
 }
