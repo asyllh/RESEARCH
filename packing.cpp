@@ -971,35 +971,63 @@ void localSearch(int maxStripWidth, vector<vector<int> > &boxWidths, vector<int>
             }
         }
     }
-
     cout << "NO PAIR PAIR SWAP PERFORMED.\n";
 
+    /*SWAPPING A PAIR OF BOXES FROM SET STRIPX WITH ONE BOX FROM SET STRIPY*/
+    for(i = 0; i < stripX.size(); ++i){ //For each strip in the set stripX
+        if(stripX[i].size() >= 4){ //If there are at least 2 boxes on stripX[i]
+            for(a = 0; a < stripX[i].size()-3; a+=2){ //Starting from the first score on the first box until the first score on the penultimate box
+                for(b = a+2; b < stripX[i].size()-1; b+=2){ //Starting from the first score on the second box until the first score on the last box
+                    pairSizeX = boxWidths[stripX[i][a]][stripX[i][a+1]] + boxWidths[stripX[i][b]][stripX[i][b+1]]; //Sum box widths
+                    //Check if there exists a box on a strip in set stripY whose width is larger than pairSizeX
+                    for(j = 0; j < stripY.size(); ++j){
+                        //Go through each box on stripY[j]
+                        for(c = 0; c < stripY[j].size()-1; c+=2){ //Starting from the first score on the first box unil the first score on the last box
+                            //Check if pairSizeX < width of box in stripY, and that box can fit onto strip
+                            if(pairSizeX <= boxWidths[stripY[j][c]][stripY[j][c+1]] && stripSumX[i] - pairSizeX + boxWidths[stripY[j][c]][stripY[j][c+1]] <= maxStripWidth){
+                                //Check if boxes meet mssc on opposite strips
+                                //If so, perform swap, update stripSums, and move onto SinSin
+                                //If not, continue
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    cout << "NO PAIR SIN SWAP PERFORMED.\n";
 
+    /*SWAPPING ONE BOX FROM SET STRIPX WITH ONE BOX FROM SET STRIPY*/
+    for(i = 0; i < stripX.size(); ++i){ //For each strip in the set stripX
+        for(a = 0; a < stripX[i].size()-1; a+=2){ // Starting from the first score on the first box until the first score on the last box
+            for(j = 0; j < stripY.size(); ++j){ // For each strip in the set stripY
+                for(c = 0; c < stripY[j].size()-1; c+=2){ //Starting from the first score on the first box until the first score on the last box
+                    //Check if boxwidth[a] < boxWidth[c] and that box can fit on strip
+                    if(boxWidths[stripX[i][a]][stripX[i][a+1]] < boxWidths[stripY[j][c]][stripY[j][c+1]]
+                       && stripSumX[i] - boxWidths[stripX[i][a]][stripX[i][a+1]] + boxWidths[stripY[j][c]][stripY[j][c+1]] <= maxStripWidth){
+                        //Check if boxes meet mssc on opposite strips
+                        //If so, perform swap, update stripSums, and move onto SinSin
+                        //If not, continue
+                    }
+                }
+            }
+        }
+    }
+    cout << "NO SINGLE SINGLE SWAP PERFORMED.\n";
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    /*MOVING ONE BOX FROM SET STRIPY TO SET STRIPX*/
+    for(j = 0; j < stripY.size(); ++j){ //For each strip in the set stripY
+        for(c = 0; c < stripY[j].size()-1; c+=2){ //Starting from the first score on the first box until the first score on the last box
+            for(i = 0; i < stripX.size(); ++i){ //For each strip in the set stripX
+                if(stripSumX[i] + boxWidths[stripY[j][c]][stripY[j][c+1]] <= maxStripWidth){
+                    //Check if box c meets mssc on strip in set stripX
+                    //If so, perform move, update stripSums, go back to PairPair
+                    //If not, continue onto next stripX[i]
+                }
+            }
+        }
+    }
+    cout << "NO SINGLE MOVE PERFORMED.\n";
 
 
 }
