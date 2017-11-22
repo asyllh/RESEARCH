@@ -158,7 +158,7 @@ int initCost(int &totalCost, int maxStripWidth, vector<int> &stripSum){
 
 }
 
-void localSearch(int maxStripWidth, vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<int> &stripSumX, vector<int> &stripSumY, vector<vector<int> > &strip, vector<vector<int> > &stripX, vector<vector<int> > &stripY){
+void localSearch(int &swapType, int maxStripWidth, vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<int> &stripSumX, vector<int> &stripSumY, vector<vector<int> > &strip, vector<vector<int> > &stripX, vector<vector<int> > &stripY){
 
     int a, b, c, d, i, j, k, l, half, pairSizeX, pairSizeY;
 
@@ -237,18 +237,25 @@ void localSearch(int maxStripWidth, vector<vector<int> > &boxWidths, vector<int>
 
 
     /*SWAPPING A PAIR OF BOXES FROM EACH SET*/
-    for(i = 0; i < stripX.size(); ++i){
-        if(stripX[i].size() >= 4){
-            for(a = 0; a < stripX[i].size()-3; a+=2){
-                for(b = a+2; b < stripX[i].size()-1; b+=2){
-                    pairSizeX = boxWidths[stripX[i][a]][stripX[i][a+1]] + boxWidths[stripX[i][b]][stripX[i][b+1]];
-                    for(j = 0; j < stripY.size(); ++j){
-                        if(stripY[j].size() >= 4){
-                            for(c = 0; c < stripY[j].size()-3; c+=2){
-                                for(d = c+2; d < stripY[j].size()-1; d+=2){
-                                    pairSizeY = boxWidths[stripY[j][c]][stripY[j][c+1]] + boxWidths[stripY[j][d]][stripY[j][d+1]];
+    for(i = 0; i < stripX.size(); ++i){ //For each strip in the set stripX
+        if(stripX[i].size() >= 4){ //If there are at least 2 boxes on stripX[i] (note that each element represents a score, so 4 elements = 2 boxes)
+            //Go through each pair of boxes on stripX[i]
+            for(a = 0; a < stripX[i].size()-3; a+=2){ //Starting from the first score on the first box until the first score on the penultimate box
+                for(b = a+2; b < stripX[i].size()-1; b+=2){ //Starting from the first score on the second box until the first score on the last box
+                    pairSizeX = boxWidths[stripX[i][a]][stripX[i][a+1]] + boxWidths[stripX[i][b]][stripX[i][b+1]]; //Sum box widths
+                    //Check if there exists a pair of boxes on a strip in set stripY that have a combined width larger than pairSizeX
+                    for(j = 0; j < stripY.size(); ++j){ //For each strip in the set stripY
+                        if(stripY[j].size() >= 4){ //If there are at least 2 boxes on stripY[j]
+                            //Go through each pair of boxes on stripY[j]
+                            for(c = 0; c < stripY[j].size()-3; c+=2){ //Starting from the first score on the first box until the first score on the penultimate box
+                                for(d = c+2; d < stripY[j].size()-1; d+=2){ //Starting from the first score on the second box until the first score on the last box
+                                    pairSizeY = boxWidths[stripY[j][c]][stripY[j][c+1]] + boxWidths[stripY[j][d]][stripY[j][d+1]]; //Sum box widths
+                                    //Check if pairSizeX < pairSizeY and that boxes can fit onto strip
                                     if(pairSizeX < pairSizeY && stripSumX[i] - pairSizeX + pairSizeY <= maxStripWidth){
-                                        //MBAHRA
+                                        swapType = 0;
+                                        //Check if boxes meet mssc on opposite strips
+                                        //If so, perform swap, update stripSums, and move onto PairSin
+                                        //If not, continue
                                     }
                                 }
                             }
@@ -273,6 +280,7 @@ void localSearch(int maxStripWidth, vector<vector<int> > &boxWidths, vector<int>
                         for(c = 0; c < stripY[j].size()-1; c+=2){ //Starting from the first score on the first box unil the first score on the last box
                             //Check if pairSizeX < width of box in stripY, and that box can fit onto strip
                             if(pairSizeX <= boxWidths[stripY[j][c]][stripY[j][c+1]] && stripSumX[i] - pairSizeX + boxWidths[stripY[j][c]][stripY[j][c+1]] <= maxStripWidth){
+                                swapType = 1;
                                 //Check if boxes meet mssc on opposite strips
                                 //If so, perform swap, update stripSums, and move onto SinSin
                                 //If not, continue
@@ -293,6 +301,7 @@ void localSearch(int maxStripWidth, vector<vector<int> > &boxWidths, vector<int>
                     //Check if boxwidth[a] < boxWidth[c] and that box can fit on strip
                     if(boxWidths[stripX[i][a]][stripX[i][a+1]] < boxWidths[stripY[j][c]][stripY[j][c+1]]
                        && stripSumX[i] - boxWidths[stripX[i][a]][stripX[i][a+1]] + boxWidths[stripY[j][c]][stripY[j][c+1]] <= maxStripWidth){
+                        swapType = 2;
                         //Check if boxes meet mssc on opposite strips
                         //If so, perform swap, update stripSums, and move onto SinSin
                         //If not, continue
@@ -308,6 +317,7 @@ void localSearch(int maxStripWidth, vector<vector<int> > &boxWidths, vector<int>
         for(c = 0; c < stripY[j].size()-1; c+=2){ //Starting from the first score on the first box until the first score on the last box
             for(i = 0; i < stripX.size(); ++i){ //For each strip in the set stripX
                 if(stripSumX[i] + boxWidths[stripY[j][c]][stripY[j][c+1]] <= maxStripWidth){
+                    swapType = 3;
                     //Check if box c meets mssc on strip in set stripX
                     //If so, perform move, update stripSums, go back to PairPair
                     //If not, continue onto next stripX[i]
@@ -317,40 +327,10 @@ void localSearch(int maxStripWidth, vector<vector<int> > &boxWidths, vector<int>
     }
     cout << "NO SINGLE MOVE PERFORMED.\n";
 
-    /*SWAPPING A PAIR OF BOXES FROM EACH SET*/
-    /*for(i = 0; i < stripX.size(); ++i){ //For each strip in the set stripX
-        if(stripX[i].size() >= 4){ //If there are at least 2 boxes on stripX[i] (note that each element represents a score, so 4 elements = 2 boxes)
-            //Go through each pair of boxes on stripX[i]
-            for(a = 0; a < stripX[i].size()-3; a+=2){ //Starting from the first score on the first box until the first score on the penultimate box
-                for(b = a+2; b < stripX[i].size()-1; b+=2){ //Starting from the first score on the second box until the first score on the last box
-                    pairSizeX = boxWidths[stripX[i][a]][stripX[i][a+1]] + boxWidths[stripX[i][b]][stripX[i][b+1]]; //Sum box widths
-                    //Check if there exists a pair of boxes on a strip in set stripY that have a combined width larger than pairSizeX
-                    for(j = 0; j < stripY.size(); ++j){ //For each strip in the set stripY
-                        if(stripY[j].size() >= 4){ //If there are at least 2 boxes on stripY[j]
-                            //Go through each pair of boxes on stripY[j]
-                            for(c = 0; c < stripY[j].size()-3; c+=2){ //Starting from the first score on the first box until the first score on the penultimate box
-                                for(d = c+2; d < stripY[j].size()-1; d+=2){ //Starting from the first score on the second box until the first score on the last box
-                                    pairSizeY = boxWidths[stripY[j][c]][stripY[j][c+1]] + boxWidths[stripY[j][d]][stripY[j][d+1]]; //Sum box widths
-                                    //Check if pairSizeX < pairSizeY and that boxes can fit onto strip
-                                    if(pairSizeX < pairSizeY && stripSumX[i] - pairSizeX + pairSizeY <= maxStripWidth){
-                                        //Check if boxes meet mssc on opposite strips
-                                        //If so, perform swap, update stripSums, and move onto PairSin
-                                        //If not, continue
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    cout << "NO PAIR PAIR SWAP PERFORMED.\n";*/
-
 
 }
 
-void MBAHRA(int i1, int a1, int b1, int j1, int c1, int d1, vector<int> &allScores, vector<vector<int> > &stripX, vector<vector<int> > &stripY){
+void MBAHRA(int swapType, int i1, int a1, int b1, int j1, int c1, int d1, vector<int> &allScores, vector<vector<int> > &stripX, vector<vector<int> > &stripY){
 
     int i, j, k, nScoresX, nBoxX, nCompX;
     int threshold = 70;
@@ -362,24 +342,61 @@ void MBAHRA(int i1, int a1, int b1, int j1, int c1, int d1, vector<int> &allScor
 
 
     /**FOR NEW STRIPX PAIRPAIR**/
-    for(k = 0; k < stripX[i1].size(); ++k){
-        if(k == a1 || k == a1 + 1 || k == b1 || k == b1 + 1){
-            continue;
-        }
-        scoresX.push_back(allScores[stripX[i1][k]]);
-        originalX.push_back(stripX[i1][k]);
+    if(swapType == 0) {
+        for (k = 0; k < stripX[i1].size(); ++k) {
+            if (k == a1 || k == a1 + 1 || k == b1 || k == b1 + 1) {
+                continue;
+            }
+            scoresX.push_back(allScores[stripX[i1][k]]);
+            originalX.push_back(stripX[i1][k]);
 
+        }
+        scoresX.push_back(allScores[stripY[j1][c1]]);
+        originalX.push_back(stripY[j1][c1]);
+        scoresX.push_back(allScores[stripY[j1][c1 + 1]]);
+        originalX.push_back(stripY[j1][c1 + 1]);
+        scoresX.push_back(allScores[stripY[j1][d1]]);
+        originalX.push_back(stripY[j1][d1]);
+        scoresX.push_back(allScores[stripY[j1][d1 + 1]]);
+        originalX.push_back(stripY[j1][d1 + 1]);
+        scoresX.push_back(70);
+        scoresX.push_back(70);
     }
-    scoresX.push_back(allScores[stripY[j1][c1]]);
-    originalX.push_back(stripY[j1][c1]);
-    scoresX.push_back(allScores[stripY[j1][c1 + 1]]);
-    originalX.push_back(stripY[j1][c1+1]);
-    scoresX.push_back(allScores[stripY[j1][d1]]);
-    originalX.push_back(stripY[j1][d1]);
-    scoresX.push_back(allScores[stripY[j1][d1 + 1]]);
-    originalX.push_back(stripY[j1][d1+1]);
-    scoresX.push_back(70);
-    scoresX.push_back(70);
+    /**FOR NEW STRIPX PAIRSIN**/
+    else if(swapType == 1){
+        for(k = 0; k < stripX[i1].size(); ++k){
+            if (k == a1 || k == a1 + 1 || k == b1 || k == b1 + 1) {
+                continue;
+            }
+            scoresX.push_back(allScores[stripX[i1][k]]);
+            originalX.push_back(stripX[i1][k]);
+        }
+        scoresX.push_back(allScores[stripY[j1][c1]]);
+        originalX.push_back(stripY[j1][c1]);
+        scoresX.push_back(allScores[stripY[j1][c1 + 1]]);
+        originalX.push_back(stripY[j1][c1 + 1]);
+        scoresX.push_back(70);
+        scoresX.push_back(70);
+    }
+    /**FOR NEW STRIPX SINSIN**/
+    else if(swapType == 2){
+        for(k = 0; k < stripX[i1].size(); ++k){
+            if (k == a1 || k == a1 + 1) {
+                continue;
+            }
+            scoresX.push_back(allScores[stripX[i1][k]]);
+            originalX.push_back(stripX[i1][k]);
+        }
+        scoresX.push_back(allScores[stripY[j1][c1]]);
+        originalX.push_back(stripY[j1][c1]);
+        scoresX.push_back(allScores[stripY[j1][c1 + 1]]);
+        originalX.push_back(stripY[j1][c1 + 1]);
+        scoresX.push_back(70);
+        scoresX.push_back(70);
+    }
+
+
+
 
     //region Initialisation
     nScoresX = scoresX.size();
@@ -1383,7 +1400,7 @@ void MBAHRA(int i1, int a1, int b1, int j1, int c1, int d1, vector<int> &allScor
 
     /*********************************************************************************************************/
 
-    /**FOR NEW STRIPY PAIRPAIR**/
+    /**FOR NEW STRIPY**/
 
     int nScoresY, nBoxY, nCompY;
     vector<int> scoresY;
@@ -1392,24 +1409,64 @@ void MBAHRA(int i1, int a1, int b1, int j1, int c1, int d1, vector<int> &allScor
     vector<int> finalY;
 
     /**FOR NEW STRIPY PAIRPAIR**/
-    for(k = 0; k < stripY[j1].size(); ++k){
-        if(k == c1 || k == c1 + 1 || k == d1 || k == d1 + 1){
-            continue;
-        }
-        scoresY.push_back(allScores[stripY[j1][k]]);
-        originalY.push_back(stripY[j1][k]);
+    if(swapType = 0) {
+        for (k = 0; k < stripY[j1].size(); ++k) {
+            if (k == c1 || k == c1 + 1 || k == d1 || k == d1 + 1) {
+                continue;
+            }
+            scoresY.push_back(allScores[stripY[j1][k]]);
+            originalY.push_back(stripY[j1][k]);
 
+        }
+        scoresY.push_back(allScores[stripX[i1][a1]]);
+        originalY.push_back(stripX[i1][a1]);
+        scoresY.push_back(allScores[stripX[i1][a1 + 1]]);
+        originalY.push_back(stripX[i1][a1 + 1]);
+        scoresY.push_back(allScores[stripX[i1][b1]]);
+        originalY.push_back(stripX[i1][b1]);
+        scoresY.push_back(allScores[stripX[i1][b1 + 1]]);
+        originalY.push_back(stripX[i1][b1 + 1]);
+        scoresY.push_back(70);
+        scoresY.push_back(70);
     }
-    scoresY.push_back(allScores[stripX[i1][a1]]);
-    originalY.push_back(stripX[i1][a1]);
-    scoresY.push_back(allScores[stripX[i1][a1 + 1]]);
-    originalY.push_back(stripX[i1][a1+1]);
-    scoresY.push_back(allScores[stripX[i1][b1]]);
-    originalY.push_back(stripX[i1][b1]);
-    scoresY.push_back(allScores[stripX[i1][b1 + 1]]);
-    originalY.push_back(stripX[i1][b1+1]);
-    scoresY.push_back(70);
-    scoresY.push_back(70);
+    /**FOR NEW STRIPY PAIRSIN**/
+    else if(swapType == 1){
+        for (k = 0; k < stripY[j1].size(); ++k) {
+            if (k == c1 || k == c1 + 1) {
+                continue;
+            }
+            scoresY.push_back(allScores[stripY[j1][k]]);
+            originalY.push_back(stripY[j1][k]);
+
+        }
+        scoresY.push_back(allScores[stripX[i1][a1]]);
+        originalY.push_back(stripX[i1][a1]);
+        scoresY.push_back(allScores[stripX[i1][a1 + 1]]);
+        originalY.push_back(stripX[i1][a1 + 1]);
+        scoresY.push_back(allScores[stripX[i1][b1]]);
+        originalY.push_back(stripX[i1][b1]);
+        scoresY.push_back(allScores[stripX[i1][b1 + 1]]);
+        originalY.push_back(stripX[i1][b1 + 1]);
+        scoresY.push_back(70);
+        scoresY.push_back(70);
+    }
+    /**FOR NEW STRIPY SINSIN**/
+    else if(swapType == 2){
+        for (k = 0; k < stripY[j1].size(); ++k) {
+            if (k == c1 || k == c1 + 1) {
+                continue;
+            }
+            scoresY.push_back(allScores[stripY[j1][k]]);
+            originalY.push_back(stripY[j1][k]);
+
+        }
+        scoresY.push_back(allScores[stripX[i1][a1]]);
+        originalY.push_back(stripX[i1][a1]);
+        scoresY.push_back(allScores[stripX[i1][a1 + 1]]);
+        originalY.push_back(stripX[i1][a1 + 1]);
+        scoresY.push_back(70);
+        scoresY.push_back(70);
+    }
 
     //region Initialisation
     nScoresY = scoresY.size();
