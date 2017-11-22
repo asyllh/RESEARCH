@@ -65,6 +65,7 @@ int main(int argc, char **argv){
     vector<vector<int> > stripY;
     vector<int> stripSumX;
     vector<int> stripSumY;
+    int swapType;
 
 
     cout << "MSSP - MBAHRA\n-------------\n";
