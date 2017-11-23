@@ -66,6 +66,8 @@ int main(int argc, char **argv){
     vector<int> stripSumX;
     vector<int> stripSumY;
     int swapType;
+    int feasible;
+    int moveType;
 
 
     cout << "MSSP - MBAHRA\n-------------\n";
@@ -130,7 +132,7 @@ int main(int argc, char **argv){
 
     //checkMove(moved, maxStripWidth, adjMatrix, boxWidths, strip, stripSum);
 
-    localSearch(maxStripWidth, boxWidths, stripSum, stripSumX, stripSumY, strip, stripX, stripY);
+    localSearch(swapType, moveType, feasible, maxStripWidth, allScores, boxWidths, stripSum, stripSumX, stripSumY, strip, stripX, stripY);
 
 
 
