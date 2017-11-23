@@ -18,9 +18,9 @@ void packStripsFFD(int &totalCost, int numBox, int maxBoxWidth, int maxStripWidt
 
 int initCost(int &totalCost, int maxStripWidth, vector<int> &stripSum);
 
-void localSearch(int &swapType, int maxStripWidth, vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<int> &stripSumX, vector<int> &stripSumY, vector<vector<int> > &strip, vector<vector<int> > &stripX, vector<vector<int> > &stripY);
+void localSearch(int &swapType, int &moveType, int feasible, int maxStripWidth, vector<int> &allScores, vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<int> &stripSumX, vector<int> &stripSumY, vector<vector<int> > &strip, vector<vector<int> > &stripX, vector<vector<int> > &stripY);
 
-void MBAHRA(int swapType, int i1, int a1, int b1, int j1, int c1, int d1, vector<int> &allScores, vector<vector<int> > &stripX, vector<vector<int> > &stripY);
+void MBAHRA(int swapType, int moveType, int &feasible, int i1, int a1, int b1, int j1, int c1, int d1, vector<int> &allScores, vector<vector<int> > &boxWidths, vector<vector<int> > &stripX, vector<vector<int> > &stripY, vector<int> &stripSumX, vector<int> &stripSumY);
 
 #endif
 

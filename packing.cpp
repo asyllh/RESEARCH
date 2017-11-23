@@ -158,10 +158,12 @@ int initCost(int &totalCost, int maxStripWidth, vector<int> &stripSum){
 
 }
 
-void localSearch(int &swapType, int maxStripWidth, vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<int> &stripSumX, vector<int> &stripSumY, vector<vector<int> > &strip, vector<vector<int> > &stripX, vector<vector<int> > &stripY){
+void localSearch(int &swapType, int &moveType, int feasible, int maxStripWidth, vector<int> &allScores, vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<int> &stripSumX, vector<int> &stripSumY, vector<vector<int> > &strip, vector<vector<int> > &stripX, vector<vector<int> > &stripY){
 
     int a, b, c, d, i, j, k, l, half, pairSizeX, pairSizeY;
+    moveType = 0;
 
+    //region Creating strip sets
     /* Initially:
      * We split the strips into two sets of strips, stripX and stripY
      * If the total number of strips is even, then we put half the strips in each set
@@ -235,7 +237,10 @@ void localSearch(int &swapType, int maxStripWidth, vector<vector<int> > &boxWidt
     }
     cout << endl << endl;
 
+    //endregion
 
+
+    PairPair:
     /*SWAPPING A PAIR OF BOXES FROM EACH SET*/
     for(i = 0; i < stripX.size(); ++i){ //For each strip in the set stripX
         if(stripX[i].size() >= 4){ //If there are at least 2 boxes on stripX[i] (note that each element represents a score, so 4 elements = 2 boxes)
@@ -253,6 +258,43 @@ void localSearch(int &swapType, int maxStripWidth, vector<vector<int> > &boxWidt
                                     //Check if pairSizeX < pairSizeY and that boxes can fit onto strip
                                     if(pairSizeX < pairSizeY && stripSumX[i] - pairSizeX + pairSizeY <= maxStripWidth){
                                         swapType = 0;
+                                        if(stripX[i].size() == 4){ //If stripX[i] only contains 2 boxes
+                                            if(stripY[j].size() == 4){ //If stripY[j] only contains 2 boxes
+                                                //Do a straight swap, no need for MBAHRA
+                                                stripX[i].swap(stripY[j]);
+                                                swap(stripSumX[i], stripSumY[j]);
+                                                feasible = 1;
+                                            }
+                                            else if (d == c+2){ //if the two chosen boxes in stripY[j] are adjacent to one another
+                                                //Do not need to perform MBAHRA on stripX[i]
+                                                //Only perform MBAHRA on stripY[j]
+                                                moveType = 11;
+                                                MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripX, stripY, stripSumX, stripSumY);
+                                            }
+                                            else{ //If boxes c and d are not adjacent
+                                                moveType = 0;
+                                                MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripX, stripY, stripSumX, stripSumY);
+                                            }
+                                        }
+                                        else if (stripY[j].size() == 4){ //If stripY[j] only contains 2 boxes
+                                            if(b == a+2){ //If the two chosen boxes in stripX[i] are adjacent to one another
+                                                //Do not need to perform MBAHRA on stripY[j]
+                                                //Only perform MBAHRA on stripX[i]
+                                                moveType = 12;
+                                                MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripX, stripY, stripSumX, stripSumY);
+                                            }
+                                            else{ //If boxes a and b are not adjacent
+                                                moveType = 0;
+                                                MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripX, stripY, stripSumX, stripSumY);
+                                            }
+                                        }
+                                        else{ //If stripX[i].size() > 4 && stripY[j[.size() > 4
+                                            moveType = 0;
+                                            MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripX, stripY, stripSumX, stripSumY);
+                                        }
+                                        if(feasible == 1){
+                                            goto PairSin;
+                                        }
                                         //Check if boxes meet mssc on opposite strips
                                         //If so, perform swap, update stripSums, and move onto PairSin
                                         //If not, continue
@@ -267,7 +309,7 @@ void localSearch(int &swapType, int maxStripWidth, vector<vector<int> > &boxWidt
     }
     cout << "NO PAIR PAIR SWAP PERFORMED.\n";
 
-
+    PairSin:
     /*SWAPPING A PAIR OF BOXES FROM SET STRIPX WITH ONE BOX FROM SET STRIPY*/
     for(i = 0; i < stripX.size(); ++i){ //For each strip in the set stripX
         if(stripX[i].size() >= 4){ //If there are at least 2 boxes on stripX[i]
@@ -281,6 +323,10 @@ void localSearch(int &swapType, int maxStripWidth, vector<vector<int> > &boxWidt
                             //Check if pairSizeX < width of box in stripY, and that box can fit onto strip
                             if(pairSizeX <= boxWidths[stripY[j][c]][stripY[j][c+1]] && stripSumX[i] - pairSizeX + boxWidths[stripY[j][c]][stripY[j][c+1]] <= maxStripWidth){
                                 swapType = 1;
+                                MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripX, stripY, stripSumX, stripSumY);
+                                if(feasible == 1){
+                                    goto SinSin;
+                                }
                                 //Check if boxes meet mssc on opposite strips
                                 //If so, perform swap, update stripSums, and move onto SinSin
                                 //If not, continue
@@ -293,6 +339,7 @@ void localSearch(int &swapType, int maxStripWidth, vector<vector<int> > &boxWidt
     }
     cout << "NO PAIR SIN SWAP PERFORMED.\n";
 
+    SinSin:
     /*SWAPPING ONE BOX FROM SET STRIPX WITH ONE BOX FROM SET STRIPY*/
     for(i = 0; i < stripX.size(); ++i){ //For each strip in the set stripX
         for(a = 0; a < stripX[i].size()-1; a+=2){ // Starting from the first score on the first box until the first score on the last box
@@ -302,6 +349,10 @@ void localSearch(int &swapType, int maxStripWidth, vector<vector<int> > &boxWidt
                     if(boxWidths[stripX[i][a]][stripX[i][a+1]] < boxWidths[stripY[j][c]][stripY[j][c+1]]
                        && stripSumX[i] - boxWidths[stripX[i][a]][stripX[i][a+1]] + boxWidths[stripY[j][c]][stripY[j][c+1]] <= maxStripWidth){
                         swapType = 2;
+                        MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripX, stripY, stripSumX, stripSumY);
+                        if(feasible == 1){
+                            goto MoveSin;
+                        }
                         //Check if boxes meet mssc on opposite strips
                         //If so, perform swap, update stripSums, and move onto SinSin
                         //If not, continue
@@ -312,12 +363,20 @@ void localSearch(int &swapType, int maxStripWidth, vector<vector<int> > &boxWidt
     }
     cout << "NO SINGLE SINGLE SWAP PERFORMED.\n";
 
+    MoveSin:
     /*MOVING ONE BOX FROM SET STRIPY TO SET STRIPX*/
     for(j = 0; j < stripY.size(); ++j){ //For each strip in the set stripY
         for(c = 0; c < stripY[j].size()-1; c+=2){ //Starting from the first score on the first box until the first score on the last box
             for(i = 0; i < stripX.size(); ++i){ //For each strip in the set stripX
                 if(stripSumX[i] + boxWidths[stripY[j][c]][stripY[j][c+1]] <= maxStripWidth){
                     swapType = 3;
+                    if(stripY[j].size() == 2){ //If stripY[j] only contains one box
+                        moveType = 1;
+                    }
+                    MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripX, stripY, stripSumX, stripSumY);
+                    if(feasible == 1){
+                        goto PairPair;
+                    }
                     //Check if box c meets mssc on strip in set stripX
                     //If so, perform move, update stripSums, go back to PairPair
                     //If not, continue onto next stripX[i]
@@ -330,8 +389,9 @@ void localSearch(int &swapType, int maxStripWidth, vector<vector<int> > &boxWidt
 
 }
 
-void MBAHRA(int swapType, int i1, int a1, int b1, int j1, int c1, int d1, vector<int> &allScores, vector<vector<int> > &stripX, vector<vector<int> > &stripY){
+void MBAHRA(int swapType, int moveType, int &feasible, int i1, int a1, int b1, int j1, int c1, int d1, vector<int> &allScores, vector<vector<int> > &boxWidths, vector<vector<int> > &stripX, vector<vector<int> > &stripY, vector<int> &stripSumX, vector<int> &stripSumY){
 
+    feasible = 0;
     int i, j, k, nScoresX, nBoxX, nCompX;
     int threshold = 70;
     int vacant = 999;
@@ -340,27 +400,36 @@ void MBAHRA(int swapType, int i1, int a1, int b1, int j1, int c1, int d1, vector
     vector<int> originalX;
     vector<int> finalX;
 
-
+    //region Creating scores vector X
     /**FOR NEW STRIPX PAIRPAIR**/
     if(swapType == 0) {
-        for (k = 0; k < stripX[i1].size(); ++k) {
-            if (k == a1 || k == a1 + 1 || k == b1 || k == b1 + 1) {
-                continue;
-            }
-            scoresX.push_back(allScores[stripX[i1][k]]);
-            originalX.push_back(stripX[i1][k]);
-
+        if(moveType == 11){
+            originalX.push_back(stripY[j1][c1]);
+            originalX.push_back(stripY[j1][c1+1]);
+            originalX.push_back(stripY[j1][d1]);
+            originalX.push_back(stripY[j1][d1+1]);
+            goto Part2;
         }
-        scoresX.push_back(allScores[stripY[j1][c1]]);
-        originalX.push_back(stripY[j1][c1]);
-        scoresX.push_back(allScores[stripY[j1][c1 + 1]]);
-        originalX.push_back(stripY[j1][c1 + 1]);
-        scoresX.push_back(allScores[stripY[j1][d1]]);
-        originalX.push_back(stripY[j1][d1]);
-        scoresX.push_back(allScores[stripY[j1][d1 + 1]]);
-        originalX.push_back(stripY[j1][d1 + 1]);
-        scoresX.push_back(70);
-        scoresX.push_back(70);
+        else {
+            for (k = 0; k < stripX[i1].size(); ++k) {
+                if (k == a1 || k == a1 + 1 || k == b1 || k == b1 + 1) {
+                    continue;
+                }
+                scoresX.push_back(allScores[stripX[i1][k]]);
+                originalX.push_back(stripX[i1][k]);
+
+            }
+            scoresX.push_back(allScores[stripY[j1][c1]]);
+            originalX.push_back(stripY[j1][c1]);
+            scoresX.push_back(allScores[stripY[j1][c1 + 1]]);
+            originalX.push_back(stripY[j1][c1 + 1]);
+            scoresX.push_back(allScores[stripY[j1][d1]]);
+            originalX.push_back(stripY[j1][d1]);
+            scoresX.push_back(allScores[stripY[j1][d1 + 1]]);
+            originalX.push_back(stripY[j1][d1 + 1]);
+            scoresX.push_back(70);
+            scoresX.push_back(70);
+        }
     }
     /**FOR NEW STRIPX PAIRSIN**/
     else if(swapType == 1){
@@ -394,9 +463,20 @@ void MBAHRA(int swapType, int i1, int a1, int b1, int j1, int c1, int d1, vector
         scoresX.push_back(70);
         scoresX.push_back(70);
     }
-
-
-
+    /**FOR NEW STRIPX MOVE**/
+    else if(swapType == 3){
+        for(k = 0; k < stripX[i1].size(); ++k){
+            scoresX.push_back(allScores[stripX[i1][k]]);
+            originalX.push_back(stripX[i1][k]);
+        }
+        scoresX.push_back(allScores[stripY[j1][c1]]);
+        originalX.push_back(stripY[j1][c1]);
+        scoresX.push_back(allScores[stripY[j1][c1 + 1]]);
+        originalX.push_back(stripY[j1][c1 + 1]);
+        scoresX.push_back(70);
+        scoresX.push_back(70);
+    }
+    //endregion
 
     //region Initialisation
     nScoresX = scoresX.size();
@@ -491,7 +571,6 @@ void MBAHRA(int swapType, int i1, int a1, int b1, int j1, int c1, int d1, vector
     cout << endl << endl;
     //endregion
 
-
     //region MTGMA
     /**MTGMA**/
     int lastMatchX = vacant;
@@ -562,7 +641,8 @@ void MBAHRA(int swapType, int i1, int a1, int b1, int j1, int c1, int d1, vector
     //endregion
     if(matchSizeX < nBoxX){
         //NOT ENOUGH MATCHING EDGES
-        /*************************************** EXIT- NO FEASIBLE SOLUTION **********************************/
+        feasible = 0;
+        goto End;
     }
 
     //region MIS
@@ -632,7 +712,7 @@ void MBAHRA(int swapType, int i1, int a1, int b1, int j1, int c1, int d1, vector
             fullCycleX.push_back(mateInducedX[0][j]);
         }
         //region MAKEPATH
-        /******************** MAKEPATH FUNCTION *************************************/
+        /**MAKEPATH FUNCTION**/
         for(i = 0; i < fullCycleX.size()-1; ++i){
             if((fullCycleX[i] == nScoresX - 1 && fullCycleX[i+1] == nScoresX - 2) || (fullCycleX[i] == nScoresX - 2 && fullCycleX[i+1] == nScoresX - 1)){
                 if(i == 0){ //if the dominating vertices are at the beginning of the fullCycle vector
@@ -665,10 +745,10 @@ void MBAHRA(int swapType, int i1, int a1, int b1, int j1, int c1, int d1, vector
         for(i = 0; i < completePathX.size(); ++i){
             finalX.push_back(originalX[orderX[completePathX[i]]]);
         }
+        goto Part2;
 
         //END MAKE PATH FUNCTION
         //endregion
-        /*********************************** OUTPUT STRIPX, MOVE ONTO STRIP Y ********************************/
     }
 
     //region FCA
@@ -759,7 +839,8 @@ void MBAHRA(int swapType, int i1, int a1, int b1, int j1, int c1, int d1, vector
     //endregion
     if(qstarX == -1){
         //INFEASIBLE, EXIT
-        /*************************************** EXIT- NO FEASIBLE SOLUTION **********************************/
+        feasible = 0;
+        goto End;
     }
 
     //region PATCHGRAPH
@@ -834,7 +915,7 @@ void MBAHRA(int swapType, int i1, int a1, int b1, int j1, int c1, int d1, vector
         }
 
         //region MAKEPATH
-        /********************************* MAKEPATH FUNCTION **************************************/
+        /**MAKEPATH FUNCTION**/
         for(i = 0; i < fullCycleX.size()-1; ++i){
             if((fullCycleX[i] == nScoresX - 1 && fullCycleX[i+1] == nScoresX - 2) || (fullCycleX[i] == nScoresX - 2 && fullCycleX[i+1] == nScoresX - 1)){
                 if(i == 0){ //if the dominating vertices are at the beginning of the fullCycle vector
@@ -867,9 +948,10 @@ void MBAHRA(int swapType, int i1, int a1, int b1, int j1, int c1, int d1, vector
         for(i = 0; i < completePathX.size(); ++i){
             finalX.push_back(originalX[orderX[completePathX[i]]]);
         }
+        goto Part2;
         //END MAKE PATH FUNCTION
         //endregion
-        /*********************************** OUTPUT STRIPX, MOVE ONTO STRIP Y ********************************/
+
     }
 
     else {
@@ -1343,7 +1425,7 @@ void MBAHRA(int swapType, int i1, int a1, int b1, int j1, int c1, int d1, vector
             }
 
             //region MAKEPATH
-            /******************** MAKEPATH FUNCTION *************************************/
+            /**MAKEPATH FUNCTION**/
             for(i = 0; i < fullCycleX.size()-1; ++i){
                 if((fullCycleX[i] == nScoresX - 1 && fullCycleX[i+1] == nScoresX - 2) || (fullCycleX[i] == nScoresX - 2 && fullCycleX[i+1] == nScoresX - 1)){
                     if(i == 0){ //if the dominating vertices are at the beginning of the fullCycle vector
@@ -1376,20 +1458,20 @@ void MBAHRA(int swapType, int i1, int a1, int b1, int j1, int c1, int d1, vector
             for(i = 0; i < completePathX.size(); ++i){
                 finalX.push_back(originalX[orderX[completePathX[i]]]);
             }
+
+            goto Part2;
             //END MAKE PATH FUNCTION
             //endregion
 
-            /*********************************** OUTPUT STRIPX, MOVE ONTO STRIP Y ********************************/
-
         }
         else if (SSumX < numCyclesX) {
-            //cout << instance << ": Infeasible SSum < numCycles\n\n";
-            /*************************************** EXIT- NO FEASIBLE SOLUTION **********************************/
+            feasible = 0;
+            goto End;
 
         }
         else {
-            //cout << instance << ": Problem.\n\n";
-            /*************************************** EXIT- NO FEASIBLE SOLUTION **********************************/
+            feasible = 0;
+            goto End;
         }
 
 
@@ -1400,7 +1482,10 @@ void MBAHRA(int swapType, int i1, int a1, int b1, int j1, int c1, int d1, vector
 
     /*********************************************************************************************************/
 
-    /**FOR NEW STRIPY**/
+    Part2:
+    if(moveType == 1){
+        goto End;
+    }
 
     int nScoresY, nBoxY, nCompY;
     vector<int> scoresY;
@@ -1408,26 +1493,37 @@ void MBAHRA(int swapType, int i1, int a1, int b1, int j1, int c1, int d1, vector
     vector<int> originalY;
     vector<int> finalY;
 
+    //region Creating scores vector Y
     /**FOR NEW STRIPY PAIRPAIR**/
     if(swapType = 0) {
-        for (k = 0; k < stripY[j1].size(); ++k) {
-            if (k == c1 || k == c1 + 1 || k == d1 || k == d1 + 1) {
-                continue;
-            }
-            scoresY.push_back(allScores[stripY[j1][k]]);
-            originalY.push_back(stripY[j1][k]);
-
+        if(moveType == 12){
+            originalY.push_back(stripX[i1][a1]);
+            originalY.push_back(stripX[i1][a1+1]);
+            originalY.push_back(stripX[i1][b1+1]);
+            originalY.push_back(stripX[i1][b1+1]);
+            feasible = 1;
+            goto End;
         }
-        scoresY.push_back(allScores[stripX[i1][a1]]);
-        originalY.push_back(stripX[i1][a1]);
-        scoresY.push_back(allScores[stripX[i1][a1 + 1]]);
-        originalY.push_back(stripX[i1][a1 + 1]);
-        scoresY.push_back(allScores[stripX[i1][b1]]);
-        originalY.push_back(stripX[i1][b1]);
-        scoresY.push_back(allScores[stripX[i1][b1 + 1]]);
-        originalY.push_back(stripX[i1][b1 + 1]);
-        scoresY.push_back(70);
-        scoresY.push_back(70);
+        else {
+            for (k = 0; k < stripY[j1].size(); ++k) {
+                if (k == c1 || k == c1 + 1 || k == d1 || k == d1 + 1) {
+                    continue;
+                }
+                scoresY.push_back(allScores[stripY[j1][k]]);
+                originalY.push_back(stripY[j1][k]);
+
+            }
+            scoresY.push_back(allScores[stripX[i1][a1]]);
+            originalY.push_back(stripX[i1][a1]);
+            scoresY.push_back(allScores[stripX[i1][a1 + 1]]);
+            originalY.push_back(stripX[i1][a1 + 1]);
+            scoresY.push_back(allScores[stripX[i1][b1]]);
+            originalY.push_back(stripX[i1][b1]);
+            scoresY.push_back(allScores[stripX[i1][b1 + 1]]);
+            originalY.push_back(stripX[i1][b1 + 1]);
+            scoresY.push_back(70);
+            scoresY.push_back(70);
+        }
     }
     /**FOR NEW STRIPY PAIRSIN**/
     else if(swapType == 1){
@@ -1467,6 +1563,19 @@ void MBAHRA(int swapType, int i1, int a1, int b1, int j1, int c1, int d1, vector
         scoresY.push_back(70);
         scoresY.push_back(70);
     }
+    /**FOR NEW STRIPY MOVE**/
+    else if(swapType == 3){
+        for(k = 0; k < stripY[j1].size(); ++k){
+            if(k == c1 || k == c1 + 1){
+                continue;
+            }
+            scoresY.push_back(allScores[stripY[j1][k]]);
+            originalY.push_back(stripY[j1][k]);
+        }
+        scoresY.push_back(70);
+        scoresY.push_back(70);
+    }
+    //endregion
 
     //region Initialisation
     nScoresY = scoresY.size();
@@ -1561,7 +1670,6 @@ void MBAHRA(int swapType, int i1, int a1, int b1, int j1, int c1, int d1, vector
     cout << endl << endl;
     //endregion
 
-
     //region MTGMA
     /**MTGMA**/
     int lastMatchY = vacant;
@@ -1631,8 +1739,8 @@ void MBAHRA(int swapType, int i1, int a1, int b1, int j1, int c1, int d1, vector
 
     //endregion
     if(matchSizeY < nBoxY){
-        //NOT ENOUGH MATCHING EDGES
-        /*************************************** EXIT- NO FEASIBLE SOLUTION **********************************/
+        feasible = 0;
+        goto End;
     }
 
     //region MIS
@@ -1702,7 +1810,7 @@ void MBAHRA(int swapType, int i1, int a1, int b1, int j1, int c1, int d1, vector
             fullCycleY.push_back(mateInducedY[0][j]);
         }
         //region MAKEPATH
-        /******************** MAKEPATH FUNCTION *************************************/
+        /**MAKEPATH FUNCTION**/
         for(i = 0; i < fullCycleY.size()-1; ++i){
             if((fullCycleY[i] == nScoresY - 1 && fullCycleY[i+1] == nScoresY - 2) || (fullCycleY[i] == nScoresY - 2 && fullCycleY[i+1] == nScoresY - 1)){
                 if(i == 0){ //if the dominating vertices are at the beginning of the fullCycle vector
@@ -1735,10 +1843,11 @@ void MBAHRA(int swapType, int i1, int a1, int b1, int j1, int c1, int d1, vector
             finalY.push_back(originalY[orderY[completePathY[i]]]);
         }
 
-
+        feasible = 1;
+        goto End;
         //END MAKE PATH FUNCTION
         //endregion
-        /*********************************** OUTPUT STRIPX, MOVE ONTO STRIP Y ********************************/
+
     }
 
     //region FCA
@@ -1829,7 +1938,8 @@ void MBAHRA(int swapType, int i1, int a1, int b1, int j1, int c1, int d1, vector
     //endregion
     if(qstarY == -1){
         //INFEASIBLE, EXIT
-        /*************************************** EXIT- NO FEASIBLE SOLUTION **********************************/
+        feasible = 0;
+        goto End;
     }
 
     //region PATCHGRAPH
@@ -1904,7 +2014,7 @@ void MBAHRA(int swapType, int i1, int a1, int b1, int j1, int c1, int d1, vector
         }
 
         //region MAKEPATH
-        /******************** MAKEPATH FUNCTION *************************************/
+        /**MAKEPATH FUNCTION**/
         for(i = 0; i < fullCycleY.size()-1; ++i){
             if((fullCycleY[i] == nScoresY - 1 && fullCycleY[i+1] == nScoresY - 2) || (fullCycleY[i] == nScoresY - 2 && fullCycleY[i+1] == nScoresY - 1)){
                 if(i == 0){ //if the dominating vertices are at the beginning of the fullCycle vector
@@ -1936,9 +2046,12 @@ void MBAHRA(int swapType, int i1, int a1, int b1, int j1, int c1, int d1, vector
         for(i = 0; i < completePathY.size(); ++i){
             finalY.push_back(originalY[orderY[completePathY[i]]]);
         }
+
+        feasible = 1;
+        goto End;
         //END MAKE PATH FUNCTION
         //endregion
-        /*********************************** OUTPUT STRIPX, MOVE ONTO STRIP Y ********************************/
+
     }
 
     else {
@@ -2414,7 +2527,7 @@ void MBAHRA(int swapType, int i1, int a1, int b1, int j1, int c1, int d1, vector
 
 
             //region MAKEPATH
-            /******************** MAKEPATH FUNCTION *************************************/
+            /**MAKEPATH FUNCTION**/
             for(i = 0; i < fullCycleY.size()-1; ++i){
                 if((fullCycleY[i] == nScoresY - 1 && fullCycleY[i+1] == nScoresY - 2) || (fullCycleY[i] == nScoresY - 2 && fullCycleY[i+1] == nScoresY - 1)){
                     if(i == 0){ //if the dominating vertices are at the beginning of the fullCycle vector
@@ -2446,30 +2559,80 @@ void MBAHRA(int swapType, int i1, int a1, int b1, int j1, int c1, int d1, vector
             for(i = 0; i < completePathY.size(); ++i){
                 finalY.push_back(originalY[orderY[completePathY[i]]]);
             }
+
+            feasible = 1;
+            goto End;
             //END MAKE PATH FUNCTION
             //endregion
 
-            /*********************************** OUTPUT STRIPX, MOVE ONTO STRIP Y ********************************/
-
         }
         else if (SSumY < numCyclesY) {
-            //cout << instance << ": Infeasible SSum < numCycles\n\n";
-            /*************************************** EXIT- NO FEASIBLE SOLUTION **********************************/
+            feasible = 0;
+            goto End;
 
         }
         else {
-            //cout << instance << ": Problem.\n\n";
-            /*************************************** EXIT- NO FEASIBLE SOLUTION **********************************/
+            feasible = 0;
+            goto End;
         }
-
 
     }
     //endregion
 
     //END MBAHRA STRIPY
 
-
-
+    //region End
+    End:
+    if(feasible == 1){
+        if(swapType == 0){ //PairPair
+            stripSumX[i1] = stripSumX[i1] - (boxWidths[stripX[i1][a1]][stripX[i1][a1 + 1]] + boxWidths[stripX[i1][b1]][stripX[i1][b1 + 1]])
+                            + (boxWidths[stripY[j1][c1]][stripY[j1][c1 + 1]] + boxWidths[stripY[j1][d1]][stripY[j1][d1 + 1]]);
+            stripSumY[j1] = stripSumY[j1] - (boxWidths[stripY[j1][c1]][stripY[j1][c1 + 1]] + boxWidths[stripY[j1][d1]][stripY[j1][d1 + 1]])
+                            + (boxWidths[stripX[i1][a1]][stripX[i1][a1 + 1]] + boxWidths[stripX[i1][b1]][stripX[i1][b1 + 1]]);
+            if(moveType == 11){
+                stripX[i1].swap(originalX);
+                stripY[j1].swap(finalY);
+            }
+            else if(moveType == 12){
+                stripX[i1].swap(finalX);
+                stripY[j1].swap(originalY);
+            }
+            else {
+                stripX[i1].swap(finalX);
+                stripY[j1].swap(finalY);
+            }
+        }
+        else if(swapType == 1){ //PairSin
+            stripSumX[i1] = stripSumX[i1] - (boxWidths[stripX[i1][a1]][stripX[i1][a1+1]] + boxWidths[stripX[i1][b1]][stripX[i1][b1+1]])
+                            + boxWidths[stripY[j1][c1]][stripY[j1][c1+1]];
+            stripSumY[j1] = stripSumY[j1] - boxWidths[stripY[j1][c1]][stripY[j1][c1+1]]
+                            + (boxWidths[stripX[i1][a1]][stripX[i1][a1+1]] + boxWidths[stripX[i1][b1]][stripX[i1][b1+1]]);
+            stripX[i1].swap(finalX);
+            stripY[j1].swap(finalY);
+        }
+        else if(swapType == 2){ //SinSin
+            stripSumX[i1] = stripSumX[i1] - boxWidths[stripX[i1][a1]][stripX[i1][a1+1]] + boxWidths[stripY[j1][c1]][stripY[j1][c1+1]];
+            stripSumY[j1] = stripSumY[j1] - boxWidths[stripY[j1][c1]][stripY[j1][c1+1]] + boxWidths[stripX[i1][a1]][stripX[i1][a1+1]];
+            stripX[i1].swap(finalX);
+            stripY[j1].swap(finalY);
+        }
+        else if(swapType == 3){
+            if(moveType == 1){
+                stripSumX[i1] += boxWidths[stripY[j1][c1]][stripY[j1][c1+1]];
+                stripX[i1].swap(finalX);
+                stripY.erase(stripY.begin() + j1);
+                stripSumY.erase(stripSumY.begin() + j1);
+                moveType = 0;
+            }
+            else {
+                stripSumX[i1] += boxWidths[stripY[j1][c1]][stripY[j1][c1 + 1]];
+                stripSumY[j1] -= boxWidths[stripY[j1][c1]][stripY[j1][c1 + 1]];
+                stripX[i1].swap(finalX);
+                stripY[j1].swap(finalY);
+            }
+        }
+    }
+    //endregion
 
 
 }//end void MBAHRA
