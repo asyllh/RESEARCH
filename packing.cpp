@@ -292,6 +292,7 @@ void localSearch(int &swapType, int &moveType, int feasible, int maxStripWidth, 
                                             MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripX, stripY, stripSumX, stripSumY);
                                         }
                                         if(feasible == 1){
+                                            //cout << "hello1\n";
                                             goto PairSin;
                                         }
                                     }
@@ -310,6 +311,7 @@ void localSearch(int &swapType, int &moveType, int feasible, int maxStripWidth, 
     PairSin:
     swapType = 0;
     moveType = 0;
+    //int count = 0;
     /*SWAPPING A PAIR OF BOXES FROM SET STRIPX WITH ONE BOX FROM SET STRIPY*/
     for(i = 0; i < stripX.size(); ++i){ //For each strip in the set stripX
         if(stripX[i].size() >= 4){ //If there are at least 2 boxes on stripX[i]
@@ -321,8 +323,10 @@ void localSearch(int &swapType, int &moveType, int feasible, int maxStripWidth, 
                         //Go through each box on stripY[j]
                         for(c = 0; c < stripY[j].size()-1; c+=2){ //Starting from the first score on the first box unil the first score on the last box
                             //Check if pairSizeX < width of box in stripY, and that box can fit onto strip
+                            //cout << ++count << endl;
                             if(pairSizeX <= boxWidths[stripY[j][c]][stripY[j][c+1]] && stripSumX[i] - pairSizeX + boxWidths[stripY[j][c]][stripY[j][c+1]] <= maxStripWidth){
                                 swapType = 2;
+                                //cout << "hello2\n";
                                 if(stripX[i].size() == 4){ //If stripX[i] only contains 2 boxes
                                     if(stripY[j].size() == 2){ //If stripY[j] only contains 1 box
                                         //straight swap
@@ -348,12 +352,13 @@ void localSearch(int &swapType, int &moveType, int feasible, int maxStripWidth, 
                                     }
                                 }
                                 else { //If stripX[i].size() > 4 && stripY[j].size() > 2
+                                    //cout << "hello3\n";
                                     moveType = 0;
                                     MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripX, stripY, stripSumX, stripSumY);
                                 }
 
                                 if(feasible == 1){
-                                    goto SinSin;
+                                    goto End;
                                 }
                             }
                         }
@@ -579,7 +584,6 @@ void MBAHRA(int swapType, int moveType, int &feasible, int i1, int a1, int b1, i
     }
     //endregion
 
-
     if(swapType == 1 || swapType == 2 || swapType == 3 || swapType == 4) {
         //region Initialisation
         nScoresX = scoresX.size();
@@ -589,6 +593,7 @@ void MBAHRA(int swapType, int moveType, int &feasible, int i1, int a1, int b1, i
         vector<vector<int> > adjMatX(nScoresX, vector<int>(nScoresX, 0));
         vector<int> matesX(nScoresX, 0);
         vector<int> completePathX;
+        //cout << "HI5\n";
         int lastMatchX = vacant;
         int mateMatchX = vacant;
         int vacantFlagX = 0;
@@ -622,17 +627,18 @@ void MBAHRA(int swapType, int moveType, int &feasible, int i1, int a1, int b1, i
             orderX.push_back(k);
         }
 
-        cout << "Scores:\n";
+
+        /*cout << "Scores:\n";
         for (k = 0; k < nScoresX; ++k) {
             cout << scoresX[k] << " ";
         }
-        cout << endl << endl;
+        cout << endl << endl;*/
 
-        cout << "Order:\n";
+        /*cout << "Order:\n";
         for (k = 0; k < nScoresX; ++k) {
             cout << orderX[k] << " ";
         }
-        cout << endl << endl;
+        cout << endl << endl;*/
 
         for (i = 1; i < nScoresX; ++i) {
             for (j = i - 1; j >= 0; --j) {
@@ -643,22 +649,22 @@ void MBAHRA(int swapType, int moveType, int &feasible, int i1, int a1, int b1, i
             }
         }
 
-        cout << "Order:\n";
+        /*cout << "Order:\n";
         for (k = 0; k < nScoresX; ++k) {
             cout << orderX[k] << " ";
         }
-        cout << endl << endl;
+        cout << endl << endl;*/
 
 
         for (k = 0; k < nScoresX; ++k) {
             invOrderX[orderX[k]] = k;
         }
 
-        cout << "Inverse Order:\n";
+        /*cout << "Inverse Order:\n";
         for (k = 0; k < nScoresX; ++k) {
             cout << invOrderX[k] << " ";
         }
-        cout << endl << endl;
+        cout << endl << endl;*/
 
         for (i = 0; i < nScoresX - 1; i += 2) {
             adjMatX[invOrderX[i]][invOrderX[i + 1]] = 2;
@@ -677,15 +683,14 @@ void MBAHRA(int swapType, int moveType, int &feasible, int i1, int a1, int b1, i
 
         }
 
-        cout << "Adjacency Matrix\n";
+        /*cout << "Adjacency Matrix\n";
         for (i = 0; i < nScoresX; ++i) {
             for (j = 0; j < nScoresX; ++j) {
                 cout << adjMatX[i][j] << " ";
             }
             cout << endl;
         }
-        cout << endl << endl;
-
+        cout << endl << endl;*/
 
         for (i = 0; i < nScoresX; ++i) {
             for (j = 0; j < nScoresX; ++j) {
@@ -695,11 +700,11 @@ void MBAHRA(int swapType, int moveType, int &feasible, int i1, int a1, int b1, i
                 }
             }
         }
-        cout << "Mates Vector:\n";
+        /*cout << "Mates Vector:\n";
         for (i = 0; i < matesX.size(); ++i) {
             cout << matesX[i] << " ";
         }
-        cout << endl << endl;
+        cout << endl << endl;*/
         //endregion
 
         //region MTGMA
@@ -1769,17 +1774,17 @@ void MBAHRA(int swapType, int moveType, int &feasible, int i1, int a1, int b1, i
             orderY.push_back(k);
         }
 
-        cout << "Scores:\n";
+        /*cout << "Scores:\n";
         for (k = 0; k < nScoresY; ++k) {
             cout << scoresY[k] << " ";
         }
-        cout << endl << endl;
+        cout << endl << endl;*/
 
-        cout << "Order:\n";
+        /*cout << "Order:\n";
         for (k = 0; k < nScoresY; ++k) {
             cout << orderY[k] << " ";
         }
-        cout << endl << endl;
+        cout << endl << endl;*/
 
         for (i = 1; i < nScoresY; ++i) {
             for (j = i - 1; j >= 0; --j) {
@@ -1790,22 +1795,22 @@ void MBAHRA(int swapType, int moveType, int &feasible, int i1, int a1, int b1, i
             }
         }
 
-        cout << "Order:\n";
+        /*cout << "Order:\n";
         for (k = 0; k < nScoresY; ++k) {
             cout << orderY[k] << " ";
         }
-        cout << endl << endl;
+        cout << endl << endl;*/
 
 
         for (k = 0; k < nScoresY; ++k) {
             invOrderY[orderY[k]] = k;
         }
 
-        cout << "Inverse Order:\n";
+        /*cout << "Inverse Order:\n";
         for (k = 0; k < nScoresY; ++k) {
             cout << invOrderY[k] << " ";
         }
-        cout << endl << endl;
+        cout << endl << endl;*/
 
         for (i = 0; i < nScoresY - 1; i += 2) {
             adjMatY[invOrderY[i]][invOrderY[i + 1]] = 2;
@@ -1824,14 +1829,14 @@ void MBAHRA(int swapType, int moveType, int &feasible, int i1, int a1, int b1, i
 
         }
 
-        cout << "Adjacency Matrix\n";
+        /*cout << "Adjacency Matrix\n";
         for (i = 0; i < nScoresY; ++i) {
             for (j = 0; j < nScoresY; ++j) {
                 cout << adjMatY[i][j] << " ";
             }
             cout << endl;
         }
-        cout << endl << endl;
+        cout << endl << endl;*/
 
 
         for (i = 0; i < nScoresY; ++i) {
@@ -1842,11 +1847,11 @@ void MBAHRA(int swapType, int moveType, int &feasible, int i1, int a1, int b1, i
                 }
             }
         }
-        cout << "Mates Vector:\n";
+        /*cout << "Mates Vector:\n";
         for (i = 0; i < matesY.size(); ++i) {
             cout << matesY[i] << " ";
         }
-        cout << endl << endl;
+        cout << endl << endl;*/
         //endregion
 
         //region MTGMA
