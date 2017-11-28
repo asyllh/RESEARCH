@@ -161,6 +161,7 @@ int initCost(int &totalCost, int maxStripWidth, vector<int> &stripSum){
 void localSearch(int &swapType, int &moveType, int feasible, int maxStripWidth, vector<int> &allScores, vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<int> &stripSumX, vector<int> &stripSumY, vector<vector<int> > &strip, vector<vector<int> > &stripX, vector<vector<int> > &stripY){
 
     int a, b, c, d, i, j, k, l, half, pairSizeX, pairSizeY;
+    int count = 0;
 
     //region Creating strip sets
     /* Initially:
@@ -292,7 +293,8 @@ void localSearch(int &swapType, int &moveType, int feasible, int maxStripWidth, 
                                             MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripX, stripY, stripSumX, stripSumY);
                                         }
                                         if(feasible == 1){
-                                            //cout << "hello1\n";
+                                            ++count;
+                                            cout << count << ": PairPair\n";
                                             goto PairSin;
                                         }
                                     }
@@ -358,6 +360,8 @@ void localSearch(int &swapType, int &moveType, int feasible, int maxStripWidth, 
                                 }
 
                                 if(feasible == 1){
+                                    ++count;
+                                    cout << count << ": PairSin\n";
                                     goto SinSin;
                                 }
                             }
@@ -408,6 +412,8 @@ void localSearch(int &swapType, int &moveType, int feasible, int maxStripWidth, 
                         }
                         //cout << "feasible? " << feasible << endl;
                         if(feasible == 1){
+                            ++count;
+                            cout << count << ": SinSin\n";
                             goto MoveSin;
                         }
                     }
@@ -431,12 +437,15 @@ void localSearch(int &swapType, int &moveType, int feasible, int maxStripWidth, 
                     //cout << "i:" << i << "\nj: " << j << "\nc: " << c << endl;
                     if(stripY[j].size() == 2){ //If stripY[j] only contains one box
                         moveType = 41;
+                        MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripX, stripY, stripSumX, stripSumY);
                     }
                     else {
                         MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripX, stripY, stripSumX, stripSumY);
                     }
                     //cout << "feasible? " << feasible << endl;
                     if(feasible == 1){
+                        ++count;
+                        cout << count << ": MoveSin\n";
                         goto PairPair;
                     }
                 }
@@ -446,7 +455,7 @@ void localSearch(int &swapType, int &moveType, int feasible, int maxStripWidth, 
     cout << "NO SINGLE MOVE PERFORMED.\n";
     //endregion
 
-    //End:
+    End:
     cout << "Local Search complete\n-------------------\n";
     cout << "stripX:\n";
     for(i = 0; i < stripX.size(); ++i){
@@ -2848,14 +2857,14 @@ void MBAHRA(int swapType, int moveType, int &feasible, int i1, int a1, int b1, i
     }
     //endregion
 
-    scoresX.clear();
+    /*scoresX.clear();
     scoresY.clear();
     orderX.clear();
     orderY.clear();
     originalX.clear();
     originalY.clear();
     finalX.clear();
-    finalY.clear();
+    finalY.clear();*/
 
 
 
