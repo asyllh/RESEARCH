@@ -239,7 +239,7 @@ void localSearch(int &swapType, int &moveType, int feasible, int maxStripWidth, 
     //endregion
 
     //region PairPair
-    //PairPair:
+    PairPair:
     swapType = 0;
     moveType = 0;
     /*SWAPPING A PAIR OF BOXES FROM EACH SET*/
@@ -304,7 +304,7 @@ void localSearch(int &swapType, int &moveType, int feasible, int maxStripWidth, 
             }
         }
     }
-    cout << "NO PAIR PAIR SWAP PERFORMED.\n";
+    //cout << "NO PAIR PAIR SWAP PERFORMED.\n";
     //endregion
 
     //region PairSin
@@ -358,7 +358,7 @@ void localSearch(int &swapType, int &moveType, int feasible, int maxStripWidth, 
                                 }
 
                                 if(feasible == 1){
-                                    goto End;
+                                    goto SinSin;
                                 }
                             }
                         }
@@ -367,7 +367,7 @@ void localSearch(int &swapType, int &moveType, int feasible, int maxStripWidth, 
             }
         }
     }
-    cout << "NO PAIR SIN SWAP PERFORMED.\n";
+    //cout << "NO PAIR SIN SWAP PERFORMED.\n";
     //endregion
 
     //region SinSin
@@ -383,6 +383,7 @@ void localSearch(int &swapType, int &moveType, int feasible, int maxStripWidth, 
                     if(boxWidths[stripX[i][a]][stripX[i][a+1]] < boxWidths[stripY[j][c]][stripY[j][c+1]]
                        && stripSumX[i] - boxWidths[stripX[i][a]][stripX[i][a+1]] + boxWidths[stripY[j][c]][stripY[j][c+1]] <= maxStripWidth){
                         swapType = 3;
+                        //cout << "i:" << i << "\na: " << a << "\nj: " << j << "\nc: " << c << endl;
                         if(stripX[i].size() == 2){ //If stripX[i] only contains 1 box
                             if(stripY[j].size() == 2){ //If stripY[j] only contains 1 box
                                 //straight swap
@@ -405,6 +406,7 @@ void localSearch(int &swapType, int &moveType, int feasible, int maxStripWidth, 
                             moveType = 0;
                             MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripX, stripY, stripSumX, stripSumY);
                         }
+                        //cout << "feasible? " << feasible << endl;
                         if(feasible == 1){
                             goto MoveSin;
                         }
@@ -413,7 +415,7 @@ void localSearch(int &swapType, int &moveType, int feasible, int maxStripWidth, 
             }
         }
     }
-    cout << "NO SINGLE SINGLE SWAP PERFORMED.\n";
+    //cout << "NO SINGLE SINGLE SWAP PERFORMED.\n";
     //endregion
 
     //region MoveSin
@@ -426,14 +428,16 @@ void localSearch(int &swapType, int &moveType, int feasible, int maxStripWidth, 
             for(i = 0; i < stripX.size(); ++i){ //For each strip in the set stripX
                 if(stripSumX[i] + boxWidths[stripY[j][c]][stripY[j][c+1]] <= maxStripWidth){
                     swapType = 4;
+                    //cout << "i:" << i << "\nj: " << j << "\nc: " << c << endl;
                     if(stripY[j].size() == 2){ //If stripY[j] only contains one box
                         moveType = 41;
                     }
                     else {
                         MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripX, stripY, stripSumX, stripSumY);
                     }
+                    //cout << "feasible? " << feasible << endl;
                     if(feasible == 1){
-                        goto End;
+                        goto PairPair;
                     }
                 }
             }
@@ -442,7 +446,7 @@ void localSearch(int &swapType, int &moveType, int feasible, int maxStripWidth, 
     cout << "NO SINGLE MOVE PERFORMED.\n";
     //endregion
 
-    End:
+    //End:
     cout << "Local Search complete\n-------------------\n";
     cout << "stripX:\n";
     for(i = 0; i < stripX.size(); ++i){
@@ -479,14 +483,15 @@ void localSearch(int &swapType, int &moveType, int feasible, int maxStripWidth, 
 void MBAHRA(int swapType, int moveType, int &feasible, int i1, int a1, int b1, int j1, int c1, int d1, vector<int> &allScores, vector<vector<int> > &boxWidths, vector<vector<int> > &stripX, vector<vector<int> > &stripY, vector<int> &stripSumX, vector<int> &stripSumY){
 
     feasible = 0;
-    int i, j, k, nScoresX, nBoxX, nCompX;
+    int i, j, k;
+    //int nScoresX, nBoxX, nCompX;
     int threshold = 70;
     int vacant = 999;
     vector<int> scoresX;
     vector<int> orderX;
     vector<int> originalX;
     vector<int> finalX;
-    int nScoresY, nBoxY, nCompY;
+    //int nScoresY, nBoxY, nCompY;
     vector<int> scoresY;
     vector<int> orderY;
     vector<int> originalY;
@@ -586,9 +591,9 @@ void MBAHRA(int swapType, int moveType, int &feasible, int i1, int a1, int b1, i
 
     if(swapType == 1 || swapType == 2 || swapType == 3 || swapType == 4) {
         //region Initialisation
-        nScoresX = scoresX.size();
-        nBoxX = scoresX.size() / 2;
-        nCompX = (nBoxX + (nBoxX % 2)) / 2;
+        int nScoresX = scoresX.size();
+        int nBoxX = scoresX.size() / 2;
+        int nCompX = (nBoxX + (nBoxX % 2)) / 2;
         vector<int> invOrderX(nScoresX);
         vector<vector<int> > adjMatX(nScoresX, vector<int>(nScoresX, 0));
         vector<int> matesX(nScoresX, 0);
@@ -616,9 +621,9 @@ void MBAHRA(int swapType, int moveType, int &feasible, int i1, int a1, int b1, i
         vector<int> tX;
         int q, u, v, saveX, SSumX, SqIntSX;
         int fullX = vacant;
-        vector<int> QSetX(qstarX, 0);
+        //vector<int> QSetX(qstarX, 0);
         vector<int> SSetX;
-        vector<int> patchCycleX(qstarX, vacant);
+        //vector<int> patchCycleX(qstarX, vacant);
         vector<int> tempPGX;
         vector<int> patchVertexX(nScoresX, vacant);
         vector<vector<int> > TpatchX;
@@ -712,16 +717,13 @@ void MBAHRA(int swapType, int moveType, int &feasible, int i1, int a1, int b1, i
         for (i = 0; i < nScoresX; ++i) { //check all vertices
             vacantFlagX = 0;
             if (matchListX[i] == vacant) { //if vertex has not yet been matched
-                for (j = nScoresX - 1; j >
-                                       i; --j) { //try match vertex i with largest unmatched vertex, start from largest vertex j, go down list of vertices in decreasing order of size
-                    if (adjMatX[i][j] == 1 && matchListX[j] ==
-                                              vacant) { //if vertices i and j are adjacent, and if vertex j has not yet been matched
+                for (j = nScoresX - 1; j > i; --j) { //try match vertex i with largest unmatched vertex, start from largest vertex j, go down list of vertices in decreasing order of size
+                    if (adjMatX[i][j] == 1 && matchListX[j] == vacant) { //if vertices i and j are adjacent, and if vertex j has not yet been matched
                         matchListX[i] = j;
                         matchListX[j] = i;
                         lastMatchX = i;
                         ++matchSizeX;
-                        if (vacantFlagX ==
-                            1) { //delete edge for FCA if matching was not with highest vertex due to the highest vertex being its mate
+                        if (vacantFlagX == 1) { //delete edge for FCA if matching was not with highest vertex due to the highest vertex being its mate
                             cycleVertexX[i] = vacant;
                             cycleVertexX[j] = vacant;
                         }
@@ -968,6 +970,8 @@ void MBAHRA(int swapType, int moveType, int &feasible, int i1, int a1, int b1, i
 
         //region PATCHGRAPH
         /**PATCHGRAPH**/
+        vector<int> QSetX(qstarX, 0);
+        vector<int> patchCycleX(qstarX, vacant);
         for (i = 0; i < TX.size(); ++i) {
             if (TX[i].size() == numCyclesX) {
                 fullX = i;
@@ -1733,9 +1737,9 @@ void MBAHRA(int swapType, int moveType, int &feasible, int i1, int a1, int b1, i
 
     if(swapType == 1 || swapType == 2 || swapType == 3 || swapType == 4) {
         //region Initialisation
-        nScoresY = scoresY.size();
-        nBoxY = scoresY.size() / 2;
-        nCompY = (nBoxY + (nBoxY % 2)) / 2;
+        int nScoresY = scoresY.size();
+        int nBoxY = scoresY.size() / 2;
+        int nCompY = (nBoxY + (nBoxY % 2)) / 2;
         vector<int> invOrderY(nScoresY);
         vector<vector<int> > adjMatY(nScoresY, vector<int>(nScoresY, 0));
         vector<int> matesY(nScoresY, 0);
@@ -1762,9 +1766,9 @@ void MBAHRA(int swapType, int moveType, int &feasible, int i1, int a1, int b1, i
         vector<int> tY;
         int q, u, v, saveY, SSumY, SqIntSY;
         int fullY = vacant;
-        vector<int> QSetY(qstarY, 0);
+        //vector<int> QSetY(qstarY, 0);
         vector<int> SSetY;
-        vector<int> patchCycleY(qstarY, vacant);
+        //vector<int> patchCycleY(qstarY, vacant);
         vector<int> tempPGY;
         vector<int> patchVertexY(nScoresY, vacant);
         vector<vector<int> > TpatchY;
@@ -1859,16 +1863,13 @@ void MBAHRA(int swapType, int moveType, int &feasible, int i1, int a1, int b1, i
         for (i = 0; i < nScoresY; ++i) { //check all vertices
             vacantFlagY = 0;
             if (matchListY[i] == vacant) { //if vertex has not yet been matched
-                for (j = nScoresY - 1; j >
-                                       i; --j) { //try match vertex i with largest unmatched vertex, start from largest vertex j, go down list of vertices in decreasing order of size
-                    if (adjMatY[i][j] == 1 && matchListY[j] ==
-                                              vacant) { //if vertices i and j are adjacent, and if vertex j has not yet been matched
+                for (j = nScoresY - 1; j > i; --j) { //try match vertex i with largest unmatched vertex, start from largest vertex j, go down list of vertices in decreasing order of size
+                    if (adjMatY[i][j] == 1 && matchListY[j] == vacant) { //if vertices i and j are adjacent, and if vertex j has not yet been matched
                         matchListY[i] = j;
                         matchListY[j] = i;
                         lastMatchY = i;
                         ++matchSizeY;
-                        if (vacantFlagY ==
-                            1) { //delete edge for FCA if matching was not with highest vertex due to the highest vertex being its mate
+                        if (vacantFlagY == 1) { //delete edge for FCA if matching was not with highest vertex due to the highest vertex being its mate
                             cycleVertexY[i] = vacant;
                             cycleVertexY[j] = vacant;
                         }
@@ -2115,6 +2116,8 @@ void MBAHRA(int swapType, int moveType, int &feasible, int i1, int a1, int b1, i
 
         //region PATCHGRAPH
         /**PATCHGRAPH**/
+        vector<int> QSetY(qstarY, 0);
+        vector<int> patchCycleY(qstarY, vacant);
         for (i = 0; i < TY.size(); ++i) {
             if (TY[i].size() == numCyclesY) {
                 fullY = i;
@@ -2844,6 +2847,17 @@ void MBAHRA(int swapType, int moveType, int &feasible, int i1, int a1, int b1, i
         }
     }
     //endregion
+
+    scoresX.clear();
+    scoresY.clear();
+    orderX.clear();
+    orderY.clear();
+    originalX.clear();
+    originalY.clear();
+    finalX.clear();
+    finalY.clear();
+
+
 
 
 }//end void MBAHRA
