@@ -8,7 +8,7 @@ base.cpp
 #include "base.h"
 using namespace std;
 
-void resetVectors(int numScores, vector<int> &allScores, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths, vector<vector<int> > &allBoxes){
+void resetVectors(int numScores, int numBox, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths, vector<vector<int> > &allBoxes, vector<int> &stripSum, vector<vector<int> > &stripWidth, vector<vector<int> > &strip){
 
     int i, j;
 
@@ -21,6 +21,35 @@ void resetVectors(int numScores, vector<int> &allScores, vector<vector<int> > &a
         }
     }
 
+    while(!strip.empty()){
+        strip.pop_back();
+    }
+    while(!stripWidth.empty()){
+        stripWidth.pop_back();
+    }
+    while(!stripSum.empty()){
+        stripSum.pop_back();
+    }
+
+    vector<int> temp;
+    for(i = 0; i < numBox; ++i){
+        strip.push_back(temp);
+        stripWidth.push_back(temp);
+        stripSum.push_back(0);
+    }
+
+
+
+}
+
+void clearVectors(vector<int> &allScores, vector<int> &stripNumBoxes, vector<int> &stripSumX, vector<int> &stripSumY, vector<vector<int> > &stripX, vector<vector<int> > &stripY){
+
+    allScores.clear();
+    stripNumBoxes.clear();
+    stripSumX.clear();
+    stripSumY.clear();
+    stripX.clear();
+    stripY.clear();
 }
 
 void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, int maxBoxWidth, int numScores, int numBox, double &totalBoxWidth, vector<int> &allScores, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths, vector<vector<int> > &allBoxes){
@@ -29,6 +58,7 @@ void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, 
     int count = 1;
     vector<int> randOrder;
     vector<int> checkBox(numScores, 0);
+    totalBoxWidth = 0.0;
 
     //Create random values to be used as score widths, put in allScores vector (except last two elements)
     for (i = 0; i < numScores; ++i) {
@@ -39,11 +69,11 @@ void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, 
     //Sort all of the scores in the allScores vector in ascending order
     sort(allScores.begin(), allScores.end()); //sorts elements of vector in ascending order
 
-    cout << "All scores:\n";
+    /*cout << "All scores:\n";
     for(i = 0; i < allScores.size(); ++i){
         cout << allScores[i] << " ";
     }
-    cout << endl <<endl;
+    cout << endl << endl;*/
 
     //Filling in adjacency matrix - if sum of two scores >= threshold (70), then insert 1 into the matrix, else leave as 0
     for (i = 0; i < allScores.size() - 1; ++i) {
@@ -91,11 +121,11 @@ void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, 
             }
         }
     }
-    cout << "Mates Vector:\n";
+    /*cout << "Mates Vector:\n";
     for(i = 0; i < mates.size(); ++i){
         cout << mates[i] << " ";
     }
-    cout << endl << endl;
+    cout << endl << endl;*/
 
     for(i = 0; i < numScores; ++i){
         for(j = 0; j < numScores; ++j){
@@ -121,12 +151,12 @@ void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, 
     }
     cout << endl;
 
-    cout << "Box#" << setw(10) << "Mates" << setw(10) << "Width\n";
+    //cout << "Box#" << setw(10) << "Mates" << setw(10) << "Width\n";
     for(i = 0; i < numScores; ++i){
         if(checkBox[i] == 1){
             continue;
         }
-        cout << count << setw(10) << i << "-" << mates[i] << setw(8) << boxWidths[i][mates[i]] << endl;
+        //cout << count << setw(10) << i << "-" << mates[i] << setw(8) << boxWidths[i][mates[i]] << endl;
         totalBoxWidth += boxWidths[i][mates[i]];
         checkBox[i] = 1;
         checkBox[mates[i]] = 1;
@@ -134,7 +164,7 @@ void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, 
 
     }
 
-    cout << "Total Box Widths: " << totalBoxWidth << endl << endl;
+    //cout << "Total Box Widths: " << totalBoxWidth << endl << endl;
 
 
 
