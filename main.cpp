@@ -29,7 +29,7 @@ int main(int argc, char **argv){
     }
     //endregion
 
-    //VARIABLES FROM ARGUMENTS
+    //region VARIABLES
     //int numInstances = atoi(argv[1]); //number of instances of mssp, use in main for loop
     int numBox = atoi(argv[1]); //number of boxes in mssp plus 1 extra box (scores on either side of extra box will be dominating vertices, score widths = 71)
     int minWidth = atoi(argv[2]); //minimum width of scores (millimeters)
@@ -39,7 +39,6 @@ int main(int argc, char **argv){
     int maxStripWidth = atoi(argv[6]);
     int randomSeed = atoi(argv[7]); //random seed
 
-    //VARIABLES
     int i, j, k, q, n;
     int instance; //counter for instances loop
     int numScores = numBox * 2; //number of scores, 2 per box (1 either side), last two scores are dominating vertices
@@ -68,6 +67,7 @@ int main(int argc, char **argv){
     int swapType;
     int feasible;
     int moveType;
+    //endregion
 
 
     cout << "MSSP - MBAHRA\n-------------\n";
@@ -135,10 +135,14 @@ int main(int argc, char **argv){
     localSearch(swapType, moveType, feasible, maxStripWidth, allScores, boxWidths, stripSum, stripSumX, stripSumY, strip, stripX, stripY);
 
 
-
     endTime = clock();
     double totalTime = (((endTime - startTime) / double(CLOCKS_PER_SEC)) * 1000);
     cout << "CPU Time = " << totalTime << " milliseconds.\nEND.\n";
+
+
+
+
+
 
 }//END INT MAIN
 
