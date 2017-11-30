@@ -16,6 +16,8 @@ int lowerBound(double totalBoxWidth, int maxStripWidth);
 
 void packStripsFFD(int numScores, int numBox, int &totalCost, int maxBoxWidth, int maxStripWidth, double totalBoxWidth, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<int> &stripNumBoxes, vector<vector<int> > &strip);
 
+void packStripsFF(int numScores, int numBox, int &totalCost, int maxStripWidth, double totalBoxWidth, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths, vector<int> &stripSum2, vector<int> &stripNumBoxes2, vector<vector<int> > &strip2);
+
 int initCost(int &totalCost, int maxStripWidth, vector<int> &stripSum);
 
 void localSearch(int &swapType, int &moveType, int feasible, int maxStripWidth, vector<int> &allScores, vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<int> &stripSumX, vector<int> &stripSumY, vector<vector<int> > &strip, vector<vector<int> > &stripX, vector<vector<int> > &stripY);

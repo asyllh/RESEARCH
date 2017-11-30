@@ -33,7 +33,7 @@ void packStripsFFD(int numScores, int numBox, int &totalCost, int maxBoxWidth, i
 
 
     while(boxDecrease.size() < numBox) {
-        for (i = 0; i < mates.size(); ++i) {
+        for (i = 0; i < numScores; ++i) {
             if(checked[i] == 1){
                 continue;
             }
@@ -49,11 +49,11 @@ void packStripsFFD(int numScores, int numBox, int &totalCost, int maxBoxWidth, i
         min = 0;
     }
 
-    /*cout << "Box decrease:\n";
+    cout << "Box decrease:\n";
     for(i = 0; i < boxDecrease.size(); ++i){
         cout << boxDecrease[i] << " ";
     }
-    cout << endl << endl;*/
+    cout << endl << endl;
 
     strip[0].push_back(boxDecrease[0]);
     strip[0].push_back(mates[boxDecrease[0]]);
@@ -110,7 +110,7 @@ void packStripsFFD(int numScores, int numBox, int &totalCost, int maxBoxWidth, i
     cout << "Lower Bound: " << lowerBound(totalBoxWidth, maxStripWidth) << " strips\n";
 
 
-    /*cout << "Strips FFD (scores):\n";
+    cout << "Strips FFD (scores):\n";
     for(i = 0; i < strip.size(); ++i){
         cout << "Strip " << i << ": ";
         for(j = 0; j < strip[i].size(); ++j){
@@ -118,17 +118,113 @@ void packStripsFFD(int numScores, int numBox, int &totalCost, int maxBoxWidth, i
         }
         cout << endl;
     }
-    cout << endl;*/
+    cout << endl;
 
-    /*cout << "Strip" << setw(8) << "#Boxes" << setw(8) << "Width" << setw(12) << "Residual\n";
+    cout << "Strip" << setw(8) << "#Boxes" << setw(8) << "Width" << setw(12) << "Residual\n";
     for(i = 0; i < stripSum.size(); ++i){
         if(stripSum[i] !=0) {
             cout << i << setw(9) << stripNumBoxes[i] << setw(10) <<  stripSum[i] << setw(9) << maxStripWidth - stripSum[i] << endl;
         }
-    }*/
+    }
 
     int costFFD = initCost(totalCost, maxStripWidth, stripSum);
     //cout << "\nInitial Cost (cost from FFD): " << costFFD << "\n-------------------------------\n\n";
+
+
+}
+
+void packStripsFF(int numScores, int numBox, int &totalCost, int maxStripWidth, double totalBoxWidth, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths, vector<int> &stripSum2, vector<int> &stripNumBoxes2, vector<vector<int> > &strip2){
+
+    int i, j, k, l;
+    int numStrips = 0;
+    vector<int> boxOrder;
+    vector<int> checked(numScores, 0);
+
+    while(boxOrder.size() < numBox){
+        for(i = 0; i < numScores; ++i){
+            if(checked[i] == 1 || checked[mates[i]] == 1){
+                continue;
+            }
+            boxOrder.push_back(i);
+            checked[i] = 1;
+            checked[mates[i]] = 1;
+        }
+    }
+
+    /*cout << "Box order:\n";
+    for(i = 0; i < boxOrder.size(); ++i){
+        cout << boxOrder[i] << " ";
+    }
+    cout << endl;*/
+
+    strip2[0].push_back(boxOrder[0]);
+    strip2[0].push_back(mates[boxOrder[0]]);
+    stripSum2[0] += boxWidths[boxOrder[0]][mates[boxOrder[0]]];
+
+
+    for(j = 1; j < boxOrder.size(); ++j){
+        for(i = 0; i < strip2.size(); ++i){
+            if(!strip2[i].empty()){
+                if(stripSum2[i] + boxWidths[boxOrder[j]][mates[boxOrder[j]]] <= maxStripWidth){
+                    if(adjMatrix[strip2[i].back()][boxOrder[j]] == 1){
+                        strip2[i].push_back(boxOrder[j]);
+                        strip2[i].push_back(mates[boxOrder[j]]);
+                        stripSum2[i] += boxWidths[boxOrder[j]][mates[boxOrder[j]]];
+                        break;
+                    }
+                    else if (adjMatrix[strip2[i].back()][mates[boxOrder[j]]] == 1){
+                        strip2[i].push_back(mates[boxOrder[j]]);
+                        strip2[i].push_back(boxOrder[j]);
+                        stripSum2[i] += boxWidths[boxOrder[j]][mates[boxOrder[j]]];
+                        break;
+                    }
+                }
+            }
+            else if (strip2[i].empty()){
+                strip2[i].push_back(boxOrder[j]);
+                strip2[i].push_back(mates[boxOrder[j]]);
+                stripSum2[i] += boxWidths[boxOrder[j]][mates[boxOrder[j]]];
+                break;
+            }
+        }
+    }
+
+    k = strip2.size() - 1;
+    while(strip2[k].empty()){
+        strip2.pop_back();
+        --k;
+    }
+
+    l = stripSum2.size() -1;
+    while(stripSum2[l] == 0){
+        stripSum2.pop_back();
+        --l;
+    }
+
+    for(i = 0; i < strip2.size(); ++i){
+        stripNumBoxes2.push_back(strip2[i].size() / 2);
+        ++numStrips;
+    }
+
+
+    cout << "After FF: " << numStrips << " strips\n";
+
+    cout << "Strips FF (scores):\n";
+    for(i = 0; i < strip2.size(); ++i){
+        cout << "Strip " << i << ": ";
+        for(j = 0; j < strip2[i].size(); ++j){
+            cout << strip2[i][j] << " ";
+        }
+        cout << endl;
+    }
+    cout << endl;
+
+    cout << "Strip" << setw(8) << "#Boxes" << setw(8) << "Width" << setw(12) << "Residual\n";
+    for(i = 0; i < stripSum2.size(); ++i){
+        if(stripSum2[i] !=0) {
+            cout << i << setw(9) << stripNumBoxes2[i] << setw(10) <<  stripSum2[i] << setw(9) << maxStripWidth - stripSum2[i] << endl;
+        }
+    }
 
 
 }
