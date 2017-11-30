@@ -49,14 +49,14 @@ int main(int argc, char **argv){
     vector<int> mates(numScores, 0); //contains vertex index for mates, e.g if vertex 0 is mates with vertex 4, then mates[0] = 4 (createInstance, MIS)
     vector<vector<int> > boxWidths(numScores, vector<int>(numScores, 0)); // holds widths in mm for the widths of boxes
     vector<vector<int> > allBoxes(numScores, vector<int>(numScores, 0)); //contains values from 1 to numBox to denote which box the scores belong to
-    srand(unsigned(time(NULL))); //seed
+    //srand(unsigned(time(NULL))); //seed
+    srand(randomSeed);
     vector<vector<int> > userInput;
     vector<int> tempUser(3, 0);
     int choice;
     double totalBoxWidth = 0.0;
     vector<int> stripSum(numBox, 0);
     vector<vector<int> > strip(numBox);
-    vector<vector<int> > stripWidth(numBox);
     vector<int> stripNumBoxes;
     int totalCost;
     int moved;
@@ -122,17 +122,18 @@ int main(int argc, char **argv){
 
         //endregion
 
-    for(instance = 0; instance < 5; ++instance) {
+    for(instance = 0; instance < 10; ++instance) {
+        cout << "Instance: " << instance << endl;
 
         createInstance(threshold, minWidth, maxWidth, minBoxWidth, maxBoxWidth, numScores, numBox, totalBoxWidth, allScores, adjMatrix, mates, boxWidths, allBoxes);
 
         //createInstanceUser(threshold, numScores, totalBoxWidth, allScores, userInput, adjMatrix, mates, boxWidths, allBoxes);
 
-        packStripsFFD(totalCost, numBox, maxBoxWidth, maxStripWidth, totalBoxWidth, adjMatrix, mates, boxWidths, stripSum, stripNumBoxes, strip, stripWidth);
+        packStripsFFD(numScores, numBox, totalCost, maxBoxWidth, maxStripWidth, totalBoxWidth, adjMatrix, mates, boxWidths, stripSum, stripNumBoxes, strip);
 
         localSearch(swapType, moveType, feasible, maxStripWidth, allScores, boxWidths, stripSum, stripSumX, stripSumY, strip, stripX, stripY);
 
-        resetVectors(numScores, numBox, adjMatrix, mates, boxWidths, allBoxes, stripSum, stripWidth, strip);
+        resetVectors(numScores, numBox, adjMatrix, mates, boxWidths, allBoxes, stripSum, strip);
         clearVectors(allScores, stripNumBoxes, stripSumX, stripSumY, stripX, stripY);
 
     }
