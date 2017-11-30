@@ -11,7 +11,7 @@ base.h
 #include <vector>
 using namespace std;
 
-void resetVectors(int numScores, int numBox, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths, vector<vector<int> > &allBoxes, vector<int> &stripSum, vector<vector<int> > &stripWidth, vector<vector<int> > &strip);
+void resetVectors(int numScores, int numBox, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths, vector<vector<int> > &allBoxes, vector<int> &stripSum, vector<vector<int> > &strip);
 
 void clearVectors(vector<int> &allScores, vector<int> &stripNumBoxes, vector<int> &stripSumX, vector<int> &stripSumY, vector<vector<int> > &stripX, vector<vector<int> > &stripY);
 

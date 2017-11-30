@@ -8,7 +8,7 @@ base.cpp
 #include "base.h"
 using namespace std;
 
-void resetVectors(int numScores, int numBox, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths, vector<vector<int> > &allBoxes, vector<int> &stripSum, vector<vector<int> > &stripWidth, vector<vector<int> > &strip){
+void resetVectors(int numScores, int numBox, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths, vector<vector<int> > &allBoxes, vector<int> &stripSum, vector<vector<int> > &strip){
 
     int i, j;
 
@@ -24,9 +24,7 @@ void resetVectors(int numScores, int numBox, vector<vector<int> > &adjMatrix, ve
     while(!strip.empty()){
         strip.pop_back();
     }
-    while(!stripWidth.empty()){
-        stripWidth.pop_back();
-    }
+
     while(!stripSum.empty()){
         stripSum.pop_back();
     }
@@ -34,7 +32,6 @@ void resetVectors(int numScores, int numBox, vector<vector<int> > &adjMatrix, ve
     vector<int> temp;
     for(i = 0; i < numBox; ++i){
         strip.push_back(temp);
-        stripWidth.push_back(temp);
         stripSum.push_back(0);
     }
 
@@ -69,11 +66,11 @@ void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, 
     //Sort all of the scores in the allScores vector in ascending order
     sort(allScores.begin(), allScores.end()); //sorts elements of vector in ascending order
 
-    /*cout << "All scores:\n";
+    //cout << "All scores:\n";
     for(i = 0; i < allScores.size(); ++i){
         cout << allScores[i] << " ";
     }
-    cout << endl << endl;*/
+    cout << endl;
 
     //Filling in adjacency matrix - if sum of two scores >= threshold (70), then insert 1 into the matrix, else leave as 0
     for (i = 0; i < allScores.size() - 1; ++i) {
@@ -149,7 +146,7 @@ void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, 
             }
         }
     }
-    cout << endl;
+    //cout << endl;
 
     //cout << "Box#" << setw(10) << "Mates" << setw(10) << "Width\n";
     for(i = 0; i < numScores; ++i){
