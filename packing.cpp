@@ -22,22 +22,29 @@ int lowerBound(double totalBoxWidth, int maxStripWidth){
     return lBound;
 }
 
-void packStripsFFD(int &totalCost, int numBox, int maxBoxWidth, int maxStripWidth, double totalBoxWidth, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<int> &stripNumBoxes, vector<vector<int> > &strip, vector<vector<int> > &stripWidth){
+void packStripsFFD(int numScores, int numBox, int &totalCost, int maxBoxWidth, int maxStripWidth, double totalBoxWidth, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<int> &stripNumBoxes, vector<vector<int> > &strip){
 
-    int i, j, mini, k, l, m;
+    int i, j, mini, k, l;
     int min = 0;
     int max = maxBoxWidth;
     int numStrips = 0;
     vector<int> boxDecrease;
+    vector<int> checked(numScores, 0);
+
 
     while(boxDecrease.size() < numBox) {
         for (i = 0; i < mates.size(); ++i) {
-            if (boxWidths[i][mates[i]] > min && boxWidths[i][mates[i]] < max) { //what happens if two boxes have the same width?
+            if(checked[i] == 1){
+                continue;
+            }
+            if (boxWidths[i][mates[i]] > min && boxWidths[i][mates[i]] <= max) {
                 min = boxWidths[i][mates[i]];
                 mini = i;
             }
         }
         boxDecrease.push_back(mini);
+        checked[mini] = 1;
+        checked[mates[mini]] = 1;
         max = min;
         min = 0;
     }
@@ -51,7 +58,6 @@ void packStripsFFD(int &totalCost, int numBox, int maxBoxWidth, int maxStripWidt
     strip[0].push_back(boxDecrease[0]);
     strip[0].push_back(mates[boxDecrease[0]]);
     stripSum[0] += boxWidths[boxDecrease[0]][mates[boxDecrease[0]]];
-    stripWidth[0].push_back(boxWidths[boxDecrease[0]][mates[boxDecrease[0]]]);
 
 
     for(j = 1; j < boxDecrease.size(); ++j){
@@ -62,14 +68,12 @@ void packStripsFFD(int &totalCost, int numBox, int maxBoxWidth, int maxStripWidt
                         strip[i].push_back(boxDecrease[j]);
                         strip[i].push_back(mates[boxDecrease[j]]);
                         stripSum[i] += boxWidths[boxDecrease[j]][mates[boxDecrease[j]]];
-                        stripWidth[i].push_back(boxWidths[boxDecrease[j]][mates[boxDecrease[j]]]);
                         break;
                     }
                     else if (adjMatrix[strip[i].back()][mates[boxDecrease[j]]] == 1){
                         strip[i].push_back(mates[boxDecrease[j]]);
                         strip[i].push_back(boxDecrease[j]);
                         stripSum[i] += boxWidths[boxDecrease[j]][mates[boxDecrease[j]]];
-                        stripWidth[i].push_back(boxWidths[boxDecrease[j]][mates[boxDecrease[j]]]);
                         break;
                     }
                 }
@@ -78,7 +82,6 @@ void packStripsFFD(int &totalCost, int numBox, int maxBoxWidth, int maxStripWidt
                 strip[i].push_back(boxDecrease[j]);
                 strip[i].push_back(mates[boxDecrease[j]]);
                 stripSum[i] += boxWidths[boxDecrease[j]][mates[boxDecrease[j]]];
-                stripWidth[i].push_back(boxWidths[boxDecrease[j]][mates[boxDecrease[j]]]);
                 break;
             }
         }
@@ -90,16 +93,10 @@ void packStripsFFD(int &totalCost, int numBox, int maxBoxWidth, int maxStripWidt
         --k;
     }
 
-    l = stripWidth.size() -1;
-    while(stripWidth[l].empty()){
-        stripWidth.pop_back();
-        --l;
-    }
-
-    m = stripSum.size() -1;
-    while(stripSum[m] == 0){
+    l = stripSum.size() -1;
+    while(stripSum[l] == 0){
         stripSum.pop_back();
-        --m;
+        --l;
     }
 
     for(i = 0; i < strip.size(); ++i){
@@ -108,9 +105,9 @@ void packStripsFFD(int &totalCost, int numBox, int maxBoxWidth, int maxStripWidt
     }
 
 
-    cout << "FFD: " << numStrips << " strips\n";
+    cout << "After FFD: " << numStrips << " strips\n";
 
-    cout << "Lower Bound: " << lowerBound(totalBoxWidth, maxStripWidth) << " strips\n---------------\n";
+    cout << "Lower Bound: " << lowerBound(totalBoxWidth, maxStripWidth) << " strips\n";
 
 
     /*cout << "Strips FFD (scores):\n";
@@ -123,27 +120,20 @@ void packStripsFFD(int &totalCost, int numBox, int maxBoxWidth, int maxStripWidt
     }
     cout << endl;*/
 
-    /*cout << "Strips FFD (boxWidths):\n";
-    for(i = 0; i < stripWidth.size(); ++i){
-        cout << "Strip " << i << ": ";
-        for(j = 0; j < stripWidth[i].size(); ++j){
-            cout << stripWidth[i][j] << " ";
-        }
-        cout << endl;
-    }
-    cout << endl;*/
-
     /*cout << "Strip" << setw(8) << "#Boxes" << setw(8) << "Width" << setw(12) << "Residual\n";
     for(i = 0; i < stripSum.size(); ++i){
         if(stripSum[i] !=0) {
             cout << i << setw(9) << stripNumBoxes[i] << setw(10) <<  stripSum[i] << setw(9) << maxStripWidth - stripSum[i] << endl;
         }
-    }
+    }*/
+
     int costFFD = initCost(totalCost, maxStripWidth, stripSum);
-    cout << "\nInitial Cost (cost from FFD): " << costFFD << "\n-------------------------------\n\n";*/
+    //cout << "\nInitial Cost (cost from FFD): " << costFFD << "\n-------------------------------\n\n";
 
 
 }
+
+
 
 int initCost(int &totalCost, int maxStripWidth, vector<int> &stripSum){
 
@@ -494,7 +484,7 @@ void localSearch(int &swapType, int &moveType, int feasible, int maxStripWidth, 
         stripSum.push_back(stripSumY[i]);
     }
 
-    cout << "Number of strips after local search: " << strip.size() << endl << endl;
+    cout << "Local search: " << strip.size() << " strips\n\n";
     /*cout << "Strips (X and Y combined):\n";
     for(i = 0; i < strip.size(); ++i){
         cout << "Strip " << i << ": " ;
