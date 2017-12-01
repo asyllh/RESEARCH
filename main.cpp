@@ -70,6 +70,11 @@ int main(int argc, char **argv){
     int swapType;
     int feasible;
     int moveType;
+    vector<vector<int> > offspring;
+    vector<int> offspringSum;
+    vector<int> absentBoxes;
+    vector<vector<int> > absent(numBox);
+    vector<int> absentSum(numBox, 0);
     //endregion
 
 
@@ -125,7 +130,7 @@ int main(int argc, char **argv){
 
         //endregion
 
-    cout << "Instance: " << instance << endl;
+    //cout << "Instance: " << instance << endl;
 
     createInstance(threshold, minWidth, maxWidth, minBoxWidth, maxBoxWidth, numScores, numBox, totalBoxWidth, allScores, adjMatrix, mates, boxWidths, allBoxes);
 
@@ -135,6 +140,10 @@ int main(int argc, char **argv){
     packStripsFFD(numScores, numBox, totalCost, maxBoxWidth, maxStripWidth, totalBoxWidth, adjMatrix, mates, boxWidths, stripSum, stripNumBoxes, strip);
 
     packStripsFF(numScores, numBox, totalCost, maxStripWidth, totalBoxWidth, adjMatrix, mates, boxWidths, stripSum2, stripNumBoxes2, strip2);
+
+    GGA(numScores, stripSum, stripSum2, strip, strip2, offspringSum, offspring, absentBoxes);
+
+    repairProcedure(numScores, maxBoxWidth, maxStripWidth, adjMatrix, mates, boxWidths, absentBoxes, absentSum, absent);
 
     //localSearch(swapType, moveType, feasible, maxStripWidth, allScores, boxWidths, stripSum, stripSumX, stripSumY, strip, stripX, stripY);
 
@@ -147,7 +156,7 @@ int main(int argc, char **argv){
 
     endTime = clock();
     double totalTime = (((endTime - startTime) / double(CLOCKS_PER_SEC)) * 1000);
-    cout << "CPU Time = " << totalTime << " milliseconds.\nEND.\n";
+    cout << "\nCPU Time = " << totalTime << " milliseconds.\nEND.\n";
 
 
 
