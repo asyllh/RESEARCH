@@ -22,6 +22,19 @@ int lowerBound(double totalBoxWidth, int maxStripWidth){
     return lBound;
 }
 
+int initCost(int &totalCost, int maxStripWidth, vector<int> &stripSum){
+
+    int i;
+    totalCost = 0;
+
+    for(i = 0; i < stripSum.size(); ++i){
+        totalCost += pow((maxStripWidth - stripSum[i]), 2);
+    }
+
+    return totalCost;
+
+}
+
 void packStripsFFD(int numScores, int numBox, int &totalCost, int maxBoxWidth, int maxStripWidth, double totalBoxWidth, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<int> &stripNumBoxes, vector<vector<int> > &strip){
 
     int i, j, mini, k, l;
@@ -126,6 +139,9 @@ void packStripsFFD(int numScores, int numBox, int &totalCost, int maxBoxWidth, i
             cout << i << setw(9) << stripNumBoxes[i] << setw(10) <<  stripSum[i] << setw(9) << maxStripWidth - stripSum[i] << endl;
         }
     }
+    cout << endl;
+
+
 
     int costFFD = initCost(totalCost, maxStripWidth, stripSum);
     //cout << "\nInitial Cost (cost from FFD): " << costFFD << "\n-------------------------------\n\n";
@@ -225,22 +241,189 @@ void packStripsFF(int numScores, int numBox, int &totalCost, int maxStripWidth, 
             cout << i << setw(9) << stripNumBoxes2[i] << setw(10) <<  stripSum2[i] << setw(9) << maxStripWidth - stripSum2[i] << endl;
         }
     }
+    cout << endl;
 
 
 }
 
+void GGA(int numScores, vector<int> &stripSum, vector<int> &stripSum2, vector<vector<int> > &strip, vector<vector<int> > &strip2, vector<int> &offspringSum, vector<vector<int> > &offspring, vector<int> &absentBoxes){
 
+    int i, j, k, l, x;
+    int repair;
+    vector<int> checked(numScores, 0);
 
-int initCost(int &totalCost, int maxStripWidth, vector<int> &stripSum){
+    k = 1;
+    l = 4;
 
-    int i;
-    totalCost = 0;
-
-    for(i = 0; i < stripSum.size(); ++i){
-        totalCost += pow((maxStripWidth - stripSum[i]), 2);
+    for(i = 0; i < strip2[k].size(); ++i){
+        checked[strip2[k][i]] = 1;
     }
 
-    return totalCost;
+    for(i = 0; i < strip2[l].size(); ++i){
+        checked[strip2[l][i]] = 1;
+    }
+
+    for(i = 0; i < strip.size(); ++i){
+        for(j = 0; j < strip[i].size(); ++j){
+            if(checked[strip[i][j]] == 1){
+                x = 0;
+                break;
+            }
+            else{
+                x = 1;
+            }
+        }
+        if(x == 1){
+            offspring.push_back(strip[i]);
+            offspringSum.push_back(stripSum[i]);
+        }
+    }
+
+    offspring.push_back(strip2[k]);
+    offspringSum.push_back(stripSum2[k]);
+    offspring.push_back(strip2[l]);
+    offspringSum.push_back(stripSum2[l]);
+
+
+    cout << "Strip after GGA:\n";
+    for(i = 0; i < offspring.size(); ++i){
+        for(j = 0; j < offspring[i].size(); ++j){
+            cout << offspring[i][j] << " ";
+        }
+        cout << endl;
+    }
+
+    cout << "stripSum after GGA: ";
+    for(i = 0; i < offspringSum.size(); ++i){
+        cout << offspringSum[i] << " ";
+    }
+    cout << endl;
+
+    for(i = 0; i < checked.size(); ++i){
+        checked[i] = 1;
+    }
+
+    for(i = 0; i < offspring.size(); ++i){
+        for(j = 0; j < offspring[i].size(); ++j){
+            checked[offspring[i][j]] = 0;
+        }
+    }
+
+    for(i = 0; i < checked.size(); ++i){
+        if(checked[i] == 1){
+            absentBoxes.push_back(i);
+        }
+    }
+
+    if(absentBoxes.empty()){
+        cout << "absentBoxes vector is empty - no boxes are missing\n";
+    }
+    else {
+        //repair = 1;
+        for (i = 0; i < absentBoxes.size(); ++i) {
+            cout << absentBoxes[i] << " ";
+        }
+        cout << endl;
+    }
+
+}
+
+void repairProcedure(int numScores, int maxBoxWidth, int maxStripWidth, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths, vector<int> &absentBoxes, vector<int> &absentSum, vector<vector<int> > &absent){
+
+    int i, j, mini, k, l;
+    int min = 0;
+    int max = maxBoxWidth;
+    vector<int> boxDecrease;
+    vector<int> checked(numScores, 0);
+
+
+    while(boxDecrease.size() < absentBoxes.size()/2) {
+        for (i = 0; i < absentBoxes.size(); ++i) {
+            if(checked[absentBoxes[i]] == 1){
+                continue;
+            }
+            if (boxWidths[absentBoxes[i]][mates[absentBoxes[i]]] > min && boxWidths[absentBoxes[i]][mates[absentBoxes[i]]] <= max) {
+                min = boxWidths[absentBoxes[i]][mates[absentBoxes[i]]];
+                mini = absentBoxes[i];
+            }
+        }
+        boxDecrease.push_back(mini);
+        checked[mini] = 1;
+        checked[mates[mini]] = 1;
+        max = min;
+        min = 0;
+    }
+
+    cout << "Box decrease:\n";
+    for(i = 0; i < boxDecrease.size(); ++i){
+        cout << boxDecrease[i] << " ";
+    }
+    cout << endl << endl;
+
+    absent[0].push_back(boxDecrease[0]);
+    absent[0].push_back(mates[boxDecrease[0]]);
+    absentSum[0] += boxWidths[boxDecrease[0]][mates[boxDecrease[0]]];
+
+
+    for(j = 1; j < boxDecrease.size(); ++j){
+        for(i = 0; i < absent.size(); ++i){
+            if(!absent[i].empty()){
+                if(absentSum[i] + boxWidths[boxDecrease[j]][mates[boxDecrease[j]]] <= maxStripWidth){
+                    if(adjMatrix[absent[i].back()][boxDecrease[j]] == 1){
+                        absent[i].push_back(boxDecrease[j]);
+                        absent[i].push_back(mates[boxDecrease[j]]);
+                        absentSum[i] += boxWidths[boxDecrease[j]][mates[boxDecrease[j]]];
+                        break;
+                    }
+                    else if (adjMatrix[absent[i].back()][mates[boxDecrease[j]]] == 1){
+                        absent[i].push_back(mates[boxDecrease[j]]);
+                        absent[i].push_back(boxDecrease[j]);
+                        absentSum[i] += boxWidths[boxDecrease[j]][mates[boxDecrease[j]]];
+                        break;
+                    }
+                }
+            }
+            else if (absent[i].empty()){
+                absent[i].push_back(boxDecrease[j]);
+                absent[i].push_back(mates[boxDecrease[j]]);
+                absentSum[i] += boxWidths[boxDecrease[j]][mates[boxDecrease[j]]];
+                break;
+            }
+        }
+    }
+
+    k = absent.size() - 1;
+    while(absent[k].empty()){
+        absent.pop_back();
+        --k;
+    }
+
+    l = absentSum.size() -1;
+    while(absentSum[l] == 0){
+        absentSum.pop_back();
+        --l;
+    }
+
+
+
+
+    cout << "After REPAIR FFD: " << absent.size() << " strips\n";
+
+
+    cout << "REPAIR Strips FFD (scores):\n";
+    for(i = 0; i < absent.size(); ++i){
+        cout << "Strip " << i << ": ";
+        for(j = 0; j < absent[i].size(); ++j){
+            cout << absent[i][j] << " ";
+        }
+        cout << endl;
+    }
+    cout << endl;
+
+
+
+
+
 
 }
 
