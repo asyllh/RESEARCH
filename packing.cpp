@@ -354,7 +354,7 @@ void repairProcedure(int numScores, int maxBoxWidth, int maxStripWidth, vector<v
         min = 0;
     }
 
-    cout << "Box decrease:\n";
+    cout << "\nBox decrease:\n";
     for(i = 0; i < boxDecrease.size(); ++i){
         cout << boxDecrease[i] << " ";
     }
@@ -418,7 +418,13 @@ void repairProcedure(int numScores, int maxBoxWidth, int maxStripWidth, vector<v
         }
         cout << endl;
     }
-    cout << endl;
+
+
+    cout << "stripSum: ";
+    for(i = 0; i < absentSum.size(); ++i){
+        cout << absentSum[i] << " ";
+    }
+    cout << endl << endl;
 
 
 
@@ -528,6 +534,7 @@ void localSearch(int &swapType, int &moveType, int feasible, int maxStripWidth, 
                                     //Check if pairSizeX < pairSizeY and that boxes can fit onto strip
                                     if(pairSizeX < pairSizeY && stripSumX[i] - pairSizeX + pairSizeY <= maxStripWidth){
                                         swapType = 1;
+                                        cout << "i: " << i << " j: " << j << " a: " << a << " b: " << b << " c: " << c << " d: " << d << endl;
                                         if(stripX[i].size() == 4){ //If stripX[i] only contains 2 boxes
                                             if(stripY[j].size() == 4){ //If stripY[j] only contains 2 boxes
                                                 //Do a straight swap, no need for MBAHRA
@@ -635,7 +642,7 @@ void localSearch(int &swapType, int &moveType, int feasible, int maxStripWidth, 
             }
         }
     }
-    //cout << "NO PAIR SIN SWAP PERFORMED.\n";
+    cout << "NO PAIR SIN SWAP PERFORMED.\n";
     //endregion
 
     //region SinSin
@@ -676,7 +683,7 @@ void localSearch(int &swapType, int &moveType, int feasible, int maxStripWidth, 
                         if(feasible == 1){
                             //++count;
                             //cout << count << ": SinSin\n";
-                            goto MoveSin;
+                            goto End;
                         }
                     }
                 }
@@ -715,9 +722,9 @@ void localSearch(int &swapType, int &moveType, int feasible, int maxStripWidth, 
     //cout << "NO SINGLE MOVE PERFORMED.\n\n";
     //endregion
 
-    //End:
-    //cout << "Local Search complete\n-------------------\n";
-    /*cout << "stripX:\n";
+    End:
+    cout << "Local Search complete\n-------------------\n";
+    cout << "stripX:\n";
     for(i = 0; i < stripX.size(); ++i){
         for(j = 0; j < stripX[i].size(); ++j){
             cout << stripX[i][j] << " ";
@@ -741,12 +748,12 @@ void localSearch(int &swapType, int &moveType, int feasible, int maxStripWidth, 
     for(i = 0; i < stripSumY.size(); ++i){
         cout << stripSumY[i] << " ";
     }
-    cout << endl << endl;*/
+    cout << endl << endl;
 
 
     //join sets stripX and stripY together back into vector<vector<int> > strip
 
-    while(!strip.empty()){
+    /*while(!strip.empty()){
         strip.pop_back();
     }
 
@@ -761,9 +768,9 @@ void localSearch(int &swapType, int &moveType, int feasible, int maxStripWidth, 
     for(i = 0; i < stripY.size(); ++i){
         strip.push_back(stripY[i]);
         stripSum.push_back(stripSumY[i]);
-    }
+    }*/
 
-    cout << "Local search: " << strip.size() << " strips\n\n";
+    //cout << "Local search: " << strip.size() << " strips\n\n";
     /*cout << "Strips (X and Y combined):\n";
     for(i = 0; i < strip.size(); ++i){
         cout << "Strip " << i << ": " ;
@@ -779,22 +786,6 @@ void localSearch(int &swapType, int &moveType, int feasible, int maxStripWidth, 
         cout << stripSum[i] << " ";
     }
     cout << endl << endl;*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 }
