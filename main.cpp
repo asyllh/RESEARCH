@@ -139,13 +139,15 @@ int main(int argc, char **argv){
 
     packStripsFFD(numScores, numBox, totalCost, maxBoxWidth, maxStripWidth, totalBoxWidth, adjMatrix, mates, boxWidths, stripSum, stripNumBoxes, strip);
 
-    packStripsFF(numScores, numBox, totalCost, maxStripWidth, totalBoxWidth, adjMatrix, mates, boxWidths, stripSum2, stripNumBoxes2, strip2);
+    //packStripsFF(numScores, numBox, totalCost, maxStripWidth, totalBoxWidth, adjMatrix, mates, boxWidths, stripSum2, stripNumBoxes2, strip2);
 
-    GGA(numScores, stripSum, stripSum2, strip, strip2, offspringSum, offspring, absentBoxes);
+    //GGA(numScores, stripSum, stripSum2, strip, strip2, offspringSum, offspring, absentBoxes);
 
-    repairProcedure(numScores, maxBoxWidth, maxStripWidth, adjMatrix, mates, boxWidths, absentBoxes, absentSum, absent);
+    //repairProcedure(numScores, maxBoxWidth, maxStripWidth, adjMatrix, mates, boxWidths, absentBoxes, absentSum, absent);
 
-    //localSearch(swapType, moveType, feasible, maxStripWidth, allScores, boxWidths, stripSum, stripSumX, stripSumY, strip, stripX, stripY);
+    localSearch(swapType, moveType, feasible, maxStripWidth, allScores, boxWidths, stripSum, stripSumX, stripSumY, strip, stripX, stripY);
+
+    //localSearch(swapType, moveType, feasible, maxStripWidth, allScores, boxWidths, stripSum, offspringSum, absentSum, strip, offspring, absent);
 
     //resetVectors(numScores, numBox, adjMatrix, mates, boxWidths, allBoxes, stripSum, strip);
     //clearVectors(allScores, stripNumBoxes, stripSumX, stripSumY, stripX, stripY);
