@@ -54,6 +54,7 @@ int main(int argc, char **argv){
     //vector<int> stripSum(numBox, 0);
     //vector<vector<int> > strip(numBox);
     vector<vector<vector<int> > > population;
+    vector<vector<int> > populationSum;
     int swapType;
     int feasible; //bool?
     int moveType;
@@ -71,7 +72,7 @@ int main(int argc, char **argv){
 
     createInstance(threshold, minWidth, maxWidth, minBoxWidth, maxBoxWidth, numScores, numBox, totalBoxWidth, allScores, adjMatrix, mates, boxWidths, allBoxes);
 
-    createInitialPopulation(numScores, numBox, maxBoxWidth, maxStripWidth, allScores, adjMatrix, mates, boxWidths, population);
+    createInitialPopulation(numScores, numBox, maxBoxWidth, maxStripWidth, allScores, mates, adjMatrix, boxWidths, populationSum, population);
 
 
     endTime = clock();
