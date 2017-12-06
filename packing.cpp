@@ -23,16 +23,17 @@ int lowerBound(double totalBoxWidth, int maxStripWidth){
     return lBound;
 }
 
-void FFD(int numScores, int numBox, int maxBoxWidth, int maxStripWidth, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<vector<int> > &strip){
+void FFD(int numScores, int numBox, int maxBoxWidth, int maxStripWidth, vector<int> &mates,
+         vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<vector<int> > &strip){
 
     int i, j, mini, k, l;
     int min = 0;
     int max = maxBoxWidth;
-    vector<int> boxDecrease;
+    vector<int> boxOrder;
     vector<int> checked(numScores, 0);
 
 
-    while(boxDecrease.size() < numBox) {
+    while(boxOrder.size() < numBox) {
         for (i = 0; i < numScores; ++i) {
             if(checked[i] == 1){
                 continue;
@@ -42,46 +43,47 @@ void FFD(int numScores, int numBox, int maxBoxWidth, int maxStripWidth, vector<v
                 mini = i;
             }
         }
-        boxDecrease.push_back(mini);
+        boxOrder.push_back(mini);
         checked[mini] = 1;
         checked[mates[mini]] = 1;
         max = min;
         min = 0;
     }
 
+
     cout << "Box decrease:\n";
-    for(i = 0; i < boxDecrease.size(); ++i){
-        cout << boxDecrease[i] << " ";
+    for(i = 0; i < boxOrder.size(); ++i){
+        cout << boxOrder[i] << " ";
     }
     cout << endl << endl;
 
-    strip[0].push_back(boxDecrease[0]);
-    strip[0].push_back(mates[boxDecrease[0]]);
-    stripSum[0] += boxWidths[boxDecrease[0]][mates[boxDecrease[0]]];
+    strip[0].push_back(boxOrder[0]);
+    strip[0].push_back(mates[boxOrder[0]]);
+    stripSum[0] += boxWidths[boxOrder[0]][mates[boxOrder[0]]];
 
 
-    for(j = 1; j < boxDecrease.size(); ++j){
+    for(j = 1; j < boxOrder.size(); ++j){
         for(i = 0; i < strip.size(); ++i){
             if(!strip[i].empty()){
-                if(stripSum[i] + boxWidths[boxDecrease[j]][mates[boxDecrease[j]]] <= maxStripWidth){
-                    if(adjMatrix[strip[i].back()][boxDecrease[j]] == 1){
-                        strip[i].push_back(boxDecrease[j]);
-                        strip[i].push_back(mates[boxDecrease[j]]);
-                        stripSum[i] += boxWidths[boxDecrease[j]][mates[boxDecrease[j]]];
+                if(stripSum[i] + boxWidths[boxOrder[j]][mates[boxOrder[j]]] <= maxStripWidth){
+                    if(adjMatrix[strip[i].back()][boxOrder[j]] == 1){
+                        strip[i].push_back(boxOrder[j]);
+                        strip[i].push_back(mates[boxOrder[j]]);
+                        stripSum[i] += boxWidths[boxOrder[j]][mates[boxOrder[j]]];
                         break;
                     }
-                    else if (adjMatrix[strip[i].back()][mates[boxDecrease[j]]] == 1){
-                        strip[i].push_back(mates[boxDecrease[j]]);
-                        strip[i].push_back(boxDecrease[j]);
-                        stripSum[i] += boxWidths[boxDecrease[j]][mates[boxDecrease[j]]];
+                    else if (adjMatrix[strip[i].back()][mates[boxOrder[j]]] == 1){
+                        strip[i].push_back(mates[boxOrder[j]]);
+                        strip[i].push_back(boxOrder[j]);
+                        stripSum[i] += boxWidths[boxOrder[j]][mates[boxOrder[j]]];
                         break;
                     }
                 }
             }
             else if (strip[i].empty()){
-                strip[i].push_back(boxDecrease[j]);
-                strip[i].push_back(mates[boxDecrease[j]]);
-                stripSum[i] += boxWidths[boxDecrease[j]][mates[boxDecrease[j]]];
+                strip[i].push_back(boxOrder[j]);
+                strip[i].push_back(mates[boxOrder[j]]);
+                stripSum[i] += boxWidths[boxOrder[j]][mates[boxOrder[j]]];
                 break;
             }
         }
@@ -128,20 +130,126 @@ void FFD(int numScores, int numBox, int maxBoxWidth, int maxStripWidth, vector<v
 
 }
 
-void createInitialPopulation(int numScores, int numBox, int maxBoxWidth, int maxStripWidth, vector<int> &allScores, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths, vector<vector<vector<int> > > &population){
+void partialFFD(int numScores, int maxBoxWidth, int maxStripWidth, vector<int> &mates, vector<vector<int> > &adjMatrix,
+                vector<vector<int> > &boxWidths, vector<int> &partialBoxes, vector<int> &partialSum, vector<vector<int> > &partialSol){
+
+    int i, j, mini, k, l;
+    int min = 0;
+    int max = maxBoxWidth;
+    vector<int> boxDecrease;
+    vector<int> checked(numScores, 0);
+
+
+    while(boxDecrease.size() < partialBoxes.size()/2) {
+        for (i = 0; i < partialBoxes.size(); ++i) {
+            if(checked[partialBoxes[i]] == 1){
+                continue;
+            }
+            if (boxWidths[partialBoxes[i]][mates[partialBoxes[i]]] > min && boxWidths[partialBoxes[i]][mates[partialBoxes[i]]] <= max) {
+                min = boxWidths[partialBoxes[i]][mates[partialBoxes[i]]];
+                mini = partialBoxes[i];
+            }
+        }
+        boxDecrease.push_back(mini);
+        checked[mini] = 1;
+        checked[mates[mini]] = 1;
+        max = min;
+        min = 0;
+    }
+
+    cout << "\nBox decrease:\n";
+    for(i = 0; i < boxDecrease.size(); ++i){
+        cout << boxDecrease[i] << " ";
+    }
+    cout << endl << endl;
+
+    partialSol[0].push_back(boxDecrease[0]);
+    partialSol[0].push_back(mates[boxDecrease[0]]);
+    partialSum[0] += boxWidths[boxDecrease[0]][mates[boxDecrease[0]]];
+
+
+    for(j = 1; j < boxDecrease.size(); ++j){
+        for(i = 0; i < partialSol.size(); ++i){
+            if(!partialSol[i].empty()){
+                if(partialSum[i] + boxWidths[boxDecrease[j]][mates[boxDecrease[j]]] <= maxStripWidth){
+                    if(adjMatrix[partialSol[i].back()][boxDecrease[j]] == 1){
+                        partialSol[i].push_back(boxDecrease[j]);
+                        partialSol[i].push_back(mates[boxDecrease[j]]);
+                        partialSum[i] += boxWidths[boxDecrease[j]][mates[boxDecrease[j]]];
+                        break;
+                    }
+                    else if (adjMatrix[partialSol[i].back()][mates[boxDecrease[j]]] == 1){
+                        partialSol[i].push_back(mates[boxDecrease[j]]);
+                        partialSol[i].push_back(boxDecrease[j]);
+                        partialSum[i] += boxWidths[boxDecrease[j]][mates[boxDecrease[j]]];
+                        break;
+                    }
+                }
+            }
+            else if (partialSol[i].empty()){
+                partialSol[i].push_back(boxDecrease[j]);
+                partialSol[i].push_back(mates[boxDecrease[j]]);
+                partialSum[i] += boxWidths[boxDecrease[j]][mates[boxDecrease[j]]];
+                break;
+            }
+        }
+    }
+
+    k = partialSol.size() - 1;
+    while(partialSol[k].empty()){
+        partialSol.pop_back();
+        --k;
+    }
+
+    l = partialSum.size() -1;
+    while(partialSum[l] == 0){
+        partialSum.pop_back();
+        --l;
+    }
+
+
+
+
+    cout << "After REPAIR FFD: " << partialSol.size() << " strips\n";
+
+
+    cout << "REPAIR Strips FFD (scores):\n";
+    for(i = 0; i < partialSol.size(); ++i){
+        cout << "Strip " << i << ": ";
+        for(j = 0; j < partialSol[i].size(); ++j){
+            cout << partialSol[i][j] << " ";
+        }
+        cout << endl;
+    }
+
+
+    cout << "stripSum: ";
+    for(i = 0; i < partialSum.size(); ++i){
+        cout << partialSum[i] << " ";
+    }
+    cout << endl << endl;
+
+}
+
+void createInitialPopulation(int numScores, int numBox, int maxBoxWidth, int maxStripWidth, vector<int> &allScores,
+                             vector<int> &mates, vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths,
+                             vector<vector<int> > &populationSum, vector<vector<vector<int> > > &population){
 
     int i, j;
     vector<vector<int> > strip(numBox);
     vector<int> stripSum(numBox, 0);
 
-    FFD(numScores, numBox, maxBoxWidth, maxStripWidth, adjMatrix, mates, boxWidths, stripSum, strip);
+    FFD(numScores, numBox, maxBoxWidth, maxStripWidth, mates, adjMatrix, boxWidths, stripSum, strip);
 
+    mutation(numScores, maxBoxWidth, maxStripWidth, allScores, mates, adjMatrix, boxWidths, stripSum, strip);
 
-
-
+    population.push_back(strip);
+    populationSum.push_back(stripSum);
+    
 }
 
-void mutation(int maxBoxWidth, int maxStripWidth, vector<int> &allScores, vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<vector<int> > &strip){
+void mutation(int numScores, int maxBoxWidth, int maxStripWidth, vector<int> &allScores, vector<int> &mates,
+              vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<vector<int> > &strip){
 
     int i, j;
     vector<int> stripSumX;
@@ -194,9 +302,16 @@ void mutation(int maxBoxWidth, int maxStripWidth, vector<int> &allScores, vector
     }
     cout << endl << endl;
 
+    localSearch(numScores, maxBoxWidth, maxStripWidth, allScores, mates, adjMatrix, boxWidths, stripSum, strip, stripSumX, stripX, stripSumY, stripY);
+
+
+
+
+
 }
 
-void localSearch(int maxBoxWidth, int maxStripWidth, vector<int> &allScores, vector<vector<int> > &boxWidths, vector<int> &stripSumX, vector<vector<int> > &stripX, vector<int> &stripSumY, vector<vector<int> > &stripY){
+void localSearch(int numScores, int maxBoxWidth, int maxStripWidth, vector<int> &allScores, vector<int> &mates, vector<vector<int> > &adjMatrix,
+                 vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<vector<int> > &strip, vector<int> &stripSumX, vector<vector<int> > &stripX, vector<int> &stripSumY, vector<vector<int> > &stripY){
 
     int a, b, c, d, i, j, k, l, pairSizeX, pairSizeY;
     int swapType, moveType, feasible;
@@ -233,27 +348,27 @@ void localSearch(int maxBoxWidth, int maxStripWidth, vector<int> &allScores, vec
                                             else if (d == c+2){ //If stripY[j] contains more than 2 boxes & the two chosen boxes in stripY[j] are adjacent
                                                 //Only perform MBAHRA on stripY[j]
                                                 moveType = 11;
-                                                MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripX, stripY, stripSumX, stripSumY);
+                                                MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripSumX, stripX, stripSumY, stripY);
                                             }
                                             else{ //IIf stripY[j] contains more than 2 boxes & boxes c and d are not adjacent
                                                 moveType = 0;
-                                                MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripX, stripY, stripSumX, stripSumY);
+                                                MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripSumX, stripX, stripSumY, stripY);
                                             }
                                         }
                                         else if (stripY[j].size() == 4){ //If stripY[j] only contains 2 boxes but stripX[i] contains > 2 boxes
                                             if(b == a+2){ //If the two chosen boxes in stripX[i] are adjacent to one another
                                                 //Only perform MBAHRA on stripX[i]
                                                 moveType = 12;
-                                                MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripX, stripY, stripSumX, stripSumY);
+                                                MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripSumX, stripX, stripSumY, stripY);
                                             }
                                             else{ //If boxes a and b are not adjacent
                                                 moveType = 0;
-                                                MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripX, stripY, stripSumX, stripSumY);
+                                                MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripSumX, stripX, stripSumY, stripY);
                                             }
                                         }
                                         else{ //If stripX[i].size() > 4 && stripY[j[.size() > 4
                                             moveType = 0;
-                                            MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripX, stripY, stripSumX, stripSumY);
+                                            MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripSumX, stripX, stripSumY, stripY);
                                         }
                                         if(feasible == 1){
                                             //++count;
@@ -299,23 +414,23 @@ void localSearch(int maxBoxWidth, int maxStripWidth, vector<int> &allScores, vec
                                     else{ //If stripY[j] contains more than 1 box
                                         //Only perform MBAHRA on stripY[j]
                                         moveType = 21;
-                                        MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripX, stripY, stripSumX, stripSumY);
+                                        MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripSumX, stripX, stripSumY, stripY);
                                     }
                                 }
                                 else if(stripY[j].size() == 2){ //If stripY[j] only contains 1 box, but stripX[i] contains > 2 boxes
                                     if(b == a+2){ //If the two boxes chosen from stripX[i] are adjacent to one another
                                         //Only perform MBAHRA on stripX[i]
                                         moveType = 22;
-                                        MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripX, stripY, stripSumX, stripSumY);
+                                        MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripSumX, stripX, stripSumY, stripY);
                                     }
                                     else{ //If the two boxes chosen from stripX[i] are not adjacent to one another
                                         moveType = 0;
-                                        MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripX, stripY, stripSumX, stripSumY);
+                                        MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripSumX, stripX, stripSumY, stripY);
                                     }
                                 }
                                 else { //If stripX[i].size() > 4 && stripY[j].size() > 2
                                     moveType = 0;
-                                    MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripX, stripY, stripSumX, stripSumY);
+                                    MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripSumX, stripX, stripSumY, stripY);
                                 }
 
                                 if(feasible == 1){
@@ -330,7 +445,7 @@ void localSearch(int maxBoxWidth, int maxStripWidth, vector<int> &allScores, vec
             }
         }
     }
-    cout << "NO PAIR SIN SWAP PERFORMED.\n";
+    //cout << "NO PAIR SIN SWAP PERFORMED.\n";
     //endregion
 
     //region SinSin
@@ -356,17 +471,17 @@ void localSearch(int maxBoxWidth, int maxStripWidth, vector<int> &allScores, vec
                             else{ //If stripY[j] contains more than 1 box
                                 //Only peform MBAHRA on stripY[j]
                                 moveType = 31;
-                                MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripX, stripY, stripSumX, stripSumY);
+                                MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripSumX, stripX, stripSumY, stripY);
                             }
                         }
                         else if(stripY[j].size() == 2){ //If stripY[j] only contains 1 box but stripX[i].size() > 2
                             //Only perform MBAHRA on stripX[i]
                             moveType = 32;
-                            MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripX, stripY, stripSumX, stripSumY);
+                            MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripSumX, stripX, stripSumY, stripY);
                         }
                         else{ //stripX[i].size() > 2 && stripY[j].size() > 2
                             moveType = 0;
-                            MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripX, stripY, stripSumX, stripSumY);
+                            MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripSumX, stripX, stripSumY, stripY);
                         }
                         if(feasible == 1){
                             //++count;
@@ -393,10 +508,10 @@ void localSearch(int maxBoxWidth, int maxStripWidth, vector<int> &allScores, vec
                     swapType = 4;
                     if(stripY[j].size() == 2){ //If stripY[j] only contains one box
                         moveType = 41;
-                        MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripX, stripY, stripSumX, stripSumY);
+                        MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripSumX, stripX, stripSumY, stripY);
                     }
                     else {
-                        MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripX, stripY, stripSumX, stripSumY);
+                        MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripSumX, stripX, stripSumY, stripY);
                     }
                     if(feasible == 1){
                         //++count;
@@ -407,7 +522,7 @@ void localSearch(int maxBoxWidth, int maxStripWidth, vector<int> &allScores, vec
             }
         }
     }
-    //cout << "NO SINGLE MOVE PERFORMED.\n\n";
+    cout << "NO SINGLE MOVE PERFORMED.\n\n";
     //endregion
 
     //End:
@@ -440,11 +555,26 @@ void localSearch(int maxBoxWidth, int maxStripWidth, vector<int> &allScores, vec
 
     //Do FFD on stripY
 
+    vector<int> partialBoxes;
+    for(i = 0; i < stripY.size(); ++i){
+        for(j = 0; j < stripY[i].size(); ++j){
+            partialBoxes.push_back(stripY[i][j]);
+        }
+    }
+    sort(partialBoxes.begin(), partialBoxes.end());
 
+    stripY.clear();
+    stripY.resize(partialBoxes.size()/2);
+    stripSumY.clear();
+    for(i = 0; i < partialBoxes.size()/2; ++i){
+        stripSumY.push_back(0);
+    }
+
+    partialFFD(numScores, maxBoxWidth, maxStripWidth, mates, adjMatrix, boxWidths, partialBoxes, stripSumY, stripY);
 
     //join sets stripX and stripY together back into vector<vector<int> > strip
 
-    /*while(!strip.empty()){
+    while(!strip.empty()){
         strip.pop_back();
     }
 
@@ -459,10 +589,10 @@ void localSearch(int maxBoxWidth, int maxStripWidth, vector<int> &allScores, vec
     for(i = 0; i < stripY.size(); ++i){
         strip.push_back(stripY[i]);
         stripSum.push_back(stripSumY[i]);
-    }*/
+    }
 
-    //cout << "Local search: " << strip.size() << " strips\n\n";
-    /*cout << "Strips (X and Y combined):\n";
+    cout << "Local search: " << strip.size() << " strips\n\n";
+    cout << "Strips (X and Y combined):\n";
     for(i = 0; i < strip.size(); ++i){
         cout << "Strip " << i << ": " ;
         for(j = 0; j < strip[i].size(); ++j){
@@ -470,18 +600,18 @@ void localSearch(int maxBoxWidth, int maxStripWidth, vector<int> &allScores, vec
         }
         cout << endl;
     }
-    cout << endl;*/
+    cout << endl;
 
-    /*cout << "StripSum:\n";
+    cout << "StripSum:\n";
     for(i = 0; i < stripSum.size(); ++i){
         cout << stripSum[i] << " ";
     }
-    cout << endl << endl;*/
-
+    cout << endl << endl;
 
 }
 
-void MBAHRA(int swapType, int moveType, int &feasible, int i1, int a1, int b1, int j1, int c1, int d1, vector<int> &allScores, vector<vector<int> > &boxWidths, vector<vector<int> > &stripX, vector<vector<int> > &stripY, vector<int> &stripSumX, vector<int> &stripSumY){
+void MBAHRA(int swapType, int moveType, int &feasible, int i1, int a1, int b1, int j1, int c1, int d1, vector<int> &allScores,
+            vector<vector<int> > &boxWidths, vector<int> &stripSumX, vector<vector<int> > &stripX, vector<int> &stripSumY, vector<vector<int> > &stripY){
 
     feasible = 0;
     int i, j, k;

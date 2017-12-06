@@ -15,14 +15,25 @@ void swap(int &a, int &b);
 
 int lowerBound(double totalBoxWidth, int maxStripWidth);
 
-void FFD(int numScores, int numBox, int maxBoxWidth, int maxStripWidth, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<vector<int> > &strip);
+void FFD(int numScores, int numBox, int maxBoxWidth, int maxStripWidth, vector<int> &mates,
+         vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<vector<int> > &strip);
 
-void createInitialPopulation(int numScores, int numBox, int maxBoxWidth, int maxStripWidth, vector<int> &allScores, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths, vector<vector<vector<int> > > &population);
+void partialFFD(int numScores, int maxBoxWidth, int maxStripWidth, vector<int> &mates, vector<vector<int> > &adjMatrix,
+                vector<vector<int> > &boxWidths, vector<int> &partialBoxes, vector<int> &partialSum, vector<vector<int> > &partialSol);
 
-void mutation(int maxBoxWidth, int maxStripWidth, vector<int> &allScores, vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<vector<int> > &strip);
+void createInitialPopulation(int numScores, int numBox, int maxBoxWidth, int maxStripWidth, vector<int> &allScores,
+                             vector<int> &mates, vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths,
+                             vector<vector<int> > &populationSum, vector<vector<vector<int> > > &population);
 
-void localSearch(int maxBoxWidth, int maxStripWidth, vector<int> &allScores, vector<vector<int> > &boxWidths, vector<int> &stripSumX, vector<vector<int> > &stripX, vector<int> &stripSumY, vector<vector<int> > &stripY);
 
-void MBAHRA(int swapType, int moveType, int &feasible, int i1, int a1, int b1, int j1, int c1, int d1, vector<int> &allScores, vector<vector<int> > &boxWidths, vector<vector<int> > &stripX, vector<vector<int> > &stripY, vector<int> &stripSumX, vector<int> &stripSumY);
+void mutation(int numScores, int maxBoxWidth, int maxStripWidth, vector<int> &allScores, vector<int> &mates,
+              vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<vector<int> > &strip);
+
+
+void localSearch(int numScores, int maxBoxWidth, int maxStripWidth, vector<int> &allScores, vector<int> &mates, vector<vector<int> > &adjMatrix,
+                 vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<vector<int> > &strip, vector<int> &stripSumX, vector<vector<int> > &stripX, vector<int> &stripSumY, vector<vector<int> > &stripY);
+
+void MBAHRA(int swapType, int moveType, int &feasible, int i1, int a1, int b1, int j1, int c1, int d1, vector<int> &allScores,
+            vector<vector<int> > &boxWidths, vector<int> &stripSumX, vector<vector<int> > &stripX, vector<int> &stripSumY, vector<vector<int> > &stripY);
 #endif
 
