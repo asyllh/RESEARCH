@@ -245,7 +245,7 @@ void createInitialPopulation(int numScores, int numBox, int maxBoxWidth, int max
 
     population.push_back(strip);
     populationSum.push_back(stripSum);
-    
+
 }
 
 void mutation(int numScores, int maxBoxWidth, int maxStripWidth, vector<int> &allScores, vector<int> &mates,
