@@ -9,4 +9,4 @@ add_executable(MAIN main.cpp
         packing.cpp
         packing.h
         base.cpp
-        base.h)            # Add executable target with source files listed in SOURCE_FILES variable
+        base.h)                                  # Add executable target with source files listed in SOURCE_FILES variable
