@@ -11,6 +11,7 @@ matchgraph.pdf
 mis.pdf
 packsmallest.pdf
 main.pdf
+paper.pdf
 *.sln
 *.VC.db
 *.vcxproj
