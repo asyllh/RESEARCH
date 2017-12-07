@@ -15,11 +15,17 @@ void swap(int &a, int &b);
 
 int lowerBound(double totalBoxWidth, int maxStripWidth);
 
-void FFD(int numScores, int numBox, int maxBoxWidth, int maxStripWidth, vector<int> &mates,
-         vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<vector<int> > &strip);
+void FFDecreasing(int numScores, int numBox, int maxBoxWidth, vector<int> &mates, vector<vector<int> > &boxWidths, vector<int> &boxOrder);
+
+void FFRandom(int numScores, int numBox, vector<int> &mates, vector<vector<int> > &boxWidths, vector<int> &boxOrder);
+
+void FFShell(int numScores, int numBox, int maxBoxWidth, int maxStripWidth, vector<int> &mates,
+         vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<vector<int> > &strip, bool decrease);
+
 
 void partialFFD(int numScores, int maxBoxWidth, int maxStripWidth, vector<int> &mates, vector<vector<int> > &adjMatrix,
                 vector<vector<int> > &boxWidths, vector<int> &partialBoxes, vector<int> &partialSum, vector<vector<int> > &partialSol);
+
 
 void createInitialPopulation(int numScores, int numBox, int maxBoxWidth, int maxStripWidth, vector<int> &allScores,
                              vector<int> &mates, vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths,
