@@ -40,11 +40,10 @@ int main(int argc, char **argv){
     int maxStripWidth = atoi(argv[6]);
     int randomSeed = atoi(argv[7]); //random seed
 
-    int i, j, k, q, n;
+    int i, j, q, n;
     int instance; //counter for instances loop
     int numScores = numBox * 2; //number of scores, 2 per box (1 either side), last two scores are dominating vertices
-    int threshold = 70; //adjacency threshold of scores, minimum knife distance
-    int vacant = 999;
+    //int threshold = 70; //adjacency threshold of scores, minimum knife distance
     vector<int> allScores;
     vector<vector<int> > adjMatrix(numScores, vector<int>(numScores, 0)); //adjaceny matrix (createInstance, MTGMA, MIS, FCA)
     vector<int> mates(numScores, 0); //contains vertex index for mates, e.g if vertex 0 is mates with vertex 4, then mates[0] = 4 (createInstance, MIS)
@@ -55,9 +54,6 @@ int main(int argc, char **argv){
     //vector<vector<int> > strip(numBox);
     vector<vector<vector<int> > > population;
     vector<vector<int> > populationSum;
-    int swapType;
-    int feasible; //bool?
-    int moveType;
     //endregion
 
 
@@ -70,9 +66,11 @@ int main(int argc, char **argv){
     time_t startTime, endTime; //start clock
     startTime = clock();
 
-    createInstance(threshold, minWidth, maxWidth, minBoxWidth, maxBoxWidth, numScores, numBox, totalBoxWidth, allScores, adjMatrix, mates, boxWidths, allBoxes);
+    createInstance(numScores, numBox, minWidth, maxWidth, minBoxWidth, maxBoxWidth, totalBoxWidth, allScores, mates, adjMatrix, boxWidths, allBoxes);
 
     createInitialPopulation(numScores, numBox, maxBoxWidth, maxStripWidth, allScores, mates, adjMatrix, boxWidths, populationSum, population);
+
+    EA(numScores, maxBoxWidth, maxStripWidth, allScores, mates, adjMatrix, boxWidths, populationSum, population);
 
 
     endTime = clock();
