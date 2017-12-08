@@ -9,9 +9,11 @@ Evolutionary Algorithm with Local Search
 #include "base.h"
 using namespace std;
 
-void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, int maxBoxWidth, int numScores, int numBox, double &totalBoxWidth, vector<int> &allScores, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths, vector<vector<int> > &allBoxes){
+void createInstance(int numScores, int numBox, int minWidth, int maxWidth, int minBoxWidth, int maxBoxWidth, double &totalBoxWidth,
+                    vector<int> &allScores, vector<int> &mates, vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths, vector<vector<int> > &allBoxes){
 
     int i, j, k;
+    int threshold = 70;
     int count = 1;
     vector<int> randOrder;
     vector<int> checkBox(numScores, 0);
