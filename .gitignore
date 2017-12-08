@@ -3,15 +3,7 @@
 Debug/*
 cmake-build-debug/
 .idea/
-boxes.pdf
-path.pdf
-patch.pdf
-thresholdgraph.pdf
-matchgraph.pdf
-mis.pdf
-packsmallest.pdf
-main.pdf
-paper.pdf
+*.pdf
 *.sln
 *.VC.db
 *.vcxproj
