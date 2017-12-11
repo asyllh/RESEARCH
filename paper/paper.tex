@@ -3,14 +3,78 @@
 \input{includes/preamble.tex}
 
 \title{Paper for IWOCA}
-\author{Asyl L. Hawa}
-\affil{\small{\textit{School of Mathematics, Cardiff University, Senghennydd Road, Cardiff, CF24 4AG}}}
+\author{Asyl L. Hawa \and Rhyd Lewis \and Jonathan Thompson}
+\institute{School of Mathematics, Cardiff University, Senghennydd Road, Cardiff, UK, CF24 4AG}
 \date{\today}
 
 \begin{document}
 \maketitle
 
 \section{Introduction}
+\begin{itemize}
+	\item complexity
+\end{itemize}
+
+\begin{itemize}
+	\item discuss problem with score constraints
+	\item Goulimis
+	\item packing
+\end{itemize}
+
+\section{FFD with approximate heuristic}
+
+\section{FFD with exact algorithm}
+\begin{definition}
+	Let $G(V,P\cup E)$ be an undirected graph, where $P \cap E = \emptyset$. Then $G$ has an alternating Hamiltonian path (or cycle) if there exists a Hamiltonian path (or cycle) on $G$ such that the successive edges are members of different edge sets, *i.e. if vertex $v_k$ is adjacent to vertex $v_{k-1}$ via an edge from $P$, then $v_k$ must be adjacent to vertex $v_{k+1}$ via an edge from $E$, or vice versa. $G$ is said to be alternating Hamiltonian if and only if there exists an alternating Hamiltonian cycle on $G$. (OR *i.e. if $\{v_{k-1}, v_k\} \in P$, then $\{v_k, v_{k+1}\} \in E$, or vice versa.)
+\end{definition}
+
+
+\subsection{Intro}
+\begin{itemize}
+	\item $n$ boxes, each box has two score lines, one on each side (mates)
+	\item Score width - distance between edge of box and score line
+	\item scores come in pairs
+	\item let each box be represented by two vertices, one vertex for each score
+	\item vertex weight equivalent to score width (mm)
+	\item if two scores are part of the same box, join corresponding vertices together with an edge
+	\item call this set of edges $P$, where $|P| = n$.
+	\item edges in $P$ are weighted, equivalent to box width
+	\item threshold graph: if sum of two vertices $\geq$ threshold, and vertices are not connected via an edge from $P$, i.e. $\{u, v\} \notin P$, then join vertices together via an edge
+	\item call this set of edges $T$
+	\item two sets of edges, $P$ and $T$
+	\item add dominating vertices
+	\item we want to find an alternating hamiltonian path, edges alternating between set $P$ and set $T$.
+\end{itemize}
+
+Let each box be represented by two vertices on a graph $G$, one vertex for each side of the box. Each vertex is assigned a value corresponding to the width of the score it represents. We refer to two vertices that represent either side of the same box as ``mates''. The boxes cannot be altered in anyway, and so vertices that are mates must be adjacent to one another. Thus, we have a set of edges $P$ that consists of edges between mates.
+
+As described in the introduction, let $\tau \in \mathbb{R}_{+}$ be the minimum scoring distance. If the sum of the values of two vertices $\{u, v\}$ is greater than or equal to $\tau$, and $\{u,v\} \notin P$, then we can connect these two vertices with an edge. Hence we have another set of edges $T$ consisting of edges between vertices that could ?  
+
+\subsection{MTGMA}
+\begin{itemize}
+	\item need a suitable matching $M\subset E$ s.t. $|M| = n-1$ CHECK THIS NOW WE HAVE DOMINATING VERTICES
+	\item maximum cardinality matching algorithm for threshold graphs (Mahadev and Peled 1994)
+	\item modify algorithm so that duplicate edges from mates are deleted, only consider edges from matching
+	\item explain swap of mates??
+\end{itemize}
+Due to the structure of threshold graphs, there is a simple maximum cardinality matching algorithm (Mahadev and Peled, 1994) that produced a matching ?? containing suitable edges from $T$.
+
+Initially, the vertices are sorted in order of non-decreasing weights, with ties broken arbitrarily. Starting from the vertex with the smallest weight, attempt to match it with any vertex in its neighbourhood that has not yet been matched. If such a vertex is available, add the current vertex and its match to a set $I$ that keeps track of the matched vertices. Succesively proceed to the next largest vertex until all vertices have been assessed.
+
+
+
+\subsection{MIS}
+\begin{itemize}
+	\item either have one alternating cycle, or more than one
+	\item if one, remove extra vertices, final solution
+	\item if more than one cycle, need to find a way to join them together
+	\item need to find one edge in each cycle such that the current matches can be broken, and new matches can be made between them, creating one cycle
+\end{itemize}
+
+\subsection{FCA}
+\begin{itemize}
+	\item pair of edges from different cycles
+\end{itemize}
 
 
 
@@ -18,40 +82,9 @@
 
 
 
+\section{Experiments/Comparison}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+\section{Conclusion}
 
 
 
