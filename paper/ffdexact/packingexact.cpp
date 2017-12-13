@@ -15,32 +15,19 @@ void swap(int &a, int &b){
     b = temp;
 }
 
-int lowerBound(double totalBoxWidth, int maxStripWidth){
+int lowerBound(int maxStripWidth, double totalBoxWidth){
     int lBound;
 
     lBound = ceil(totalBoxWidth/maxStripWidth);
     return lBound;
 }
 
-int initCost(int &totalCost, int maxStripWidth, vector<int> &stripSum){
-
-    int i;
-    totalCost = 0;
-
-    for(i = 0; i < stripSum.size(); ++i){
-        totalCost += pow((maxStripWidth - stripSum[i]), 2);
-    }
-
-    return totalCost;
-
-}
-
-void packStripsFFD(int numScores, int numBox, int &totalCost, int maxBoxWidth, int maxStripWidth, double totalBoxWidth, vector<int> &allScores, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<int> &stripNumBoxes, vector<vector<int> > &strip){
+void packStripsFFD(int numScores, int numBox, int maxBoxWidth, int maxStripWidth, double totalBoxWidth, vector<int> &allScores, vector<int> &mates,
+                   vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<vector<int> > &strip){
 
     int i, j, mini, k, l;
     int min = 0;
     int max = maxBoxWidth;
-    int numStrips = 0;
     int feasible;
     vector<int> boxDecrease;
     vector<int> checked(numScores, 0);
@@ -63,11 +50,11 @@ void packStripsFFD(int numScores, int numBox, int &totalCost, int maxBoxWidth, i
         min = 0;
     }
 
-    cout << "Box decrease:\n";
+    /*cout << "Box decrease:\n";
     for(i = 0; i < boxDecrease.size(); ++i){
         cout << boxDecrease[i] << " ";
     }
-    cout << endl << endl;
+    cout << endl << endl;*/
 
     strip[0].push_back(boxDecrease[0]);
     strip[0].push_back(mates[boxDecrease[0]]);
@@ -119,19 +106,12 @@ void packStripsFFD(int numScores, int numBox, int &totalCost, int maxBoxWidth, i
         stripSum.pop_back();
         --l;
     }
+    cout << "After FFD: " << strip.size()<< " strips\n";
 
-    for(i = 0; i < strip.size(); ++i){
-        stripNumBoxes.push_back(strip[i].size() / 2);
-        ++numStrips;
-    }
+    cout << "Lower Bound: " << lowerBound(maxStripWidth, totalBoxWidth) << " strips\n";
 
 
-    cout << "After FFD: " << numStrips << " strips\n";
-
-    cout << "Lower Bound: " << lowerBound(totalBoxWidth, maxStripWidth) << " strips\n";
-
-
-    cout << "Strips FFD (scores):\n";
+    /*cout << "Strips FFD (scores):\n";
     for(i = 0; i < strip.size(); ++i){
         cout << "Strip " << i << ": ";
         for(j = 0; j < strip[i].size(); ++j){
@@ -139,20 +119,15 @@ void packStripsFFD(int numScores, int numBox, int &totalCost, int maxBoxWidth, i
         }
         cout << endl;
     }
-    cout << endl;
+    cout << endl;*/
 
-    cout << "Strip" << setw(8) << "#Boxes" << setw(8) << "Width" << setw(12) << "Residual\n";
+    /*cout << "Strip" << setw(8) << "Width" << setw(12) << "Residual\n";
     for(i = 0; i < stripSum.size(); ++i){
         if(stripSum[i] !=0) {
-            cout << i << setw(9) << stripNumBoxes[i] << setw(10) <<  stripSum[i] << setw(9) << maxStripWidth - stripSum[i] << endl;
+            cout << i << setw(9) <<  stripSum[i] << setw(9) << maxStripWidth - stripSum[i] << endl;
         }
     }
-    cout << endl;
-
-
-
-    int costFFD = initCost(totalCost, maxStripWidth, stripSum);
-    //cout << "\nInitial Cost (cost from FFD): " << costFFD << "\n-------------------------------\n\n";
+    cout << endl;*/
 
 
 }

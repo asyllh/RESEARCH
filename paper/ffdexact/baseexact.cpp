@@ -8,7 +8,8 @@ base.cpp
 #include "baseexact.h"
 using namespace std;
 
-void resetVectors(int numScores, int numBox, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths, vector<vector<int> > &allBoxes, vector<int> &stripSum, vector<vector<int> > &strip){
+void resetVectors(int numScores, int numBox, vector<int> &allScores, vector<int> &mates,
+                  vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<vector<int> > &strip){
 
     int i, j;
 
@@ -17,7 +18,6 @@ void resetVectors(int numScores, int numBox, vector<vector<int> > &adjMatrix, ve
         for(j = 0; j < numScores; ++j){
             adjMatrix[i][j] = 0;
             boxWidths[i][j] = 0;
-            allBoxes[i][j] = 0;
         }
     }
 
@@ -35,23 +35,18 @@ void resetVectors(int numScores, int numBox, vector<vector<int> > &adjMatrix, ve
         stripSum.push_back(0);
     }
 
-
-
-}
-
-void clearVectors(vector<int> &allScores, vector<int> &stripNumBoxes, vector<int> &stripSumX, vector<int> &stripSumY, vector<vector<int> > &stripX, vector<vector<int> > &stripY){
-
     allScores.clear();
-    stripNumBoxes.clear();
-    stripSumX.clear();
-    stripSumY.clear();
-    stripX.clear();
-    stripY.clear();
+
+
+
 }
 
-void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, int maxBoxWidth, int numScores, int numBox, double &totalBoxWidth, vector<int> &allScores, vector<vector<int> > &adjMatrix, vector<int> &mates, vector<vector<int> > &boxWidths, vector<vector<int> > &allBoxes){
 
-    int i, j, k;
+void createInstance(int numScores, int numBox, int minWidth, int maxWidth, int minBoxWidth, int maxBoxWidth, double &totalBoxWidth,
+                    vector<int> &allScores, vector<int> &mates, vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths){
+
+    int i, j;
+    int threshold = 70;
     int count = 1;
     vector<int> randOrder;
     vector<int> checkBox(numScores, 0);
@@ -67,11 +62,10 @@ void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, 
     sort(allScores.begin(), allScores.end()); //sorts elements of vector in ascending order
 
     //cout << "All scores:\n";
-    for(i = 0; i < allScores.size(); ++i){
+    /*for(i = 0; i < allScores.size(); ++i){
         cout << allScores[i] << " ";
     }
-    cout << endl;
-
+    cout << endl;*/
     //Filling in adjacency matrix - if sum of two scores >= threshold (70), then insert 1 into the matrix, else leave as 0
     for (i = 0; i < allScores.size() - 1; ++i) {
         for (j = i + 1; j < allScores.size(); ++j) {
@@ -135,18 +129,6 @@ void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, 
         }
     }
 
-    k = 1;
-    for(i = 0; i < numScores; ++i){
-        for(j = i+1; j < numScores; ++j){
-            if(adjMatrix[i][j] == 2){
-                allBoxes[i][j] = k;
-                allBoxes[j][i] = k * -1;
-                ++k;
-                break;
-            }
-        }
-    }
-    //cout << endl;
 
     cout << "Box#" << setw(10) << "Mates" << setw(10) << "Scores" << setw(10) << "Width\n";
     for(i = 0; i < numScores; ++i){
@@ -161,7 +143,7 @@ void createInstance(int threshold, int minWidth, int maxWidth, int minBoxWidth, 
 
     }
 
-    //cout << "Total Box Widths: " << totalBoxWidth << endl << endl;
+    cout << "Total Box Widths: " << totalBoxWidth << endl << endl;
 
 
 

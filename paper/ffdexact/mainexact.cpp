@@ -39,16 +39,13 @@ int main(int argc, char **argv){
     int maxStripWidth = atoi(argv[6]);
     int randomSeed = atoi(argv[7]); //random seed
 
-    int i, j, k, q, n;
+    int i, j;
     int instance; //counter for instances loop
     int numScores = numBox * 2; //number of scores, 2 per box (1 either side), last two scores are dominating vertices
-    int threshold = 70; //adjacency threshold of scores, minimum knife distance
-    int vacant = 999;
     vector<int> allScores;
     vector<vector<int> > adjMatrix(numScores, vector<int>(numScores, 0)); //adjaceny matrix (createInstance, MTGMA, MIS, FCA)
     vector<int> mates(numScores, 0); //contains vertex index for mates, e.g if vertex 0 is mates with vertex 4, then mates[0] = 4 (createInstance, MIS)
     vector<vector<int> > boxWidths(numScores, vector<int>(numScores, 0)); // holds widths in mm for the widths of boxes
-    vector<vector<int> > allBoxes(numScores, vector<int>(numScores, 0)); //contains values from 1 to numBox to denote which box the scores belong to
     //srand(unsigned(time(NULL))); //seed
     srand(randomSeed);
     vector<vector<int> > userInput;
@@ -57,17 +54,6 @@ int main(int argc, char **argv){
     double totalBoxWidth = 0.0;
     vector<int> stripSum(numBox, 0);
     vector<vector<int> > strip(numBox);
-    vector<int> stripSum2(numBox, 0);
-    vector<vector<int> > strip2(numBox);
-    vector<int> stripNumBoxes;
-    vector<int> stripNumBoxes2;
-    int totalCost;
-    int moved;
-    vector<vector<int> > stripX;
-    vector<vector<int> > stripY;
-    vector<int> stripSumX;
-    vector<int> stripSumY;
-
     //endregion
 
 
@@ -123,17 +109,19 @@ int main(int argc, char **argv){
 
         //endregion
 
-    //cout << "Instance: " << instance << endl;
+    for(i = 0; i < 10; ++i) {
+        cout << "Instance: " << i << endl;
 
-    createInstance(threshold, minWidth, maxWidth, minBoxWidth, maxBoxWidth, numScores, numBox, totalBoxWidth, allScores, adjMatrix, mates, boxWidths, allBoxes);
+        createInstance(numScores, numBox, minWidth, maxWidth, minBoxWidth, maxBoxWidth, totalBoxWidth, allScores, mates,
+                       adjMatrix, boxWidths);
 
-    //createInstanceUser(threshold, numScores, totalBoxWidth, allScores, userInput, adjMatrix, mates, boxWidths, allBoxes);
+        packStripsFFD(numScores, numBox, maxBoxWidth, maxStripWidth, totalBoxWidth, allScores, mates, adjMatrix,
+                      boxWidths, stripSum, strip);
 
+        resetVectors(numScores, numBox, allScores, mates, adjMatrix, boxWidths, stripSum, strip);
+        cout << endl;
+    }
 
-    packStripsFFD(numScores, numBox, totalCost, maxBoxWidth, maxStripWidth, totalBoxWidth, allScores, adjMatrix, mates, boxWidths, stripSum, stripNumBoxes, strip);
-
-    //resetVectors(numScores, numBox, adjMatrix, mates, boxWidths, allBoxes, stripSum, strip);
-    //clearVectors(allScores, stripNumBoxes, stripSumX, stripSumY, stripX, stripY);
 
 
 
