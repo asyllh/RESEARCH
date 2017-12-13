@@ -10,26 +10,60 @@
 \begin{document}
 \maketitle
 
-\section{Introduction}
-\begin{itemize}
-	\item complexity
-\end{itemize}
+\begin{abstract}
+	Abstract
+\end{abstract}
 
-\begin{itemize}
-	\item discuss problem with score constraints
-	\item Goulimis
-	\item packing
-\end{itemize}
+\section{Introduction}
+\begin{enumerate}
+	\item Goulimis (2004)
+	\item boxes are scored in specfici places to make folding easier 
+	\item only consider outermost scores, although box may have many 
+	\item machine explanation, scoring knives cannot be placed too close together
+	\item therefore we have a score constraint/minimum knife distance
+	\item strips of material of a fixed length
+	\item minimise waste whilst adhering to the score constraints
+	\item feasible arrangement of boxes
+	\item boxes have same heights, different widths
+	\item therefore have a strip packing/bpp with an additional constraint
+	\item explain rest of paper
+\end{enumerate}
+
 
 \section{FFD with approximate heuristic}
+\begin{enumerate}
+	\item background on FF/FFD
+	\item explain how FFD operates without score constraints (simple)
+	\item complexity/lower bound
+	\item explain FFD with score constraint (algorithm)
+	\item pros and cons: speed, however there may be a solution that exists that cannot be found due to boxes being fixed in place
+\end{enumerate}
 
 \section{FFD with exact algorithm}
+\begin{enumerate}
+	\item extension of the above, however we include an algorithm that can find a feasible alignment of boxes with score constraints if one exists
+	\item if a box can fit onto a strip, instead of attempting to place on the end, we apply this algorithm
+	\item therefore unlike the heuristic above, boxes are not fixed in place, all boxes can be reordered
+	\item then go on to explain mbahra + output of solution
+	\item pros and cons? polynomial time, however it means that it cannot be done continuously
+	\item i.e. the heuristic can be applied during scoring, but with the exact alg, a full solution must be found before any scoring can occur, as boxes can be moved around
+\end{enumerate}
+
 \begin{definition}
+	% Alternating Hamiltonian Path/cycle
 	Let $G(V,P\cup E)$ be an undirected graph, where $P \cap E = \emptyset$. Then $G$ has an alternating Hamiltonian path (or cycle) if there exists a Hamiltonian path (or cycle) on $G$ such that the successive edges are members of different edge sets, *i.e. if vertex $v_k$ is adjacent to vertex $v_{k-1}$ via an edge from $P$, then $v_k$ must be adjacent to vertex $v_{k+1}$ via an edge from $E$, or vice versa. $G$ is said to be alternating Hamiltonian if and only if there exists an alternating Hamiltonian cycle on $G$. (OR *i.e. if $\{v_{k-1}, v_k\} \in P$, then $\{v_k, v_{k+1}\} \in E$, or vice versa.)
 \end{definition}
 
 
+
+
+
 \subsection{Intro}
+\begin{enumerate}
+	\item Notation
+	\item Creating two sets of edges
+	\item Alternating Hamiltonian Path/cycle
+\end{enumerate}
 \begin{itemize}
 	\item $n$ boxes, each box has two score lines, one on each side (mates)
 	\item Score width - distance between edge of box and score line
@@ -44,47 +78,77 @@
 	\item two sets of edges, $P$ and $T$
 	\item add dominating vertices
 	\item we want to find an alternating hamiltonian path, edges alternating between set $P$ and set $T$.
+	\item -----------------------
+	\item each box has same height, varying width (introduction?)
+	\item vertices have values corresponding to the score width
+	\item two vertices that represent either side of the same box are called ``mates''
+	\item add dominating vertices that are mates with value = mkd, removed at the end
+	\item so graph has $2n + 2$ vertices
+	\item mates must be adjacent to one another, so we have a set of edges $P$ that consists of edges between mates
+	\item each of these edges are weighted, value corresponds to boxwidth
+	\item seconds set of edges $T$: if the sum of two score widths from different boxes is greater than or equal to the mkd, the corresponding vertices will be connected with an edge 
+	\item called these matched
+	\item or if the sum of two vertices that are not adjacent via an edge from $P$ is $\geq$ mkd, connect via an edge
+	\item picture threshold graph colours or dots?	
 \end{itemize}
 
+
+--------------------------------\\
 Let each box be represented by two vertices on a graph $G$, one vertex for each side of the box. Each vertex is assigned a value corresponding to the width of the score it represents. We refer to two vertices that represent either side of the same box as ``mates''. The boxes cannot be altered in anyway, and so vertices that are mates must be adjacent to one another. Thus, we have a set of edges $P$ that consists of edges between mates.
 
 As described in the introduction, let $\tau \in \mathbb{R}_{+}$ be the minimum scoring distance. If the sum of the values of two vertices $\{u, v\}$ is greater than or equal to $\tau$, and $\{u,v\} \notin P$, then we can connect these two vertices with an edge. Hence we have another set of edges $T$ consisting of edges between vertices that could ?  
 
 \subsection{MTGMA}
+\begin{enumerate}
+	\item explain max cardinality matching algorithm excluding edges from $P$
+	\item swap of mates
+	\item if $|M| = n$, continue, else fail, no feasible arrangement of the boxes exists
+\end{enumerate}
 \begin{itemize}
 	\item need a suitable matching $M\subset E$ s.t. $|M| = n-1$ CHECK THIS NOW WE HAVE DOMINATING VERTICES
 	\item maximum cardinality matching algorithm for threshold graphs (Mahadev and Peled 1994)
 	\item modify algorithm so that duplicate edges from mates are deleted, only consider edges from matching
 	\item explain swap of mates??
 \end{itemize}
-Due to the structure of threshold graphs, there is a simple maximum cardinality matching algorithm (Mahadev and Peled, 1994) that produced a matching ?? containing suitable edges from $T$.
+
+
+There is a simple maximum cardinality matching algorithm (Mahadev and Peled, 1994) that produced a matching ?? containing suitable edges from $T$.
 
 Initially, the vertices are sorted in order of non-decreasing weights, with ties broken arbitrarily. Starting from the vertex with the smallest weight, attempt to match it with any vertex in its neighbourhood that has not yet been matched. If such a vertex is available, add the current vertex and its match to a set $I$ that keeps track of the matched vertices. Succesively proceed to the next largest vertex until all vertices have been assessed.
 
 
 
 \subsection{MIS}
-\begin{itemize}
-	\item either have one alternating cycle, or more than one
-	\item if one, remove extra vertices, final solution
-	\item if more than one cycle, need to find a way to join them together
-	\item need to find one edge in each cycle such that the current matches can be broken, and new matches can be made between them, creating one cycle
-\end{itemize}
+\begin{enumerate}
+	\item new graph, each vertex has degree 2 (connected to one vertex via edge from $P$ and one vertex via edge from $M$)
+	\item either one cycle, remove dominating vertices
+	\item 2+ cycles, need to connect all cycles together
+\end{enumerate}
+
 
 \subsection{FCA}
-\begin{itemize}
-	\item pair of edges from different cycles
-\end{itemize}
+\begin{enumerate}
+	\item find pairs of vertices in each cycle connected via a matching edge that can be broken and rematched
+	\item lower vertex adj to higher vertex of other cycle's edge
+	\item connect cycles together, remove dominating vertices
+	\item if cycles cannot be connected, then no feasible arrangement of all boxes exists
+\end{enumerate}
 
-
-
-
-
+\subsection{Other}
+\begin{enumerate}
+	\item benefits of this alg wrt FFD/BPP?
+\end{enumerate}
 
 
 \section{Experiments/Comparison}
 
 \section{Conclusion}
+
+\section{Other}
+\begin{itemize}
+	\item complexity
+\end{itemize}
+
 
 
 
