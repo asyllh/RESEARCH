@@ -54,11 +54,14 @@ int main(int argc, char **argv){
     //vector<vector<int> > strip(numBox);
     vector<vector<vector<int> > > population;
     vector<vector<int> > populationSum;
+    double parent1cost;
+    double parent2cost;
     //endregion
 
 
 
-    cout << "MSSP - MBAHRA\n-------------\n";
+    cout << "local search\n-------------\n";
+
     //srand(unsigned(time(NULL))); //seed
     srand(randomSeed);
 
@@ -70,7 +73,7 @@ int main(int argc, char **argv){
 
     createInitialPopulation(numScores, numBox, maxBoxWidth, maxStripWidth, allScores, mates, adjMatrix, boxWidths, populationSum, population);
 
-    EA(numScores, maxBoxWidth, maxStripWidth, allScores, mates, adjMatrix, boxWidths, populationSum, population);
+    EA(numScores, maxBoxWidth, maxStripWidth, parent1cost, parent2cost, allScores, mates, adjMatrix, boxWidths, populationSum, population);
 
 
     endTime = clock();

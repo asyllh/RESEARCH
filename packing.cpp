@@ -23,6 +23,23 @@ int lowerBound(double totalBoxWidth, int maxStripWidth){
     return lBound;
 }
 
+double fitness (int maxStripWidth, vector<int> &stripSum, vector<vector<int> > &strip){
+
+    int i;
+    double total = 0.0;
+    double final;
+
+    for(i = 0; i < strip.size(); ++i){
+        double a = static_cast<double>(stripSum[i]) / static_cast<double>(maxStripWidth);
+        total += pow(a, 2);
+    }
+
+    final = total / static_cast<double>(strip.size());
+
+    return final;
+
+}
+
 void FFDecreasing(int numScores, int numBox, int maxBoxWidth, vector<int> &mates, vector<vector<int> > &boxWidths, vector<int> &boxOrder){
 
     int i, mini;
@@ -251,7 +268,7 @@ void partialFFD(int numScores, int maxBoxWidth, int maxStripWidth, vector<int> &
     //cout << "After REPAIR FFD: " << partialSol.size() << " strips\n";
 
 
-    cout << "REPAIR Strips FFD (scores):\n";
+    /*cout << "REPAIR Strips FFD (scores):\n";
     for(i = 0; i < partialSol.size(); ++i){
         cout << "Strip " << i << ": ";
         for(j = 0; j < partialSol[i].size(); ++j){
@@ -265,7 +282,7 @@ void partialFFD(int numScores, int maxBoxWidth, int maxStripWidth, vector<int> &
     for(i = 0; i < partialSum.size(); ++i){
         cout << partialSum[i] << " ";
     }
-    cout << endl << endl;
+    cout << endl << endl;*/
 
 }
 
@@ -597,9 +614,9 @@ void localSearch(int numScores, int maxBoxWidth, int maxStripWidth, vector<int> 
     //endregion
 
     End:
-    cout << "Local Search complete\n-------------------\n";
+    //cout << "Local Search complete\n-------------------\n";
     if(feasible == 2){
-        cout << "stripY emptied\n\n";
+        /*cout << "stripY emptied\n\n";
         cout << "stripX:\n";
         for(i = 0; i < stripX.size(); ++i){
             for(j = 0; j < stripX[i].size(); ++j){
@@ -611,7 +628,7 @@ void localSearch(int numScores, int maxBoxWidth, int maxStripWidth, vector<int> 
         for(i = 0; i < stripSumX.size(); ++i){
             cout << stripSumX[i] << " ";
         }
-        cout << endl << endl;
+        cout << endl << endl;*/
 
         while(!strip.empty()){
             strip.pop_back();
@@ -627,7 +644,7 @@ void localSearch(int numScores, int maxBoxWidth, int maxStripWidth, vector<int> 
         }
     }
     else{
-        cout << "stripX:\n";
+        /*cout << "stripX:\n";
         for(i = 0; i < stripX.size(); ++i){
             for(j = 0; j < stripX[i].size(); ++j){
                 cout << stripX[i][j] << " ";
@@ -651,7 +668,7 @@ void localSearch(int numScores, int maxBoxWidth, int maxStripWidth, vector<int> 
         for(i = 0; i < stripSumY.size(); ++i){
             cout << stripSumY[i] << " ";
         }
-        cout << endl << endl;
+        cout << endl << endl;*/
 
         //Do FFD on stripY
 
@@ -691,7 +708,7 @@ void localSearch(int numScores, int maxBoxWidth, int maxStripWidth, vector<int> 
             stripSum.push_back(stripSumY[i]);
         }
 
-        cout << "Local search: " << strip.size() << " strips\n\n";
+        /*cout << "Local search: " << strip.size() << " strips\n\n";
         cout << "Strips (X and Y combined):\n";
         for(i = 0; i < strip.size(); ++i){
             cout << "Strip " << i << ": " ;
@@ -706,7 +723,7 @@ void localSearch(int numScores, int maxBoxWidth, int maxStripWidth, vector<int> 
         for(i = 0; i < stripSum.size(); ++i){
             cout << stripSum[i] << " ";
         }
-        cout << endl << endl;
+        cout << endl << endl;*/
 
 
     }
@@ -3101,10 +3118,10 @@ void MBAHRA(int swapType, int moveType, int &feasible, int i1, int a1, int b1, i
 
 }
 
-void EA(int numScores, int maxBoxWidth, int maxStripWidth, vector<int> &allScores, vector<int> &mates, vector<vector<int> > &adjMatrix,
+void EA(int numScores, int maxBoxWidth, int maxStripWidth, double &parent1cost, double &parent2cost, vector<int> &allScores, vector<int> &mates, vector<vector<int> > &adjMatrix,
         vector<vector<int> > &boxWidths, vector<vector<int> > &populationSum, vector<vector<vector<int> > > &population){
 
-    int i, j;
+    int i;
     vector<vector<int> > stripX;
     vector<vector<int> > stripY;
     vector<int> stripSumX;
@@ -3113,6 +3130,8 @@ void EA(int numScores, int maxBoxWidth, int maxStripWidth, vector<int> &allScore
 
     int k = 0;
     int l = 3;
+
+
 
     for(i = 0; i < population[k].size(); ++i){
         stripX.push_back(population[k][i]);
@@ -3124,8 +3143,12 @@ void EA(int numScores, int maxBoxWidth, int maxStripWidth, vector<int> &allScore
         stripSumY.push_back(populationSum[l][i]);
     }
 
+    parent1cost = fitness(maxStripWidth, stripSumX, stripX);
+    parent2cost = fitness(maxStripWidth, stripSumY, stripY);
 
     GGA(numScores, maxBoxWidth, maxStripWidth, allScores, mates, adjMatrix, boxWidths, stripSumX, stripX, stripSumY, stripY);
+
+
 }
 
 void GGA(int numScores, int maxBoxWidth, int maxStripWidth, vector<int> &allScores, vector<int> &mates, vector<vector<int> > &adjMatrix,
@@ -3163,7 +3186,7 @@ void GGA(int numScores, int maxBoxWidth, int maxStripWidth, vector<int> &allScor
         stripSumX.push_back(stripSumY[i]);
     }
 
-    for(i = 0; i < stripX.size(); ++i){
+    /*for(i = 0; i < stripX.size(); ++i){
         for(j = 0; j < stripX[i].size(); ++j){
             cout << stripX[i][j] << " ";
         }
@@ -3173,7 +3196,7 @@ void GGA(int numScores, int maxBoxWidth, int maxStripWidth, vector<int> &allScor
     for(i = 0; i < stripSumX.size(); ++i){
         cout << stripSumX[i] << " ";
     }
-    cout << endl;
+    cout << endl;*/
 
     for(i = 0; i < checked.size(); ++i){
         checked[i] = 1;
@@ -3206,10 +3229,10 @@ void GGA(int numScores, int maxBoxWidth, int maxStripWidth, vector<int> &allScor
             stripSumY.push_back(0);
         }
 
-        for (i = 0; i < absentBoxes.size(); ++i) {
+        /*for (i = 0; i < absentBoxes.size(); ++i) {
             cout << absentBoxes[i] << " ";
         }
-        cout << endl;
+        cout << endl;*/
 
         partialFFD(numScores, maxBoxWidth, maxStripWidth, mates, adjMatrix, boxWidths, absentBoxes, stripSumY, stripY);
 
