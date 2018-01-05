@@ -3,15 +3,19 @@
 % Allows separate files to be used in the main file
 \usepackage{subfiles}
 \usepackage{natbib}
+\bibpunct{(}{)}{;}{a}{,}{,}
 
 % Algorithms
 \usepackage{algorithm}
-\usepackage[noend]{algpseudocode}
+\usepackage{algpseudocode}
 \renewcommand{\algorithmicrequire}{\textbf{Input:}}
 \renewcommand{\algorithmicensure}{\textbf{Output:}}
 \newcommand{\IndStatex}[1][1]{\Statex\hspace{6mm}}
 \newcommand{\IndIndStatex}[1][1]{\Statex\hspace{12mm}}
 \newcommand{\IndIndIndStatex}[1][1]{\Statex\hspace{18mm}}
+\newcommand{\IndIndIndIndStatex}[1][1]{\Statex\hspace{24mm}}
+\newcommand{\IndIndIndIndIndStatex}[1][1]{\Statex\hspace{30mm}}
+\newcommand{\IndIndIndIndIndIndStatex}[1][1]{\Statex\hspace{36mm}}
 
 % Contains advanced math extensions
 \usepackage{amsmath}
@@ -51,7 +55,7 @@
 \hypersetup{
 	colorlinks,
 	linkcolor={red!50!black},
-	citecolor={green!20!black},
+	citecolor={green!30!black},
 	urlcolor={blue!80!black}
 }
 

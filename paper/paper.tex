@@ -2,7 +2,7 @@
 
 \input{includes/preamble.tex}
 
-\title{Heuristics for the Score Constrained Bin-Packing Problem}
+\title{Heuristics for the Score-Constrained Bin-Packing Problem}
 \author{Asyl L. Hawa \and Rhyd M. R. Lewis \and Jonathan M. Thompson}
 \institute{School of Mathematics, Cardiff University, Senghennydd Road, Cardiff, UK, CF24 4AG}
 \date{\today}
@@ -18,63 +18,117 @@
 \label{sec:intro}
 
 The one-dimensional bin packing problem (BPP) is a combinatorial optimisation problem that has been widely researched and discussed due to its ability to model a variety of real-life sitations.
-The BPP can be described as follows: given a set of $n$ items of varying sizes $w$, and a finite number of bins with equal capacity $c$, find the minimum number of bins required to contain all of the items. As shown by \cite{garey1979}, this problem is NP-hard, and therefore (under the assumption that $P \neq NP$) there is no known algorithm that is able to find an optimal solution in polynomial time for every instance of the BPP. Instead, heursitics can be used to find a near-optimal solution in a shorter amount of time. One example is the greedy heuristic known as first-fit, an online algorithm that places each item (in some arbitrary order) into the lowest-indexed bin. If there are no bins that can feasibly accommodate the item, the algorithm places the item into a new bin. A modified version of first-fit yields the well-known first-fit decreasing (FFD) algorithm (\cite{eilon1971}), which initially sorts the items into non-decreasing order of size before allocating them into bins. As proven by \cite{dosa2007}, the worst case for FFD is $\frac{11}{9}k + 4$ bins, where $k$ is the optimal number of bins given by $\ceil{\frac{\sum_{i=1}^{n} w_{i}}{c}}$ (\cite{korf2002}).
+The BPP can be described as follows: given a set of $n$ items of varying sizes $w$, and a finite number of bins with equal capacity $c$, find the minimum number of bins required to contain all of the items. As shown by \cite{garey1979}, this problem is NP-hard, and therefore (under the assumption that $P \neq NP$) there is no known algorithm that is able to find an optimal solution in polynomial time for every instance of the BPP. Instead, heursitics can be used to find a near-optimal solution in a shorter amount of time. One example is the greedy heuristic known as first-fit, an online algorithm that places each item (in some arbitrary order) into the lowest-indexed bin. If there are no bins that can feasibly accommodate the item, the algorithm places the item into a new bin. A modified version of first-fit yields the well-known first-fit decreasing (FFD) algorithm (\citealp{eilon1971}), which initially sorts the items into non-decreasing order of size before allocating them into bins. As proven by \cite{dosa2007}, the worst case for FFD is $\frac{11}{9}k + 4$ bins, where $k$ is the optimal number of bins given by $\ceil{\frac{\sum_{i=1}^{n} w_{i}}{c}}$ (..if the solution has this many bins then it is optimal, (\citealp{korf2002})).
 
-
-
-In 2004, Goulimis brought to light an open-combinatorial problem related to the bin-packing problem. Corrugated boxes are formed in two stages: firstly, they are produced flat, then a device consistsing of knives mounted on a bar creates ``scores'' along fold lines on the flat boxes. These scores allow the boxes to be folded in predetermined places. The first stage of this process involves finding a feasible pattern of the flat boxes that minimises the amount of waste, and has been researched extensively. It is classically solved by delayed column-generation \citep{gilmore1961, gilmore1963}. However, the second step of this process requires an additional constraint.
+In 2004, Goulimis brought to light an open-combinatorial problem related to the bin-packing problem. Corrugated boxes are formed in two stages: firstly, they are produced flat, then a device consistsing of knives mounted on a bar creates ``scores'' along specific lines on the flat boxes. These scores allow the boxes to be folded in predetermined places. The first stage of this process involves finding a feasible pattern of the flat boxes that minimises the amount of waste, and has been researched extensively. It is classically solved by delayed column-generation (\citealp{gilmore1961, gilmore1963}). However, the second step of this process requires an additional constraint.
 
 The scoring knives, by design, cannot be placed too close together (around 70mm in industry), and as such have a ``minimum knife distance''. The problem then becomes a bin-packing problem with an additional constraint: find a feasible arrangement of boxes such that the sum of two adjacent score widths from different boxes is greater than or equal to the minimum knife distance. We will call this constraint the minimum total width constraint.
 
 \textcolor{red}{INSERT FIGURE TWO BOXES ANNOTATED AND KNIVES ON BAR FOLD LINES SCORE WIDTH}
 
-There exists a polynomial time algorithm that is able to recognise whether a particular instance of the problem is feasible or infeasible (\cite{becker2010}) (i.e. whether all boxes can be arranged in one line). However, the algorithm does not consider the lengths of each individual box, or the total length of the final arrangement of boxes. In industry, strips of materials are provided in fixed lengths, so, given a large number of boxes to pack, it may not be feasible to pack all of the boxes onto one strip. 
+\textcolor{blue}{Figure showing two boxes with score widths and the scoring knives mounted on a bar. Since the sum of the two adjacent score widths from different boxes is greater than or equal to 70mm, the minimum total width constraint has been met - this is a feasible alignment of these two boxes}
+
+There exists a polynomial time algorithm that is able to recognise whether a particular instance of the problem is feasible or infeasible (\citealp{becker2010}) (i.e. whether all boxes can be arranged in one line). However, the algorithm does not consider the lengths of each individual box, or the total length of the final arrangement of boxes. In industry, strips of materials are provided in fixed lengths, so, given a large number of boxes to pack, it may not be feasible to pack all of the boxes onto one strip. 
 
 This leads us to our main problem: given a collection of boxes with varying widths and score widths on either side, and strips of a fixed length, find the minimum number of strips required to accommodate all of the boxes, such that the minimum total width constraint is met between all boxes on all strips. 
 
 The remainder of this report will firstly, in Section \ref{sec:ffdapprox}, introduce the first-fit decreasing approximate algorithm and describe the modifications made to consider the minimum score width constraint. In Section \ref{sec:ffdexact}, we will present a new algorithm which consists of the modified first-fit decreasing algorithm detailed in the previous section combined with a polynomial-time algorithm which will be used to find feasible sub-solutions. A comparison of the two algorithms and an analysis of the results will be provided in Section \ref{sec:compresult}, and finally Section \ref{sec:conclusion} concludes the paper and proposes some potential directions for furture work.
 
-
-
 \begin{itemize}
-	\item \textcolor{red}{original BPP}
-	\item Definition of problem: packing items of different sizes into a finite number of bins/containers that have a fixed size such that the number of bins/containers required is minimised.
-	\item Combinatorial NP-hard problem (computational complexity) Gary and Johnson 1979
-	\item NP-Complete (decision problem)
-	\item Heuristics
-	\item FF and FFD
-	\item FF can produce a feasible solution quickly, but the solution may not be optimal O(nln n), n is the number of items that need to be packed.
-	\item ``There exists at least one ordering of items that allows FF to produce an optimal solution'' (wiki) Rhyd Lewis 2009
-	\item ``bound for FFD is tight'' (wiki)
-	\item 2015 Hoberg and Rothvoss proposed and proofed a new complexity for the algorithm FF (wiki)
+	\item FF if online, FFD is offline
+	\item FF and FFD can produce a feasible solution quickly, but the solution may not be optimal O(nln n), where n is the number of items that need to be packed
 	\item Exact algorithms, Martello and Toth (MTP), Bin Completion algorithm Korf 2002, Schreiber and Korf (2013) (wiki)
 	\item \textcolor{blue}{Although there are exact solutions available for the BPP} (martello knapsack MTP 1989 (1990b) ``is based on a first-fit decreasing'' branching strategy and is the best existing algorithm for optimal packing (KOrf2002)'', hung and brown 1978 ``a branch-and-bound algorithm'' paper title:``an algorithm for a class of loading problems'', eilon christofides 1971 ``a depth-first numerative algorithm'' paper title: ``the loadings problem'', schreiber and korf 2002 bin completion algorithm) \textcolor{blue}{they are only able to find solutions to problems that have a small input size.}
 	\item ``Hence, exact solution techniques are bound to work well for small to medium sized problem instances only, and real world sized problems including up to thousands of items have to be solved heuristically.''
-	
-	\item \textcolor{red}{Score constraints}	
-	\item Goulimis 2004, score constraints for packing and folding
-	\item Explain knives for scoring
+	\item ``There exists at least one ordering of items that allows FF to produce an optimal solution'' (wiki) Rhyd Lewis 2009
 	\item Picture of box with score widths, score lines
 	\item All boxes have same height, different widths, different score widths
-	\item ``Threshold'' ``minimum knife distance'' ``minimum score separation constraint'' ``minimum score line distance'', ``minimum score line constraint'' ``minimum total width constraint'' 70mm industry
-	\item Becker alg exact, P, but without packing, all boxes on one strip
-	\item \textcolor{red}{Multiple strips}
-	\item Material may not come in long sizes, instead short sizes of fixed length
-	\item find optimal arrangement of boxes on strips while mimimising waste and number of strips required
+	\item Recognition algorithm Becker
+	\item Formal statement of BPP with score constraint called the Score Constrained Bin packing problem (SCBPP): given
+	\item dicuss other paper/articles with this problem, i.e. rhyd 2017
 	
-	\item Formal statement of BPP with score constraint
-	
-	\item layout of paper
 \end{itemize}
+
 
 \section{FFD Using Approximate Algorithm}
 \label{sec:ffdapprox}
+
+\begin{itemize}
+	\item discuss heuristics
+	\item ``Heuristics are approximate solution techniques that typically provide solutions in the least amount of time to the detriment of the solutions quality''
+	\item ``Exact methods find a best possible packing, but are slow and may be unable to provide solutions to large or reastically sized problem instances within reasonable time''
+	\item ``Consider a set of $n$ items. In the context of bin packing problems, heuristics consider these items one-by-one and attempt to pack them into a bin so as to achieve a near-optimal solution without the guarantee that a solution is optimal.''
+	\item ``Exact packing methods are often called deterministic methods and are guarantees to find an optimal solution to a problem (given sufficient time and a feasible region) while heuristics attempt to find optimal solutions, but are not guaranteed to do so.''
+	\item ``Exact methods may often be too slow to solve large problem instances, but may typically be used to solve smaller ones.''
+	\item ``Packing heuristics follow a fixed set of rules to pack items in such a manner as to find good, feasible (but not necessarily optimal) solutions to the bin packing problem within as short a time span as possible.''
+	\item offline algorithm, whole problem data is provided/required at the start.
+	\item online, doesn't consider future events/items, data is processed in the order that it is input into the algorithm, entire input is not required to be available from the start
+	\item ``first-fit decreasing (FFD) algorithm for one-dimensional bin packing by johnson et al (1974, worst-case performance bounds for simple one-dimensional packing algorithms)''
+	\item FF is online, FFD is offline
+	\item FF and FFD can produce a feasible solution quickly, but the solution may not be optimal, O(nln n), where n is the number of items that need to be packed
+	\item who stated that ffd is O(nlog n)?
+	\item Coffman et al 1984 heuristics survey
+	\item \textcolor{blue}{Describe how the ffdapprox algorithm works}
+	\item \textcolor{red}{figure of packed boxes on strips}
+	\item previously placed boxes are fixed, cannot be rearranged
+	\item complexity of modified FFD for SCBPP
+	\item background information on FFD
+	\item works in the same way as FFD, but with an additional step - each box must meet the minimum total score width constraint, so if a box fits onto a strip, we start by checking if the smallest of the two score widths on the box, and the free score width on the end of the current strip, meet the mtswc. If not, then we rotate the box $180^{\circ}$ and check again if the mtswc is met. If neither score width on the box meets the mtswc with the free score width, then we move onto the next strip and try again.
+	\item start from bottom of strip/end of strip, pack from left to right
+	\item Karp complexity
+	\item \textcolor{red}{figure of one packed strip indicating free score end $e$}
+	\item pros and cons: speed, however there may be a solution that exists that cannot be found due to boxes being fixed in place
+	\item In this algorithm, the boxes are sorted by non-increasing widths prior to packing.
+	\item If a box does not fit onto any existing strips, a new strip is initialised.
+	\item Initially, pack the largest (widest/box with the largest width/first box in the sorted list of boxes) box into the first strip.
+	
+	
+\end{itemize}
+
+\begin{algorithm}[H]
+	\caption{First-Fit Decreasing Algorithm for the Score-Constrained Bin-Packing Problem}
+	\label{alg:ffdapprox}
+	\begin{algorithmic}[1]
+		\Require $n$ boxes with widths $w_i$, each box has two score widths $u_{i1} \text{ and } u_{i2}$, where $u_{i1}$ is the smaller of the two score widths, n strips of fixed lengths $l \text { and residual length } r_j \text { which is initially set to } l$. $j = 1,2, ..$ strips. $e_j$ is the score width at the end of strip $j$, i.e a score width of the most recent box packed into that strip, free end, etc. $t$ is the minimum total score width that must be met in order for the boxes to be packed. Assume no box has a width that is larger than the strip length, i.e. $w_i \leq l \forall i $. Could do strips set $S$ with $\{u_{i1}, u_{i2}\}$ representing box on strip $S_j$ with smallest score width first, and $\{u_{i2}, u_{i1}\}$ representing box with larger score width first. need to put $i = 1, 2, ..., n$ and $j = 1, 2, ...$.
+		\State Sort boxes in non-increasing order of widths, breaking ties arbitrarily
+		\ForAll{boxes $i = 1, 2, ..., n$}
+			\ForAll{strips $j = 1,2,...$}
+				\If{$r_j < l \land w_i \leq r_j $}
+					\If{$e_j + s_{i1} \geq t$}
+						\IndIndIndStatex $S_j \gets S_j + \{\{u_{i1}, u_{i2}\}\}$
+						\IndIndIndStatex $r_j \gets r_j - w_i$
+						\IndIndIndStatex break
+					\ElsIf{$e_j + s_{i2} \geq t$}
+						\IndIndIndStatex $S_j \gets S_j + \{\{u_{i2}, u_{i1}\}\}$
+						\IndIndIndStatex $r_j \gets r_j - w_i$
+						\IndIndIndStatex break
+					\EndIf
+				\ElsIf{$r_j = l$}
+					\IndIndStatex $S_j \gets S_j + \{\{u_{i1}, u_{i2}\}\}$
+					\IndIndStatex $r_j \gets r_j - w_i$
+					\IndIndStatex break
+				\EndIf
+			\EndFor
+		\EndFor
+		\Ensure all boxes packed onto strips while meeting minimum total width constraint. Set $S$ is all strips with boxes in correct rotation to meet minimum total score width constraint.
+		
+	\end{algorithmic}	
+\end{algorithm}
+
+
+
+
+
 
 \section{FFD Using Exact Algorithm}
 \label{sec:ffdexact}
 
 \section{Comparison and Results}
 \label{sec:compresult}
+
+\begin{itemize}
+	\item ``Dowsland and Dowsland (1992, ``Packing Problems'') comment that while average or worst-case performance bounds are useful guidelines, it is best to determine an algorithm's usefuless by testing it on data sets typical to the intended problem. Repositories are available on the internet where benchamrk data sets for packing problems are stored for the purpose of evaluating algorithms.''
+\end{itemize}
 
 \section{Conclusion}
 \label{sec:conclusion}
@@ -132,7 +186,7 @@ The remainder of this report will firstly, in Section \ref{sec:ffdapprox}, intro
 
 \cite{mahadev1995}: Threshold graphs and related topics
 
-\cite{martello1990}: Knapsack problems. ``(cite martello1990) proposed a branch-and-bound based exact algorithm MTP for the BPP.'' 
+\cite{martello1990b}: Knapsack problems. ``(cite martello1990) proposed a branch-and-bound based exact algorithm MTP for the BPP.'' 
 
 
 

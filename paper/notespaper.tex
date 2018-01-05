@@ -13,6 +13,38 @@
 \end{abstract}
 
 \section{Introduction}
+
+\begin{itemize}
+	\item \textcolor{red}{original BPP}
+	\item Definition of problem: packing items of different sizes into a finite number of bins/containers that have a fixed size such that the number of bins/containers required is minimised.
+	\item Combinatorial NP-hard problem (computational complexity) Gary and Johnson 1979
+	\item NP-Complete (decision problem)
+	\item Heuristics
+	\item FF and FFD
+	\item FF can produce a feasible solution quickly, but the solution may not be optimal O(nln n), n is the number of items that need to be packed.
+	\item ``There exists at least one ordering of items that allows FF to produce an optimal solution'' (wiki) Rhyd Lewis 2009
+	\item ``bound for FFD is tight'' (wiki)
+	\item 2015 Hoberg and Rothvoss proposed and proofed a new complexity for the algorithm FF (wiki)
+	\item Exact algorithms, Martello and Toth (MTP), Bin Completion algorithm Korf 2002, Schreiber and Korf (2013) (wiki)
+	\item \textcolor{blue}{Although there are exact solutions available for the BPP} (martello knapsack MTP 1989 (1990b) ``is based on a first-fit decreasing'' branching strategy and is the best existing algorithm for optimal packing (KOrf2002)'', hung and brown 1978 ``a branch-and-bound algorithm'' paper title:``an algorithm for a class of loading problems'', eilon christofides 1971 ``a depth-first numerative algorithm'' paper title: ``the loadings problem'', schreiber and korf 2002 bin completion algorithm) \textcolor{blue}{they are only able to find solutions to problems that have a small input size.}
+	\item ``Hence, exact solution techniques are bound to work well for small to medium sized problem instances only, and real world sized problems including up to thousands of items have to be solved heuristically.''
+	
+	\item \textcolor{red}{Score constraints}	
+	\item Goulimis 2004, score constraints for packing and folding
+	\item Explain knives for scoring
+	\item Picture of box with score widths, score lines
+	\item All boxes have same height, different widths, different score widths
+	\item ``Threshold'' ``minimum knife distance'' ``minimum score separation constraint'' ``minimum score line distance'', ``minimum score line constraint'' ``minimum total width constraint'' 70mm industry
+	\item Becker alg exact, P, but without packing, all boxes on one strip
+	\item \textcolor{red}{Multiple strips}
+	\item Material may not come in long sizes, instead short sizes of fixed length
+	\item find optimal arrangement of boxes on strips while mimimising waste and number of strips required
+	
+	\item Formal statement of BPP with score constraint called the Score Constrained Bin packing problem: given ...
+	
+	\item layout of paper
+\end{itemize}
+
 \begin{enumerate}
 	\item Goulimis (2004)
 	\item boxes are scored in specfici places to make folding easier 
@@ -43,8 +75,7 @@
 	\item if a box can fit onto a strip, instead of attempting to place on the end, we apply this algorithm
 	\item therefore unlike the heuristic above, boxes are not fixed in place, all boxes can be reordered
 	\item then go on to explain mbahra + output of solution
-	\item pros and cons? polynomial time, however it means that it cannot be done continuously
-	\item i.e. the heuristic can be applied during scoring, but with the exact alg, a full solution must be found before any scoring can occur, as boxes can be moved around
+	\item pros and cons? polynomial time, however it means that it cannot be done continuously, i.e. the heuristic can be applied during scoring, but with the exact alg, a full solution must be found before any scoring can occur, as boxes can be moved around
 \end{enumerate}
 
 \begin{definition}
