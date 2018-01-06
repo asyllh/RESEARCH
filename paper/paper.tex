@@ -97,16 +97,16 @@ The remainder of this report will firstly, in Section \ref{sec:ffdapprox}, intro
 					\If{$e_j + s_{i1} \geq t$}
 						\IndIndIndStatex $S_j \gets S_j + \{\{u_{i1}, u_{i2}\}\}$
 						\IndIndIndStatex $r_j \gets r_j - w_i$
-						\IndIndIndStatex break
+						\IndIndIndStatex \Break
 					\ElsIf{$e_j + s_{i2} \geq t$}
 						\IndIndIndStatex $S_j \gets S_j + \{\{u_{i2}, u_{i1}\}\}$
 						\IndIndIndStatex $r_j \gets r_j - w_i$
-						\IndIndIndStatex break
+						\IndIndIndStatex \Break
 					\EndIf
 				\ElsIf{$r_j = l$}
 					\IndIndStatex $S_j \gets S_j + \{\{u_{i1}, u_{i2}\}\}$
 					\IndIndStatex $r_j \gets r_j - w_i$
-					\IndIndStatex break
+					\IndIndStatex \Break
 				\EndIf
 			\EndFor
 		\EndFor
@@ -114,6 +114,12 @@ The remainder of this report will firstly, in Section \ref{sec:ffdapprox}, intro
 		
 	\end{algorithmic}	
 \end{algorithm}
+
+DESCRIPTION OF FFDAPPROX 
+\begin{itemize}
+	\item start by sorting all boxes into non-increasing order of widths, breaking ties arbitrarily
+	\item starting with the first box in the list (i.e with the box that has the largest width), check if the box is able to feasibly fit onto the first used strip available, i.e. a strip that already contains a box.  
+\end{itemize}
 
 
 
