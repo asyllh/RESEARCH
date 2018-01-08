@@ -23,7 +23,7 @@ The BPP can be described as follows: given a set of $n$ items of varying sizes $
 
 In 2004, Goulimis brought to light an open-combinatorial problem related to the bin-packing problem. Corrugated boxes are formed in two stages: firstly, they are produced flat, then a device consistsing of knives mounted on a bar creates ``scores'' along specific lines on the flat boxes. These scores allow the boxes to be folded in predetermined places. The first stage of this process involves finding a feasible pattern of the flat boxes that minimises the amount of waste, and has been researched extensively. It is classically solved by delayed column-generation (\citealp{gilmore1961, gilmore1963}). However, the second step of this process requires an additional constraint.
 
-The scoring knives, by design, cannot be placed too close together (around 70mm in industry), and as such have a ``minimum knife distance''. The problem then becomes a bin-packing problem with an additional constraint: find a feasible arrangement of boxes such that the sum of two adjacent score widths from different boxes is greater than or equal to the minimum knife distance. We will call this constraint the minimum total width constraint.
+The scoring knives, by design, cannot be placed too close together (around 70mm in industry), and as such have a ``minimum knife distance''. The problem then becomes a bin-packing problem with an additional constraint: find a feasible arrangement of boxes such that the sum of two adjacent score widths from different boxes is greater than or equal to the minimum knife distance. We will call this constraint the minimum total score width constraint.
 
 \textcolor{red}{INSERT FIGURE TWO BOXES ANNOTATED AND KNIVES ON BAR FOLD LINES SCORE WIDTH}
 
@@ -90,30 +90,30 @@ Definition: Score-Constrained Bin-Packing Problem. Find the minimum number of st
 \end{itemize}
 
 \begin{algorithm}[H]
-\caption{First-Fit Decreasing Algorithm for the Score-Constrained Bin-Packing Problem}
-\label{alg:ffdapprox}
+	\caption{\textcolor{red}{First-Fit Decreasing Algorithm for the Score-Constrained Bin-Packing Problem}}
+	\label{alg:ffdapprox}
 	\begin{algorithmic}[1]
 	\Require $n$ boxes with widths $w(i)$ for $i = 1,2,...,n$, each box $i$ has two scores $i_1$ (smaller score width) and $i_2$ (larger score width), where $w(i_1) \leq w(i_2)$. Let $\{i_1, i_2\}$ represent box $i$ aligned such that the smaller score is on the LHS, and let $\{i_2, i_2\}$ represent box $i$ rotated by $180^{\circ}$ such that the larger score is on the LHS. Strips are packed from left to right. Finite number of strips $S_j, j = 1, 2, ...$ that all have equal fixed length $l > 0$, and a residual length $r(j)$, where initially $r(j) = l \forall j = 1, 2, ...$. Initially $S_j = \emptyset \forall j = 1, 2,...$. Let $w(f_j)$ denote the width of the free score for strip $j$.   
 	\State Sort boxes in non-increasing order of widths, breaking ties arbitrarily
 	\State $i \gets 1, j \gets 1$
-	\State $S_j \gets S_j + \{\{i_1, i_2\}\}$
+	\State $S_j \gets S_j \cup \{i_1, i_2\}$
 	\State $r(j) \gets r(j) - w(i)$
 	\For{$i \gets 2$ \textbf{to} $n$}
 		\For{$j \gets 1$ \textbf{to} $n$}
 			\If{$S_j \neq \emptyset \land w(i) \leq r(j)$}
 				\If{$w(f_j) + w(i_1) \geq t$}
-					\IndIndIndStatex $S_j \gets S_j \cup \{i_1, i_2\}$
-					\IndIndIndStatex $r(j) \gets r(j) - w(i)$
-					\IndIndIndStatex \Break
+					\State $S_j \gets S_j \cup \{i_1, i_2\}$
+					\State $r(j) \gets r(j) - w(i)$
+					\State \Break
 				\ElsIf{$w(f_j) + w(i_2) \geq t$}
-					\IndIndIndStatex $S_j \gets S_j \cup \{i_2, i_1\}$
-					\IndIndIndStatex $r(j) \gets r(j) - w(i)$
-					\IndIndIndStatex \Break					
+					\State $S_j \gets S_j \cup \{i_2, i_1\}$
+					\State $r(j) \gets r(j) - w(i)$
+					\State \Break					
 				\EndIf
 			\ElsIf{$S_j = \emptyset$}
-				\IndIndStatex $S_j \gets S_j \cup \{i_1, i_2\}$
-				\IndIndStatex $r(j) \gets r(j) - w(i)$
-				\IndIndStatex \Break
+				\State $S_j \gets S_j \cup \{i_1, i_2\}$
+				\State $r(j) \gets r(j) - w(i)$
+				\State \Break
 			\EndIf
 		\EndFor
 	\EndFor		
@@ -147,54 +147,88 @@ Introduction
 	\item algorithm also doesn't output a full solution, only whether there exists a feasible solution or not
 	\item ffd but including an algorithm that can find a feasible aligment of boxes with score constraints if one exists
 	\item unlike ffd, where boxes are placed onto the end of each strip, the boxes are not fixed in place, all boxes can be reordered.
+	\item Can find a solution for a set of boxes on a strip when it may not have been possible to find one in ffdapprox due to only the last box being checked.
 	\item try to find a hamiltonian path 
+	\item complexity $O(n^2), O(n)$ to construct a solution
+	\item if the algorithm cannot find a feasible alignment of the boxes including the current box, move onto next strip and try again.
 \end{itemize}
 
 Explanation: Initialise
 \begin{itemize}
-	\item initialise
+	\item Let each box be represented by two vertices on a graph $G$, one vertex for each side of the box. Each vertex has a value corresponding to the score width it represent. We will refer to two vertices that represent either side of the same box as ``partners''. The boxes cannot be altered in any way, and so the pairs of vertices must be adjacent to one another on the graph. 
+	\item Add extra dominating box with dominating score widths equal to the minimum total score width, the dominating box will be removed at the end.
+	\item Therefore we connect pair of vertices that are partners via an edge on the graph $G$.
+	\item Call this set of edges $P$.
+	\item Edges of P are also weighted, value equivalent to the corresponding box width.
+	\item For every pair of vertices on $G$, if the sum of their values/score widths is greater than or equal to the minimum total score width, and the two vertices are not partners/not connected via an edge from $P$, connect the vertices with an edge - call this set of edges $Q$ (These edges are not weighted).
+	\item Call a pair of vertices connected via an edge from $Q$ ``matched''.
+	\item We want to find an alternating Hamiltonian cycle, where successive edges alternate from sets $P$ and $Q$.
 \end{itemize}
-
-Let each box be represented by two vertices on a graph $G$, one vertex for each side of the box. Each vertex has a value corresponding to the score width it represent. We will refer to two vertices that represent either side of the same box as ``mates''. The boxes cannot be altered in any way, and so the pairs of vertices must be adjacent to one another on the graph. 
-
-------------------
 
 MTGMA/MIS
 \begin{itemize}
-	\item mtgma/mis
+	\item \cite{mahadev1994} Maximum cardinality matching algorithm.
+	\item From the set of edges $Q$, we need to obtain a set of edges $M \subset Q$ of cardinality $n$ such that the edges from sets $M$ and $P$ form an alternating Hamiltonian cycle.
+	\item We use a simple maximum cardinality matching algorithm to obtain the set of edges $M$ (the matching).
+	\item Explain algorithm.
+	\item Swap of partners?
+	\item Explain matching on a graph.
+	\item If $|M| < n$, then infeasible, there is no feasible arrangement of the boxes such that the minimum total score width constraint is met, exit.
+	\item If $|M| = n$, then we should have at least one alternating Hamiltonian cycle.
+	\item If there is only one cycle, remove the dominating vertices, obtain final solution of boxes in order they should be packed, exit.
+	\item Else, if there is more than one cycle, we need to find a way to combine these cycles into one alternating Hamiltonian cycle.
 \end{itemize}
 
-FIS/Patch
+FCA/Patch
 \begin{itemize}
-	\item fis/patch
+	\item Find pairs of vertices in each cycle connected via a matching edge/ edge from $M$ that can be broken and rematched.
+	\item Break/remove matching edges between vertices and create/add new matching edges such that the cycles are combined/connected.
+	\item If there are no vertices that can be rematched from different cycles, then the cycles cannot be joined together, and therefore there is no feasible solution.
+	\item Else, if we are able to join the cycles together to create one alternating Hamiltonian cycle, we then simply have to remove the dominating vertices to obtain a final solution/feasible alignment of the boxes.
+	\item Sort edges, successive edges, see if edges are from different cycles and if the smaller vertex of the lower indexed edge is adjacent to the larger vertex of the higher indexed edge.
 \end{itemize}
 
 
+\begin{algorithm}[H]
+	\caption{\textcolor{blue}{First-Fit Decreasing Algorithm for the Score-Constrained Bin-Packing Problem}}
+	\label{alg:ffdexact}
+	\begin{algorithmic}[1]
+	\Require fill in.   
+	\State Sort boxes in non-increasing order of widths, breaking ties arbitrarily
+	\State $i \gets 1, j \gets 1$
+	\State $S_j \gets S_j \cup \{i_1, i_2\}$
+	\State $r(j) \gets r(j) - w(i)$
+	\For{$i \gets 2$ \textbf{to} $n$}
+		\For{$j \gets 1$ \textbf{to} $n$}
+			\If{$S_j \neq \emptyset \land w(i) \leq r(j)$}
+				\State Perform \textcolor{red}{algorithm} on boxes in $S_j$ and box $i$
+				\If{feasible alignment of boxes found}
+					\State Replace alignment of boxes in $S_j$ with new box alignment including box $i$
+					\State $r(j) \gets r(j) - w(i)$
+					\State \Break
+				\EndIf
+			\ElsIf{$S_j = \emptyset$}
+				\State $S_j \gets S_j \cup \{i_1, i_2\}$
+				\State $r(j) \gets r(j) - w(i)$
+				\State \Break
+			\EndIf
+		\EndFor
+	\EndFor		
+	\Ensure all boxes packed onto strips while meeting minimum total width constraint. Set $S$ is all strips with boxes in correct rotation to meet minimum total score width constraint.	
+	\end{algorithmic}	
+\end{algorithm}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+DESCRIPTION FFD EXACT
+\begin{itemize}
+	\item Start with boxes sorted in order of non-increasing widths, breaking ties arbitrarily.
+	\item Place the first box onto the first strip, such that the smaller of the two score widths is on the leftmost side of the strip.
+	\item Attempt to fit each box $i, i = 2,..., n$ onto the lowest-indexed strip possible that already contains a box, i.e. the strip is not empty.
+	\item If a box is able to feasibly fit onto a strip, apply the \textcolor{red}{algorithm} on all of the boxes on the strip plus the current box $i$.
+	\item If a feasible alignment of the boxes has been found, replace the current alignment of boxes on the strip with the new alignment, which includes box $i$ (and move onto the next box).
+	\item If no feasible alignment of the boxes is found, we move onto the next lowest-indexed strip and repeat.
+	\item If a box cannot fit into any of the used strips, i.e. any of the strips that already contain a box/any of the open strips, we then place the box onto a new, unused strip, such that the smaller of the two score widths on the box is on the leftmost side of the strip, then move onto the next box.
+	\item Continue untill all boxes have been placed onto a strip/until all boxes have been packed.
+\end{itemize}
 
 
 
@@ -259,6 +293,8 @@ FIS/Patch
 \cite{lewis2017}: How to pack trapezoids
 
 \cite{lewis2011}: An investigation into two bpp with ordering and orientation implications
+
+\cite{mahadev1994}: Longest cycle in threshold graphs
 
 \cite{mahadev1995}: Threshold graphs and related topics
 
