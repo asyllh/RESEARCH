@@ -87,6 +87,7 @@ Definition: Score-Constrained Bin-Packing Problem. Find the minimum number of st
 	\item If a box does not fit onto any existing strips, a new strip is initialised.
 	\item Initially, pack the largest (widest/box with the largest width/first box in the sorted list of boxes) box into the first strip.
 	\item ``Simchi-Levi (1994, ``New worst-case results for the bpp'') has shown that the FFD and the BFD heuristics have an absolute performance ratio of 1.5, and that this value is the best possible for the BPP, unles $P = NP$.''
+	\item We use $\{i_1, i_2\}$ or $\{i_2, i_1\}$ to represent the box, rather than just $i$, because the feasibility of the alignment of boxes on the strip depends on which way the box is placed, regularly or rotated.
 \end{itemize}
 
 \begin{algorithm}[H]
@@ -154,16 +155,32 @@ Introduction
 \end{itemize}
 
 Explanation: Initialise
-\begin{itemize}
-	\item Let each box be represented by two vertices on a graph $G$, one vertex for each side of the box. Each vertex has a value corresponding to the score width it represent. We will refer to two vertices that represent either side of the same box as ``partners''. The boxes cannot be altered in any way, and so the pairs of vertices must be adjacent to one another on the graph. 
-	\item Add extra dominating box with dominating score widths equal to the minimum total score width, the dominating box will be removed at the end.
-	\item Therefore we connect pair of vertices that are partners via an edge on the graph $G$.
-	\item Call this set of edges $P$.
-	\item Edges of P are also weighted, value equivalent to the corresponding box width.
-	\item For every pair of vertices on $G$, if the sum of their values/score widths is greater than or equal to the minimum total score width, and the two vertices are not partners/not connected via an edge from $P$, connect the vertices with an edge - call this set of edges $Q$ (These edges are not weighted).
-	\item Call a pair of vertices connected via an edge from $Q$ ``matched''.
-	\item We want to find an alternating Hamiltonian cycle, where successive edges alternate from sets $P$ and $Q$.
-\end{itemize}
+
+Let each box be represented by two vertices on a graph $G$, one vertex for each side of the box. We also introduce a ``dummy'' box that has two ``dominating scores'' with widths equal to the minimum total score width, $t$. This dummy box will be discarded at the end of the algorithm, and will not be included in the final feasible alignment. We now have $n$ boxes including the dummy box, and so $G$ will have $2n$ vertices.
+
+We will refer two two vertices that represent either side of the same box as ``partners''. The boxes cannot be altered in any way, and so partners must be adjacent to one another. We therefore create a set of edges, $P$, consisting of edges between partners on $G$. \textcolor{red}{weighted edges $P$}.
+
+Each vertex $v_i$ for $i = 1, 2, ..., 2n$ has a positive value $w(v)$ corresponding to the score width it represents. There is an edge between two vertices $u$ and $v$ on $G$ if and only if the vertices fulfil the \textit{minimum total score width constraint}, 
+
+\begin{equation*}
+w(u) + w(v) \geq t,
+\end{equation*}
+
+and $u$ and $v$ are not partners, i.e. $\{u, v\} \notin P$. The vertices $u$ and $v$ are referred to as ``matched'', and so their corresponding score widths can be feasibly aligned next to one another. We now have another set of edges, $Q$, consisting of edges between matched vertices.  
+
+In order to find a feasible alignment of the boxes, we must find an alternating Hamiltonian cycle on $G$. \textcolor{red}{turns into path when we remove dummy box.}
+
+\begin{definition}
+	Let $G(V, P\cup Q)$ be an undirected graph, where each edge is a member of one of two sets, $P$ or $Q$. $G$ has an \textit{alternating Hamiltonian cycle} if there exists a Hamiltonian cycle on $G$ such that the successive edges alternate between sets $P$ and $Q$. For example, if vertex $v_k$ in the Hamiltonian cycle is adjacent to vertex $v_{k-1}$ via an edge from $P$, then $v_k$ must be adjacent to vertex $v_{k+1}$ via an edge from $Q$, or vice versa. 
+\end{definition}
+
+\textcolor{red}{Figure of graph $G$ with boxes, figure of aligned boxes with alternating Hamiltonian path underneath.}
+
+
+
+
+
+
 
 MTGMA/MIS
 \begin{itemize}
