@@ -166,35 +166,29 @@ Each vertex $v_i$ for $i = 1, 2, ..., 2n$ has a positive value $w(v)$ correspond
 w(u) + w(v) \geq t,
 \end{equation*}
 
-and $u$ and $v$ are not partners, i.e. $\{u, v\} \notin P$. The vertices $u$ and $v$ are referred to as ``matched'', and so their corresponding score widths can be feasibly aligned next to one another. We now have another set of edges, $Q$, consisting of edges between matched vertices.  
+and $u$ and $v$ are not partners, i.e. $\{u, v\} \notin P$. The vertices $u$ and $v$ are referred to as \textcolor{red}{``matched''}, and so their corresponding score widths can be feasibly aligned next to one another. We now have another set of edges, $Q$, consisting of edges between \textcolor{red}{``matched''} vertices.  
 
 In order to find a feasible alignment of the boxes, we must find an alternating Hamiltonian cycle on $G$. \textcolor{red}{turns into path when we remove dummy box.}
 
 \begin{definition}
+	\label{defn:althamcycle}
 	Let $G(V, P\cup Q)$ be an undirected graph, where each edge is a member of one of two sets, $P$ or $Q$. $G$ has an \textit{alternating Hamiltonian cycle} if there exists a Hamiltonian cycle on $G$ such that the successive edges alternate between sets $P$ and $Q$. For example, if vertex $v_k$ in the Hamiltonian cycle is adjacent to vertex $v_{k-1}$ via an edge from $P$, then $v_k$ must be adjacent to vertex $v_{k+1}$ via an edge from $Q$, or vice versa. 
 \end{definition}
 
 \textcolor{red}{Figure of graph $G$ with boxes, figure of aligned boxes with alternating Hamiltonian path underneath.}
 
-
-
-
-
-
+\textcolor{red}{we now need to find a way of producing the alternating hamiltonian cycle on the graph $G$, if one exists.}
 
 MTGMA/MIS
-\begin{itemize}
-	\item \cite{mahadev1994} Maximum cardinality matching algorithm.
-	\item From the set of edges $Q$, we need to obtain a set of edges $M \subset Q$ of cardinality $n$ such that the edges from sets $M$ and $P$ form an alternating Hamiltonian cycle.
-	\item We use a simple maximum cardinality matching algorithm to obtain the set of edges $M$ (the matching).
-	\item Explain algorithm.
-	\item Swap of partners?
-	\item Explain matching on a graph.
-	\item If $|M| < n$, then infeasible, there is no feasible arrangement of the boxes such that the minimum total score width constraint is met, exit.
-	\item If $|M| = n$, then we should have at least one alternating Hamiltonian cycle.
-	\item If there is only one cycle, remove the dominating vertices, obtain final solution of boxes in order they should be packed, exit.
-	\item Else, if there is more than one cycle, we need to find a way to combine these cycles into one alternating Hamiltonian cycle.
-\end{itemize}
+
+We need to obtain a set of matching edges $M \subset Q$ of cardinality $n$, such that the matching edges from $M$ and the edges from $P$ form an alternating Hamiltonain cycle as described in Definition \ref{defn:althamcycle}. We use a modified matching algorithm (\citealp{mahadev1994, becker2010}) that produces a suitable set of matching edges $M$. 
+
+Initially, the vertices are sorted in order of non-decreasing values, and ties are broken arbitrarily. Starting from the smallest vertex, find the largest adjacent vertex (under $Q$? in the set $Q$? )that is not the current vertex's partner, and that has not yet been matched. Add this pair of vertices to the set $M$ that keeps a record of the matching edges, and proceed to the next vertex in the list. Continue until all vertices have been assessed. 
+
+If a vertex $v_i$ is not adjacent to any other vertex except its partner, we can rematch previous vertices to provide $v_i$ with a feasible match, provided $v_i$ is not the first vertex in the sorted list, the previous vertex $v_{i-1}$ has a match (i.e. $v_{i-1} \in M$), and $v_{i-1}$ is adajcent to $v_i$'s partner. We then simply match $v_{i-1}$ with $v_i$'s partner, and match $v_i$ with $v_{i-1}$'s previous match. \textcolor{red}{max cardinality.}
+
+If $|M| < n$, then there are not enough matching edges to form an alternating Hamiltonian cycle with the edges in $P$, and therefore there is no feasible arrangement of the boxes such that the minimum total score width constraint is not violated. However, if $|M| = n$, then the graph $G(V, P \cup M)$ is a 2-regular graph, where each vertex is adjacent to one vertex via an edge in $P$, (i.e. its partner), and another vertex via an edge in $M$ (i.e. its match). If $G$ consists of one alternating Hamiltonian cycle, then we simply remove the dominating vertices to obtain a feasible alignment of the boxes/feasible solution. If there are more than two cycles on $G$, we need to combine them into one alternating Hamiltonian cycle.
+
 
 FCA/Patch
 \begin{itemize}
