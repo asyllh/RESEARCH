@@ -19,17 +19,17 @@
 \label{sec:intro}
 
 The one-dimensional bin packing problem (BPP) is a combinatorial optimisation problem that has been widely researched and discussed due to its ability to model a variety of real-life sitations.
-The BPP can be described as follows: given a set of $n$ items of varying sizes $w$, and a finite number of bins with equal capacity $c$, find the minimum number of bins required to contain all of the items. As shown by \cite{garey1979}, this problem is NP-hard, and therefore (under the assumption that $P \neq NP$) there is no known algorithm that is able to find an optimal solution in polynomial time for every instance of the BPP. Instead, heursitics can be used to find a near-optimal solution in a shorter amount of time. One example is the greedy heuristic known as first-fit, an online algorithm that places each item (in some arbitrary order) into the lowest-indexed bin. If there are no bins that can feasibly accommodate the item, the algorithm places the item into a new bin. A modified version of first-fit yields the well-known first-fit decreasing (FFD) algorithm (\citealp{eilon1971}), which initially sorts the items into non-decreasing order of size before allocating them into bins. As proven by \cite{dosa2007} (tight bound), the worst case for FFD is $\frac{11}{9}k + \frac{6}{9}$ bins, where $k$ is the optimal number of bins given by $\ceil{\frac{\sum_{i=1}^{n} w_{i}}{c}}$ (..if the solution has this many bins then it is optimal, (\citealp{korf2002})).
+The BPP can be described as follows: given a set of $n$ items of varying sizes $w$, and a finite number of bins with equal capacity $c$, find the minimum number of bins required to contain all of the items. As shown by \cite{garey1979}, this problem is NP-hard, and therefore (under the assumption that $P \neq NP$) there is no known algorithm that is able to find an optimal solution in polynomial time for every instance of the BPP. Instead, heursitics can be used to find a near-optimal solution in a shorter amount of time. One example is the greedy heuristic known as first-fit, an online algorithm that places each item (in some arbitrary order) into the lowest-indexed bin. If there are no bins that can feasibly accommodate the item, the algorithm places the item into a new bin. A modified version of first-fit yields the well-known first-fit decreasing (FFD) algorithm (\citealp{eilon1971}), which initially sorts the items into non-decreasing order of size before allocating them into bins. As proven by \cite{dosa2007} \textcolor{RoyalBlue}{(tight bound)}, the worst case for FFD is $\frac{11}{9}k + \frac{6}{9}$ bins, where $k$ is the optimal number of bins given by $\ceil{\frac{\sum_{i=1}^{n} w_{i}}{c}}$ \textcolor{RoyalBlue}{(..if the solution has this many bins then it is optimal,} (\citealp{korf2002})).
 
 In 2004, Goulimis brought to light an open-combinatorial problem related to the bin-packing problem. Corrugated boxes are formed in two stages: firstly, they are produced flat, then a device consistsing of knives mounted on a bar creates ``scores'' along specific lines on the flat boxes. These scores allow the boxes to be folded in predetermined places. The first stage of this process involves finding a feasible pattern of the flat boxes that minimises the amount of waste, and has been researched extensively. It is classically solved by delayed column-generation (\citealp{gilmore1961, gilmore1963}). However, the second step of this process requires an additional constraint.
 
-The scoring knives, by design, cannot be placed too close together (around 70mm in industry), and as such have a ``minimum knife distance''. The problem then becomes a bin-packing problem with an additional constraint: find a feasible arrangement of boxes such that the sum of two adjacent score widths from different boxes is greater than or equal to the minimum knife distance. We will call this constraint the minimum total score width constraint.
+The scoring knives, by design, cannot be placed too close together (around 70mm in industry), and as such have a ``minimum knife distance''. The problem then becomes a bin-packing problem with an additional constraint: find a feasible arrangement of boxes such that the sum of two adjacent score widths from different boxes is greater than or equal to the minimum knife distance. \textcolor{RoyalBlue}{We will call this constraint the minimum total score width constraint.}
 
-\textcolor{red}{INSERT FIGURE TWO BOXES ANNOTATED AND KNIVES ON BAR FOLD LINES SCORE WIDTH}
+\textcolor{OrangeRed}{Insert figure, two boxes annotated with score widths, score lines, box widths, knives mounted on bar showing minimum total score width constraint}
 
-\textcolor{blue}{Figure showing two boxes with score widths and the scoring knives mounted on a bar. Since the sum of the two adjacent score widths from different boxes is greater than or equal to 70mm, the minimum total width constraint has been met - this is a feasible alignment of these two boxes}
+\textcolor{RoyalBlue}{Figure showing two boxes with score widths and the scoring knives mounted on a bar. Since the sum of the two adjacent score widths from different boxes is greater than or equal to 70mm, the minimum total width constraint has been met - this is a feasible alignment of these two boxes}
 
-There exists a polynomial time algorithm that is able to recognise whether a particular instance of the problem is feasible or infeasible (\citealp{becker2010}) (i.e. whether all boxes can be arranged in one line). However, the algorithm does not consider the lengths of each individual box, or the total length of the final arrangement of boxes. In industry, strips of materials are provided in fixed lengths, so, given a large number of boxes to pack, it may not be feasible to pack all of the boxes onto one strip. 
+There exists a polynomial time algorithm that is able to recognise whether a particular instance of the problem is feasible or infeasible (\citealp{becker2010}) \textcolor{RoyalBlue}{(i.e. whether all boxes can be arranged in one line)}. However, the algorithm does not consider the lengths of each individual box, or the total length of the final arrangement of boxes. In industry, strips of materials are provided in fixed lengths, so, given a large number of boxes to pack, it may not be feasible to pack all of the boxes onto one strip. 
 
 This leads us to our main problem, the score-constrained bin-packing problem: given a collection of boxes with varying widths and score widths on either side, and strips of a fixed length, find the minimum number of strips required to accommodate all of the boxes, such that the minimum total width constraint is met between all boxes on all strips. 
 
@@ -39,41 +39,75 @@ The remainder of this report will firstly, in Section \ref{sec:ffdapprox}, intro
 	\item FF if online, FFD is offline
 	\item FF and FFD can produce a feasible solution quickly, but the solution may not be optimal O(nln n), where n is the number of items that need to be packed
 	\item Exact algorithms, Martello and Toth (MTP), Bin Completion algorithm Korf 2002, Schreiber and Korf (2013) (wiki)
-	\item \textcolor{blue}{Although there are exact solutions available for the BPP} (martello knapsack MTP 1989 (1990b) ``is based on a first-fit decreasing'' branching strategy and is the best existing algorithm for optimal packing (KOrf2002)'', hung and brown 1978 ``a branch-and-bound algorithm'' paper title:``an algorithm for a class of loading problems'', eilon christofides 1971 ``a depth-first numerative algorithm'' paper title: ``the loadings problem'', schreiber and korf 2002 bin completion algorithm) \textcolor{blue}{they are only able to find solutions to problems that have a small input size.}
-	\item ``Hence, exact solution techniques are bound to work well for small to medium sized problem instances only, and real world sized problems including up to thousands of items have to be solved heuristically.''
-	\item ``There exists at least one ordering of items that allows FF to produce an optimal solution'' (wiki) Rhyd Lewis 2009
-	\item Picture of box with score widths, score lines
+	\item \textcolor{RoyalBlue}{Although there are exact solutions available for the BPP} (martello knapsack MTP 1989 (1990b) \textcolor{Plum}{``is based on a first-fit decreasing'' branching strategy and is the best existing algorithm for optimal packing (Korf2002)'', hung and brown 1978 ``a branch-and-bound algorithm'' paper title:``an algorithm for a class of loading problems'', eilon christofides 1971 ``a depth-first numerative algorithm'' paper title: ``the loadings problem'', schreiber and korf 2002 bin completion algorithm)} \textcolor{RoyalBlue}{they are only able to find solutions to problems that have a small input size.}
+	\item \textcolor{Plum}{``Hence, exact solution techniques are bound to work well for small to medium sized problem instances only, and real world sized problems including up to thousands of items have to be solved heuristically.''}
+	\item \textcolor{Plum}{``There exists at least one ordering of items that allows FF to produce an optimal solution'' (wiki) Rhyd Lewis 2009}
 	\item All boxes have same height, different widths, different score widths
 	\item Recognition algorithm Becker
-	\item Formal statement of BPP with score constraint called the Score Constrained Bin packing problem (SCBPP): given
+	\item \textcolor{RoyalBlue}{Formal statement of BPP with score constraint called the Score Constrained Bin packing problem (SCBPP): given}
 	\item dicuss other paper/articles with this problem, i.e. rhyd 2017	
 \end{itemize}
 
 \section{Formulating the problem}
 We are given $n$ boxes that need to be packed onto strips. Each of these boxes have a positive width, and two score widths, one on either side of the box. Since these score widths are not necessarily equal, the boxes can be aligned in two ways: either in a ``regular'' alignment, where the smaller of the two score widths is on the left hand side of the box, or in a ``rotated'' alignment, where the box has been rotated by $180^{\circ}$ so that the larger score width is on the left-hand side of the box. Strips are packed left to right. We also have a finite number of strips of equal fixed lengths. Once a box has been placed onto a strip, the rightmost score on the strip is referred to as the ``free'' score. A box can only be placed onto a strip if it can fit onto the strip, i.e. the addition of the box to the strip doesn't exceed the length of the strip, and if the free score and one of the scores on the box meet the minimum total score width constraint, i.e. the sum of the free score width and one of the scores on the box is greater than or equal to the minimum total score width. Assume that no box has a width that is greater than the fixed length of the strips.
 
-Definition: Score-Constrained Bin-Packing Problem. Find the minimum number of strips required to feasibly pack all the boxes such that the minimum total score width constraint is met between every pair of adjacent score widths from different boxes on every strip. Then the SCBPP consists of finding a feasible alignment of all of the boxes onto the strips such that every pair of adjacent score widths from different boxes meets the minimum total score width constraint, and that the least number of strips is used.
+\textcolor{RoyalBlue}{Definition: Score-Constrained Bin-Packing Problem. Find the minimum number of strips required to feasibly pack all the boxes such that the minimum total score width constraint is met between every pair of adjacent score widths from different boxes on every strip. Then the SCBPP consists of finding a feasible alignment of all of the boxes onto the strips such that every pair of adjacent score widths from different boxes meets the minimum total score width constraint, and that the least number of strips is used.}
+
+Notation
+\begin{itemize}
+	\item $n$ boxes, $i = 1, 2, ..., n$.
+	\item Each box $i$ has a total width $w(i)$.
+	\item Each box $i$ has two scores, $i_1$ (the smaller score), and $i_2$ (the larger score), and widths $w(i_1), w(i_2)$, such that $w(i_1) \leq w(i_2)$.
+	\item $\{i_1, i_2\}$ represents ``regular'' box $i$: $i_1$ on LHS of box.
+	\item $\{i_2, i_1\}$ represents ``rotated'' box $i$: $i_2$ on LHS of box (box rotated by $180^{\circ}$).
+	\item All box widths $w(i) > 0$ and all score widths $w(i_1), w(i_2) > 0$ $\forall$ $i = 1, 2, ..., n$.
+	\item Finite number of strips $S_j$, $j = 1, 2, ...$.
+	\item All strips $S_j$ have equal fixed length $l > 0$ $\forall$ $j = 1, 2, ...$.
+	\item All strips $S_j$ have a residual length $r(j)$, initially $r(j) = l$ $\forall$ $j = 1,2, ...$, which reduces as boxes are added to each strip.
+	\item Assumption: all box widths $w(i) \leq l, i = 1, 2, ..., n$
+	\item Initially, $S_j = \emptyset$ $\forall$ $j = 1, 2, ...$.
+	\item For all strips $S_j \neq \emptyset$, the score on the right hand side of the last box in the strip is called the ``free score'', denoted $f_j$, with width $w(f_j)$.
+	\item The \textit{minimum total score width} is denoted by $t, t > 0$ \textcolor{RoyalBlue}{usually 70mm in industry}. \textcolor{RoyalBlue}{The \textit{minimum total score width constraint} is $w(u_p) + w(v_q) \geq t$, $u \neq v, p, q = 1 or 2$.}
+	
+	\item -------------------------
+	
+	\item Notation for Exact algorithm
+	\item $n$ boxes including dummy box.
+	\item $2n$ vertices including dominating vertices.
+	\item Graph $G$ is an undirected graph with $2n$ vertices $v_i, i = 1, 2, ...,2n$.
+	\item Vertices are weighted, $w(v_i)$.
+	\item Vertices that represent either side of same box referred to as ``partners''
+	\item $P$ contains the set of edges between partners, fixed, $|P| = n$.
+	\item Edges in $P$ are weighted, corresponding to box width.
+	\item $Q$ contains the set of edges between vertices that meet the minimum total score width constraint, excluding partners (these edges are not weighted).
+	\item $G(V, P \cup Q)$ - each edge on $G$ is either in $P$ or $Q$, not both.
+	\item $t$ still represents the minimum total score width.
+	\item $M$ is the set of matching edges, $M \subset Q$, edges chosen using the matching algorithm (need $|M| = n$).
+	\item number of cycles on $G$ after MTGMA =  ?
+	\item $C_k$: sets of edges for connecting cycles.
+	
+\end{itemize}
 
 
 \section{FFD Using Approximate Algorithm}
 \label{sec:ffdapprox}
 \begin{itemize}
 	\item discuss heuristics
-	\item ``Heuristics are approximate solution techniques that typically provide solutions in the least amount of time to the detriment of the solutions quality''
-	\item ``Exact methods find a best possible packing, but are slow and may be unable to provide solutions to large or reastically sized problem instances within reasonable time''
-	\item ``Consider a set of $n$ items. In the context of bin packing problems, heuristics consider these items one-by-one and attempt to pack them into a bin so as to achieve a near-optimal solution without the guarantee that a solution is optimal.''
-	\item ``Exact packing methods are often called deterministic methods and are guarantees to find an optimal solution to a problem (given sufficient time and a feasible region) while heuristics attempt to find optimal solutions, but are not guaranteed to do so.''
-	\item ``Exact methods may often be too slow to solve large problem instances, but may typically be used to solve smaller ones.''
-	\item ``Packing heuristics follow a fixed set of rules to pack items in such a manner as to find good, feasible (but not necessarily optimal) solutions to the bin packing problem within as short a time span as possible.''
+	\item \textcolor{Plum}{``Heuristics are approximate solution techniques that typically provide solutions in the least amount of time to the detriment of the solutions quality''}
+	\item \textcolor{Plum}{``Exact methods find a best possible packing, but are slow and may be unable to provide solutions to large or reastically sized problem instances within reasonable time''}
+	\item \textcolor{Plum}{``Consider a set of $n$ items. In the context of bin packing problems, heuristics consider these items one-by-one and attempt to pack them into a bin so as to achieve a near-optimal solution without the guarantee that a solution is optimal.''}
+	\item \textcolor{Plum}{``Exact packing methods are often called deterministic methods and are guarantees to find an optimal solution to a problem (given sufficient time and a feasible region) while heuristics attempt to find optimal solutions, but are not guaranteed to do so.''}
+	\item \textcolor{Plum}{``Exact methods may often be too slow to solve large problem instances, but may typically be used to solve smaller ones.''}
+	\item \textcolor{Plum}{``Packing heuristics follow a fixed set of rules to pack items in such a manner as to find good, feasible (but not necessarily optimal) solutions to the bin packing problem within as short a time span as possible.''}
 	\item offline algorithm, whole problem data is provided/required at the start.
 	\item online, doesn't consider future events/items, data is processed in the order that it is input into the algorithm, entire input is not required to be available from the start
-	\item ``first-fit decreasing (FFD) algorithm for one-dimensional bin packing by johnson et al (1974, worst-case performance bounds for simple one-dimensional packing algorithms)''
+	\item \textcolor{Plum}{``first-fit decreasing (FFD) algorithm for one-dimensional bin packing by johnson et al (1974, worst-case performance bounds for simple one-dimensional packing algorithms)''}
 	\item FF is online, FFD is offline
 	\item FF and FFD can produce a feasible solution quickly, but the solution may not be optimal, O(nln n), where n is the number of items that need to be packed
-	\item who stated that ffd is O(nlog n)?
-	\item Coffman et al 1984 heuristics survey
-	\item \textcolor{blue}{Describe how the ffdapprox algorithm works}
-	\item \textcolor{red}{figure of packed boxes on strips}
+	\item \textcolor{Plum}{who stated that ffd is O(nlog n)?}
+	\item \textcolor{Plum}{Coffman et al 1984 heuristics survey}
+	\item \textcolor{RoyalBlue}{Describe how the ffdapprox algorithm works}
+	\item \textcolor{OrangeRed}{figure of packed boxes on strips}
 	\item previously placed boxes are fixed, cannot be rearranged
 	\item complexity of modified FFD for SCBPP
 	\item background information on FFD
@@ -81,20 +115,20 @@ Definition: Score-Constrained Bin-Packing Problem. Find the minimum number of st
 	\item pack from left to right
 	\item boxes can be aligned in two ways, with smaller score on LHS, or rotated $180^{\circ}$ so the smaller score is on the LHS
 	\item Karp complexity
-	\item \textcolor{red}{figure of one packed strip indicating free score end $e$}
+	\item \textcolor{OrangeRed}{figure of one packed strip indicating free score end $e$}
 	\item pros and cons: speed, however there may be a solution that exists that cannot be found due to boxes being fixed in place
 	\item In this algorithm, the boxes are sorted by non-increasing widths prior to packing.
 	\item If a box does not fit onto any existing strips, a new strip is initialised.
 	\item Initially, pack the largest (widest/box with the largest width/first box in the sorted list of boxes) box into the first strip.
-	\item ``Simchi-Levi (1994, ``New worst-case results for the bpp'') has shown that the FFD and the BFD heuristics have an absolute performance ratio of 1.5, and that this value is the best possible for the BPP, unles $P = NP$.''
+	\item \textcolor{Plum}{``Simchi-Levi (1994, ``New worst-case results for the bpp'') has shown that the FFD and the BFD heuristics have an absolute performance ratio of 1.5, and that this value is the best possible for the BPP, unless $P = NP$.''}
 	\item We use $\{i_1, i_2\}$ or $\{i_2, i_1\}$ to represent the box, rather than just $i$, because the feasibility of the alignment of boxes on the strip depends on which way the box is placed, regularly or rotated.
 \end{itemize}
 
 \begin{algorithm}[H]
-	\caption{\textcolor{red}{First-Fit Decreasing Algorithm for the Score-Constrained Bin-Packing Problem}}
+	\caption{\textcolor{OliveGreen}{First-Fit Decreasing Algorithm for the Score-Constrained Bin-Packing Problem}}
 	\label{alg:ffdapprox}
 	\begin{algorithmic}[1]
-	\Require $n$ boxes with widths $w(i)$ for $i = 1,2,...,n$, each box $i$ has two scores $i_1$ (smaller score width) and $i_2$ (larger score width), where $w(i_1) \leq w(i_2)$. Let $\{i_1, i_2\}$ represent box $i$ aligned such that the smaller score is on the LHS, and let $\{i_2, i_2\}$ represent box $i$ rotated by $180^{\circ}$ such that the larger score is on the LHS. Strips are packed from left to right. Finite number of strips $S_j, j = 1, 2, ...$ that all have equal fixed length $l > 0$, and a residual length $r(j)$, where initially $r(j) = l \forall j = 1, 2, ...$. Initially $S_j = \emptyset \forall j = 1, 2,...$. Let $w(f_j)$ denote the width of the free score for strip $j$.   
+	\Require \textcolor{RoyalBlue}{$n$ boxes with widths $w(i)$ for $i = 1,2,...,n$, each box $i$ has two scores $i_1$ (smaller score width) and $i_2$ (larger score width), where $w(i_1) \leq w(i_2)$. Let $\{i_1, i_2\}$ represent box $i$ aligned such that the smaller score is on the LHS, and let $\{i_2, i_2\}$ represent box $i$ rotated by $180^{\circ}$ such that the larger score is on the LHS. Strips are packed from left to right. Finite number of strips $S_j, j = 1, 2, ...$ that all have equal fixed length $l > 0$, and a residual length $r(j)$, where initially $r(j) = l \forall j = 1, 2, ...$. Initially $S_j = \emptyset \forall j = 1, 2,...$. Let $w(f_j)$ denote the width of the free score for strip $j$.}   
 	\State Sort boxes in non-increasing order of widths, breaking ties arbitrarily
 	\State $i \gets 1, j \gets 1$
 	\State $S_j \gets S_j \cup \{i_1, i_2\}$
@@ -118,7 +152,7 @@ Definition: Score-Constrained Bin-Packing Problem. Find the minimum number of st
 			\EndIf
 		\EndFor
 	\EndFor		
-	\Ensure all boxes packed onto strips while meeting minimum total width constraint. Set $S$ is all strips with boxes in correct rotation to meet minimum total score width constraint.	
+	\Ensure \textcolor{RoyalBlue}{all boxes packed onto strips while meeting minimum total width constraint. Set $S$ is all strips with boxes in correct rotation to meet minimum total score width constraint.}	
 	\end{algorithmic}	
 \end{algorithm}
 
@@ -158,7 +192,7 @@ Explanation: Initialise
 
 Let each box be represented by two vertices on a graph $G$, one vertex for each side of the box. We also introduce a ``dummy'' box that has two ``dominating scores'' with widths equal to the minimum total score width, $t$. This dummy box will be discarded at the end of the algorithm, and will not be included in the final feasible alignment. We now have $n$ boxes including the dummy box, and so $G$ will have $2n$ vertices.
 
-We will refer two two vertices that represent either side of the same box as ``partners''. The boxes cannot be altered in any way, and so partners must be adjacent to one another. We therefore create a set of edges, $P$, consisting of edges between partners on $G$. \textcolor{red}{weighted edges $P$}.
+We will refer two two vertices that represent either side of the same box as ``partners''. The boxes cannot be altered in any way, and so partners must be adjacent to one another. We therefore create a set of edges, $P$, consisting of edges between partners on $G$. \textcolor{RoyalBlue}{weighted edges $P$}.
 
 Each vertex $v_i$ for $i = 1, 2, ..., 2n$ has a positive value $w(v)$ corresponding to the score width it represents. There is an edge between two vertices $u$ and $v$ on $G$ if and only if the vertices fulfil the \textit{minimum total score width constraint}, 
 
@@ -166,18 +200,18 @@ Each vertex $v_i$ for $i = 1, 2, ..., 2n$ has a positive value $w(v)$ correspond
 w(u) + w(v) \geq t,
 \end{equation*}
 
-and $u$ and $v$ are not partners, i.e. $\{u, v\} \notin P$. The vertices $u$ and $v$ are referred to as \textcolor{red}{``matched''}, and so their corresponding score widths can be feasibly aligned next to one another. We now have another set of edges, $Q$, consisting of edges between \textcolor{red}{``matched''} vertices.  
+and $u$ and $v$ are not partners, i.e. $\{u, v\} \notin P$. The vertices $u$ and $v$ are referred to as \textcolor{OliveGreen}{``matched''}, and so their corresponding score widths can be feasibly aligned next to one another. We now have another set of edges, $Q$, consisting of edges between \textcolor{OliveGreen}{``matched''} vertices.  
 
-In order to find a feasible alignment of the boxes, we must find an alternating Hamiltonian cycle on $G$. \textcolor{red}{turns into path when we remove dummy box.}
+In order to find a feasible alignment of the boxes, we must find an alternating Hamiltonian cycle on $G$. \textcolor{RoyalBlue}{turns into path when we remove dummy box.}
 
 \begin{definition}
 	\label{defn:althamcycle}
 	Let $G(V, P\cup Q)$ be an undirected graph, where each edge is a member of one of two sets, $P$ or $Q$. $G$ has an \textit{alternating Hamiltonian cycle} if there exists a Hamiltonian cycle on $G$ such that the successive edges alternate between sets $P$ and $Q$. For example, if vertex $v_k$ in the Hamiltonian cycle is adjacent to vertex $v_{k-1}$ via an edge from $P$, then $v_k$ must be adjacent to vertex $v_{k+1}$ via an edge from $Q$, or vice versa. 
 \end{definition}
 
-\textcolor{red}{Figure of graph $G$ with boxes, figure of aligned boxes with alternating Hamiltonian path underneath.}
+\textcolor{OrangeRed}{Figure of graph $G$ with boxes, figure of aligned boxes with alternating Hamiltonian path underneath.}
 
-\textcolor{red}{we now need to find a way of producing the alternating hamiltonian cycle on the graph $G$, if one exists.}
+\textcolor{RoyalBlue}{we now need to find a way of producing the alternating hamiltonian cycle on the graph $G$, if one exists.}
 
 MTGMA/MIS
 
@@ -185,56 +219,58 @@ We need to obtain a set of matching edges $M \subset Q$ of cardinality $n$, such
 
 Initially, the vertices are sorted in order of non-decreasing values, and ties are broken arbitrarily. Starting from the smallest vertex, find the largest adjacent vertex (under $Q$? in the set $Q$? )that is not the current vertex's partner, and that has not yet been matched. Add this pair of vertices to the set $M$ that keeps a record of the matching edges, and proceed to the next vertex in the list. Continue until all vertices have been assessed. 
 
-If a vertex $v_i$ is not adjacent to any other vertex except its partner, we can rematch previous vertices to provide $v_i$ with a feasible match, provided $v_i$ is not the first vertex in the sorted list, the previous vertex $v_{i-1}$ has a match (i.e. $v_{i-1} \in M$), and $v_{i-1}$ is adajcent to $v_i$'s partner. We then simply match $v_{i-1}$ with $v_i$'s partner, and match $v_i$ with $v_{i-1}$'s previous match. \textcolor{red}{max cardinality.}
+If a vertex $v_i$ is not adjacent to any other vertex except its partner, we can rematch previous vertices to provide $v_i$ with a feasible match, provided $v_i$ is not the first vertex in the sorted list, the previous vertex $v_{i-1}$ has a match (i.e. $v_{i-1} \in M$), and $v_{i-1}$ is adajcent to $v_i$'s partner. We then simply match $v_{i-1}$ with $v_i$'s partner, and match $v_i$ with $v_{i-1}$'s previous match. \textcolor{RoyalBlue}{max cardinality.}
 
-If $|M| < n$, then there are not enough matching edges to form an alternating Hamiltonian cycle with the edges in $P$, and therefore there is no feasible arrangement of the boxes such that the minimum total score width constraint is not violated. However, if $|M| = n$, then the graph $G(V, P \cup M)$ is a 2-regular graph, where each vertex is adjacent to one vertex via an edge in $P$, (i.e. its partner), and another vertex via an edge in $M$ (i.e. its match). If $G$ consists of one alternating Hamiltonian cycle, then we simply remove the dominating vertices to obtain a feasible alignment of the boxes/feasible solution. If there are more than two cycles on $G$, we need to combine them into one alternating Hamiltonian cycle.
+If $|M| < n$, then there are not enough matching edges to form an alternating Hamiltonian cycle with the edges in $P$, and therefore there is no feasible arrangement of the boxes such that the minimum total score width constraint is not violated. However, if $|M| = n$, then the graph $G(V, P \cup M)$ is a 2-regular graph, where each vertex is adjacent to one vertex via an edge in $P$, (i.e. its partner), and another vertex via an edge in $M$ (i.e. its match). If $G$ consists of one alternating Hamiltonian cycle, then we simply remove the dominating vertices to obtain a feasible alignment of the boxes/feasible solution. If there are more than two cycles on $G$, we need to combine them into one alternating Hamiltonian cycle. \textcolor{RoyalBlue}{notation number of cycles.}
+
+\textcolor{OrangeRed}{figure of graph $G$ showing edges between partners ($P$), edges in the set $M$, and faint lines to represent the rest of the edges $Q$.}
 
 
 FCA/Patch
-\begin{itemize}
-	\item Find pairs of vertices in each cycle connected via a matching edge/ edge from $M$ that can be broken and rematched.
-	\item Break/remove matching edges between vertices and create/add new matching edges such that the cycles are combined/connected.
-	\item If there are no vertices that can be rematched from different cycles, then the cycles cannot be joined together, and therefore there is no feasible solution.
-	\item Else, if we are able to join the cycles together to create one alternating Hamiltonian cycle, we then simply have to remove the dominating vertices to obtain a final solution/feasible alignment of the boxes.
-	\item Sort edges, successive edges, see if edges are from different cycles and if the smaller vertex of the lower indexed edge is adjacent to the larger vertex of the higher indexed edge.
-\end{itemize}
 
+In order to combine multiple cycles into one, we need to replace some matching edges with feasible edges from the set $Q$ that connect vertices from different cycles. \textcolor{RoyalBlue}{The following algorithm is used to find these feasible edges}.
+
+The algorithm initially creates a list of all matching edges in $M$, sorted in order of non-decreasing vertex values \textcolor{RoyalBlue}{(i.e. the edge which connects the smallest vertex to its match is first in the list) (do not include edges from partner swap)}. Starting from the first edge in the list, the algorithm searches through the list of edges until it finds an edge whose smaller vertex is adjacent via an edge in $Q$ to the larger vertex of the succeeding edge in the list, such that both edges are from different cycles on the graph $G$. If such a pair of edges has been found, the algorithm adds the first edge of the pair to a set $C_k$. The algorithm then continues to add all succeeding edges to $C_k$, provided that the smaller vertex of the current edge is adjacent to the larger vertex of the succeeding edge via an edge in $Q$, the succeeding edge does not belong to a cycle that is already represented by an edge in $C_k$, and the algorithm has not reached the final edge in the list. Once there are no more valid edges to add to $C_k$, the algorithm proceeds to the next edge in the list, and checked whether this edge is suitable for beginning a new set $C_{k+1}$. If the algorithm has already reached the penultimate or final edge in the list, the algorithm terminates.
+
+If the algorithm does not produce a single set $C$, there are no edges available to connect the cycles together, and therefore no feasible alignment of the boxes in this problem instance exists. \textcolor{RoyalBlue}{also if the set $C$ doesn't include an edge from every cycle, or multiple sets $C$ that don't cover all cycles, infeasible.}
+
+If there exists a set $C_k$ such that $|C_k| = \textcolor{OliveGreen}{number of cycles}$, then the cycles can be connected as follows: starting from the first edge in $C_k$, connect the smaller vertex to the larger vertex of the second edge in the set. Then, connect the smaller vertex of the second edge to the larger vertex of the third edge. Continue in this manner until the last edge in $C_k$ is reached, and connect the lower vertex of this final edge to the larger vertex of the first edge. These new matching edges will join the distinct cycles together to form one alternating Hamiltonian cycle. The edges in the set $C_k$ can be removed from the graph $G$
+
+\textcolor{RoyalBlue}{Multiple $C_k$ cycles required.}
 
 \begin{algorithm}[H]
-	\caption{\textcolor{blue}{First-Fit Decreasing Algorithm for the Score-Constrained Bin-Packing Problem}}
+	\caption{\textcolor{OliveGreen}{First-Fit Decreasing Algorithm for the Score-Constrained Bin-Packing Problem}}
 	\label{alg:ffdexact}
 	\begin{algorithmic}[1]
-	\Require fill in.   
-	\State Sort boxes in non-increasing order of widths, breaking ties arbitrarily
-	\State $i \gets 1, j \gets 1$
-	\State $S_j \gets S_j \cup \{i_1, i_2\}$
-	\State $r(j) \gets r(j) - w(i)$
-	\For{$i \gets 2$ \textbf{to} $n$}
+	\Require A list of boxes $\{i_1, i_2\}$ with widths $w(i), i = 1, 2, ..., n$, strips $S_j = \emptyset$ of fixed lengths $l$ and residual lengths $r(j) = l$, $j = 1, 2, ...,n$, $\mathcal{S} = \emptyset$.
+	\Ensure A feasible packing of all boxes onto a set of strips $\mathcal{S}$.
+	\State Sort the boxes in order of non-increasing widths
+	\For{$i \gets 1$ \textbf{to} $n$}
 		\For{$j \gets 1$ \textbf{to} $n$}
-			\If{$S_j \neq \emptyset \land w(i) \leq r(j)$}
-				\State Perform \textcolor{red}{algorithm} on boxes in $S_j$ and box $i$
-				\If{feasible alignment of boxes found}
-					\State Replace alignment of boxes in $S_j$ with new box alignment including box $i$
+			\If{$S_j = \emptyset$}
+				\State $S_j \gets \{i_1, i_2\}$
+				\State $r(j) \gets r(j) - w(i)$
+				\State $\mathcal{S} \gets \mathcal{S} \cup S_j$
+				\State \Break
+			\ElsIf{$S_j \neq \emptyset \land w(i) \leq r(j)$}
+				\State \textcolor{RoyalBlue}{Run} \textcolor{OrangeRed}{``MBAHRA''} \textcolor{RoyalBlue}{on boxes in $S_j$ and box $i$}
+				\If{feasible alignment found}
+					\State $S_j \gets$ \textcolor{RoyalBlue}{new alignment found by} \textcolor{OrangeRed}{``MBAHRA''}
 					\State $r(j) \gets r(j) - w(i)$
 					\State \Break
 				\EndIf
-			\ElsIf{$S_j = \emptyset$}
-				\State $S_j \gets S_j \cup \{i_1, i_2\}$
-				\State $r(j) \gets r(j) - w(i)$
-				\State \Break
 			\EndIf
 		\EndFor
-	\EndFor		
-	\Ensure all boxes packed onto strips while meeting minimum total width constraint. Set $S$ is all strips with boxes in correct rotation to meet minimum total score width constraint.	
+	\EndFor
 	\end{algorithmic}	
 \end{algorithm}
 
 DESCRIPTION FFD EXACT
 \begin{itemize}
-	\item Start with boxes sorted in order of non-increasing widths, breaking ties arbitrarily.
+	\item Start with boxes sorted in order of non-increasing widths, breaking ties by choosing the box with the smallest score width.
 	\item Place the first box onto the first strip, such that the smaller of the two score widths is on the leftmost side of the strip.
 	\item Attempt to fit each box $i, i = 2,..., n$ onto the lowest-indexed strip possible that already contains a box, i.e. the strip is not empty.
-	\item If a box is able to feasibly fit onto a strip, apply the \textcolor{red}{algorithm} on all of the boxes on the strip plus the current box $i$.
+	\item If a box is able to feasibly fit onto a strip, apply the \textcolor{OliveGreen}{algorithm} on all of the boxes on the strip plus the current box $i$.
 	\item If a feasible alignment of the boxes has been found, replace the current alignment of boxes on the strip with the new alignment, which includes box $i$ (and move onto the next box).
 	\item If no feasible alignment of the boxes is found, we move onto the next lowest-indexed strip and repeat.
 	\item If a box cannot fit into any of the used strips, i.e. any of the strips that already contain a box/any of the open strips, we then place the box onto a new, unused strip, such that the smaller of the two score widths on the box is on the leftmost side of the strip, then move onto the next box.
@@ -249,7 +285,7 @@ DESCRIPTION FFD EXACT
 \label{sec:compresult}
 
 \begin{itemize}
-	\item ``Dowsland and Dowsland (1992, ``Packing Problems'') comment that while average or worst-case performance bounds are useful guidelines, it is best to determine an algorithm's usefuless by testing it on data sets typical to the intended problem. Repositories are available on the internet where benchamrk data sets for packing problems are stored for the purpose of evaluating algorithms.''
+	\item \textcolor{Plum}{``Dowsland and Dowsland (1992, ``Packing Problems'') comment that while average or worst-case performance bounds are useful guidelines, it is best to determine an algorithm's usefuless by testing it on data sets typical to the intended problem. Repositories are available on the internet where benchamrk data sets for packing problems are stored for the purpose of evaluating algorithms.''}
 \end{itemize}
 
 \section{Conclusion}
@@ -264,24 +300,25 @@ DESCRIPTION FFD EXACT
 
 \cite{coffman1984}: Approximation Algorithms for Bin-Packing - An Updated Survey.
 \begin{itemize}
-	\item ``first fit and first fit decreasing algorithms have equivalent worst-case time complexities of O(n ln n) (cite coffman1984)''
-	\item ``we refer the interested reader to the excellent survery by (cite coffman1984), which includes a bibliography of more than one hundred titles''
-	\item ``A comprehensive review of various heuristic algorithms is provided in a recent survery by (cite coffman1984)''
-	\item ``(cite coffman1984) did an excellent survey on this problem, particularly on approximation algorithms and their asymptotic performance ratios''
+	\item \textcolor{Plum}{``first fit and first fit decreasing algorithms have equivalent worst-case time complexities of O(n ln n) (cite coffman1984)''}
+	\item \textcolor{Plum}{``we refer the interested reader to the excellent survery by (cite coffman1984), which includes a bibliography of more than one hundred titles''}
+	\item \textcolor{Plum}{``A comprehensive review of various heuristic algorithms is provided in a recent survery by (cite coffman1984)''}
+	\item \textcolor{Plum}{``(cite coffman1984) did an excellent survey on this problem, particularly on approximation algorithms and their asymptotic performance ratios''}
 \end{itemize}
+
 \cite{dosa2007}: The tight bound of first fit decreasing bin packing algorithm
 
 \cite{eilon1971}: The loading problem. 
 \begin{itemize}
-	\item ``(cite eilon1971) presented a depth-first enumerative algorithm''
-	\item ``(cite eilon1971) discuss its(the BPP) application to the loading of vehicles (or other containers) with consignment'' 
-	\item ``the most well-known heuristics are the FFD and the BFD (cite eilon1971)''
+	\item \textcolor{Plum}{``(cite eilon1971) presented a depth-first enumerative algorithm''}
+	\item \textcolor{Plum}{``(cite eilon1971) discuss its(the BPP) application to the loading of vehicles (or other containers) with consignment''}
+	\item \textcolor{Plum}{``the most well-known heuristics are the FFD and the BFD (cite eilon1971)''}
 \end{itemize}
+
 \cite{garey1979}: Computers and Intractibility - A Guide to the Theory of NP-Completeness. 
 \begin{itemize}
-	\item ``(cite garey1979) cite simple heuristics which can be shown to be no
-	worse(but also no better) than a rather small multiplying factor above the optimal number of bins.''
-	\item ``the bpp problem is NP-Hard''
+	\item \textcolor{Plum}{``(cite garey1979) cite simple heuristics which can be shown to be noworse(but also no better) than a rather small multiplying factor above the optimal number of bins.''}
+	\item \textcolor{Plum}{``the bpp problem is NP-Hard''}
 \end{itemize}
 
 \cite{gilmore1961}: A LP Approach to the CSP Part 1
@@ -292,12 +329,12 @@ DESCRIPTION FFD EXACT
 
 \cite{johnson1974}: Worst case performance bounds for simple one-dimensional packing algorithms
 \begin{itemize}
-	\item ``(cite johnson1974) discuss three practical applications in computer science, which are table formatting, prepaging, and file allocation''
+	\item \textcolor{Plum}{ ``(cite johnson1974) discuss three practical applications in computer science, which are table formatting, prepaging, and file allocation''}
 \end{itemize}
 
 \cite{karp1972}: Reducibility among combinatorial problems
 
-\cite{korf2002}: A new algorithm for optimal bin packing. ``If the number of bins in a solution is equivalent to the expression (sum of all weights/ capacity) then that solution is an optimal solution to the problem instance (cite Korf2002)'' 
+\cite{korf2002}: A new algorithm for optimal bin packing. \textcolor{Plum}{``If the number of bins in a solution is equivalent to the expression (sum of all weights/ capacity) then that solution is an optimal solution to the problem instance (cite Korf2002)''} 
 
 \cite{lewis2009}: A general-purpose hill-climbing method for order independent minimum grouping problems
 
@@ -309,7 +346,7 @@ DESCRIPTION FFD EXACT
 
 \cite{mahadev1995}: Threshold graphs and related topics
 
-\cite{martello1990b}: Knapsack problems. ``(cite martello1990) proposed a branch-and-bound based exact algorithm MTP for the BPP.'' 
+\cite{martello1990b}: Knapsack problems.\textcolor{Plum}{ ``(cite martello1990) proposed a branch-and-bound based exact algorithm MTP for the BPP.''} 
 
 
 
@@ -318,32 +355,6 @@ DESCRIPTION FFD EXACT
 
 \bibliographystyle{dcu}
 \bibliography{includes/bibliography}
-
-%\input{includes/bibliography.tex}
-
-
-%%Additional Comments
-\begin{comment}
-- all citations have been changed to \cite{}, so that the citation shows up in green in latex. some of these citations need to be changed to (\citealp{}) (or \citep{}, same outcome) as the citations need to be in brackets but without the year in brackets.
-- 1. "As proven by \cite{dosa2007}, ..." -> "As proven by Dosa (2007), ..."
-- 2. "... FFD algorithm (\cite{eilon1971}), which ..." -> "... FFD algorithm (Eilon and Christofides (1971)), which .." NOTE THE YEAR IS IN BRACKETS INSIDE THE CITATION BRACKETS, THIS IS ONLY WHILE WRITING, THIS NEEDS TO BE CHANGED BEFORE SUBMISSION
-- 3. "... FFD algorithm (\citealp{eilon1971}), which ..." -> "... FFD algorithm (Eilon and Christofides, 1971), which .." THIS IS HOW IT NEEDS TO BE WHEN SUBMITTING
-\end{comment}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 \end{document}
 
