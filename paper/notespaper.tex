@@ -168,6 +168,18 @@ Initially, the vertices are sorted in order of non-decreasing weights, with ties
 	\item benefits of this alg wrt FFD/BPP?
 \end{enumerate}
 
+DESCRIPTION OF FFD EXACT
+\begin{itemize}
+	\item Start with boxes sorted in order of non-increasing widths, breaking ties by choosing the box with the smallest score width.
+	\item Place the first box onto the first strip, such that the smaller of the two score widths is on the leftmost side of the strip.
+	\item Attempt to fit each box $i, i = 2,..., n$ onto the lowest-indexed strip possible that already contains a box, i.e. the strip is not empty.
+	\item If a box is able to feasibly fit onto a strip, apply the \textcolor{OliveGreen}{algorithm} on all of the boxes on the strip plus the current box $i$.
+	\item If a feasible alignment of the boxes has been found, replace the current alignment of boxes on the strip with the new alignment, which includes box $i$ (and move onto the next box).
+	\item If no feasible alignment of the boxes is found, we move onto the next lowest-indexed strip and repeat.
+	\item If a box cannot fit into any of the used strips, i.e. any of the strips that already contain a box/any of the open strips, we then place the box onto a new, unused strip, such that the smaller of the two score widths on the box is on the leftmost side of the strip, then move onto the next box.
+	\item Continue untill all boxes have been placed onto a strip/until all boxes have been packed.
+\end{itemize}
+
 
 \section{Experiments/Comparison}
 
