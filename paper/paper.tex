@@ -17,11 +17,10 @@
 
 \section{Introduction}
 \label{sec:intro}
-
 The one-dimensional bin packing problem (BPP) is a combinatorial optimisation problem that has been widely researched and discussed due to its ability to model a variety of real-life sitations.
 The BPP can be described as follows: given a set of $n$ items of varying sizes $w$, and a finite number of bins with equal capacity $c$, find the minimum number of bins required to contain all of the items. As shown by \cite{garey1979}, this problem is NP-hard, and therefore (under the assumption that $P \neq NP$) there is no known algorithm that is able to find an optimal solution in polynomial time for every instance of the BPP. Instead, heursitics can be used to find a near-optimal solution in a shorter amount of time. One example is the greedy heuristic known as first-fit, an online algorithm that places each item (in some arbitrary order) into the lowest-indexed bin. If there are no bins that can feasibly accommodate the item, the algorithm places the item into a new bin. A modified version of first-fit yields the well-known first-fit decreasing (FFD) algorithm (\citealp{eilon1971}), which initially sorts the items into non-decreasing order of size before allocating them into bins. As proven by \cite{dosa2007} \textcolor{RoyalBlue}{(tight bound)}, the worst case for FFD is $\frac{11}{9}k + \frac{6}{9}$ bins, where $k$ is the optimal number of bins given by $\ceil{\frac{\sum_{i=1}^{n} w_{i}}{c}}$ \textcolor{RoyalBlue}{(..if the solution has this many bins then it is optimal,} (\citealp{korf2002})).
 
-In 2004, Goulimis brought to light an open-combinatorial problem related to the bin-packing problem. Corrugated boxes are formed in two stages: firstly, they are produced flat, then a device consistsing of knives mounted on a bar creates ``scores'' along specific lines on the flat boxes. These scores allow the boxes to be folded in predetermined places. The first stage of this process involves finding a feasible pattern of the flat boxes that minimises the amount of waste, and has been researched extensively. It is classically solved by delayed column-generation (\citealp{gilmore1961, gilmore1963}). However, the second step of this process requires an additional constraint.
+In 2004, Goulimis brought to light an open-combinatorial problem related to the bin-packing problem. Corrugated boxes are formed in two stages: firstly, they are produced flat, then a device consistsing of knives mounted on a bar creates ``scores'' along specific lines on the flat boxes. These scores allow the boxes to be folded in predetermined places. The first stage of this process involves finding a feasible pattern of the flat boxes that minimises the amount of waste, and has been researched extensively. \textcolor{Plum}{It is classically solved by delayed column-generation} (\citealp{gilmore1961, gilmore1963}). However, the second step of this process requires an additional constraint.
 
 The scoring knives, by design, cannot be placed too close together (around 70mm in industry), and as such have a ``minimum knife distance''. The problem then becomes a bin-packing problem with an additional constraint: find a feasible arrangement of boxes such that the sum of two adjacent score widths from different boxes is greater than or equal to the minimum knife distance. \textcolor{RoyalBlue}{We will call this constraint the minimum total score width constraint.}
 
@@ -49,9 +48,28 @@ The remainder of this report will firstly, in Section \ref{sec:ffdapprox}, intro
 \end{itemize}
 
 \section{Formulating the problem}
-We are given $n$ boxes that need to be packed onto strips. Each of these boxes have a positive width, and two score widths, one on either side of the box. Since these score widths are not necessarily equal, the boxes can be aligned in two ways: either in a ``regular'' alignment, where the smaller of the two score widths is on the left hand side of the box, or in a ``rotated'' alignment, where the box has been rotated by $180^{\circ}$ so that the larger score width is on the left-hand side of the box. Strips are packed left to right. We also have a finite number of strips of equal fixed lengths. Once a box has been placed onto a strip, the rightmost score on the strip is referred to as the ``free'' score. A box can only be placed onto a strip if it can fit onto the strip, i.e. the addition of the box to the strip doesn't exceed the length of the strip, and if the free score and one of the scores on the box meet the minimum total score width constraint, i.e. the sum of the free score width and one of the scores on the box is greater than or equal to the minimum total score width. Assume that no box has a width that is greater than the fixed length of the strips.
+We are given $n$ boxes that need to be packed onto strips. Each of these boxes have a positive width, and two score widths, one on either side of the box. Since these score widths are not necessarily equal, the boxes can be aligned in two ways: either in a ``regular'' alignment, where the smaller of the two score widths is on the left hand side of the box, or in a ``rotated'' alignment, where the box has been rotated by $180^{\circ}$ so that the larger score width is on the left-hand side of the box. Strips are packed left to right. We also have a finite number of strips of equal fixed lengths. Once a box has been placed onto a strip, the rightmost score on the strip is referred to as the ``free'' score. A box can only be placed onto a strip if it can fit onto the strip, i.e. the addition of the box to the strip doesn't exceed the length of the strip, and if the free score and one of the scores on the box meet the minimum total score width constraint, i.e. the sum of the free score width and one of the scores on the box is greater than or equal to the minimum total score width. Assume that no box has a width that is greater than the fixed length of the strips. \textcolor{RoyalBlue}{need to explain minimum total score width constraint with equation and example, used in the definition for SCBPP below.}
 
-\textcolor{RoyalBlue}{Definition: Score-Constrained Bin-Packing Problem. Find the minimum number of strips required to feasibly pack all the boxes such that the minimum total score width constraint is met between every pair of adjacent score widths from different boxes on every strip. Then the SCBPP consists of finding a feasible alignment of all of the boxes onto the strips such that every pair of adjacent score widths from different boxes meets the minimum total score width constraint, and that the least number of strips is used.}
+\begin{itemize}
+	\item $n$ boxes need to be packed, all have same height but different widths $w(i)$.
+	\item Each box $i$ has two scores $i_1, i_2$, one on either side of the box.
+	\item Each of these scores has a width $w(i_1) \leq w(i_2)$.
+	\item Score widths not necessarily equal, therefore box has two different positions.
+	\item Regular position, smaller score on LHS, denoted $\{i_1, i_2\}$.
+	\item Rotated position, smaller score on RHS, denoted $\{i_2, i_1\}$ (rotated $180^{\circ}$).
+	\item Boxes will be placed side by side.
+	\item The sum of two adjacent score widths must fulfil the minimum total score width constraint ... $t$ is the minimum total score width.
+	\item The minimum total score width constraint must be fulfilled in order for the scoring knives to be able to score the boxes correctly.
+	\item There are a finite number of strips $S_j$, with equal fixed lengths $l$.
+	\item Need to pack the boxes onto the strips so mtswc is met and least number of strips used.
+	\item $l > 0, w(i) > 0, w(i) \leq l$
+\end{itemize}
+
+\begin{definition} 
+	\label{defn:scbpp}
+	Given $n$ boxes of varying widths $w(i)$ and score widths $w(i_1), w(i_2)$, and a finite number of strips $S_j$ with equal fixed lengths $l$, the Score-Constrained Bin-Packing Problem (SCBPP) consists of finding the minimum number of strips required to pack all of the boxes such that the minimum total score width constraint is met between every pair of boxes. \textcolor{RoyalBlue}{or: such that for every pair of boxes the sum of the adjacent score widths is greater than or equal to some fixed value $t$.}
+\end{definition}
+
 
 Notation
 \begin{itemize}
@@ -68,6 +86,7 @@ Notation
 	\item Initially, $S_j = \emptyset$ $\forall$ $j = 1, 2, ...$.
 	\item For all strips $S_j \neq \emptyset$, the score on the right hand side of the last box in the strip is called the ``free score'', denoted $f_j$, with width $w(f_j)$.
 	\item The \textit{minimum total score width} is denoted by $t, t > 0$ \textcolor{RoyalBlue}{usually 70mm in industry}. \textcolor{RoyalBlue}{The \textit{minimum total score width constraint} is $w(u_p) + w(v_q) \geq t$, $u \neq v, p, q = 1 or 2$.}
+	\item Strips packed from left to right.
 	
 	\item -------------------------
 	
@@ -115,7 +134,7 @@ Notation
 	\item pack from left to right
 	\item boxes can be aligned in two ways, with smaller score on LHS, or rotated $180^{\circ}$ so the smaller score is on the LHS
 	\item Karp complexity
-	\item \textcolor{OrangeRed}{figure of one packed strip indicating free score end $e$}
+	\item \textcolor{OrangeRed}{figure of one packed strip indicating free score end $f_j$}
 	\item pros and cons: speed, however there may be a solution that exists that cannot be found due to boxes being fixed in place
 	\item In this algorithm, the boxes are sorted by non-increasing widths prior to packing.
 	\item If a box does not fit onto any existing strips, a new strip is initialised.
@@ -125,48 +144,39 @@ Notation
 \end{itemize}
 
 \begin{algorithm}[H]
-	\caption{\textcolor{OliveGreen}{First-Fit Decreasing Algorithm for the Score-Constrained Bin-Packing Problem}}
+	\caption{\textcolor{OliveGreen}{Approximate First-Fit Decreasing Algorithm for the Score-Constrained Bin-Packing Problem}}
 	\label{alg:ffdapprox}
 	\begin{algorithmic}[1]
-	\Require \textcolor{RoyalBlue}{$n$ boxes with widths $w(i)$ for $i = 1,2,...,n$, each box $i$ has two scores $i_1$ (smaller score width) and $i_2$ (larger score width), where $w(i_1) \leq w(i_2)$. Let $\{i_1, i_2\}$ represent box $i$ aligned such that the smaller score is on the LHS, and let $\{i_2, i_2\}$ represent box $i$ rotated by $180^{\circ}$ such that the larger score is on the LHS. Strips are packed from left to right. Finite number of strips $S_j, j = 1, 2, ...$ that all have equal fixed length $l > 0$, and a residual length $r(j)$, where initially $r(j) = l \forall j = 1, 2, ...$. Initially $S_j = \emptyset \forall j = 1, 2,...$. Let $w(f_j)$ denote the width of the free score for strip $j$.}   
-	\State Sort boxes in non-increasing order of widths, breaking ties arbitrarily
-	\State $i \gets 1, j \gets 1$
-	\State $S_j \gets S_j \cup \{i_1, i_2\}$
-	\State $r(j) \gets r(j) - w(i)$
-	\For{$i \gets 2$ \textbf{to} $n$}
-		\For{$j \gets 1$ \textbf{to} $n$}
-			\If{$S_j \neq \emptyset \land w(i) \leq r(j)$}
+	\Require A list of boxes $\{i_1, i_2\}$ with widths $w(i), i = 1, 2, ..., n$, strips $S_j = \emptyset$ of fixed lengths $l$ and residual lengths $r(j) = l$, $j = 1, 2, ...,n$, minimum total score width $t$, and a set $\mathcal{S} = \emptyset$.
+	\Ensure A feasible packing of all boxes onto a set of strips $\mathcal{S}$.
+	\State Sort the boxes in order of non-increasing widths.
+	\For{$i \gets 1 \To n$}
+		\For{$j \gets 1 \To n$}
+			\If{$S_j = \emptyset$}
+				\State $S_j \gets \{i_1, i_2\}$
+				\State $r(j) \gets r(j) - w(i)$
+				\State $\mathcal{S} \gets \mathcal{S} \cup S_j$
+				\Break
+			\ElsIf{$S_j \neq \emptyset \land w(i) \leq r(j)$}
 				\If{$w(f_j) + w(i_1) \geq t$}
 					\State $S_j \gets S_j \cup \{i_1, i_2\}$
 					\State $r(j) \gets r(j) - w(i)$
-					\State \Break
+					\Break
 				\ElsIf{$w(f_j) + w(i_2) \geq t$}
 					\State $S_j \gets S_j \cup \{i_2, i_1\}$
 					\State $r(j) \gets r(j) - w(i)$
-					\State \Break					
+					\Break
 				\EndIf
-			\ElsIf{$S_j = \emptyset$}
-				\State $S_j \gets S_j \cup \{i_1, i_2\}$
-				\State $r(j) \gets r(j) - w(i)$
-				\State \Break
 			\EndIf
 		\EndFor
-	\EndFor		
-	\Ensure \textcolor{RoyalBlue}{all boxes packed onto strips while meeting minimum total width constraint. Set $S$ is all strips with boxes in correct rotation to meet minimum total score width constraint.}	
+	\EndFor
+	\Return $\mathcal{S}$
 	\end{algorithmic}	
 \end{algorithm}
 
-DESCRIPTION OF FFDAPPROX 
-\begin{itemize}
-	\item start by sorting all boxes into non-increasing order of widths, breaking ties arbitrarily
-	\item starting with the first box in the list (i.e with the box that has the largest width), put it onto the first strip, with the box rotated such that the side of the box with the smaller score width is placed at the beginning of the strip
-	\item for each box, find the lowest indexed strip that the box can fit into
-	\item if the box can fit onto a strip, check if the free score width on that strip and the smaller of the two score widths on the box meet the minimum total score width requirement. If so, place the box onto that strip such that the smaller of the two score widths is placed next to the free score width. Move onto the next box in the list
-	\item else, check if the larger of the two score widths on the box and the free score width meet the minimum total score width constraint. If so, place the box onto that strip such that the larger of the two score widths is placed next to the free score width. Move onto the next box.
-	\item else, if neither of the two score widths and the free score meet the minimum total score width constraint, move onto the next used strip and repeat
-	\item if there are no used strips that can accommodate the current box, place the box into a new unused strip, with the smaller score at the beginning of the strip (on the LHS). move onto the next box.
-	\item we then obtain ...
-\end{itemize}
+\textbf{\textcolor{Rhodamine}{DESCRIPTION OF FFDAPPROX}}
+
+Initially, the algorithm arranges the boxes in non-increasing order of widths, breaking ties by choosing the box with the smallest score width. For each box $i$ in the sorted list, the algorithm find the lowest-indexed strip $S_j$ that is able to feasibly accommodate $i$. If $S_j$ is empty, $i$ is placed in a regular position onto $S_j$, which is then added to a set $\mathcal{S}$ that maintains a record of strips that are being packed. However, if $S_j$ is not empty, the algorithm checks the minimum total score width constraint with $i$ firstly in a regular position, then in a rotated position. If the constraint is met in either case, $i$ is placed accordingly onto $S_j$. If neither positions are able to fulfil the constraint, the algorithm moves onto the next strip $S_{j+1}$ and the process of attempting to pack $i$ is repeated. Once a box $i$ has been placed onto a strip, the algorithm moves onto the next box $i+1$, until all of the boxes have been packed. 
 
 
 
@@ -197,7 +207,8 @@ We will refer two two vertices that represent either side of the same box as ``p
 Each vertex $v_i$ for $i = 1, 2, ..., 2n$ has a positive value $w(v)$ corresponding to the score width it represents. There is an edge between two vertices $u$ and $v$ on $G$ if and only if the vertices fulfil the \textit{minimum total score width constraint}, 
 
 \begin{equation*}
-w(u) + w(v) \geq t,
+	\label{eqn:mtswcg}
+	w(u) + w(v) \geq t,
 \end{equation*}
 
 and $u$ and $v$ are not partners, i.e. $\{u, v\} \notin P$. The vertices $u$ and $v$ are referred to as \textcolor{OliveGreen}{``matched''}, and so their corresponding score widths can be feasibly aligned next to one another. We now have another set of edges, $Q$, consisting of edges between \textcolor{OliveGreen}{``matched''} vertices.  
@@ -239,43 +250,42 @@ If there exists a set $C_k$ such that $|C_k| = \textcolor{OliveGreen}{number of 
 \textcolor{RoyalBlue}{Multiple $C_k$ cycles required.}
 
 \begin{algorithm}[H]
-	\caption{\textcolor{OliveGreen}{First-Fit Decreasing Algorithm for the Score-Constrained Bin-Packing Problem}}
+	\caption{\textcolor{OliveGreen}{Exact First-Fit Decreasing Algorithm for the Score-Constrained Bin-Packing Problem}}
 	\label{alg:ffdexact}
 	\begin{algorithmic}[1]
-	\Require A list of boxes $\{i_1, i_2\}$ with widths $w(i), i = 1, 2, ..., n$, strips $S_j = \emptyset$ of fixed lengths $l$ and residual lengths $r(j) = l$, $j = 1, 2, ...,n$, $\mathcal{S} = \emptyset$.
+	\Require A list of boxes $\{i_1, i_2\}$ with widths $w(i), i = 1, 2, ..., n$, strips $S_j = \emptyset$ of fixed lengths $l$ and residual lengths $r(j) = l$, $j = 1, 2, ...,n$, and a set $\mathcal{S} = \emptyset$.
 	\Ensure A feasible packing of all boxes onto a set of strips $\mathcal{S}$.
 	\State Sort the boxes in order of non-increasing widths
-	\For{$i \gets 1$ \textbf{to} $n$}
-		\For{$j \gets 1$ \textbf{to} $n$}
+	\For{$i \gets 1 \To n$}
+		\For{$j \gets 1 \To n$}
 			\If{$S_j = \emptyset$}
 				\State $S_j \gets \{i_1, i_2\}$
 				\State $r(j) \gets r(j) - w(i)$
 				\State $\mathcal{S} \gets \mathcal{S} \cup S_j$
-				\State \Break
+				\Break
 			\ElsIf{$S_j \neq \emptyset \land w(i) \leq r(j)$}
 				\State \textcolor{RoyalBlue}{Run} \textcolor{OrangeRed}{``MBAHRA''} \textcolor{RoyalBlue}{on boxes in $S_j$ and box $i$}
+				%\Return \textcolor{OrangeRed}{found}
 				\If{feasible alignment found}
+				%\If{found}
 					\State $S_j \gets$ \textcolor{RoyalBlue}{new alignment found by} \textcolor{OrangeRed}{``MBAHRA''}
 					\State $r(j) \gets r(j) - w(i)$
-					\State \Break
+					\Break
 				\EndIf
 			\EndIf
 		\EndFor
 	\EndFor
+	\Return $\mathcal{S}$
 	\end{algorithmic}	
 \end{algorithm}
 
-DESCRIPTION FFD EXACT
-\begin{itemize}
-	\item Start with boxes sorted in order of non-increasing widths, breaking ties by choosing the box with the smallest score width.
-	\item Place the first box onto the first strip, such that the smaller of the two score widths is on the leftmost side of the strip.
-	\item Attempt to fit each box $i, i = 2,..., n$ onto the lowest-indexed strip possible that already contains a box, i.e. the strip is not empty.
-	\item If a box is able to feasibly fit onto a strip, apply the \textcolor{OliveGreen}{algorithm} on all of the boxes on the strip plus the current box $i$.
-	\item If a feasible alignment of the boxes has been found, replace the current alignment of boxes on the strip with the new alignment, which includes box $i$ (and move onto the next box).
-	\item If no feasible alignment of the boxes is found, we move onto the next lowest-indexed strip and repeat.
-	\item If a box cannot fit into any of the used strips, i.e. any of the strips that already contain a box/any of the open strips, we then place the box onto a new, unused strip, such that the smaller of the two score widths on the box is on the leftmost side of the strip, then move onto the next box.
-	\item Continue untill all boxes have been placed onto a strip/until all boxes have been packed.
-\end{itemize}
+\textbf{\textcolor{ProcessBlue}{DESCRIPTION OF FFDEXACT}}
+
+\textcolor{RoyalBlue}{In a similar fashion/manner to ``FFD approx'' (rename)} The algorithm starts by sorting the boxes in order of non-increasing widths, with ties broken by choosing the box with the smallest score width. Starting with the first box, the algorithm finds the lowest-indexed strip $S_j$ that can feasibly accommodate the current box $i$. If $S_j$ is empty, box $i$ is placed onto $S_j$ in a ``regular'' position \textcolor{RoyalBlue}{(i.e. smallest score width on the LHS of the box)}. This strip is added to the set $\mathcal{S}$ that keeps track of the strips being used to form a solution, and the algorithm proceeds onto the next box $i+1$ in the sorted list.
+
+If $S_j$ is not empty \textcolor{RoyalBlue}{(i.e contains at least one box, $|S_j| > 0$)}, then \textcolor{OrangeRed}{MBAHRA} is performed on all of the boxes in $S_j$ and the current box $i$. If a feasible alignment of the boxes has been found, the current boxes on $S_j$ are replaced with the new alignment, and the algorithm proceeds onto the next box $i+1$. If \textcolor{OrangeRed}{MBAHRA} is unable to find a feasible alignment of the boxes, the algorithm moves onto the next strip $S_{j+1}$ and the process is repeated. The algorithm continues until all of the boxes have been packed. \textcolor{RoyalBlue}{Complexity}
+
+
 
 
 
