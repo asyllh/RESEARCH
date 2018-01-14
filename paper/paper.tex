@@ -11,7 +11,7 @@
 \maketitle
 
 \begin{abstract}
-	Abstract
+	This version finished: 13/01/2018
 \end{abstract}
 
 
@@ -20,7 +20,7 @@
 The one-dimensional bin packing problem (BPP) is a combinatorial optimisation problem that has been widely researched and discussed due to its ability to model a variety of real-life sitations.
 The BPP can be described as follows: given a set of $n$ items of varying sizes $w$, and a finite number of bins with equal capacity $c$, find the minimum number of bins required to contain all of the items. As shown by \cite{garey1979}, this problem is NP-hard, and therefore (under the assumption that $P \neq NP$) there is no known algorithm that is able to find an optimal solution in polynomial time for every instance of the BPP. Instead, heursitics can be used to find a near-optimal solution in a shorter amount of time. One example is the greedy heuristic known as first-fit, an online algorithm that places each item (in some arbitrary order) into the lowest-indexed bin. If there are no bins that can feasibly accommodate the item, the algorithm places the item into a new bin. A modified version of first-fit yields the well-known first-fit decreasing (FFD) algorithm (\citealp{eilon1971}), which initially sorts the items into non-decreasing order of size before allocating them into bins. As proven by \cite{dosa2007} \textcolor{RoyalBlue}{(proved bound is tight)}, the worst case for FFD is $\frac{11}{9}k + \frac{6}{9}$ bins, where $k$ is the optimal number of bins given by $\ceil{\frac{\sum_{i=1}^{n} w_{i}}{c}}$ \textcolor{RoyalBlue}{(..if the solution has this many bins then it is optimal,} (\citealp{korf2002})).
 
-In 2004, Goulimis brought to light an open-combinatorial problem related to the bin-packing problem. Corrugated boxes are formed in two stages: firstly, they are produced flat, then a device consistsing of knives mounted on a bar creates ``scores'' along specific lines on the flat boxes. These scores allow the boxes to be folded in predetermined places. The first stage of this process involves finding a feasible pattern of the flat boxes that minimises the amount of waste, and has been researched extensively. \textcolor{Plum}{It is classically solved by delayed column-generation} (\citealp{gilmore1961, gilmore1963}). However, the second step of this process requires an additional constraint.
+In 2004, \citeauthor{goulimis2004} brought to light an open-combinatorial problem related to the bin-packing problem. Corrugated boxes are formed in two stages: firstly, they are produced flat, then a device consistsing of knives mounted on a bar creates ``scores'' along specific lines on the flat boxes. These scores allow the boxes to be folded in predetermined places. The first stage of this process involves finding a feasible pattern of the flat boxes that minimises the amount of waste, and has been researched extensively. \textcolor{Plum}{It is classically solved by delayed column-generation} (\citealp{gilmore1961, gilmore1963}). However, the second step of this process requires an additional constraint.
 
 The scoring knives, by design, cannot be placed too close together (around 70mm in industry), and as such have a ``minimum knife distance''. The problem then becomes a bin-packing problem with an additional constraint: find a feasible arrangement of boxes such that the sum of two adjacent score widths from different boxes is greater than or equal to the minimum knife distance. \textcolor{RoyalBlue}{We will call this constraint the minimum total score width constraint.}
 
