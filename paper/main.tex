@@ -1,0 +1,109 @@
+\documentclass[oribibl]{llncs}
+
+\input{includes/preamble.tex}
+
+\title{Heuristics for the Score-Constrained Bin-Packing Problem}
+\author{Asyl L. Hawa \and Rhyd M. R. Lewis \and Jonathan M. Thompson}
+\institute{School of Mathematics, Cardiff University, Senghennydd Road, Cardiff, UK, CF24 4AG}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+	This version started: 14/01/2018
+\end{abstract}
+
+\section{Introduction}
+\label{sec:intro}
+
+The one-dimensional bin-packing problem (BPP) is a combinatorial optimisation problem that has been widely researched and discussed due to its ability to model a variety of real-life situations. The BPP can be described as follows: given a set of $n$ items of varying sizes $w$, and a finite number of bins with equal capacity $c$, find the minimum number of bins required to contain all of the items. In 2004, \citeauthor{goulimis2004} brought to light an open-combinatorial problem related to the bin-packing problem. Corrugated boxes are formed in two stages: firstly, they are produced flat, then a device consisting of knives mounted of a bar creates scores along specific lines on the flat boxes. These scores allow the boxes to be folded in predetermined locations. The first stage of this process is a cutting stock problem, and involves finding a feasible pattern of the flat boxes that minimises the amount of waste. This problem has been researched extensively, and can be solved using delayed column-generation (\citealp{gilmore1961, gilmore1963}). However, the second strip of this process requires an additional constraint.
+
+The scoring knives are arranged in pairs, and cut along score lines from two adjacent boxes simultaneously. By design, the knives cannot be placed too close to one another, and so the distance between the scoring knives must exceed a fixed minimum value $\tau \in \mathbb{R}^{+}$ (around 70mm in industry). The problem therefore consists of finding a feasible arrangement of boxes such that the distance between two score lines is greater than or equal to $t$.
+
+There exists a polynomial-time algorithm that is able to recognise whether a particular instance of this problem is feasible (\citealp{becker2010}). However, this algorithm does not consider the widths of each individual box, and only attempts to place the boxes onto a single strip. In industry, strips of material are provided in fixed lengths, and so given a large problem instance multiple strips may be required to feasibly accommodate all of the boxes without exceeding the capacity of the strips.  
+
+This leads us to our main problem: given a collection of boxes of varying widths and a finite number of strips of fixed lengths, find the minimum number of strips required to feasibly pack all of the boxes such that the distance between two adjacent score lines on every pair of boxes is greater than or equal to some fixed value $\tau$ on all strips.
+
+The remainder of this article will firstly, in Section \ref{sec:scbpp}, state the notation that will be used throughout, and formally define the problem. Section \ref{sec:ffdapprox} will introduce a modified first-fit decreasing heuristic and describe the changes made to consider the new constraint. In Section \ref{sec:ffdexact}, we will present a new algorithm which consists of the modified heuristic detailed in the previous section combine with a polynomial-time algorithm which will be used to find feasible sub-solutions. A comparison of the two heuristics and an analysis of the results will be provided in Section \ref{sec:comparison}, and finally Section \ref{sec:conclusion} concludes the paper and proposes some potential directions for future work.
+
+\section{Formulating the Score-Constrained Bin-Packing Problem}
+\label{sec:scbpp}
+Insert lit review here.
+
+Let each box $i$ of a set of $n$ boxes have a positive width $w(i)$. A ``score width'' is the distance between a score line and the nearest edge of the box. Each box $i$ has two score lines, $i_1, i_2$, with score widths $w(i_1), w(i_2)$ such that $w(i_1) \leq w(i_2)$. Since these score widths are not necessarily equal, each box can be algined in two distinct ways: in a ``regular'' position, where the smaller score width $w(i_1)$ is on the left-hand side of the box, or in a ``rotated'' position, with the smaller score width on the right-hand side of the box. The boxes can be expressed using their score lines, where $\{i_1, i_2\}$ represents a regular position, and $\{i_2, i_1\}$ a rotated position. 
+
+Given the minimum fixed value $\tau$, two boxes can only be placed next to one another if the adjacent score lines $\alpha$ and $\beta$ fulfil the \textit{minimum total score width constraint},
+
+\begin{equation*}
+	\label{eqn:mtswc}
+	w(\alpha) + w(\beta) \geq \tau,
+\end{equation*}
+
+that is, the sum of the adjacent score widths must exceed the \textit{minimum total score width} $\tau$.
+
+There are a finite number of strips $S_j, j = 1, 2, ...$, with equal fixed lengths $l > 0$, that are to be packed from left to right. Assume that, for all boxes $i = 1, 2, ..., n$, $w(i) \leq l$, and $0 < w(i_1) \leq w(i_2) \leq \tau$. We are now able to present a formal definition of the problem.
+
+\begin{definition}
+	Given $n$ boxes of varying widths $w(i)$ and score widths $w(i_1), w(i_2)$, $i = 1, 2, ..., n$, a finite number of strips $S_j$ with equal fixed lengths $l$, and a minimum total score width $\tau$, the Score-Constrained Bin-Packing Problem (SCBPP) consists of finding the minimum number of strips required to pack the boxes such that the minimum total score width constraint is met between every pair of adjacent boxes. 
+\end{definition}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\section{FFD Approx}
+\label{sec:ffdapprox}
+
+\section{FFD Exact}
+\label{sec:ffdexact}
+
+\section{Comparison and results}
+\label{sec:comparison}
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+
+
+
+
+
+
+
+
+
+
+
+
+\bibliographystyle{dcu}
+\bibliography{includes/bibliography}
+
+\end{document}
