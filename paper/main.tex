@@ -31,7 +31,7 @@ The remainder of this article will firstly, in Section \ref{sec:scbpp}, state th
 \label{sec:scbpp}
 Insert lit review here.
 
-Let each box $i$ of a set of $n$ boxes have a positive width $w(i)$. A ``score width'' is the distance between a score line and the nearest edge of the box. Each box $i$ has two score lines, $i_1, i_2$, with score widths $w(i_1), w(i_2)$ such that $w(i_1) \leq w(i_2)$. Since these score widths are not necessarily equal, each box can be algined in two distinct ways: in a ``regular'' position, where the smaller score width $w(i_1)$ is on the left-hand side of the box, or in a ``rotated'' position, with the smaller score width on the right-hand side of the box. The boxes can be expressed using their score lines, where $\{i_1, i_2\}$ represents a regular position, and $\{i_2, i_1\}$ a rotated position. 
+Let each box $i$ of a set of $n$ boxes have a positive width $w(i)$. A ``score width'' is the distance between a score line and the nearest edge of the box. Each box $i$ has two score lines, $i_1, i_2$, with score widths $w(i_1), w(i_2)$ such that $w(i_1) \leq w(i_2)$. Since these score widths are not necessarily equal, each box can be aligned in two distinct ways: in a ``regular'' position, where the smaller score width $w(i_1)$ is on the left-hand side of the box, or in a ``rotated'' position, with the smaller score width on the right-hand side of the box. The boxes can be expressed using their score lines, where $\{i_1, i_2\}$ represents a regular position, and $\{i_2, i_1\}$ a rotated position. 
 
 Given the minimum fixed value $\tau$, two boxes can only be placed next to one another if the adjacent score lines $\alpha$ and $\beta$ fulfil the \textit{minimum total score width constraint},
 
@@ -49,41 +49,142 @@ There are a finite number of strips $S_j, j = 1, 2, ...$, with equal fixed lengt
 \end{definition}
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 \section{FFD Approx}
 \label{sec:ffdapprox}
 
+
+
+
+
+
+
+
+\begin{algorithm}[H]
+	\caption{\textcolor{OliveGreen}{Approximate First-Fit Decreasing Algorithm for the Score-Constrained Bin-Packing Problem}}
+	\label{alg:ffdapprox}
+	\begin{algorithmic}[1]
+	\Require A list of boxes $\{i_1, i_2\}$ with widths $w(i), i = 1, 2, ..., n$, strips $S_j = \emptyset$ of fixed lengths $l$ and residual lengths $r(j) = l$, $j = 1, 2, ...,n$, minimum total score width $\tau$, and a set $\mathcal{S} = \emptyset$.
+	\Ensure A feasible packing of all boxes onto a set of strips $\mathcal{S}$.
+	\State Sort the boxes in order of non-increasing widths.
+	\For{$i \gets 1 \To n$}
+		\For{$j \gets 1 \To n$}
+			\If{$S_j = \emptyset$}
+				\State $S_j \gets \{i_1, i_2\}$
+				\State $r(j) \gets r(j) - w(i)$
+				\State $\mathcal{S} \gets \mathcal{S} \cup S_j$
+				\Break
+			\ElsIf{$S_j \neq \emptyset \land w(i) \leq r(j)$}
+				\If{$w(f_j) + w(i_1) \geq \tau$}
+					\State $S_j \gets S_j \cup \{i_1, i_2\}$
+					\State $r(j) \gets r(j) - w(i)$
+					\Break
+				\ElsIf{$w(f_j) + w(i_2) \geq \tau$}
+					\State $S_j \gets S_j \cup \{i_2, i_1\}$
+					\State $r(j) \gets r(j) - w(i)$
+					\Break
+				\EndIf
+			\EndIf
+		\EndFor
+	\EndFor
+	\Return $\mathcal{S}$
+	\end{algorithmic}	
+\end{algorithm}
+
+Initially, the algorithm arranges the boxes in non-increasing order of widths, breaking ties by choosing the box with the smallest score width. For each box $i$ in the sorted list, the algorithm find the lowest-indexed strip $S_j$ that is able to feasibly accommodate $i$. If $S_j$ is empty, $i$ is placed in a regular position onto $S_j$, which is then added to a set $\mathcal{S}$ that maintains a record of strips that are being packed. However, if $S_j$ is not empty, the algorithm checks the minimum total score width constraint with $i$ firstly in a regular position, then in a rotated position. If the constraint is met in either case, $i$ is placed accordingly onto $S_j$. If neither positions are able to fulfil the constraint, the algorithm moves onto the next strip $S_{j+1}$ and the process of attempting to pack $i$ is repeated. Once a box $i$ has been placed onto a strip, the algorithm moves onto the next box $i+1$, until all of the boxes have been packed. 
+
+
 \section{FFD Exact}
 \label{sec:ffdexact}
+
+Let each box be represented by two vertices on a graph $G$, one vertex for each side of a box. A ``dummy'' box is introduced, with two ``dominating'' score widths equal to the minimum total score width $\tau$. This dummy box will be discarded at the end of the algorihtm, and will not be included in the final solution. Thus, there are $n$ boxes, including the dummy box, and so $G$ will consist of $2n$ vertices.
+
+Two vertices $v_i, v_j$ $(i \neq j)$ that represent either side of the same box are referred to as ``partners''. The boxes cannot be altered in any way, and so partners must always be adjacent to one another. Therefore, a set $P$ is created, consisting of edges between partners on $G$. These edges are weighted, with values corresponding to the width of the box that the partners are associated with.
+
+Each vertex $v_i, i = 1, 2, ..., 2n$ has a postive value $w(v_i)$ corresponding to the score width it represents. There is an edge between two vertices $v_i, v_j$ $(i \neq j)$ on $G$ if and only if the vertices fulfil the minimum total score width constraint,
+
+\begin{equation*}
+	w(v_i) + w(v_j) \geq \tau,
+\end{equation*}
+
+and $v_i, v_j$ are not partners, i.e. $\{v_i, v_j\} \notin P$. The vertices $v_i, v_j$ are then referred to as ``matched'', and so their corresponding score widths can be feasibly placed next to one another. Hence there is another set of edges $Q$, which contains edges between matched vertices. 
+
+Thus, $G(V, P\cup Q)$ is an undirected graph with vertex set $V = \{v_1, v_2, ..., v_{2n}\}$, and two edge sets $P$ and $Q$, with $P \cap Q = \emptyset$. In order to find a feasible alignment of the boxes, $G$ must contain an alternating Hamiltonian cycle.
+
+\begin{definition}
+	\label{defn:althamcycle}
+	Let $G(V, P\cup Q)$ be an undirected graph, where each edge is a member of one of two sets, $P$ or $Q$. $G$ has an \textit{alternating Hamiltonian cycle} if there exists a Hamiltonian cycle on $G$ such that the successive edges alternate between sets $P$ and $Q$. For example, if vertex $v_i$ in the Hamiltonian cycle is adjacent to vertex $v_{i-1}$ via an edge from $P$, then $v_i$ must be adjacent to vertex $v_{i+1}$ via an edge from $Q$, or vice versa. 
+\end{definition}
+
+If $G$ does contain an alternating Hamiltonian cycle, the algorithm simply removes the dominating vertices and any associated edges to obtain an alternating Hamiltonian path, which portrays the order of the score widths that gives rise to a feasible alignment of the boxes. Thus, the aim of the algorithm is to find an alternating Hamiltonian cycle on $G$, if one exists.
+
+The next step of the algorithm attemps to obtain a set of matching edges $M \subset Q$ of cardinality $n$, such that the edges from $M$ and $P$ form an alternating Hamiltonain cycle as described in Definition \ref{defn:althamcycle}. There is a modified matching algorithm (\citealp{mahadev1994, becker2010}) that is able to choose a suitable set of edges for $M$.
+
+Initially, the vertices are sorted in order of non-decreasing values $w(v_i), i = 1,2, .., 2n$, with ties broken arbitrarily. For each vertex in the list, find the largest adjacent vertex in $Q$ that has not yet been added to the matching set $M$. This pair of vertices is then added to $M$, and the algorithm proceeds on to the next vertex in the sorted list. This process continues until all of the vertices have been assessed. 
+
+If a vertex $v_i$ is not adjacent to any other vertex except its partner, the previous vertex can be rematched, provided $v_i$ is not the first vertex in the sorted list, the previous vertex $v_{i-1}$ is matched under $M$ (i.e. $v_{i-1} \in M$), and $v_{i-1}$ is adajcent to $v_i$'s partner. Then, $v_{i-1}$ is matched with $v_i$'s partner, and $v_i$ is matched with $v_{i-1}$'s previous match under $M$. It is guaranteed that this algorithm will produce a maximum cardinality matching $M \subset Q$ (\citealp{becker2010}).
+
+
+If $|M| < n$, there are not enough matching edges to form an alternating Hamiltonian cycle with the edges in $P$, and therefore there is no feasible arrangement of the boxes such that the minimum total score width constraint is not violated. However, if $|M| = n$, then the graph $G(V, P \cup M)$ is a 2-regular graph where each vertex is adjacent to one vertex (its partner) via an edge in $P$, and another vertex (its match) via an edge in $M$. If $G$ consists of one alternating Hamiltonian cycle, the dominating vertices are removed to obtain a feasible alignment of the boxes. If there are two or more cycles on $G(V, P \cup M)$, a solution to the problem has not yet been found. These cycles need to be combined into one single alternating Hamiltonian cycle.
+
+
+To merge the multiple cycles on $G$, we need to connect vertices from different cycles by removing some matching edges and adding new edges from $Q$. The following algorithm finds the matching edges on the graph $G(V, P \cup M)$ that allow the cycles to be combined.
+
+
+The algorithm initially creates a list of all matching edges in $M$, sorted in order of non-decreasing vertex values. Starting from the first edge, the algorithm searches through the list of edges until it finds an edge whose smaller vertex is adjacent via an edge in $Q$ to the larger vertex of the succeeding edge in the list, such that both edges are from different cycles on the graph $G$. If such a pair of edges is found, the first edge of the pair is added to a set $C_k$. The algorithm then continues to add all succeeding edges to $C_k$, provided that the smaller vertex of the current edge is adjacent to the larger vertex of the succeeding edge via an edge in $Q$, the succeeding edge does not belong to a cycle that is already represented by an edge in $C_k$, and the algorithm has not reached the final edge in the list. Once there are no more valid edges to add to $C_k$, the algorithm proceeds to the next edge in the list, and checks whether this edge is suitable for beginning a new set $C_{k+1}$. If the penultimate or final edge in the list is reached, the algorithm terminates.
+
+If the algorithm does not produce a single set $C$, there are no edges available to connect the cycles together, and therefore no feasible alignment of the boxes in this problem instance exists. \textcolor{RoyalBlue}{also if the set $C$ doesn't include an edge from every cycle, or multiple sets $C$ that don't cover all cycles, infeasible.}
+
+If there exists a set $C_k$ such that $|C_k| = \textcolor{OliveGreen}{number of cycles}$, then the cycles can be connected as follows: starting from the first edge in $C_k$, connect the smaller vertex to the larger vertex of the second edge in the set. Then, connect the smaller vertex of the second edge to the larger vertex of the third edge. Continue in this manner until the last edge in $C_k$ is reached, and connect the lower vertex of this final edge to the larger vertex of the first edge. These new matching edges will join the distinct cycles together to form one alternating Hamiltonian cycle. The edges in the set $C_k$ can be removed from the graph $G$
+
+\textcolor{RoyalBlue}{Multiple $C_k$ cycles required.}
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+\begin{algorithm}[H]
+	\caption{\textcolor{OliveGreen}{Exact First-Fit Decreasing Algorithm for the Score-Constrained Bin-Packing Problem}}
+	\label{alg:ffdexact}
+	\begin{algorithmic}[1]
+	\Require A list of boxes $\{i_1, i_2\}$ with widths $w(i), i = 1, 2, ..., n$, strips $S_j = \emptyset$ of fixed lengths $l$ and residual lengths $r(j) = l$, $j = 1, 2, ...,n$, and a set $\mathcal{S} = \emptyset$.
+	\Ensure A feasible packing of all boxes onto a set of strips $\mathcal{S}$.	
+	\State Sort the boxes in order of non-increasing widths
+	\For{$i \gets 1 \To n$}
+		\For{$j \gets 1 \To n$}
+			\If{$S_j = \emptyset$}
+				\State $S_j \gets \{i_1, i_2\}$
+				\State $r(j) \gets r(j) - w(i)$
+				\State $\mathcal{S} \gets \mathcal{S} \cup S_j$
+				\Break
+			\ElsIf{$S_j \neq \emptyset \land w(i) \leq r(j)$}
+				\State \textcolor{RoyalBlue}{Run} \textcolor{OrangeRed}{``MBAHRA''} \textcolor{RoyalBlue}{on boxes in $S_j$ and box $i$}
+				\If{feasible alignment found}
+					\State $S_j \gets$ \textcolor{RoyalBlue}{new alignment found by} \textcolor{OrangeRed}{``MBAHRA''}
+					\State $r(j) \gets r(j) - w(i)$
+					\Break
+				\EndIf
+			\EndIf
+		\EndFor
+	\EndFor
+	\Return $\mathcal{S}$
+	\end{algorithmic}	
+\end{algorithm}
+
+\textcolor{RoyalBlue}{In a similar fashion/manner to ``FFD approx'' (rename)} The algorithm starts by sorting the boxes in order of non-increasing widths, with ties broken by choosing the box with the smallest score width. Starting with the first box, the algorithm finds the lowest-indexed strip $S_j$ that can feasibly accommodate the current box $i$. If $S_j$ is empty, box $i$ is placed onto $S_j$ in a ``regular'' position \textcolor{RoyalBlue}{(i.e. smallest score width on the LHS of the box)}. This strip is added to the set $\mathcal{S}$ that keeps track of the strips being used to form a solution, and the algorithm proceeds onto the next box $i+1$ in the sorted list.
+
+If $S_j$ is not empty \textcolor{RoyalBlue}{(i.e contains at least one box, $|S_j| > 0$)}, then \textcolor{OrangeRed}{MBAHRA} is performed on all of the boxes in $S_j$ and the current box $i$. If a feasible alignment of the boxes has been found, the current boxes on $S_j$ are replaced with the new alignment, and the algorithm proceeds onto the next box $i+1$. If \textcolor{OrangeRed}{MBAHRA} is unable to find a feasible alignment of the boxes, the algorithm moves onto the next strip $S_{j+1}$ and the process is repeated. The algorithm continues until all of the boxes have been packed. \textcolor{RoyalBlue}{Complexity}
+
+
+
 
 \section{Comparison and results}
 \label{sec:comparison}
