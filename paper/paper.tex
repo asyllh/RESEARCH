@@ -2,7 +2,7 @@
 
 \input{includes/preamble.tex}
 
-\title{Heuristics for the Score-Constrained Bin-Packing Problem}
+\title{DRAFT}
 \author{Asyl L. Hawa \and Rhyd M. R. Lewis \and Jonathan M. Thompson}
 \institute{School of Mathematics, Cardiff University, Senghennydd Road, Cardiff, UK, CF24 4AG}
 \date{\today}
@@ -133,7 +133,7 @@ FCA/Patch
 
 In order to combine multiple cycles into one, we need to replace some matching edges with feasible edges from the set $Q$ that connect vertices from different cycles. \textcolor{RoyalBlue}{The following algorithm is used to find these feasible edges}.
 
-The algorithm initially creates a list of all matching edges in $M$, sorted in order of non-decreasing vertex values \textcolor{RoyalBlue}{(i.e. the edge which connects the smallest vertex to its match is first in the list) (do not include edges from partner swap)}. Starting from the first edge in the list, the algorithm searches through the list of edges until it finds an edge whose smaller vertex is adjacent via an edge in $Q$ to the larger vertex of the succeeding edge in the list, such that both edges are from different cycles on the graph $G$. If such a pair of edges has been found, the algorithm adds the first edge of the pair to a set $C_k$. The algorithm then continues to add all succeeding edges to $C_k$, provided that the smaller vertex of the current edge is adjacent to the larger vertex of the succeeding edge via an edge in $Q$, the succeeding edge does not belong to a cycle that is already represented by an edge in $C_k$, and the algorithm has not reached the final edge in the list. Once there are no more valid edges to add to $C_k$, the algorithm proceeds to the next edge in the list, and checked whether this edge is suitable for beginning a new set $C_{k+1}$. If the algorithm has already reached the penultimate or final edge in the list, the algorithm terminates.
+The algorithm initially creates a list of all matching edges in $M$, sorted in order of non-decreasing vertex values \textcolor{RoyalBlue}{(i.e. the edge which connects the smallest vertex to its match is first in the list) (do not include edges from partner swap)}. Starting from the first edge in the list, the algorithm searches through the list of edges until it finds an edge whose smaller vertex is adjacent via an edge in $Q$ to the larger vertex of the succeeding edge in the list, such that both edges are from different cycles on the graph $G$. If such a pair of edges has been found, the algorithm adds the first edge of the pair to a set $C_k$. The algorithm then continues to add all succeeding edges to $C_k$, provided that the smaller vertex of the current edge is adjacent to the larger vertex of the succeeding edge via an edge in $Q$, the succeeding edge does not belong to a cycle that is already represented by an edge in $C_k$, and the algorithm has not reached the final edge in the list. Once there are no more valid edges to add to $C_k$, the algorithm proceeds to the next edge in the list, and checks whether this edge is suitable for beginning a new set $C_{k+1}$. If the algorithm has already reached the penultimate or final edge in the list, the algorithm terminates.
 
 If the algorithm does not produce a single set $C$, there are no edges available to connect the cycles together, and therefore no feasible alignment of the boxes in this problem instance exists. \textcolor{RoyalBlue}{also if the set $C$ doesn't include an edge from every cycle, or multiple sets $C$ that don't cover all cycles, infeasible.}
 
