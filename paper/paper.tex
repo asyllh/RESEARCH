@@ -16,9 +16,9 @@
 
 
 \section{Introduction}
-\label{sec:intro}
+
 The one-dimensional bin packing problem (BPP) is a combinatorial optimisation problem that has been widely researched and discussed due to its ability to model a variety of real-life sitations.
-The BPP can be described as follows: given a set of $n$ items of varying sizes $w$, and a finite number of bins with equal capacity $c$, find the minimum number of bins required to contain all of the items. As shown by \cite{garey1979}, this problem is NP-hard, and therefore (under the assumption that $P \neq NP$) there is no known algorithm that is able to find an optimal solution in polynomial time for every instance of the BPP. Instead, heursitics can be used to find a near-optimal solution in a shorter amount of time. One example is the greedy heuristic known as first-fit, an online algorithm that places each item (in some arbitrary order) into the lowest-indexed bin. If there are no bins that can feasibly accommodate the item, the algorithm places the item into a new bin. A modified version of first-fit yields the well-known first-fit decreasing (FFD) algorithm (\citealp{eilon1971}), which initially sorts the items into non-decreasing order of size before allocating them into bins. As proven by \cite{dosa2007} \textcolor{RoyalBlue}{(proved bound is tight)}, the worst case for FFD is $\frac{11}{9}k + \frac{6}{9}$ bins, where $k$ is the optimal number of bins given by $\ceil{\frac{\sum_{i=1}^{n} w_{i}}{c}}$ \textcolor{RoyalBlue}{(..if the solution has this many bins then it is optimal,} (\citealp{korf2002})).
+The BPP can be described as follows: given a set of $n$ items of varying sizes $w$, and a finite number of bins with equal capacity $c$, find the minimum number of bins required to contain all of the items. As shown by \cite{garey1979}, this problem is NP-hard, and therefore (under the assumption that $P \neq NP$) there is no known algorithm that is able to find an optimal solution in polynomial time for every instance of the BPP. Instead, heursitics can be used to find a near-optimal solution in a shorter amount of time. One example is the greedy heuristic known as first-fit, an online algorithm that places each item (in some arbitrary order) into the lowest-indexed bin. If there are no bins that can feasibly accommodate the item, the algorithm places the item into a new bin. A modified version of first-fit yields the well-known first-fit decreasing (FFD) algorithm (\citealp{eilon1971}), which initially sorts the items into non-increasing order of size before allocating them into bins. As proven by \cite{dosa2007} \textcolor{RoyalBlue}{(proved bound is tight)}, the worst case for FFD is $\frac{11}{9}k + \frac{6}{9}$ bins, where $k$ is the optimal number of bins given by $\ceil{\frac{\sum_{i=1}^{n} w_{i}}{c}}$ \textcolor{RoyalBlue}{(..if the solution has this many bins then it is optimal,} (\citealp{korf2002})).
 
 In 2004, \citeauthor{goulimis2004} brought to light an open-combinatorial problem related to the bin-packing problem. Corrugated boxes are formed in two stages: firstly, they are produced flat, then a device consistsing of knives mounted on a bar creates ``scores'' along specific lines on the flat boxes. These scores allow the boxes to be folded in predetermined places. The first stage of this process involves finding a feasible pattern of the flat boxes that minimises the amount of waste, and has been researched extensively. \textcolor{Plum}{It is classically solved by delayed column-generation} (\citealp{gilmore1961, gilmore1963}). However, the second step of this process requires an additional constraint.
 
@@ -40,18 +40,17 @@ We are given $n$ boxes that need to be packed onto strips. Each of these boxes h
 
 
 \begin{definition} 
-	\label{defn:scbpp}
+
 	Given $n$ boxes of varying widths $w(i)$ and score widths $w(i_1), w(i_2)$, and a finite number of strips $S_j$ with equal fixed lengths $l$, the Score-Constrained Bin-Packing Problem (SCBPP) consists of finding the minimum number of strips required to pack all of the boxes such that the minimum total score width constraint is met between every pair of boxes. \textcolor{RoyalBlue}{or: such that for every pair of boxes the sum of the adjacent score widths is greater than or equal to some fixed value $t$.}
 \end{definition}
 
 
 
 \section{FFD Using Approximate Algorithm}
-\label{sec:ffdapprox}
+
 
 \begin{algorithm}[H]
 	\caption{\textcolor{OliveGreen}{Approximate First-Fit Decreasing Algorithm for the Score-Constrained Bin-Packing Problem}}
-	\label{alg:ffdapprox}
 	\begin{algorithmic}[1]
 	\Require A list of boxes $\{i_1, i_2\}$ with widths $w(i), i = 1, 2, ..., n$, strips $S_j = \emptyset$ of fixed lengths $l$ and residual lengths $r(j) = l$, $j = 1, 2, ...,n$, minimum total score width $t$, and a set $\mathcal{S} = \emptyset$.
 	\Ensure A feasible packing of all boxes onto a set of strips $\mathcal{S}$.
@@ -87,7 +86,7 @@ Initially, the algorithm arranges the boxes in non-increasing order of widths, b
 
 
 \section{FFD Using Exact Algorithm}
-\label{sec:ffdexact}
+
 Introduction
 
 Explanation: Initialise
@@ -99,7 +98,6 @@ We will refer two two vertices that represent either side of the same box as ``p
 Each vertex $v_i$ for $i = 1, 2, ..., 2n$ has a positive value $w(v)$ corresponding to the score width it represents. There is an edge between two vertices $u$ and $v$ on $G$ if and only if the vertices fulfil the \textit{minimum total score width constraint}, 
 
 \begin{equation*}
-	\label{eqn:mtswcg}
 	w(u) + w(v) \geq t,
 \end{equation*}
 
@@ -108,7 +106,7 @@ and $u$ and $v$ are not partners, i.e. $\{u, v\} \notin P$. The vertices $u$ and
 In order to find a feasible alignment of the boxes, we must find an alternating Hamiltonian cycle on $G$. \textcolor{RoyalBlue}{turns into path when we remove dummy box.}
 
 \begin{definition}
-	\label{defn:althamcycle}
+	
 	Let $G(V, P\cup Q)$ be an undirected graph, where each edge is a member of one of two sets, $P$ or $Q$. $G$ has an \textit{alternating Hamiltonian cycle} if there exists a Hamiltonian cycle on $G$ such that the successive edges alternate between sets $P$ and $Q$. For example, if vertex $v_k$ in the Hamiltonian cycle is adjacent to vertex $v_{k-1}$ via an edge from $P$, then $v_k$ must be adjacent to vertex $v_{k+1}$ via an edge from $Q$, or vice versa. 
 \end{definition}
 
@@ -143,7 +141,7 @@ If there exists a set $C_k$ such that $|C_k| = \textcolor{OliveGreen}{number of 
 
 \begin{algorithm}[H]
 	\caption{\textcolor{OliveGreen}{Exact First-Fit Decreasing Algorithm for the Score-Constrained Bin-Packing Problem}}
-	\label{alg:ffdexact}
+
 	\begin{algorithmic}[1]
 	\Require A list of boxes $\{i_1, i_2\}$ with widths $w(i), i = 1, 2, ..., n$, strips $S_j = \emptyset$ of fixed lengths $l$ and residual lengths $r(j) = l$, $j = 1, 2, ...,n$, and a set $\mathcal{S} = \emptyset$.
 	\Ensure A feasible packing of all boxes onto a set of strips $\mathcal{S}$.
@@ -178,14 +176,14 @@ If there exists a set $C_k$ such that $|C_k| = \textcolor{OliveGreen}{number of 
 If $S_j$ is not empty \textcolor{RoyalBlue}{(i.e contains at least one box, $|S_j| > 0$)}, then \textcolor{OrangeRed}{MBAHRA} is performed on all of the boxes in $S_j$ and the current box $i$. If a feasible alignment of the boxes has been found, the current boxes on $S_j$ are replaced with the new alignment, and the algorithm proceeds onto the next box $i+1$. If \textcolor{OrangeRed}{MBAHRA} is unable to find a feasible alignment of the boxes, the algorithm moves onto the next strip $S_{j+1}$ and the process is repeated. The algorithm continues until all of the boxes have been packed. \textcolor{RoyalBlue}{Complexity}
 
 \section{Comparison and Results}
-\label{sec:compresult}
+
 
 
 \section{Conclusion}
-\label{sec:conclusion}
+
 
 \section{References}
-\cite{becker2010}, \cite{becker2015}, \cite{coffman1978}, \cite{dosa2007}, \cite{eilon1971}, \cite{garey1979}, \cite{gilmore1961}, \cite{gilmore1963}, \cite{goulimis2004}, \cite{johnson1974}, \cite{karp1972}, \cite{korf2002}, \cite{lewis2009}, \cite{lewis2017}, \cite{lewis2011}, \cite{mahadev1994}, \cite{mahadev1995}, \cite{martello1990a}, \cite{martello1990b}
+\cite{becker2010}, \cite{becker2015}, \cite{coffman1978}, \cite{dosa2007}, \cite{eilon1971}, \cite{garey1979}, \cite{gilmore1961}, \cite{gilmore1963}, \cite{goulimis2004}, \cite{johnson1974worst}, \cite{johnson1974fast}, \cite{hung1978}, \cite{garey1972}, \cite{johnson1973}, \cite{karp1972}, \cite{korf2002}, \cite{lewis2009}, \cite{lewis2017}, \cite{lewis2011}, \cite{mahadev1994}, \cite{mahadev1995}, \cite{martello1990a}, \cite{martello1990b}
 
 \section{Layout}
 Introduction:
