@@ -30,22 +30,16 @@ The remainder of this article will firstly, in Section \ref{sec:scbpp}, state th
 \section{Formulating the Score-Constrained Bin-Packing Problem}
 \label{sec:scbpp}
 
-Despite the simplicity of the bin-packing problem statement, it has in fact been shown to be an NP-hard optimisation problem (\citealp{garey1979}). Thus, under the assumption that $P \neq NP$, there is no known algorithm that is able to find an optimal solution for every instance of the BPP in polynomial time. Instead, heuristics can be used to find near-optimal solutions within a shorter amount of time. One example is the greedy heuristic known as first-fit (FF), an online algorithm that places each item (in some arbitrary order) into the lowest-indexed bin such that the bin capacity is not exceeded. It has been seen that by arranging the items in decreasing order of sizes, a bin-packing heuristic will produce a solution that is closer to the optimal than if the items are arranged in any other order (\citealp{johnson1974fast}). Applying FF onto items sorted in this manner yields the well-known first-fit decreasing (FFD) heuristic.
+Despite the simplicity of the bin-packing problem statement, it has in fact been shown to be an NP-hard optimisation problem (\citealp{garey1979}). Thus, under the assumption that $P \neq NP$, there is no known algorithm that is able to find an optimal solution for every instance of the BPP in polynomial time. Instead, heuristics can be used to find near-optimal solutions in a shorter amount of time. One example is the greedy heuristic known as first-fit (FF), an online algorithm that places each item (in some arbitrary order) into the lowest-indexed bin such that the bin capacity is not exceeded. It has been shown that by arranging the items in decreasing order of size, a bin-packing heuristic will produce a solution that is closer to the optimal than if the items are arranged in any other order (\citealp{johnson1974fast}). Applying FF onto items sorted in this manner yields the well-known first-fit decreasing (FFD) heuristic.
 
 
-An optimal solution to an instance of the BPP is a solution that consists of the fewest number of bins, $k$. A simple lower bound for $k$ that can be computed in $O(n)$ time is given by
+An optimal solution of an instance of the BPP is a solution that consists of the fewest number of bins, $k$. A simple lower bound for $k$ that can be computed in $O(n)$ time is given by
 
 \begin{equation*}
-	k \geq \ceil*{\frac{\sum_{i=1}^{n}w_i}{c}}
+	k \geq \ceil*{\frac{\sum_{i=1}^{n}w(i)}{c}}
 \end{equation*}
 
-where $n$ is the number of items to be packed, $w_i$ the size of each item $i$, and $c$ the maximum capacity of the bins (\citealp{martello1990b}). In 1973, \citeauthor{johnson1973} showed that FFD is guaranteed to return a solution that uses no more than $\frac{11}{9}k + 4$ bins. More recently, \cite{dosa2007} has proven that the worst case for FFD is in fact $\frac{11}{9}k + \frac{6}{9}$, and that this bound is tight. Due to the initial sorting of the $n$ items in non-increasing order of sizes, FFD can be implemented in $O(n\log n)$ time.
-
-
-
-
-
-
+where $n$ is the number of items to be packed, $w(i)$ the size of each item $i$, and $c$ the maximum capacity of the bins (\citealp{martello1990b}). In 1973, \citeauthor{johnson1973} showed that FFD is guaranteed to return a solution that uses no more than $\frac{11}{9}k + 4$ bins. More recently, \cite{dosa2007} has proven that the worst case for FFD is in fact $\frac{11}{9}k + \frac{6}{9}$, and that this bound is tight. Due to the initial sorting of the $n$ items in non-increasing order of sizes, the time compelexity of FFD is $O(n\log n)$.
 
 ---------------------------------
 
