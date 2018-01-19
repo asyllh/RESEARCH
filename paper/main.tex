@@ -23,68 +23,13 @@ Modification/adaption of the Pair Sequencing Problem (PSP) as seen in \cite{lewi
 	\label{defn:psp}
 	Let $\mathcal{P}$ be a multiset of unordered pairs $\mathcal{P} = \{\{x_1, y_1\}, \{x_2,y_2\},...,\{x_n,y_n\}\}$, $x_i, y_i \in \mathbb{Z}^{+}$ for $i \in \{1,2,...,n\}$, and let $\mathcal{X}$ be an ordering of the elements on $\mathcal{P}$ in which each element is also expressed as an ordered pair. The \textcolor{RoyalBlue}{constrained} PSP involves finding a solution $\mathcal{X}$ such that
 	\begin{equation*}
-		\textup{rhs}(i) + \textup{lhs}(i+1) \geq \tau \hspace{5mm} \forall \hspace{1mm} i \in \{1,2,..., n-1\}
+		\textup{\textbf{rhs}}(i) + \textup{\textbf{lhs}}(i+1) \geq \tau \hspace{5mm} \forall \hspace{1mm} i \in \{1,2,..., n-1\}
 	\end{equation*}
-	where \textup{lhs($i$)} and \textup{rhs($i$)} denote the values on the left- and right-hand sides of the $i$th ordered pair in $\mathcal{X}$, and $\tau \in \mathbb{R}^{+}$ is a fixed value.	
+	where \textup{\textbf{lhs}($i$)} and \textup{\textbf{rhs}($i$)} denote the values on the left- and right-hand sides of the $i$th ordered pair in $\mathcal{X}$, and $\tau \in \mathbb{R}^{+}$ is a fixed value.	
 \end{definition}
 
-Adaptations from original PSP:
+For example, if $\mathcal{P} = \{\{1,2\}, \{1,5\}, \{2,4\}, \{3,4\}, \{4,5\}\}$ and $\tau = 7$, a solution is $\mathcal{X} = \langle(1,2), (5,4), (3,4), (4,2), (5,1) \rangle$.
 
-\begin{itemize}
-	\item Instead of minimising an objective function, the aim is to find a single solution/determine whether a solution exists such that the constraint is met.
-	\item In this case, there may not be a solution, whereas original case will have a solution.
-	\item introduction of $\tau \in \mathbb{R}^{+}$.
-	\item $x_i, y_i \in \mathbb{Z}^{+}$, original PSP was $\mathbb{N}_{0}$. Changed since if $x_i = 0$ or $y_i = 0$ for any $i \in\{1, 2, ..., n\}$, then a score width would not exist. Ensure that all items (boxes) have two score widths, one on either side. 
-	\item Original PSP checks distance between rhs($n$) and lhs(1). Not required in this case, as the first and last score widths will be ``free'', not adjacent to any other score widths, strip does not wrap around.
-\end{itemize}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-\section{References}
-\cite{becker2010}, \cite{becker2015}, \cite{coffman1978}, \cite{dosa2007}, \cite{eilon1971}, \cite{garey1979}, \cite{gilmore1961}, \cite{gilmore1963}, \cite{goulimis2004}, \cite{johnson1974worst}, \cite{johnson1974fast}, \cite{hung1978}, \cite{garey1972}, \cite{johnson1973}, \cite{karp1972}, \cite{korf2002}, \cite{lewis2009}, \cite{lewis2017}, \cite{lewis2011}, \cite{mahadev1994}, \cite{mahadev1995}, \cite{martello1990a}, \cite{martello1990b}
 
 
 
