@@ -17,18 +17,37 @@
 \section{Introduction}
 \label{sec:intro}
 
-Modification/adaption of the Pair Sequencing Problem (PSP) as seen in \cite{lewis2017}:
-
 \begin{definition}
-	\label{defn:psp}
-	Let $\mathcal{P}$ be a multiset of unordered pairs $\mathcal{P} = \{\{x_1, y_1\}, \{x_2,y_2\},...,\{x_n,y_n\}\}$, $x_i, y_i \in \mathbb{Z}^{+}$ for $i \in \{1,2,...,n\}$, and let $\mathcal{X}$ be an ordering of the elements on $\mathcal{P}$ in which each element is also expressed as an ordered pair. The \textcolor{RoyalBlue}{constrained} PSP involves finding a solution $\mathcal{X}$ such that
+	\label{defn:cpop}
+	Let $\mathcal{M}$ be a multiset of unordered pairs of positive integers $\mathcal{M} = \{\{a_1, b_1\}, \{a_2,b_2\},...,\{a_n,b_n\}\}$, and let $\mathcal{T}$ be an ordering of the elements of $\mathcal{M}$ such that each element is a tuple. The Constrained Pair Ordering Problem consists of finding a solution $\mathcal{T}$ such that
 	\begin{equation*}
-		\textup{\textbf{rhs}}(i) + \textup{\textbf{lhs}}(i+1) \geq \tau \hspace{5mm} \forall \hspace{1mm} i \in \{1,2,..., n-1\}
+		\label{eqn:cpop}
+		\textup{\textbf{rhs}}(i) + \textup{\textbf{lhs}}(i+1) \geq \tau \hspace{5mm} \forall \hspace{1mm} i \in \{1,2,..., n-1\},
 	\end{equation*}
-	where \textup{\textbf{lhs}($i$)} and \textup{\textbf{rhs}($i$)} denote the values on the left- and right-hand sides of the $i$th ordered pair in $\mathcal{X}$, and $\tau \in \mathbb{R}^{+}$ is a fixed value.	
+	where \textup{\textbf{lhs}($i$)} and \textup{\textbf{rhs}($i$)} denote the left- and right-hand values of the $i$th tuple, and $\tau \in \mathbb{R}^{+}$ is a fixed value.	
 \end{definition}
 
-For example, if $\mathcal{P} = \{\{1,2\}, \{1,5\}, \{2,4\}, \{3,4\}, \{4,5\}\}$ and $\tau = 7$, a solution is $\mathcal{X} = \langle(1,2), (5,4), (3,4), (4,2), (5,1) \rangle$.
+For example, given the multiset $\mathcal{M} = \{\{1,2\}, \{1,5\}, \{2,4\}, \{3,4\}, \{4,5\}\}$ and $\tau = 7$, a feasible solution is $\mathcal{T} = \langle(1,2), (5,4), (3,4), (4,2), (5,1) \rangle$.
+
+\textcolor{OrangeRed}{Model the problem using a graph.}
+
+Let $\mathcal{M}$ be a multiset as described in Definition \ref{defn:cpop}, with an additional unordered pair consisting of ``dominating'' values equal to $\tau$. Two values that make up a pair in $\mathcal{M}$ are referred to as ``partners''. Then, $G(V, P \cup Q)$ is an undirected graph defined by a vertex set $V = \{v_1, v_2, ...v_{2n+2}\}$, where each vertex is assigned a value from $\mathcal{M}$ such that $v_1 \leq v_2 \leq ... \leq v_{2n+2}$. $G$ comprises two distinct edge sets: $P$, which contains edges between vertices that are partners, and $Q$, which consists of edges between vertices that fulfil the \textit{joint sum constraint}. That is, for two distinct vertices $v_i, v_j$,
+
+\begin{equation*}
+	\label{eqn:jointsum}
+	v_i + v_j \geq \tau,
+\end{equation*}
+
+provided $\{v_i, v_j\} \notin P$. Observe that $P$ is in fact a perfect matching, with $|P| = |\mathcal{M}| = n+1$, and that $P \cap Q = \emptyset$.
+
+If $G(V, P\cup Q)$ features an alternating Hamiltonian cycle, then a feasible solution $\mathcal{T}$ exists.
+
+\begin{definition}
+	\label{defn:althamcycle}
+	Let $G(V, P\cup Q)$ be an undirected graph, where each edge is a member of one of two sets, $P$ or $Q$. $G$ contains an alternating Hamiltonian cycle if there exists a Hamiltonian cycle such successive edges alternate between sets $P$ and $Q$. For example, if $\{v_{i-1}, v_i\} \in P$, then $\{v_i, v_{i+1}\} \in Q$, or vice versa.
+\end{definition}
+
+compulsory edges $P$ values pairs cannot be altered.
 
 
 
@@ -40,6 +59,64 @@ For example, if $\mathcal{P} = \{\{1,2\}, \{1,5\}, \{2,4\}, \{3,4\}, \{4,5\}\}$ 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%========================================================================%
+
+
+\begin{comment}
+The PSP can be seen in a problem related to the cutting-stock problem, first described by \cite{goulimis2004}. Let $\mathcal{I}$ be a set of rectangular items of equal heights, made from corrugated cardboard. Each item $i \in \mathcal{I}$ has width $w_i \in \mathbb{Z}^{+}$ and possess two vertical score lines. A pair of knives mounted on a bar will cut along these score lines to allow the items to be folded with ease. The distances between each edge of an item and the nearest score line are the score widths, $a_i, b_i \in \mathbb{Z}^{+}$, assigned such that $a_i \leq b_i$. As illustrated in Figure \ref{fig:boxesknife}, the knives cut along score lines from two adjacent items simultaneously. By design, the knives cannot be placed too close to one another - the distance between the knives must exceed a fixed minimum $\tau \in \mathbb{R}^{+}$ (around 70mm in industry). In order for the knives to be able to cut the items in the correct locations, two adajcent score widths, for example $a_i$ and $b_{i+1}$, must fulfil the \textit{minimum total score width constraint}
+
+\begin{equation*}
+a_i + b_{i+1} \geq \tau.
+\end{equation*}
+
+That is, the sum of two adjacent score widths must exceed the \textit{minimum total score width} $\tau$. Therefore, the problem involves finding a feasible arrangement of the items such that between each pair of items the minimum total score width constraint is met.
+
+
+\begin{figure}[H]	
+\centering
+\includestandalone[width=0.4\textwidth]{figures/boxesknifeannotate}
+\caption{\textcolor{red}{Individual boxes.}}	
+\label{fig:boxesknife}
+\end{figure}
+
+Since the score widths on each item $i \in \mathcal{I}$ are not necessarily equal, they can be aligned in two distinct orientations: ``regular'', denoted by $(a_i, b_i)$, and ``rotated'', denoted by $(b_i, a_i)$, where the smaller of the two score widths $a_i$ is on the left- and right-hand side of the item respectively.
+
+This can be seen as a PSP, where the values $x_i$ and $y_i$ are the score widths, and a feasible solution $\mathcal{X}$ consists of an arrangement of items in some order such that $\textup{\textbf{rhs}}(i) + \textup{\textbf{lhs}}(i+1) \geq \tau \forall  i \in \{1,2,..., |\mathcal{I}|-1\}$.
+
+There exists a polynomial-time algorithm that is able to recognise whether a particular instance of this problem is feasible (\citealp{becker2010}).
+
+\end{comment}
 
 
 
