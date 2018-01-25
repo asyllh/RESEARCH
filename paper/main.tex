@@ -19,36 +19,41 @@
 
 \begin{definition}
 	\label{defn:cpop}
-	Let $\mathcal{M}$ be a multiset of unordered pairs of positive integers $\mathcal{M} = \{\{a_1, b_1\}, \{a_2,b_2\},...,\{a_n,b_n\}\}$, and let $\mathcal{T}$ be an ordering of the elements of $\mathcal{M}$ such that each element is a tuple. The Constrained Pair Ordering Problem consists of finding a solution $\mathcal{T}$ such that
-	\begin{equation*}
+	Let $\mathcal{M}$ be a multiset of unordered pairs of positive integers $\mathcal{M} = \{\{a_1, b_1\}, \{a_2,b_2\},...,\{a_n,b_n\}\}$, and let $\mathcal{T}$ be an ordering of the elements of $\mathcal{M}$ such that each element is a tuple. The Constrained Pair Ordering Problem (CPOP) consists of finding a solution $\mathcal{T}$ such that, given a fixed value $\tau \in \mathbb{R}^{+},$
+	\begin{equation}
 		\label{eqn:cpop}
 		\textup{\textbf{rhs}}(i) + \textup{\textbf{lhs}}(i+1) \geq \tau \hspace{5mm} \forall \hspace{1mm} i \in \{1,2,..., n-1\},
-	\end{equation*}
-	where \textup{\textbf{lhs}($i$)} and \textup{\textbf{rhs}($i$)} denote the left- and right-hand values of the $i$th tuple, and $\tau \in \mathbb{R}^{+}$ is a fixed value.	
+	\end{equation}
+	where \textup{\textbf{lhs}($i$)} and \textup{\textbf{rhs}($i$)} denote the left- and right-hand values of the $i$th tuple.	
 \end{definition}
 
-For example, given the multiset $\mathcal{M} = \{\{1,2\}, \{1,5\}, \{2,4\}, \{3,4\}, \{4,5\}\}$ and $\tau = 7$, a feasible solution is $\mathcal{T} = \langle(1,2), (5,4), (3,4), (4,2), (5,1) \rangle$.
+For example, given the multiset $\mathcal{M} = \{\{1,2\}, \{1,5\}, \{2,4\}, \{3,4\}, \{4,5\}\}$ and $\tau = 7$, one possible feasible solution is $\mathcal{T} = \langle(1,2), (5,4), (3,4), (4,2), (5,1) \rangle$.
 
 \textcolor{OrangeRed}{Model the problem using a graph.}
 
-Let $\mathcal{M}$ be a multiset as described in Definition \ref{defn:cpop}, with an additional unordered pair consisting of ``dominating'' values equal to $\tau$. Two values that make up a pair in $\mathcal{M}$ are referred to as ``partners''. Then, $G(V, P \cup Q)$ is an undirected graph defined by a vertex set $V = \{v_1, v_2, ...v_{2n+2}\}$, where each vertex is assigned a value from $\mathcal{M}$ such that $v_1 \leq v_2 \leq ... \leq v_{2n+2}$. $G$ comprises two distinct edge sets: $P$, which contains edges between vertices that are partners, and $Q$, which consists of edges between vertices that fulfil the \textit{joint sum constraint}. That is, for two distinct vertices $v_i, v_j$,
+Let $\mathcal{M}$ be a multiset as described in Definition \ref{defn:cpop}, with an additional unordered pair consisting of ``dominating'' values equal to $\tau$. Two values that make up a pair in $\mathcal{M}$ are referred to as ``partners''. Then, $G(V, P \cup E)$ is an undirected graph defined by a vertex set $V = \{v_1, v_2, ...v_{2n+2}\}$, where each vertex is assigned a value from $\mathcal{M}$ such that $v_1 \leq v_2 \leq ... \leq v_{2n+2}$. $G$ comprises two distinct edge sets: $P$, which contains edges between vertices that are partners, and $E$, which consists of edges between vertices that fulfil the \textit{joint sum constraint}. That is, for two distinct vertices $v_i, v_j$,
 
-\begin{equation*}
+\begin{equation}
 	\label{eqn:jointsum}
 	v_i + v_j \geq \tau,
-\end{equation*}
+\end{equation}
 
-provided $\{v_i, v_j\} \notin P$. Observe that $P$ is in fact a perfect matching, with $|P| = |\mathcal{M}| = n+1$, and that $P \cap Q = \emptyset$.
+provided $\{v_i, v_j\} \notin P$. Observe that $P$ is in fact a perfect matching, with $|P| = |\mathcal{M}| = n+1$, and that $P \cap E = \emptyset$.
 
-If $G(V, P\cup Q)$ features an alternating Hamiltonian cycle, then a feasible solution $\mathcal{T}$ exists.
+If $G(V, P\cup E)$ features an alternating Hamiltonian cycle, then a feasible solution $\mathcal{T}$ exists.
 
 \begin{definition}
 	\label{defn:althamcycle}
-	Let $G(V, P\cup Q)$ be an undirected graph, where each edge is a member of one of two sets, $P$ or $Q$. $G$ contains an alternating Hamiltonian cycle if there exists a Hamiltonian cycle such successive edges alternate between sets $P$ and $Q$. For example, if $\{v_{i-1}, v_i\} \in P$, then $\{v_i, v_{i+1}\} \in Q$, or vice versa.
+	Let $G(V, P\cup E)$ be an undirected graph, where each edge is a member of one of two sets, $P$ or $E$. $G$ contains an alternating Hamiltonian cycle if there exists a Hamiltonian cycle such successive edges alternate between sets $P$ and $E$. For example, if $\{v_{i-1}, v_i\} \in P$, then $\{v_i, v_{i+1}\} \in E$, or vice versa.
 \end{definition}
 
-compulsory edges $P$ values pairs cannot be altered.
-
+\begin{theorem}
+	\label{thm:cpopsolnalt}
+	There exists a feasible solution $\mathcal{T}$ to an instance $\mathcal{M}$ of the CPOP if and only if its corresponding graph $G(V, P\cup E)$ contains an alternating Hamiltonian cycle.
+\end{theorem}
+\begin{proof}
+	To be completed. \qed
+\end{proof}
 
 
 
