@@ -55,6 +55,38 @@ If $G(V, P\cup E)$ features an alternating Hamiltonian cycle, then a feasible so
 	To be completed. \qed
 \end{proof}
 
+The values in each unordered pair in $\mathcal{M}$ cannot be altered, and so every edge in $P$ must be present in the alternating Hamiltonian cycle. Thus, the task involves finding a matching $Q \subset E$ of cardinality $n+1$, such that the edge sets $P$ and $Q$ form an alternating Hamiltonian cycle as described in Definition \ref{defn:althamcycle}. If no suitable matching $Q$ can be found, then, in accordance with Theorem \ref{thm:cpopsolnalt}, no feasible solution exists for the given instance $\mathcal{M}$.
+
+To find a matching $Q \subset E$, the following modified maximum cardinality matching algorithm is executed (\citealp{mahadev1994, becker2010}): for each vertex $v_i, i = 1, 2,...,2n+2$, find the largest vertex in $v_i$'s neighbourhood, excluding partners, that is not incident to any edge in $Q$. Add the edge connecting these two vertices to $Q$, and proceed to the next vertex until all vertices have been assessed. The pair of vertices incident to each edge in $Q$ are referred to as being ``matched'', and are connected by a ``matching'' edge. 
+
+During this algorithm, if a vertex $v_i$ is not adjacent to any other unmatched vertex except its partner, the preceeding vertex $v_{i-1}$ can be rematched, provided that $v_i$ is not the first vertex (i.e $i \neq 1$), $v_{i-1}$ is incident to an edge in $Q$, (i.e. $v_{i-1}$ has been matched) and $v_{i-1}$ is adjacne to $v_i$'s partner via an edge in $E$. Thenm, $v_{i-1}$ is matched with $v_i$'s partner, and $v_i$ is matched with $v_{i-1}$'s previous match. It is guaranteed that this algorithm will produce a maximum cardinality matching $Q \subset E$ (\citealp{becker2010}).
+
+If $|Q| < n+1$, clearly there are not enough matching edges to form an alternating Hamiltonian cycle along with the edges in $P$, and hence there is no feasible solution to this particular instance of the CPOP. However, if $|Q| = n+1$, then the spanning subgraph $G'(V, P \cup Q)$ is a 2-regular graph, where each vertex is adjacent to its partner via an edge in $P$, and its match via an edge in $Q$. $G'$ thus consists of a collection of alternating Hamiltonian cycles $A_1, A_2, ..., A_{\lambda}$. If there is only one alternating Hamiltonian cycle on $G'$, i.e. $\lambda = 1$, then a feasible solution has been found \textcolor{OrangeRed}{remove dominating vertices}. If $\lambda > 1$, then the components of $G'$ need to be combined into one single alternating Hamiltonian cycle, by removing some matching edges from $Q$, and adding new edges from $E$. The following algorithm finds edges that are able to merge the components of $G'$ together.
+
+For each edge $(v_i, v_j) \in Q$, with $i < j$, $v_i$ is referred to as the ``smaller'' vertex, and $v_j$ as the ``larger'' vertex, since the value associated with $v_i$ is less than or equal to the value associated with $v_j$. Initially, the edges in $Q$ are sorted in a list such that the smaller vertices of the edges are in lexicographical order, and therefore in non-decreasing order of values. \textcolor{OrangeRed}{remove edges from list that are a result of rematching}. Starting from the first edge, search through the list to find an edge that meets the following conditions:
+\begin{enumerate}
+	\item The smaller vertex of the current edge is adjacent to the larger vertex of the succeeding edge in the list via an edge in $E$,
+	\item The current edge and the succeeding edge are members of different alternating Hamiltonian cycles on $G$.
+\end{enumerate}
+
+If such an edge is found, add it to a set $C_i$, and continue to add all succeeding edges in the list to $C_i$, provided that for each edge conditions 1 and 2 hold, and the succeeding edge does not belong to a component on $G$ that is already represented by an edge in $C_i$. Once there are no more valid edges to add to $C_i$, continue to search through the remaining edges in the list to find an edge that meets conditions 1 and 2, and can therefore start a new set $C_{i+1}$. If the final edge in the list has been reached, the process is terminated.
+
+The sets $C_i, i = 1, ..., k$ that have been created during this process are then analysed. In the case where not a single set $C$ has been produced, then the cycles $A_1,..., A_{\lambda}$ of $G'$ cannot be combined, and therefore no solution exists. If there exists a set $C_i$ such that $|C_i| = \lambda$, then all components on $G'$ can be combined as follows:
+
+Starting from the first edge in $C_i$, add the edge from $E$ connecting the smaller vertex of each edge to the larger vertex of the succeeding edge to the matching $Q$. For the final edge in $C_i$, add the edge from $E$ that connects its smaller vertex to the larger vertex of the first edge in $C_i$ to $Q$. Then, edges that appear in both $C_i$ and $Q$ are removed from $Q$, such that $C_i \cap Q = \emptyset$. \textcolor{OrangeRed}{Then components have been merged, remove dominating vertices etc}.
+
+
+If there is no set $C_i$ such that $|C_i| = \lambda$, and $k > 1$ (i.e. there are multiple sets $C_i, i = 1,..., k$), it may be that multiple sets are required to combine the components of $G'$. Let $\mathcal{C}$ be a set that will contain all the sets $C_i$ needed to merge all components of $G'$ together, and let $\Lambda$ be a set that records the components covered by the sets in $\mathcal{C}$. For the set $C_1$, append the componnents $A_i$ that each edge in $C_1$ is a member of to $\Lambda$, and then add $C_1$ to $\mathcal{C}$. At this stage, $|\Lambda| = |\mathcal{C}|$. Proceeding throug the sets $C_i, i = 2, ..., k$, find a set $C_i$ that contains at least one edge that is a member of a component recorded in $\Lambda$, and at least one edge that is a member of a component not yet recorded in $\Lambda$. Append the component that each edge in this set $C_i$ is a member of to $\Lambda$, provided the component is not already a member of $\Lambda$, and add $C_i$ to $\mathcal{C}$. Continue in this manner until the final set $C_k$ has been assessed. If $|\Lambda| = \lambda$, then the sets in $\mathcal{C}$ are able to merge the components of $G'$ together. This is done by repeating the connecting process for a single set $C_i$ on every set in $\mathcal{C}$. 
+
+\textcolor{OrangeRed}{Complexity of the CPOP algorithm, ability to find a solution, complete recognition.}
+
+
+
+
+
+
+
+
 
 
 
