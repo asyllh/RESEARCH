@@ -80,6 +80,27 @@ If there is no set $C_i$ such that $|C_i| = \lambda$, and $k > 1$ (i.e. there ar
 
 \textcolor{OrangeRed}{Complexity of the CPOP algorithm, ability to find a solution, complete recognition.}
 
+One prominent application of the CPOP is in a cutting stock problem \textcolor{OrangeRed}{(or strip packing problem)} brought to light as an open-combinatorial problem by \cite{goulimis2004} in 2004. A set $\mathcal{I}$ of rectangular items of equal height $h$ made from cardboard are to be packed onto  strip from left to right. Each item $i \in \mathcal{I}$ has a width $w_i \in \mathbb{Z}^{+}$, and possesses two vertical score lines, marked in predetermined placed. A pair of knives mounted on a bar cuts along the score lines of two adjacent items simultaneously, which allows the items to be folded with ease (see Figure ref{}). However, by desgn, the scoring knives cannot be placed too close to one another, and as such have a ``minimum scoring distance'' (around 70mm in industry). Thus, the distance between two score lines on adjacent items must be greater than or equal to the minimum scoring distance in order for the knives to be able to cut the items correctly. The distance between a score line and the nearest edge on an item is called a score width. Each item $i \in \mathcal{I}$ thus has two score widths, $a_i, b_i \in \mathbb{Z}^{+}$, with $a_i \leq b_i$. Since these score widths are not necessarily equal, an item $i$ can be positioned in one of two orientations: ``regular'', denoted $(a_i, b_i)$, where the smaller score $a_i$ is on the left-hand side of the item, or ``rotated'', denoted $(b_i, a_i)$, where the item has been rotated by $180^{\circ}$ so that the smaller score $a_i$ is on the right-hand side of the item. Then, for two items to be feasibly placed alongside one another, the sum of the adjacent score widths must be greater than or equal to the minimum scoring distance. Thus, the problem consists of finding a suitable ordering and orientation of the items on a strip $\mathcal{S}$ that fulfils the \textit{minimum total score width constraint},
+
+\begin{equation}
+\label{eqn:mtswc}
+\textup{\textbf{rhs}}(i) + \textup{\textbf{lhs}}(i+1) \geq \tau \hspace{5mm} \forall \hspace{1mm} i \in \{1,2,..., |\mathcal{S}|-1\},
+\end{equation}
+
+where \textup{\textbf{lhs}($i$)} and \textup{\textbf{rhs}($i$)} denote the left- and right-hand values of the $i$th item on the strip $\mathcal{S}$, and $\tau \in \mathbb{R}^{+}$ is the minimum scoring distance.
+
+It can be seen that this problem is analogous to the CPOP, where the pairs of score widths on each item are expressed as an unordered pair in a multiset $\mathcal{M}$, and therefore the problem can be solved in the same manner.
+
+In the problem detailed by Goulimis, the aim is to align all of the items onto a single strip. So, when an instance of this problem is expressed as an instance of the CPOP, the widths of the individual items are not taken into account. In reality, strips of material are provided in fixed lengths. Given a large problem instance, multiple strips may be required to feasibly accommodate all of the items. For this reasons, we define a new problem to be investigated.
+
+\begin{definition}
+	Given a set $\mathcal{I}$ of rectangular items of varying widths $w_i$ and score widths $a_i, b_i$ for each item $i \in \mathcal{I}$, a finite set of strips $S_j$ with equal fixed length $l$, and a minimum scoring distance $\tau$, the Score-Constrained Strip-Packing Problem (SCSPP) consists of finding the minimum number of strips required to pack all items in $\mathcal{I}$ such that the minimum total score width constraint is met between every pair of adjacent items on every strip.
+\end{definition}
+
+Indeed, the SCSPP is a generalisation of the classical one-dimensional bin-packing problem (BPP), where in the latter problem, the minimum scoring distance $\tau$ can be said to be equal to zero. It follows that the SCSPP is at least as hard as the BPP, which is known to be NP-hard (\citealp{garey1979}). Thus, we will be using heuristics..
+
+
+
 
 
 
