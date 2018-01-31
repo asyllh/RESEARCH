@@ -97,7 +97,15 @@ In the problem detailed by Goulimis, the aim is to align all of the items onto a
 	Given a set $\mathcal{I}$ of rectangular items of varying widths $w_i$ and score widths $a_i, b_i$ for each item $i \in \mathcal{I}$, a finite set of strips $S_j$ with equal fixed length $l$, and a minimum scoring distance $\tau$, the Score-Constrained Strip-Packing Problem (SCSPP) consists of finding the minimum number of strips required to pack all items in $\mathcal{I}$ such that the minimum total score width constraint is met between every pair of adjacent items on every strip.
 \end{definition}
 
-Indeed, the SCSPP is a generalisation of the classical one-dimensional bin-packing problem (BPP), where in the latter problem, the minimum scoring distance $\tau$ can be said to be equal to zero. It follows that the SCSPP is at least as hard as the BPP, which is known to be NP-hard (\citealp{garey1979}). Thus, we will be using heuristics..
+Indeed, the SCSPP is a generalisation of the classical one-dimensional bin-packing problem (BPP), where in the latter problem, the minimum scoring distance $\tau$ can be said to be equal to zero. It follows that the SCSPP is at least as hard as the BPP, which is known to be NP-hard (\citealp{garey1979}), and so (under the assumption that $P \neq NP$) there is no known algorithm that is able to find an optimal solution for every instance of the SCSPP in polynomial time. Instead, heuristics can be used to find near-optimal solutions in a shorter amount of time. One example is the greedy heuristic known as first-fit (FF), an online algorithm that places each item (in some arbitrary order) onto the lowest-indexed strip such that the capacity of the strip is not exceeded. It has been shown that by arranging the items in decreasing order of size, a packing heuristic will produce a solution that is closer to the optimal than if the items are arranged in any other order (\citealp{johnson1974fast}). Applying FF onto items sorted in this manner yields the well-known first-fit decreasing (FFD) heuristic.
+
+An optimal solution of an instance of the SCSPP is a solution that consists of the fewest number of strips, $k$. A simple lower bound for $k$ that can be computed in $O(n)$ time is given by
+
+\begin{equation}
+	k \geq \ceil*{\frac{\sum_{i=1}^{n}w_i}{l}}
+\end{equation}
+
+where $n$ is the number of items in the set $\mathcal{I}$, $w_i$ the width of each item $i \in \mathcal{I}$, and $l$ is the length of the strips (\citealp{martello1990b}). In 1973, \citeauthor{johnson1973} showed that FFD is guaranteed to return a solution that uses no more than $\frac{11}{9}k + 4$ strips. More recently, \cite{dosa2007} has proven that the worst case for FFD is in fact $\frac{11}{9}k + \frac{6}{9}$, and that this bound is tight. Due to the initial sorting of the $n$ items in non-increasing order of sizes, the time complexity of FFD is $O(n\log n)$.
 
 
 
