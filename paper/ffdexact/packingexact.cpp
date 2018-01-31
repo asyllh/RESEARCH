@@ -61,6 +61,27 @@ void packStripsFFD(int numScores, int numBox, int maxBoxWidth, int maxStripWidth
     stripSum[0] += boxWidths[boxDecrease[0]][mates[boxDecrease[0]]];
 
 
+    /*for(j = 1; j < boxDecrease.size(); ++j){
+        for(i = 0; i < strip.size(); ++i){
+            if(!strip[i].empty()){
+                if(stripSum[i] + boxWidths[boxDecrease[j]][mates[boxDecrease[j]]] <= maxStripWidth){
+                    feasible = 0;
+                    MBAHRA(i, j, feasible, allScores, mates, adjMatrix, boxWidths, boxDecrease, stripSum, strip);
+                    if(feasible == 1){
+                        break;
+                    }
+                }
+            }
+            else if (strip[i].empty()){
+                strip[i].push_back(boxDecrease[j]);
+                strip[i].push_back(mates[boxDecrease[j]]);
+                stripSum[i] += boxWidths[boxDecrease[j]][mates[boxDecrease[j]]];
+                break;
+            }
+        }
+    }*/
+
+
     for(j = 1; j < boxDecrease.size(); ++j){
         for(i = 0; i < strip.size(); ++i){
             if(!strip[i].empty()){
@@ -77,13 +98,13 @@ void packStripsFFD(int numScores, int numBox, int maxBoxWidth, int maxStripWidth
                         stripSum[i] += boxWidths[boxDecrease[j]][mates[boxDecrease[j]]];
                         break;
                     }
-                    else{
+                    /*else{
                         feasible = 0;
                         MBAHRA(i, j, feasible, allScores, mates, adjMatrix, boxWidths, boxDecrease, stripSum, strip);
                         if(feasible == 1){
                             break;
                         }
-                    }
+                    }*/
                 }
             }
             else if (strip[i].empty()){
