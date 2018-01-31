@@ -109,7 +109,7 @@ int main(int argc, char **argv){
 
         //endregion
 
-    for(i = 0; i < 2; ++i) {
+    for(i = 0; i < 1; ++i) {
         cout << "Instance: " << i << endl;
 
         createInstance(numScores, numBox, minWidth, maxWidth, minBoxWidth, maxBoxWidth, totalBoxWidth, allScores, mates,
