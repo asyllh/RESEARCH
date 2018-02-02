@@ -2,7 +2,7 @@
 
 \input{includes/preamble.tex}
 
-\title{Heuristics for the Score-Constrained Bin-Packing Problem}
+\title{Heuristics for the Score-Constrained Strip-Packing Problem}
 \author{Asyl L. Hawa \and Rhyd M. R. Lewis \and Jonathan M. Thompson}
 \institute{School of Mathematics, Cardiff University, Senghennydd Road, Cardiff, UK, CF24 4AG}
 \date{\today}
@@ -17,17 +17,26 @@
 \section{Introduction}
 \label{sec:intro}
 
+Firstly, let us introduce the Constrained Pair-Ordering Problem:
+
 \begin{definition}
 	\label{defn:cpop}
-	Let $\mathcal{M}$ be a multiset of unordered pairs of positive integers $\mathcal{M} = \{\{a_1, b_1\}, \{a_2,b_2\},...,\{a_n,b_n\}\}$, and let $\mathcal{T}$ be an ordering of the elements of $\mathcal{M}$ such that each element is a tuple. The Constrained Pair Ordering Problem (CPOP) consists of finding a solution $\mathcal{T}$ such that, given a fixed value $\tau \in \mathbb{R}^{+},$
+	Let $\mathcal{M}$ be a multiset of unordered pairs of positive integers $\mathcal{M} = \{\{a_1, b_1\}, \{a_2,b_2\},...,\{a_n,b_n\}\}$, and let $\mathcal{T}$ be an ordering of the elements of $\mathcal{M}$ such that each element is a tuple. The Constrained Pair Ordering Problem (CPOP) consists of finding a solution $\mathcal{T}$ such that, given a fixed value $\tau \in \mathbb{Z}^{+},$
 	\begin{equation}
 		\label{eqn:cpop}
 		\textup{\textbf{rhs}}(i) + \textup{\textbf{lhs}}(i+1) \geq \tau \hspace{5mm} \forall \hspace{1mm} i \in \{1,2,..., n-1\},
 	\end{equation}
-	where \textup{\textbf{lhs}($i$)} and \textup{\textbf{rhs}($i$)} denote the left- and right-hand values of the $i$th tuple.	
+	where \textup{\textbf{lhs}($i$)} and \textup{\textbf{rhs}($i$)} denote the left- and right-hand values of the $i$th tuple. The inequality is referred to as the vicinal sum constraint.
 \end{definition}
 
 For example, given the multiset $\mathcal{M} = \{\{1,2\}, \{1,5\}, \{2,4\}, \{3,4\}, \{4,5\}\}$ and $\tau = 7$, one possible feasible solution is $\mathcal{T} = \langle(1,2), (5,4), (3,4), (4,2), (5,1) \rangle$.
+
+One prominent application of the CPOP is in a strip-packing problem brought to light as an open-combinatorial problem by \citeauthor{goulimis2004} in 2004. A set $\mathcal{I}$ of rectangular items of equal height $h$ made from cardboard are to be packed onto a strip from left to right. Each item $i \in \mathcal{I}$ has width $w_i \in \mathbb{Z}^{+}$, and possesses two vertical score lines, marked in predetermined places. A pair of knives mounted onto a bar cuts along the score lines of two adjacent items simultaneously, which allows the items to be folded with ease (see Figure ref{}). However, by design, the scoring knives cannot be placed too close to one another, and as such have a ``minimum scoring distance'' (around 70mm in industry). The distances between each score line and the nearest edge on an item $i \in \mathcal{I}$ are the score widths, $a_i, b_i \in \mathbb{Z}^{+}$, assigned such that $a_i \leq b_i$. Since these score widths are not necessarily equal, an item $i$ can be positioned in one of two orientations: ``regular'', denoted $(a_i, b_i)$, or ``rotated'', denoted $(b_i, a_i)$, where the smaller of the two score widths $a_i$ is on the left- and right- hand side of the item respectively. Clearly, for two items to be placed alongside one another feasibly the sum of the adjacent score widths must equal or exceed the minimum scoring distance, else the knives will not be able to score the items in the correct locations. Thus, the problem consists of finding a suitable ordering and orientation of the items such that the sum of every pair of adjacent score widths is greater than or equal to the minimum scoring distance. Specifically, as the items are packed from left to right, this involved checking the sum of the right-hand score width of each item $i$ and the left-hand score width of the next item $i+1$ on the strip. The left-hand score width of the first item and the right-hand score width of the last item on the strip are not adjacent to any other item, and are therefore ignored. 
+
+It can be seen that this problem is in fact analogous to the CPOP, where each unordered pair in an instance $\mathcal{M}$ contains values corresponding to the score widths of an item, and $\tau$ is the minimum scoring distance. Thus, a set $\mathcal{I}$ of items has a feasible arrangement if the equivalent CPOP has a feasible solution $\mathcal{T}$.
+
+
+
 
 \textcolor{OrangeRed}{Model the problem using a graph.}
 
@@ -59,7 +68,7 @@ The values in each unordered pair in $\mathcal{M}$ cannot be altered, and so eve
 
 To find a matching $Q \subset E$, the following modified maximum cardinality matching algorithm is executed (\citealp{mahadev1994, becker2010}): for each vertex $v_i, i = 1, 2,...,2n+2$, find the largest vertex in $v_i$'s neighbourhood, excluding partners, that is not incident to any edge in $Q$. Add the edge connecting these two vertices to $Q$, and proceed to the next vertex until all vertices have been assessed. The pair of vertices incident to each edge in $Q$ are referred to as being ``matched'', and are connected by a ``matching'' edge. 
 
-During this algorithm, if a vertex $v_i$ is not adjacent to any other unmatched vertex except its partner, the preceeding vertex $v_{i-1}$ can be rematched, provided that $v_i$ is not the first vertex (i.e $i \neq 1$), $v_{i-1}$ is incident to an edge in $Q$, (i.e. $v_{i-1}$ has been matched) and $v_{i-1}$ is adjacne to $v_i$'s partner via an edge in $E$. Thenm, $v_{i-1}$ is matched with $v_i$'s partner, and $v_i$ is matched with $v_{i-1}$'s previous match. It is guaranteed that this algorithm will produce a maximum cardinality matching $Q \subset E$ (\citealp{becker2010}).
+During this algorithm, if a vertex $v_i$ is not adjacent to any other unmatched vertex except its partner, the preceeding vertex $v_{i-1}$ can be rematched, provided that $v_i$ is not the first vertex (i.e $i \neq 1$), $v_{i-1}$ is incident to an edge in $Q$, (i.e. $v_{i-1}$ has been matched) and $v_{i-1}$ is adjacent to $v_i$'s partner via an edge in $E$. Then, $v_{i-1}$ is matched with $v_i$'s partner, and $v_i$ is matched with $v_{i-1}$'s previous match. It is guaranteed that this algorithm will produce a maximum cardinality matching $Q \subset E$ (\citealp{becker2010}).
 
 If $|Q| < n+1$, clearly there are not enough matching edges to form an alternating Hamiltonian cycle along with the edges in $P$, and hence there is no feasible solution to this particular instance of the CPOP. However, if $|Q| = n+1$, then the spanning subgraph $G'(V, P \cup Q)$ is a 2-regular graph, where each vertex is adjacent to its partner via an edge in $P$, and its match via an edge in $Q$. $G'$ thus consists of a collection of alternating Hamiltonian cycles $A_1, A_2, ..., A_{\lambda}$. If there is only one alternating Hamiltonian cycle on $G'$, i.e. $\lambda = 1$, then a feasible solution has been found \textcolor{OrangeRed}{remove dominating vertices}. If $\lambda > 1$, then the components of $G'$ need to be combined into one single alternating Hamiltonian cycle, by removing some matching edges from $Q$, and adding new edges from $E$. The following algorithm finds edges that are able to merge the components of $G'$ together.
 
@@ -76,20 +85,10 @@ The sets $C_i, i = 1, ..., k$ that have been created during this process are the
 Starting from the first edge in $C_i$, add the edge from $E$ connecting the smaller vertex of each edge to the larger vertex of the succeeding edge to the matching $Q$. For the final edge in $C_i$, add the edge from $E$ that connects its smaller vertex to the larger vertex of the first edge in $C_i$ to $Q$. Then, edges that appear in both $C_i$ and $Q$ are removed from $Q$, such that $C_i \cap Q = \emptyset$. \textcolor{OrangeRed}{Then components have been merged, remove dominating vertices etc}.
 
 
-If there is no set $C_i$ such that $|C_i| = \lambda$, and $k > 1$ (i.e. there are multiple sets $C_i, i = 1,..., k$), it may be that multiple sets are required to combine the components of $G'$. Let $\mathcal{C}$ be a set that will contain all the sets $C_i$ needed to merge all components of $G'$ together, and let $\Lambda$ be a set that records the components covered by the sets in $\mathcal{C}$. For the set $C_1$, append the componnents $A_i$ that each edge in $C_1$ is a member of to $\Lambda$, and then add $C_1$ to $\mathcal{C}$. At this stage, $|\Lambda| = |\mathcal{C}|$. Proceeding throug the sets $C_i, i = 2, ..., k$, find a set $C_i$ that contains at least one edge that is a member of a component recorded in $\Lambda$, and at least one edge that is a member of a component not yet recorded in $\Lambda$. Append the component that each edge in this set $C_i$ is a member of to $\Lambda$, provided the component is not already a member of $\Lambda$, and add $C_i$ to $\mathcal{C}$. Continue in this manner until the final set $C_k$ has been assessed. If $|\Lambda| = \lambda$, then the sets in $\mathcal{C}$ are able to merge the components of $G'$ together. This is done by repeating the connecting process for a single set $C_i$ on every set in $\mathcal{C}$. 
+If there is no set $C_i$ such that $|C_i| = \lambda$, and $k > 1$ (i.e. there are multiple sets $C_i, i = 1,..., k$), it may be that multiple sets are required to combine the components of $G'$. Let $\mathcal{C}$ be a set that will contain all the sets $C_i$ needed to merge all components of $G'$ together, and let $\Lambda$ be a set that records the components covered by the sets in $\mathcal{C}$. For the set $C_1$, append the components $A_i$ that each edge in $C_1$ is a member of to $\Lambda$, and then add $C_1$ to $\mathcal{C}$. At this stage, $|\Lambda| = |\mathcal{C}|$. Proceeding through the sets $C_i, i = 2, ..., k$, find a set $C_i$ that contains at least one edge that is a member of a component recorded in $\Lambda$, and at least one edge that is a member of a component not yet recorded in $\Lambda$. Append the component that each edge in this set $C_i$ is a member of to $\Lambda$, provided the component is not already a member of $\Lambda$, and add $C_i$ to $\mathcal{C}$. Continue in this manner until the final set $C_k$ has been assessed. If $|\Lambda| = \lambda$, then the sets in $\mathcal{C}$ are able to merge the components of $G'$ together. This is done by repeating the connecting process for a single set $C_i$ on every set in $\mathcal{C}$. 
 
 \textcolor{OrangeRed}{Complexity of the CPOP algorithm, ability to find a solution, complete recognition.}
 
-One prominent application of the CPOP is in a cutting stock problem \textcolor{OrangeRed}{(or strip packing problem)} brought to light as an open-combinatorial problem by \cite{goulimis2004} in 2004. A set $\mathcal{I}$ of rectangular items of equal height $h$ made from cardboard are to be packed onto  strip from left to right. Each item $i \in \mathcal{I}$ has a width $w_i \in \mathbb{Z}^{+}$, and possesses two vertical score lines, marked in predetermined placed. A pair of knives mounted on a bar cuts along the score lines of two adjacent items simultaneously, which allows the items to be folded with ease (see Figure ref{}). However, by desgn, the scoring knives cannot be placed too close to one another, and as such have a ``minimum scoring distance'' (around 70mm in industry). Thus, the distance between two score lines on adjacent items must be greater than or equal to the minimum scoring distance in order for the knives to be able to cut the items correctly. The distance between a score line and the nearest edge on an item is called a score width. Each item $i \in \mathcal{I}$ thus has two score widths, $a_i, b_i \in \mathbb{Z}^{+}$, with $a_i \leq b_i$. Since these score widths are not necessarily equal, an item $i$ can be positioned in one of two orientations: ``regular'', denoted $(a_i, b_i)$, where the smaller score $a_i$ is on the left-hand side of the item, or ``rotated'', denoted $(b_i, a_i)$, where the item has been rotated by $180^{\circ}$ so that the smaller score $a_i$ is on the right-hand side of the item. Then, for two items to be feasibly placed alongside one another, the sum of the adjacent score widths must be greater than or equal to the minimum scoring distance. Thus, the problem consists of finding a suitable ordering and orientation of the items on a strip $\mathcal{S}$ that fulfils the \textit{minimum total score width constraint},
-
-\begin{equation}
-\label{eqn:mtswc}
-\textup{\textbf{rhs}}(i) + \textup{\textbf{lhs}}(i+1) \geq \tau \hspace{5mm} \forall \hspace{1mm} i \in \{1,2,..., |\mathcal{S}|-1\},
-\end{equation}
-
-where \textup{\textbf{lhs}($i$)} and \textup{\textbf{rhs}($i$)} denote the left- and right-hand values of the $i$th item on the strip $\mathcal{S}$, and $\tau \in \mathbb{R}^{+}$ is the minimum scoring distance.
-
-It can be seen that this problem is analogous to the CPOP, where the pairs of score widths on each item are expressed as an unordered pair in a multiset $\mathcal{M}$, and therefore the problem can be solved in the same manner.
 
 In the problem detailed by Goulimis, the aim is to align all of the items onto a single strip. So, when an instance of this problem is expressed as an instance of the CPOP, the widths of the individual items are not taken into account. In reality, strips of material are provided in fixed lengths. Given a large problem instance, multiple strips may be required to feasibly accommodate all of the items. For this reasons, we define a new problem to be investigated.
 
