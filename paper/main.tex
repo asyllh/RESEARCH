@@ -54,22 +54,22 @@ The remainder of this article will firstly, in Section 2, detail a polynomial-ti
 
 \section{Solving the CPOP}
 
-\textcolor{OrangeRed}{Model the problem using a graph. partner function}
+We shall now present an algorithm for solving the CPOP, which operates by expressing the problem instance graphically. 
 
-Let $\mathcal{M}$ be a multiset as described in Definition \ref{defn:cpop}, with an additional unordered pair consisting of ``dominating'' values equal to $\tau$. Two values that make up a pair in $\mathcal{M}$ are referred to as ``partners''. Then, $G(V, P \cup E)$ is an undirected graph defined by a vertex set $V = \{v_1, v_2, ...v_{2n+2}\}$, where each vertex is assigned a value from $\mathcal{M}$ such that $v_1 \leq v_2 \leq ... \leq v_{2n+2}$. $G$ comprises two distinct edge sets: $P$, which contains edges between vertices that are partners, and $E$, which consists of edges between vertices that fulfil the \textit{joint sum constraint}. That is, for two distinct vertices $v_i, v_j$,
+Let $\mathcal{M}$ be an instance of the CPOP of cardinality $n$ as described in Definition \ref{defn:cpop}. Then, the graph $G$ is defined by a vertex set $V = \{v_1, v_2, ...v_{2n+2}\}$, where each vertex is assigned a value from $\mathcal{M}$ such that $v_1 \leq v_2 \leq ... \leq v_{2n+2}$. Note that there are two extra ``dominating'' vertices, $v_{2n+1}$ and $v_{2n+2}$, which have values equivalent to $\tau$. In $\mathcal{M}$, the values that make up a pair are referred to as ``partners''. Thus, let $p: V \to V$ be a bijective function that associates each vertex $v_i \in V$ on $G$ with its partner, $v_j = p(v_i)$. $G$ comprises two distinct edge sets: $P$, which contains edges between vertices that are partners, and $E$, which consists of edges between vertices whose corresponding values in $\mathcal{M}$ can be arranged alongside one another. That is, for two distinct vertices $v_i, v_j$,
 
 \begin{equation}
 	\label{eqn:jointsum}
 	v_i + v_j \geq \tau,
 \end{equation}
 
-provided $\{v_i, v_j\} \notin P$. Observe that $P$ is in fact a perfect matching, with $|P| = |\mathcal{M}| = n+1$, and that $P \cap E = \emptyset$.
+provided $p(v_i) \neq v_j$. Hence, $G(V, P \cup E)$ is an undirected graph with $2n + 2$ vertices and edge sets $P$ and $E$, such that $P \cap E = \emptyset$. Observe that $P$ is in fact a perfect matching, with $|P|= n+1$.
 
-If $G(V, P\cup E)$ features an alternating Hamiltonian cycle, then a feasible solution $\mathcal{T}$ exists.
+The following definition describes a variant of the classical Hamiltonian cycle on a graph $G$.
 
 \begin{definition}
 	\label{defn:althamcycle}
-	Let $G(V, P\cup E)$ be an undirected graph, where each edge is a member of one of two sets, $P$ or $E$. $G$ contains an alternating Hamiltonian cycle if there exists a Hamiltonian cycle such successive edges alternate between sets $P$ and $E$. For example, if $\{v_{i-1}, v_i\} \in P$, then $\{v_i, v_{i+1}\} \in E$, or vice versa.
+	Let $G(V, P\cup E)$ be an undirected graph, where each edge is a member of one of two sets, $P$ or $E$. $G$ contains an alternating Hamiltonian cycle if there exists a Hamiltonian cycle such successive edges alternate between sets $P$ and $E$. For example, if $(v_{i-1}, v_i) \in P$, then $(v_i, v_{i+1}) \in E$, or vice versa.
 \end{definition}
 
 \begin{theorem}
@@ -105,6 +105,8 @@ If there is no set $C_i$ such that $|C_i| = \lambda$, and $k > 1$ (i.e. there ar
 
 \textcolor{OrangeRed}{Complexity of the CPOP algorithm, ability to find a solution, complete recognition.}
 
+\section{Solving the SCSPP/Heuristics}
+
 
 Indeed, the SCSPP is a generalisation of the classical one-dimensional bin-packing problem (BPP), where in the latter problem, the minimum scoring distance $\tau$ can be said to be equal to zero. It follows that the SCSPP is at least as hard as the BPP, which is known to be NP-hard (\citealp{garey1979}), and so (under the assumption that $P \neq NP$) there is no known algorithm that is able to find an optimal solution for every instance of the SCSPP in polynomial time. Instead, heuristics can be used to find near-optimal solutions in a shorter amount of time. One example is the greedy heuristic known as first-fit (FF), an online algorithm that places each item (in some arbitrary order) onto the lowest-indexed strip such that the capacity of the strip is not exceeded. It has been shown that by arranging the items in decreasing order of size, a packing heuristic will produce a solution that is closer to the optimal than if the items are arranged in any other order (\citealp{johnson1974fast}). Applying FF onto items sorted in this manner yields the well-known first-fit decreasing (FFD) heuristic.
 
@@ -119,8 +121,15 @@ where $n$ is the number of items in the set $\mathcal{I}$, $w_i$ the width of ea
 
 \section{Heuristics}
 
-The first heuristic to be discussed is the Score-Constrainted First-Fit Decreasing (SCFFD) heuristic, which is an extension of the original FFD. The items in $\mathcal{I}$ are, as usual, sorted in non-increasing order of widths, with ties broken by selecting the item with the smallest score width. Then, for each item $i \in \mathcal{I}$, SCFFD finds the lowest-indexed strip $S_j$ that can accommodate $i$ without being overfilled. If this strip $S_j$ is empty, place $i$ onto $S_j$ in a regular orientation, and add $S_j$ to the solution set $\mathcal{S}$. However, if $S_j$ is not empty, i.e. $S_j \in \mathcal{S}$, the algorithm checked if the vicinal sum constraint is met between the right-most score width on $S_j$ and one of the two score widths on $i$, assessing the smaller score width $a_i$ first. In either case, if the constraint is met, $i$ is placed accordingly onto $S_j$. Indeed, an item $i$ may not fulfil the vicinal sum constraint in any orientation, in which case SCFFD finds the next lowest-indexed strip and attempts to pack $i$ again. This process continues until every item $i \in \mathcal{I}$ has been placed onto a strip $S_j \in \mathcal{S}$.
 
+\subsection{FFD Approx}
+The first heuristic to be discussed is the Score-Constrainted First-Fit Decreasing (SCFFD) heuristic, which is an extension of the original FFD. The items in $\mathcal{I}$ are, as usual, sorted in non-increasing order of widths, with ties broken by selecting the item with the smallest score width. Then, for each item $i \in \mathcal{I}$, SCFFD finds the lowest-indexed strip $S_j$ that can accommodate $i$ without being overfilled. If this strip $S_j$ is empty, place $i$ onto $S_j$ in a regular orientation, and add $S_j$ to the solution set $\mathcal{S}$. However, if $S_j$ is not empty, i.e. $S_j \in \mathcal{S}$, the algorithm checks if the vicinal sum constraint is met between the right-most score width on $S_j$ and one of the two score widths on $i$, assessing the smaller score width $a_i$ first. In either case, if the constraint is met, $i$ is placed accordingly onto $S_j$. Indeed, an item $i$ may not fulfil the vicinal sum constraint in any orientation, in which case SCFFD finds the next lowest-indexed strip and attempts to pack $i$ again. This process continues until every item $i \in \mathcal{I}$ has been placed onto a strip $S_j \in \mathcal{S}$.
+
+\subsection{Smallest First}
+This next heuristic focusses on packing each strip in turn, rather than each item as in the previous heuristic. Each new strip $S_j$ is initialised by placing the item $i \in \mathcal{I}'$ with the smallest score width onto $S_j$ in a regular position, where $\mathcal{I}'$ is the set of items that have not yet been packed onto a strip. The heuristic then continues to pack items onto $S_j$, by choosing an item in $\mathcal{I}'$ with the smallest score width that fulfils the vicinal sum constraint when placed alongside the right-most score width on $S_j$, and that does not exceed $S_j$'s capacity. Once there are no more items in $\mathcal{I}'$ that can be feasibly packed onto $S_j$, the heuristic adds $S_j$ to the solution set $\mathcal{S}$, and the next new strip $S_{j+1}$ is initialised. When $|\mathcal{I}'| = 0$, all items have been packed onto a strip, and the process terminates.
+
+\subsection{FFD Exact} 
+The last heuristic in this paper is formed by integrating the Alternating Hamiltonian Construction Algorithm (AHCA) detailed in Section ref{} with the classical FFD heuristic. Again, all items in $\mathcal{I}$ are sorted into non-increasing order of widths, with ties broken by choosing the item with the smallest score width. For each item $i \in \mathcal{I}$, the heuristic finds the lowest-indexed feasible strip $S_j$. As in the first heuristic, if $S_j$ is empty, $i$ is placed in a regular orientation onto $S_j$, and $S_j$ is then added to the solution set $\mathcal{S}$. Unlike the first heuristic, however, if $S_j$ is not empty ($S_j \in \mathcal{S}$), AHCA is applied on all items in $S_j$ and the current item $i$. If AHCA is successful, the items currently on $S_j$ are replaced by the new arrangement, which of course includes $i$. In the event that AHCA is unable to produce a solution, $S_j$ remains intact, and the heuristic attempts to pack $i$ onto the next lowest-indexed feasible strip.
 
 
 
