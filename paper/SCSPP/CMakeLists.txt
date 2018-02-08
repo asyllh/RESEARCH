@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(ffdexact)
+project(SCSPP)
 
 set(CMAKE_CXX_STANDARD 11)
 
@@ -10,4 +10,4 @@ set(SOURCE_FILES
         packing.cpp
         packing.h)
 
-add_executable(ffdexact ${SOURCE_FILES})
+add_executable(SCSPP ${SOURCE_FILES})
