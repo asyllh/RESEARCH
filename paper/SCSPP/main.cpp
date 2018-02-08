@@ -115,17 +115,13 @@ int main(int argc, char **argv){
         createInstance(numScores, numBox, minWidth, maxWidth, minBoxWidth, maxBoxWidth, totalBoxWidth, allScores, mates,
                        adjMatrix, boxWidths);
 
-        packStripsFFD(numScores, numBox, maxBoxWidth, maxStripWidth, totalBoxWidth, allScores, mates, adjMatrix,
+        packStripsFFDExact(numScores, numBox, maxBoxWidth, maxStripWidth, totalBoxWidth, allScores, mates, adjMatrix,
                       boxWidths, stripSum, strip);
 
         resetVectors(numScores, numBox, allScores, mates, adjMatrix, boxWidths, stripSum, strip);
         cout << endl;
     }
-
-
-
-
-
+    
 
     endTime = clock();
     double totalTime = (((endTime - startTime) / double(CLOCKS_PER_SEC)) * 1000);
