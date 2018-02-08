@@ -13,7 +13,7 @@ using namespace std;
 
 int main(int argc, char **argv){
     //region USAGE - ARGUMENTS REQUIRED
-    if(argc < 8){
+    if(argc < 9){
         cout << "Minimum Score Separation Problem: MBAHRA.\n";
         cout << "Arguments are the following:\n";
         cout << "- Number of instances (integer)\n";
@@ -25,6 +25,7 @@ int main(int argc, char **argv){
         cout << "- Maximum width of strips (millimeters)\n";
         cout << "- Random Seed (integer)\n";
         cout << "- Name of input file (must have .txt extension)\n";
+        cout << "- packType: 1 = Approx, 2 = Smallest, 3 = Exact\n";
         exit(1);
     }
     //endregion
@@ -38,6 +39,7 @@ int main(int argc, char **argv){
     int maxBoxWidth = atoi(argv[5]); //max box width (mm)
     int maxStripWidth = atoi(argv[6]);
     int randomSeed = atoi(argv[7]); //random seed
+    int packType = atoi(argv[8]);
 
     int i, j;
     int instance; //counter for instances loop
@@ -109,18 +111,40 @@ int main(int argc, char **argv){
 
         //endregion
 
-    for(i = 0; i < 1; ++i) {
-        cout << "Instance: " << i << endl;
-
-        createInstance(numScores, numBox, minWidth, maxWidth, minBoxWidth, maxBoxWidth, totalBoxWidth, allScores, mates,
+    createInstance(numScores, numBox, minWidth, maxWidth, minBoxWidth, maxBoxWidth, totalBoxWidth, allScores, mates,
                        adjMatrix, boxWidths);
 
-        packStripsFFDExact(numScores, numBox, maxBoxWidth, maxStripWidth, totalBoxWidth, allScores, mates, adjMatrix,
-                      boxWidths, stripSum, strip);
+    switch(packType){
+        case 1:
+            cout << "FFD Approx:\n\n";
+            packStripsFFDApprox(numScores, numBox, maxBoxWidth, maxStripWidth, totalBoxWidth, allScores, mates, adjMatrix, boxWidths, stripSum, strip);
+            break;
 
-        resetVectors(numScores, numBox, allScores, mates, adjMatrix, boxWidths, stripSum, strip);
-        cout << endl;
+        case 2:
+            cout << "FFD Smallest:\n\n";
+            packStripsFFDSmallest(numScores, numBox, maxBoxWidth, maxStripWidth, totalBoxWidth, allScores, mates, adjMatrix, boxWidths, stripSum, strip);
+            break;
+
+        case 3:
+            cout << "FFD Exact:\n\n";
+            packStripsFFDExact(numScores, numBox, maxBoxWidth, maxStripWidth, totalBoxWidth, allScores, mates, adjMatrix, boxWidths, stripSum, strip);
+            break;
+
+        default:
+            cout << "No packType selected\n\n";
+            break;
+
+
+
+
+
     }
+
+
+
+    resetVectors(numScores, numBox, allScores, mates, adjMatrix, boxWidths, stripSum, strip);
+    cout << endl;
+
     
 
     endTime = clock();
