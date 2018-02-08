@@ -128,31 +128,56 @@ void packStripsFFDSmallest(int numScores, int numBox, int maxBoxWidth, int maxSt
 
     int i, j, k, l;
     int count = 0;
+    vector<int> scoreInc;
     vector<int> checked(numScores, 0);
+
+    for(i = 0; i < numScores; ++i){
+        scoreInc.push_back(i);
+    }
+
+    for(i = 0; i < scoreInc.size() - 1; ++i){
+        for(j = i+1; j < scoreInc.size(); ++j){
+            if(allScores[scoreInc[i]] == allScores[scoreInc[j]]){
+                if(allScores[mates[scoreInc[i]]] < allScores[mates[scoreInc[j]]]){
+                    swap(scoreInc[i], scoreInc[j]);
+                }
+            }
+            else{
+                break;
+            }
+        }
+    }
+
+    /*cout << "Scores Increase:\n";
+    for(auto number : scoreInc){
+        cout << number << " ";
+    }
+    cout << endl;*/
+
 
     j = 0;
     while (count < numScores){
-        for(i = 0; i < numScores; ++i){
-            if(checked[i] == 1){
+        for(i = 0; i < scoreInc.size(); ++i){
+            if(checked[scoreInc[i]] == 1){
                 continue;
             }
             if(strip[j].empty()){
-                strip[j].push_back(i);
-                strip[j].push_back(mates[i]);
-                stripSum[j] += boxWidths[i][mates[i]];
-                checked[i] = 1;
-                checked[mates[i]] = 1;
+                strip[j].push_back(scoreInc[i]);
+                strip[j].push_back(mates[scoreInc[i]]);
+                stripSum[j] += boxWidths[scoreInc[i]][mates[scoreInc[i]]];
+                checked[scoreInc[i]] = 1;
+                checked[mates[scoreInc[i]]] = 1;
                 count += 2;
                 i = -1;
                 continue;
             }
             else if(!strip[j].empty()){
-                if(adjMatrix[strip[j].back()][i] == 1 && stripSum[j] + boxWidths[i][mates[i]] <= maxStripWidth){
-                    strip[j].push_back(i);
-                    strip[j].push_back(mates[i]);
-                    stripSum[j] += boxWidths[i][mates[i]];
-                    checked[i] = 1;
-                    checked[mates[i]] = 1;
+                if(adjMatrix[strip[j].back()][scoreInc[i]] == 1 && stripSum[j] + boxWidths[scoreInc[i]][mates[scoreInc[i]]] <= maxStripWidth){
+                    strip[j].push_back(scoreInc[i]);
+                    strip[j].push_back(mates[scoreInc[i]]);
+                    stripSum[j] += boxWidths[scoreInc[i]][mates[scoreInc[i]]];
+                    checked[scoreInc[i]] = 1;
+                    checked[mates[scoreInc[i]]] = 1;
                     count += 2;
                     i = -1;
                     continue;
