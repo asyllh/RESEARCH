@@ -4,10 +4,10 @@ project(ffdexact)
 set(CMAKE_CXX_STANDARD 11)
 
 set(SOURCE_FILES
-        baseexact.cpp
-        baseexact.h
-        mainexact.cpp
-        packingexact.cpp
-        packingexact.h)
+        base.cpp
+        base.h
+        main.cpp
+        packing.cpp
+        packing.h)
 
 add_executable(ffdexact ${SOURCE_FILES})

@@ -6,7 +6,7 @@ packing.cpp
 #include <algorithm>
 #include <cmath>
 #include <iomanip>
-#include "packingexact.h"
+#include "packing.h"
 using namespace std;
 
 void swap(int &a, int &b){

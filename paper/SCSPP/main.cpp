@@ -8,8 +8,8 @@ mainexact.cpp
 #include <ctime>
 using namespace std;
 
-#include "baseexact.h"
-#include "packingexact.h"
+#include "base.h"
+#include "packing.h"
 
 int main(int argc, char **argv){
     //region USAGE - ARGUMENTS REQUIRED

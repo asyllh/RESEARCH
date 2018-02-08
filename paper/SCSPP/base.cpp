@@ -5,7 +5,7 @@ base.cpp
 /--------------*/
 #include <algorithm>
 #include <iomanip>
-#include "baseexact.h"
+#include "base.h"
 using namespace std;
 
 void resetVectors(int numScores, int numBox, vector<int> &allScores, vector<int> &mates,
