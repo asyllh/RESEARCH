@@ -46,6 +46,7 @@ It can be seen that this problem is in fact analogous to the CPOP, where each un
 Observe that, in this particular strip-packing problem, the widths of the individual items are not taken into account, since the aim is to arrage the items onto a strip of seemingly infinite length. In reality, strips of material are provided in fixed lengths. Given a large problem instance, multiple strips may be required to feasibly accommodate all of the items. For this reason, we define a new problem to be investigated.
 
 \begin{definition}
+	\label{defn:scspp}
 	Given a set $\mathcal{I}$ of rectangular items of varying widths $w_i$ and score widths $a_i, b_i$ for each item $i \in \mathcal{I}$, a finite set of strips $S_j$ with equal fixed length $l$, and a minimum scoring distance $\tau$, the Score-Constrained Strip-Packing Problem (SCSPP) consists of finding the minimum number of strips required to pack all items in $\mathcal{I}$ such that the minimum total score width constraint is met between every pair of adjacent items on every strip.
 \end{definition}
 
@@ -53,6 +54,7 @@ The remainder of this article will firstly, in Section 2, detail a polynomial-ti
 
 
 \section{Solving the CPOP}
+\label{sec:ahca}
 
 We shall now present an algorithm for solving the CPOP, which operates by expressing the problem instance graphically. 
 
@@ -73,7 +75,7 @@ The following definition describes a variant of the classical Hamiltonian cycle 
 \end{definition}
 
 \begin{theorem}
-	\label{thm:cpopsolnalt}
+	\label{thm:cpopsoln}
 	There exists a feasible solution $\mathcal{T}$ to an instance $\mathcal{M}$ of the CPOP if and only if its corresponding graph $G(V, P\cup E)$ contains an alternating Hamiltonian cycle.
 \end{theorem}
 \begin{proof}
@@ -87,7 +89,7 @@ To find a matching $Q \subset E$, the following modified maximum cardinality mat
 
 During this algorithm, if a vertex $v_i$ is not adjacent to any other unmatched vertex except its partner $p(v_i)$, the preceeding vertex $v_{i-1}$ can be ``rematched'', provided $v_i$ is not the first vertex (i.e $i \neq 1$), $v_{i-1}$ has been matched, and $(v_{i-1}, p(v_i)) \in E$. Then, $v_{i-1}$ is matched with $p(v_i)$, and $v_i$ is matched with the vertex that was previously matched with $v_{i-1}$. It is guaranteed that this algorithm will produce a maximum cardinality matching $Q \subset E$. This algorithm is able to create a matching set $Q$ in at most $O(n \log n)$ time.
 
-Clearly, if $|Q| < n+1$, there are not enough matching edges to form an alternating Hamiltonian cycle along with the edges in $P$, and hence in accordance with Theorem $\ref{thm:cpopsolnalt}$ no feasible solution exists for the given instance $\mathcal{M}$ of the CPOP. Otherwise, if $Q$ is a perfect matching of cardinality $n+1$, the spanning subgraph $G'(V, P \cup Q)$ is a 2-regular graph, where each vertex is adjacent to its partner via an edge in $P$, and its match via an edge in $Q$. $G'$ thus consists of a collection of alternating cycles $A_1, A_2, ..., A_{\lambda}$. If there is only one component on $G'$, i.e. $\lambda = 1$, then this alternating cycle is in fact Hamiltonian, and therefore a feasible solution exists. For a graph $G'$ with $\lambda > 1$, the components of $G'$ must be combined to form one single alternating Hamiltonian cycle. The algorithm thus executes a procedure that selects suitable edges in $E$ to replace specific edges in $Q$, such that the components of $G'$ are merged together.
+Clearly, if $|Q| < n+1$, there are not enough matching edges to form an alternating Hamiltonian cycle along with the edges in $P$, and hence in accordance with Theorem $\ref{thm:cpopsoln}$ no feasible solution exists for the given instance $\mathcal{M}$ of the CPOP. Otherwise, if $Q$ is a perfect matching of cardinality $n+1$, the spanning subgraph $G'(V, P \cup Q)$ is a 2-regular graph, where each vertex is adjacent to its partner via an edge in $P$, and its match via an edge in $Q$. $G'$ thus consists of a collection of alternating cycles $A_1, A_2, ..., A_{\lambda}$. If there is only one component on $G'$, i.e. $\lambda = 1$, then this alternating cycle is in fact Hamiltonian, and therefore a feasible solution exists. For a graph $G'$ with $\lambda > 1$, the components of $G'$ must be combined to form one single alternating Hamiltonian cycle. The algorithm thus executes a procedure that selects suitable edges in $E$ to replace specific edges in $Q$, such that the components of $G'$ are merged together.
 
 For each edge $(v_i, v_j) \in Q$, where $i < j$, $v_i$ is referred to as the ``smaller'' vertex, and $v_j$ as the ``larger'' vertex, since the value associated with $v_i$ is less than or equal to the value associated with $v_j$. The procedure initially sorts the edges in $Q$ into a list such that the smaller vertices of the edges are in lexicographical order, and therefore in non-decreasing order of values. Any edges that are a result of rematching are then removed from this list. Starting from the first edge, the procedure searches through the list to find an edge that meets the following conditions:
 \begin{enumerate}
@@ -108,13 +110,14 @@ Else, if $k > 1$, it may be that multiple sets are required to combine the compo
 This algorithm, which will be referred to as the Alternating Hamiltonian Construction Algorithm (AHCA) is able to deduce whether a feasible solution $\mathcal{T}$ exists for any given instance $\mathcal{M}$ of the CPOP. If a solution does indeed exist, AHCA can produce this solution in at most $O(n^2)$ time.
 
 \section{Solving the SCSPP/Heuristics}
-
+\label{sec:scsppsoln}
 
 Indeed, the SCSPP is a generalisation of the classical one-dimensional bin-packing problem (BPP), where in the latter problem, the minimum scoring distance $\tau$ can be said to be equal to zero. It follows that the SCSPP is at least as hard as the BPP, which is known to be NP-hard (\citealp{garey1979}), and so (under the assumption that $P \neq NP$) there is no known algorithm that is able to find an optimal solution for every instance of the SCSPP in polynomial time. Instead, heuristics can be used to find near-optimal solutions in a shorter amount of time. One example is the greedy heuristic known as first-fit (FF), an online algorithm that places each item (in some arbitrary order) onto the lowest-indexed strip such that the capacity of the strip is not exceeded. It has been shown that by arranging the items in decreasing order of size, a packing heuristic will produce a solution that is closer to the optimal than if the items are arranged in any other order (\citealp{johnson1974fast}). Applying FF onto items sorted in this manner yields the well-known first-fit decreasing (FFD) heuristic.
 
 An optimal solution of an instance of the SCSPP is a solution that consists of the fewest number of strips, $k$. A simple lower bound for $k$ that can be computed in $O(n)$ time is given by
 
 \begin{equation}
+	\label{eqn:lowerbound}
 	k \geq \ceil*{\frac{\sum_{i=1}^{n}w_i}{l}}
 \end{equation}
 
@@ -122,89 +125,16 @@ where $n$ is the number of items in the set $\mathcal{I}$, $w_i$ the width of ea
 
 
 \subsection{FFD Approx}
+\label{sec:ffdapprox}
 The first heuristic to be discussed is the Score-Constrainted First-Fit Decreasing (SCFFD) heuristic, which is an extension of the original FFD. The items in $\mathcal{I}$ are, as usual, sorted in non-increasing order of widths, with ties broken by selecting the item with the smallest score width. Then, for each item $i \in \mathcal{I}$, SCFFD finds the lowest-indexed strip $S_j$ that can accommodate $i$ without being overfilled. If this strip $S_j$ is empty, place $i$ onto $S_j$ in a regular orientation, and add $S_j$ to the solution set $\mathcal{S}$. However, if $S_j$ is not empty, i.e. $S_j \in \mathcal{S}$, the algorithm checks if the vicinal sum constraint is met between the right-most score width on $S_j$ and one of the two score widths on $i$, assessing the smaller score width $a_i$ first. In either case, if the constraint is met, $i$ is placed accordingly onto $S_j$. Indeed, an item $i$ may not fulfil the vicinal sum constraint in any orientation, in which case SCFFD finds the next lowest-indexed strip and attempts to pack $i$ again. This process continues until every item $i \in \mathcal{I}$ has been placed onto a strip $S_j \in \mathcal{S}$.
 
 \subsection{Smallest First}
+\label{sec:ffdsmall}
 This next heuristic focusses on packing each strip in turn, rather than each item as in the previous heuristic. Each new strip $S_j$ is initialised by placing the item $i \in \mathcal{I}'$ with the smallest score width onto $S_j$ in a regular position, where $\mathcal{I}'$ is the set of items that have not yet been packed onto a strip. The heuristic then continues to pack items onto $S_j$, by choosing an item in $\mathcal{I}'$ with the smallest score width that fulfils the vicinal sum constraint when placed alongside the right-most score width on $S_j$, and that does not exceed $S_j$'s capacity. Once there are no more items in $\mathcal{I}'$ that can be feasibly packed onto $S_j$, the heuristic adds $S_j$ to the solution set $\mathcal{S}$, and the next new strip $S_{j+1}$ is initialised. When $|\mathcal{I}'| = 0$, all items have been packed onto a strip, and the process terminates.
 
-\subsection{FFD Exact} 
+\subsection{FFD Exact}
+\label{sec:ffdexact}
 The last heuristic in this paper is formed by integrating the Alternating Hamiltonian Construction Algorithm (AHCA) detailed in Section ref{} with the classical FFD heuristic. Again, all items in $\mathcal{I}$ are sorted into non-increasing order of widths, with ties broken by choosing the item with the smallest score width. For each item $i \in \mathcal{I}$, the heuristic finds the lowest-indexed feasible strip $S_j$. As in the first heuristic, if $S_j$ is empty, $i$ is placed in a regular orientation onto $S_j$, and $S_j$ is then added to the solution set $\mathcal{S}$. Unlike the first heuristic, however, if $S_j$ is not empty ($S_j \in \mathcal{S}$), AHCA is applied on all items in $S_j$ and the current item $i$. If AHCA is successful, the items currently on $S_j$ are replaced by the new arrangement, which of course includes $i$. In the event that AHCA is unable to produce a solution, $S_j$ remains intact, and the heuristic attempts to pack $i$ onto the next lowest-indexed feasible strip.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-%========================================================================%
-
-
-\begin{comment}
-The PSP can be seen in a problem related to the cutting-stock problem, first described by \cite{goulimis2004}. Let $\mathcal{I}$ be a set of rectangular items of equal heights, made from corrugated cardboard. Each item $i \in \mathcal{I}$ has width $w_i \in \mathbb{Z}^{+}$ and possess two vertical score lines. A pair of knives mounted on a bar will cut along these score lines to allow the items to be folded with ease. The distances between each edge of an item and the nearest score line are the score widths, $a_i, b_i \in \mathbb{Z}^{+}$, assigned such that $a_i \leq b_i$. As illustrated in Figure \ref{fig:boxesknife}, the knives cut along score lines from two adjacent items simultaneously. By design, the knives cannot be placed too close to one another - the distance between the knives must exceed a fixed minimum $\tau \in \mathbb{R}^{+}$ (around 70mm in industry). In order for the knives to be able to cut the items in the correct locations, two adajcent score widths, for example $a_i$ and $b_{i+1}$, must fulfil the \textit{minimum total score width constraint}
-
-\begin{equation*}
-a_i + b_{i+1} \geq \tau.
-\end{equation*}
-
-That is, the sum of two adjacent score widths must exceed the \textit{minimum total score width} $\tau$. Therefore, the problem involves finding a feasible arrangement of the items such that between each pair of items the minimum total score width constraint is met.
-
-
-\begin{figure}[H]	
-\centering
-\includestandalone[width=0.4\textwidth]{figures/boxesknifeannotate}
-\caption{\textcolor{red}{Individual boxes.}}	
-\label{fig:boxesknife}
-\end{figure}
-
-Since the score widths on each item $i \in \mathcal{I}$ are not necessarily equal, they can be aligned in two distinct orientations: ``regular'', denoted by $(a_i, b_i)$, and ``rotated'', denoted by $(b_i, a_i)$, where the smaller of the two score widths $a_i$ is on the left- and right-hand side of the item respectively.
-
-This can be seen as a PSP, where the values $x_i$ and $y_i$ are the score widths, and a feasible solution $\mathcal{X}$ consists of an arrangement of items in some order such that $\textup{\textbf{rhs}}(i) + \textup{\textbf{lhs}}(i+1) \geq \tau \forall  i \in \{1,2,..., |\mathcal{I}|-1\}$.
-
-There exists a polynomial-time algorithm that is able to recognise whether a particular instance of this problem is feasible (\citealp{becker2010}).
-
-\end{comment}
 
 
 
