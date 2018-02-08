@@ -31,7 +31,7 @@ int main(int argc, char **argv){
     //endregion
 
     //region VARIABLES
-    //int numInstances = atoi(argv[1]); //number of instances of mssp, use in main for loop
+    int numInstances = 20; //number of instances of mssp, use in main for loop
     int numBox = atoi(argv[1]); //number of boxes in mssp plus 1 extra box (scores on either side of extra box will be dominating vertices, score widths = 71)
     int minWidth = atoi(argv[2]); //minimum width of scores (millimeters)
     int maxWidth = atoi(argv[3]); //maximum width of scores (millimeters)
@@ -56,6 +56,14 @@ int main(int argc, char **argv){
     double totalBoxWidth = 0.0;
     vector<int> stripSum(numBox, 0);
     vector<vector<int> > strip(numBox);
+    int opt = 0;
+    int opt90 = 0;
+    int opt80 = 0;
+    int opt70 = 0;
+    int opt60 = 0;
+    int opt50 = 0;
+    int optLow = 0;
+
     //endregion
 
 
@@ -111,32 +119,39 @@ int main(int argc, char **argv){
 
         //endregion
 
-    createInstance(numScores, numBox, minWidth, maxWidth, minBoxWidth, maxBoxWidth, totalBoxWidth, allScores, mates,
-                       adjMatrix, boxWidths);
+    //createInstance(numScores, numBox, minWidth, maxWidth, minBoxWidth, maxBoxWidth, totalBoxWidth, allScores, mates, adjMatrix, boxWidths);
 
     switch(packType){
         case 1:
             cout << "FFD Approx:\n";
-            packStripsFFDApprox(numScores, numBox, maxBoxWidth, maxStripWidth, totalBoxWidth, allScores, mates, adjMatrix, boxWidths, stripSum, strip);
+            for(i = 0; i < numInstances; ++i){
+                createInstance(numScores, numBox, minWidth, maxWidth, minBoxWidth, maxBoxWidth, totalBoxWidth, allScores, mates, adjMatrix, boxWidths);
+                packStripsFFDApprox(opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numBox, maxBoxWidth, maxStripWidth, totalBoxWidth, allScores, mates, adjMatrix, boxWidths, stripSum, strip);
+                resetVectors(numScores, numBox, allScores, mates, adjMatrix, boxWidths, stripSum, strip);
+            }
             break;
 
         case 2:
             cout << "FFD Smallest:\n";
-            packStripsFFDSmallest(numScores, numBox, maxBoxWidth, maxStripWidth, totalBoxWidth, allScores, mates, adjMatrix, boxWidths, stripSum, strip);
+            for(i = 0; i < numInstances; ++i){
+                createInstance(numScores, numBox, minWidth, maxWidth, minBoxWidth, maxBoxWidth, totalBoxWidth, allScores, mates, adjMatrix, boxWidths);
+                packStripsFFDSmallest(opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numBox, maxBoxWidth, maxStripWidth, totalBoxWidth, allScores, mates, adjMatrix, boxWidths, stripSum, strip);
+                resetVectors(numScores, numBox, allScores, mates, adjMatrix, boxWidths, stripSum, strip);
+            }
             break;
 
         case 3:
             cout << "FFD Exact:\n";
-            packStripsFFDExact(numScores, numBox, maxBoxWidth, maxStripWidth, totalBoxWidth, allScores, mates, adjMatrix, boxWidths, stripSum, strip);
+            for(i = 0; i < numInstances; ++i){
+                createInstance(numScores, numBox, minWidth, maxWidth, minBoxWidth, maxBoxWidth, totalBoxWidth, allScores, mates, adjMatrix, boxWidths);
+                packStripsFFDExact(opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numBox, maxBoxWidth, maxStripWidth, totalBoxWidth, allScores, mates, adjMatrix, boxWidths, stripSum, strip);
+                resetVectors(numScores, numBox, allScores, mates, adjMatrix, boxWidths, stripSum, strip);
+            }
             break;
 
         default:
             cout << "No packType selected\n\n";
             break;
-
-
-
-
 
     }
 
@@ -145,11 +160,13 @@ int main(int argc, char **argv){
     resetVectors(numScores, numBox, allScores, mates, adjMatrix, boxWidths, stripSum, strip);
     cout << endl;
 
+    output(opt, opt90, opt80, opt70, opt60, opt50, optLow, numInstances);
+
     
 
     endTime = clock();
     double totalTime = (((endTime - startTime) / double(CLOCKS_PER_SEC)) * 1000);
-    cout << "CPU Time = " << totalTime << " milliseconds.\nEND.\n";
+    cout << "\nCPU Time = " << totalTime << " milliseconds.\nEND.\n";
 
 
 
