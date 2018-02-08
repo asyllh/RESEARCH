@@ -267,7 +267,7 @@ void packStripsFFDSmallest(int &opt, int &opt90, int &opt80, int &opt70, int &op
 
 }
 
-void packStripsFFDExact(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int numScores, int numBox, int maxBoxWidth,
+void packStripsFFDExact(int instance, int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int numScores, int numBox, int maxBoxWidth,
                         int maxStripWidth, double totalBoxWidth, vector<int> &allScores, vector<int> &mates, vector<vector<int> > &adjMatrix,
                         vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<vector<int> > &strip){
 
@@ -296,6 +296,13 @@ void packStripsFFDExact(int &opt, int &opt90, int &opt80, int &opt70, int &opt60
         min = 0;
     }
 
+    if(instance == 20){
+        cout << "Box decrease:\n";
+        for(i = 0; i < boxDecrease.size(); ++i){
+        cout << boxDecrease[i] << " ";
+        }
+        cout << endl << endl;
+    }
     /*cout << "Box decrease:\n";
     for(i = 0; i < boxDecrease.size(); ++i){
         cout << boxDecrease[i] << " ";
@@ -314,6 +321,16 @@ void packStripsFFDExact(int &opt, int &opt90, int &opt80, int &opt70, int &opt60
                     feasible = 0;
                     MBAHRA(i, j, feasible, allScores, mates, adjMatrix, boxWidths, boxDecrease, stripSum, strip);
                     if(feasible == 1){
+                        if(instance == 20) {
+                            for (i = 0; i < strip.size(); ++i) {
+                                cout << "Strip " << i << ": ";
+                                for (j = 0; j < strip[i].size(); ++j) {
+                                    cout << strip[i][j] << " ";
+                                }
+                                cout << endl;
+                            }
+                            cout << endl;
+                        }
                         break;
                     }
                 }
@@ -322,6 +339,16 @@ void packStripsFFDExact(int &opt, int &opt90, int &opt80, int &opt70, int &opt60
                 strip[i].push_back(boxDecrease[j]);
                 strip[i].push_back(mates[boxDecrease[j]]);
                 stripSum[i] += boxWidths[boxDecrease[j]][mates[boxDecrease[j]]];
+                if(instance == 20) {
+                    for (i = 0; i < strip.size(); ++i) {
+                        cout << "Strip " << i << ": ";
+                        for (j = 0; j < strip[i].size(); ++j) {
+                            cout << strip[i][j] << " ";
+                        }
+                        cout << endl;
+                    }
+                    cout << endl;
+                }
                 break;
             }
         }

@@ -24,7 +24,7 @@ void packStripsFFDSmallest(int &opt, int &opt90, int &opt80, int &opt70, int &op
                            int maxStripWidth, double totalBoxWidth, vector<int> &allScores, vector<int> &mates, vector<vector<int> > &adjMatrix,
                            vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<vector<int> > &strip);
 
-void packStripsFFDExact(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int numScores, int numBox, int maxBoxWidth,
+void packStripsFFDExact(int instance, int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int numScores, int numBox, int maxBoxWidth,
                         int maxStripWidth, double totalBoxWidth, vector<int> &allScores, vector<int> &mates, vector<vector<int> > &adjMatrix,
                         vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<vector<int> > &strip);
 
