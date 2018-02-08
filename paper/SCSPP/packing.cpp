@@ -22,8 +22,38 @@ int lowerBound(int maxStripWidth, double totalBoxWidth){
     return lBound;
 }
 
-void packStripsFFDApprox(int numScores, int numBox, int maxBoxWidth, int maxStripWidth, double totalBoxWidth, vector<int> &allScores, vector<int> &mates,
-        vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<vector<int> > &strip){
+void optimality(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int stripSize, int LB){
+
+    double c = static_cast<double>(LB) / stripSize;
+
+    if(stripSize == LB){
+        ++opt;
+    }
+    else if(c >= 0.9){
+        ++opt90;
+    }
+    else if(c >= 0.8){
+        ++opt80;
+    }
+    else if(c >= 0.7){
+        ++opt70;
+    }
+    else if(c >= 0.6){
+        ++opt60;
+    }
+    else if(c >= 0.5){
+        ++opt50;
+    }
+    else{
+        ++optLow;
+    }
+
+}
+
+
+void packStripsFFDApprox(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int numScores, int numBox, int maxBoxWidth,
+                         int maxStripWidth, double totalBoxWidth, vector<int> &allScores, vector<int> &mates, vector<vector<int> > &adjMatrix,
+                         vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<vector<int> > &strip){
 
     int i, j, mini, k, l;
     int min = 0;
@@ -99,11 +129,17 @@ void packStripsFFDApprox(int numScores, int numBox, int maxBoxWidth, int maxStri
         stripSum.pop_back();
         --l;
     }
-    cout << "After FFD: " << strip.size()<< " strips\n";
 
-    cout << "Lower Bound: " << lowerBound(maxStripWidth, totalBoxWidth) << " strips\n";
+    int stripSize = strip.size();
+    int LB = lowerBound(maxStripWidth, totalBoxWidth);
 
+    /*cout << "After FFD: " << stripSize << " strips\n";
 
+    cout << "Lower Bound: " << LB << " strips\n";*/
+
+    optimality(opt, opt90, opt80, opt70,opt60, opt50, optLow, stripSize, LB);
+
+/*
     cout << "Strips FFD (scores):\n";
     for(i = 0; i < strip.size(); ++i){
         cout << "Strip " << i << ": ";
@@ -120,11 +156,12 @@ void packStripsFFDApprox(int numScores, int numBox, int maxBoxWidth, int maxStri
             cout << i << setw(9) <<  stripSum[i] << setw(9) << maxStripWidth - stripSum[i] << endl;
         }
     }
-    cout << endl;
+    cout << endl;*/
 }
 
-void packStripsFFDSmallest(int numScores, int numBox, int maxBoxWidth, int maxStripWidth, double totalBoxWidth, vector<int> &allScores, vector<int> &mates,
-                         vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<vector<int> > &strip){
+void packStripsFFDSmallest(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int numScores, int numBox, int maxBoxWidth,
+                           int maxStripWidth, double totalBoxWidth, vector<int> &allScores, vector<int> &mates, vector<vector<int> > &adjMatrix,
+                           vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<vector<int> > &strip){
 
     int i, j, k, l;
     int count = 0;
@@ -198,34 +235,41 @@ void packStripsFFDSmallest(int numScores, int numBox, int maxBoxWidth, int maxSt
         stripSum.pop_back();
         --l;
     }
-    cout << "After FFD: " << strip.size()<< " strips\n";
 
-    cout << "Lower Bound: " << lowerBound(maxStripWidth, totalBoxWidth) << " strips\n";
+    int stripSize = strip.size();
+    int LB = lowerBound(maxStripWidth, totalBoxWidth);
+
+    /*cout << "After FFD: " << stripSize << " strips\n";
+
+    cout << "Lower Bound: " << LB << " strips\n";*/
+
+    optimality(opt, opt90, opt80, opt70,opt60, opt50, optLow, stripSize, LB);
 
 
-    cout << "Strips FFD (scores):\n";
-    for(i = 0; i < strip.size(); ++i){
+    //cout << "Strips FFD (scores):\n";
+    /*for(i = 0; i < strip.size(); ++i){
         cout << "Strip " << i << ": ";
         for(j = 0; j < strip[i].size(); ++j){
             cout << strip[i][j] << " ";
         }
         cout << endl;
     }
-    cout << endl;
+    cout << endl;*/
 
-    cout << "Strip" << setw(8) << "Width" << setw(12) << "Residual\n";
-    for(i = 0; i < stripSum.size(); ++i){
+    //cout << "Strip" << setw(8) << "Width" << setw(12) << "Residual\n";
+    /*for(i = 0; i < stripSum.size(); ++i){
         if(stripSum[i] !=0) {
             cout << i << setw(9) <<  stripSum[i] << setw(9) << maxStripWidth - stripSum[i] << endl;
         }
     }
-    cout << endl;
+    cout << endl;*/
 
 
 }
 
-void packStripsFFDExact(int numScores, int numBox, int maxBoxWidth, int maxStripWidth, double totalBoxWidth, vector<int> &allScores, vector<int> &mates,
-                   vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<vector<int> > &strip){
+void packStripsFFDExact(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int numScores, int numBox, int maxBoxWidth,
+                        int maxStripWidth, double totalBoxWidth, vector<int> &allScores, vector<int> &mates, vector<vector<int> > &adjMatrix,
+                        vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<vector<int> > &strip){
 
     int i, j, mini, k, l;
     int min = 0;
@@ -262,7 +306,7 @@ void packStripsFFDExact(int numScores, int numBox, int maxBoxWidth, int maxStrip
     strip[0].push_back(mates[boxDecrease[0]]);
     stripSum[0] += boxWidths[boxDecrease[0]][mates[boxDecrease[0]]];
 
-
+    //cout << "hello\n";
     for(j = 1; j < boxDecrease.size(); ++j){
         for(i = 0; i < strip.size(); ++i){
             if(!strip[i].empty()){
@@ -297,28 +341,34 @@ void packStripsFFDExact(int numScores, int numBox, int maxBoxWidth, int maxStrip
         stripSum.pop_back();
         --l;
     }
-    cout << "After FFD: " << strip.size()<< " strips\n";
 
-    cout << "Lower Bound: " << lowerBound(maxStripWidth, totalBoxWidth) << " strips\n";
+    int stripSize = strip.size();
+    int LB = lowerBound(maxStripWidth, totalBoxWidth);
+
+    /*cout << "After FFD: " << stripSize << " strips\n";
+
+    cout << "Lower Bound: " << LB << " strips\n";*/
+
+    optimality(opt, opt90, opt80, opt70,opt60, opt50, optLow, stripSize, LB);
 
 
-    cout << "Strips FFD (scores):\n";
-    for(i = 0; i < strip.size(); ++i){
+    //cout << "Strips FFD (scores):\n";
+    /*for(i = 0; i < strip.size(); ++i){
         cout << "Strip " << i << ": ";
         for(j = 0; j < strip[i].size(); ++j){
             cout << strip[i][j] << " ";
         }
         cout << endl;
     }
-    cout << endl;
+    cout << endl;*/
 
-    cout << "Strip" << setw(8) << "Width" << setw(12) << "Residual\n";
-    for(i = 0; i < stripSum.size(); ++i){
+    //cout << "Strip" << setw(8) << "Width" << setw(12) << "Residual\n";
+    /*for(i = 0; i < stripSum.size(); ++i){
         if(stripSum[i] !=0) {
             cout << i << setw(9) <<  stripSum[i] << setw(9) << maxStripWidth - stripSum[i] << endl;
         }
     }
-    cout << endl;
+    cout << endl;*/
 
 
 }
