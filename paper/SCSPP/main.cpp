@@ -116,17 +116,17 @@ int main(int argc, char **argv){
 
     switch(packType){
         case 1:
-            cout << "FFD Approx:\n\n";
+            cout << "FFD Approx:\n";
             packStripsFFDApprox(numScores, numBox, maxBoxWidth, maxStripWidth, totalBoxWidth, allScores, mates, adjMatrix, boxWidths, stripSum, strip);
             break;
 
         case 2:
-            cout << "FFD Smallest:\n\n";
+            cout << "FFD Smallest:\n";
             packStripsFFDSmallest(numScores, numBox, maxBoxWidth, maxStripWidth, totalBoxWidth, allScores, mates, adjMatrix, boxWidths, stripSum, strip);
             break;
 
         case 3:
-            cout << "FFD Exact:\n\n";
+            cout << "FFD Exact:\n";
             packStripsFFDExact(numScores, numBox, maxBoxWidth, maxStripWidth, totalBoxWidth, allScores, mates, adjMatrix, boxWidths, stripSum, strip);
             break;
 
@@ -149,7 +149,7 @@ int main(int argc, char **argv){
 
     endTime = clock();
     double totalTime = (((endTime - startTime) / double(CLOCKS_PER_SEC)) * 1000);
-    cout << "\nCPU Time = " << totalTime << " milliseconds.\nEND.\n";
+    cout << "CPU Time = " << totalTime << " milliseconds.\nEND.\n";
 
 
 
