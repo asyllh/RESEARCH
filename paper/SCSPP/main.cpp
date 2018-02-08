@@ -31,7 +31,7 @@ int main(int argc, char **argv){
     //endregion
 
     //region VARIABLES
-    int numInstances = 20; //number of instances of mssp, use in main for loop
+    int numInstances = 21; //number of instances of mssp, use in main for loop
     int numBox = atoi(argv[1]); //number of boxes in mssp plus 1 extra box (scores on either side of extra box will be dominating vertices, score widths = 71)
     int minWidth = atoi(argv[2]); //minimum width of scores (millimeters)
     int maxWidth = atoi(argv[3]); //maximum width of scores (millimeters)
@@ -124,7 +124,7 @@ int main(int argc, char **argv){
     switch(packType){
         case 1:
             cout << "FFD Approx:\n";
-            for(i = 0; i < numInstances; ++i){
+            for(instance = 0; instance < numInstances; ++instance){
                 createInstance(numScores, numBox, minWidth, maxWidth, minBoxWidth, maxBoxWidth, totalBoxWidth, allScores, mates, adjMatrix, boxWidths);
                 packStripsFFDApprox(opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numBox, maxBoxWidth, maxStripWidth, totalBoxWidth, allScores, mates, adjMatrix, boxWidths, stripSum, strip);
                 resetVectors(numScores, numBox, allScores, mates, adjMatrix, boxWidths, stripSum, strip);
@@ -133,7 +133,7 @@ int main(int argc, char **argv){
 
         case 2:
             cout << "FFD Smallest:\n";
-            for(i = 0; i < numInstances; ++i){
+            for(instance = 0; instance < numInstances; ++instance){
                 createInstance(numScores, numBox, minWidth, maxWidth, minBoxWidth, maxBoxWidth, totalBoxWidth, allScores, mates, adjMatrix, boxWidths);
                 packStripsFFDSmallest(opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numBox, maxBoxWidth, maxStripWidth, totalBoxWidth, allScores, mates, adjMatrix, boxWidths, stripSum, strip);
                 resetVectors(numScores, numBox, allScores, mates, adjMatrix, boxWidths, stripSum, strip);
@@ -142,9 +142,9 @@ int main(int argc, char **argv){
 
         case 3:
             cout << "FFD Exact:\n";
-            for(i = 0; i < numInstances; ++i){
+            for(instance = 0; instance < numInstances; ++instance){
                 createInstance(numScores, numBox, minWidth, maxWidth, minBoxWidth, maxBoxWidth, totalBoxWidth, allScores, mates, adjMatrix, boxWidths);
-                packStripsFFDExact(opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numBox, maxBoxWidth, maxStripWidth, totalBoxWidth, allScores, mates, adjMatrix, boxWidths, stripSum, strip);
+                packStripsFFDExact(instance, opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numBox, maxBoxWidth, maxStripWidth, totalBoxWidth, allScores, mates, adjMatrix, boxWidths, stripSum, strip);
                 resetVectors(numScores, numBox, allScores, mates, adjMatrix, boxWidths, stripSum, strip);
             }
             break;
