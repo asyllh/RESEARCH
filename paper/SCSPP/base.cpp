@@ -74,11 +74,11 @@ void createInstance(int numScores, int numBox, int minWidth, int maxWidth, int m
     //Sort all of the scores in the allScores vector in ascending order
     sort(allScores.begin(), allScores.end()); //sorts elements of vector in ascending order
 
-    cout << "All scores:\n";
+    /*cout << "All scores:\n";
     for(i = 0; i < allScores.size(); ++i){
         cout << allScores[i] << " ";
     }
-    cout << endl;
+    cout << endl;*/
     //Filling in adjacency matrix - if sum of two scores >= threshold (70), then insert 1 into the matrix, else leave as 0
     for (i = 0; i < allScores.size() - 1; ++i) {
         for (j = i + 1; j < allScores.size(); ++j) {
