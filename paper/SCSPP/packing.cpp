@@ -296,13 +296,13 @@ void packStripsFFDExact(int instance, int &opt, int &opt90, int &opt80, int &opt
         min = 0;
     }
 
-    if(instance == 20){
+    /*if(instance == 20){
         cout << "Box decrease:\n";
         for(i = 0; i < boxDecrease.size(); ++i){
         cout << boxDecrease[i] << " ";
         }
         cout << endl << endl;
-    }
+    }*/
     /*cout << "Box decrease:\n";
     for(i = 0; i < boxDecrease.size(); ++i){
         cout << boxDecrease[i] << " ";
@@ -321,7 +321,7 @@ void packStripsFFDExact(int instance, int &opt, int &opt90, int &opt80, int &opt
                     feasible = 0;
                     MBAHRA(i, j, feasible, allScores, mates, adjMatrix, boxWidths, boxDecrease, stripSum, strip);
                     if(feasible == 1){
-                        if(instance == 20) {
+                        /*if(instance == 20) {
                             for (i = 0; i < strip.size(); ++i) {
                                 cout << "Strip " << i << ": ";
                                 for (j = 0; j < strip[i].size(); ++j) {
@@ -330,7 +330,7 @@ void packStripsFFDExact(int instance, int &opt, int &opt90, int &opt80, int &opt
                                 cout << endl;
                             }
                             cout << endl;
-                        }
+                        }*/
                         break;
                     }
                 }
@@ -339,7 +339,7 @@ void packStripsFFDExact(int instance, int &opt, int &opt90, int &opt80, int &opt
                 strip[i].push_back(boxDecrease[j]);
                 strip[i].push_back(mates[boxDecrease[j]]);
                 stripSum[i] += boxWidths[boxDecrease[j]][mates[boxDecrease[j]]];
-                if(instance == 20) {
+                /*if(instance == 20) {
                     for (i = 0; i < strip.size(); ++i) {
                         cout << "Strip " << i << ": ";
                         for (j = 0; j < strip[i].size(); ++j) {
@@ -348,7 +348,7 @@ void packStripsFFDExact(int instance, int &opt, int &opt90, int &opt80, int &opt
                         cout << endl;
                     }
                     cout << endl;
-                }
+                }*/
                 break;
             }
         }
@@ -820,8 +820,8 @@ void MBAHRA(int i1, int j1, int &feasible, vector<int> &allScores, vector<int> &
 
         //region PATCHGRAPH
         /**PATCHGRAPH**/
-        vector<int> QSetX(qstarX, 0);
-        vector<int> patchCycleX(qstarX, vacant);
+        vector<int> QSetX(nCompX, 0);
+        vector<int> patchCycleX(nCompX, vacant);
         for (i = 0; i < TX.size(); ++i) {
             if (TX[i].size() == numCyclesX) {
                 fullX = i;
