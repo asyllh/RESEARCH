@@ -79,7 +79,7 @@ The following definition describes a variant of the classical Hamiltonian cycle 
 	There exists a feasible solution $\mathcal{T}$ to an instance $\mathcal{M}$ of the CPOP if and only if its corresponding graph $G(V, P\cup E)$ contains an alternating Hamiltonian cycle.
 \end{theorem}
 \begin{proof}
-	To be completed. \qed
+	Let $\mathcal{A} = \{v_1, v_2, ..., v_{2n+1}, v_{2n+2}\}$ be an alternating Hamiltonian cycle on $G$, where $v_{2n+1}$ and $v_{2n+2}$ are the dominating vertices. By definition, $\mathcal{A}$ contains all vertices on $G$, and all $n+1$ edgs in $P$. Thus, there exists a set of $n+1$ edges from $E$ that, together with the edges in $P$, form the alternating Hamiltonian cycle. Now, removing the dominating vertices and any incident edges gives rise to an alternating Hamiltonian path $\mathcal{A}' = \{v_1, v_2, ..., v_{2n-1}, v_{2n}\}$, whose first edge $(v_1, v_2)$ and last edge $(v_{2n-1}, v_{2n})$ are in $P$. The order of the values corresponding to each vertex of this path form a feasible solution $\mathcal{T}$, where values that are partners make up a tuple. \textcolor{OrangeRed}{edges E vicinal sum constraint equation 2}. \qed
 \end{proof}
 
 Therefore, the aim of this algorithm is to construct an alternating Hamiltonian cycle on $G$. Since the values in each unordered pair in $\mathcal{M}$ cannot be altered, every edge in $P$ must be present in the alternating Hamiltonian cycle. Consequently, the task now involves finding a matching $Q \subset E$ of cardinality $n+1$, such that the edge sets $P$ and $Q$ form an alternating Hamiltonian cycle as described in Definition $\ref{defn:althamcycle}$.  
