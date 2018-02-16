@@ -296,6 +296,8 @@ void packStripsFFDExact(int instance, int &opt, int &opt90, int &opt80, int &opt
         min = 0;
     }
 
+    if(instance == 849){ cout << "hi\n"; }
+
     /*if(instance == 20){
         cout << "Box decrease:\n";
         for(i = 0; i < boxDecrease.size(); ++i){
@@ -429,7 +431,7 @@ void MBAHRA(int i1, int j1, int &feasible, vector<int> &allScores, vector<int> &
     //region Variables
     int nScoresX = scoresX.size();
     int nBoxX = scoresX.size() / 2;
-    int nCompX = (nBoxX + (nBoxX % 2)) / 2;
+    int nCompX = nScoresX;
     vector<int> invOrderX(nScoresX);
     vector<vector<int> > adjMatX(nScoresX, vector<int>(nScoresX, 0));
     vector<int> matesX(nScoresX, 0);
