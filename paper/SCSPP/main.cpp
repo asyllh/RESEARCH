@@ -31,7 +31,7 @@ int main(int argc, char **argv){
     //endregion
 
     //region VARIABLES
-    int numInstances = 100; //number of instances of mssp, use in main for loop
+    int numInstances = 1000; //number of instances of mssp, use in main for loop
     int numBox = atoi(argv[1]); //number of boxes in mssp plus 1 extra box (scores on either side of extra box will be dominating vertices, score widths = 71)
     int minWidth = atoi(argv[2]); //minimum width of scores (millimeters)
     int maxWidth = atoi(argv[3]); //maximum width of scores (millimeters)
