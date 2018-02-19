@@ -6,6 +6,7 @@ packing.cpp
 #include <algorithm>
 #include <cmath>
 #include <iomanip>
+#include <iterator>
 #include "packing.h"
 using namespace std;
 
@@ -296,7 +297,6 @@ void packStripsFFDExact(int instance, int &opt, int &opt90, int &opt80, int &opt
         min = 0;
     }
 
-    if(instance == 849){ cout << "hi\n"; }
 
     /*if(instance == 20){
         cout << "Box decrease:\n";
@@ -402,7 +402,7 @@ void packStripsFFDExact(int instance, int &opt, int &opt90, int &opt80, int &opt
 
 }
 
-void MBAHRA(int i1, int j1, int &feasible, vector<int> &allScores, vector<int> &mates, vector<vector<int> > &adjMatrix,
+void MBAHRA1(int i1, int j1, int &feasible, vector<int> &allScores, vector<int> &mates, vector<vector<int> > &adjMatrix,
             vector<vector<int> > &boxWidths, vector<int> &boxDecrease, vector<int> &stripSum, vector<vector<int> > &strip){
 
     feasible = 0;
@@ -1419,6 +1419,703 @@ void MBAHRA(int i1, int j1, int &feasible, vector<int> &allScores, vector<int> &
                     //endregion
 
                 }
+
+                //region MAKEPATH
+                /**MAKEPATH FUNCTION**/
+                for (i = 0; i < fullCycleX.size() - 1; ++i) {
+                    if ((fullCycleX[i] == nScoresX - 1 && fullCycleX[i + 1] == nScoresX - 2) ||
+                        (fullCycleX[i] == nScoresX - 2 && fullCycleX[i + 1] == nScoresX - 1)) {
+                        if (i == 0) { //if the dominating vertices are at the beginning of the fullCycle vector
+                            for (j = 2; j < fullCycleX.size(); ++j) {
+                                completePathX.push_back(fullCycleX[j]);
+                            }
+                            break;
+                        }
+
+                        else if (i == fullCycleX.size() -
+                                      2) { //if the dominating vertices are at the end of the fullCycle vector
+                            for (j = 0; j < fullCycleX.size() - 2; ++j) {
+                                completePathX.push_back(fullCycleX[j]);
+                            }
+                            break;
+                        }
+                        else { //if the dominating vertices are in the middle of the fullCycle vector
+                            for (j = i + 2; j < fullCycleX.size(); ++j) {
+                                completePathX.push_back(fullCycleX[j]);
+                            }
+                            for (j = 0; j < i; ++j) {
+                                completePathX.push_back(fullCycleX[j]);
+                            }
+                            break;
+
+                        }
+
+                    }
+                }
+
+                for (i = 0; i < completePathX.size(); ++i) {
+                    finalX.push_back(originalX[orderX[completePathX[i]]]);
+                }
+                feasible = 1;
+                goto End;
+                //END MAKE PATH FUNCTION
+                //endregion
+
+            }
+            else if (SSumX < numCyclesX) {
+                feasible = 0;
+                goto End;
+
+            }
+            else {
+                feasible = 0;
+                goto End;
+            }
+
+        }
+
+        //endregion
+    }
+
+    //END MBAHRA STRIPX
+
+
+    //region End
+    End:
+    if(feasible == 1){
+        stripSum[i1] += boxWidths[boxDecrease[j1]][mates[boxDecrease[j1]]];
+        strip[i1].swap(finalX);
+    }
+    //endregion
+
+}//end void MBAHRA
+
+void MBAHRA(int i1, int j1, int &feasible, vector<int> &allScores, vector<int> &mates, vector<vector<int> > &adjMatrix,
+            vector<vector<int> > &boxWidths, vector<int> &boxDecrease, vector<int> &stripSum, vector<vector<int> > &strip){
+
+    feasible = 0;
+    int i, j, k;
+    int threshold = 70;
+    int vacant = 999;
+    vector<int> scoresX;
+    vector<int> orderX;
+    vector<int> originalX;
+    vector<int> finalX;
+
+    //region Creating scoresX vector
+    for(k = 0; k < strip[i1].size(); ++k){
+        scoresX.push_back(allScores[strip[i1][k]]);
+        originalX.push_back(strip[i1][k]);
+    }
+    scoresX.push_back(allScores[boxDecrease[j1]]);
+    originalX.push_back(boxDecrease[j1]);
+    scoresX.push_back(allScores[mates[boxDecrease[j1]]]);
+    originalX.push_back(mates[boxDecrease[j1]]);
+    scoresX.push_back(70);
+    scoresX.push_back(70);
+
+    //endregion
+
+    //region Variables
+    int nScoresX = scoresX.size();
+    int nBoxX = scoresX.size() / 2;
+    int nCompX = (nBoxX + (nBoxX % 2)) / 2;
+    vector<int> invOrderX(nScoresX);
+    vector<vector<int> > adjMatX(nScoresX, vector<int>(nScoresX, 0));
+    vector<int> matesX(nScoresX, 0);
+
+    //MTGMA
+    int lastMatchX = vacant;
+    int mateMatchX = vacant;
+    int vacantFlagX = 0;
+    int matchSizeX = 0;
+    vector<int> cycleVertexX(nScoresX, 1);
+    vector<int> matchListX(nScoresX, vacant);
+
+    //MIS
+    int numCyclesX = 0;
+    int smallestVertexX;
+    int currentVertexX;
+    vector<vector<int> > mateInducedX;
+    vector<int> lengthMateInducedX;
+    vector<int> tempMISX;
+    vector<int> checkedX(nScoresX, 0);
+
+    //FCA
+    int qstarX;
+    int numEdgesX;
+    vector<vector<int> > SX(nCompX, vector<int>(nCompX, 0));
+    vector<vector<int> > TX;
+    vector<int> edgeX;
+    vector<int> tX;
+
+    //PatchGraph
+    int q, u, v, saveX, SSumX, SqIntSX;
+    int fullX = vacant;
+    vector<int> SSetX;
+    vector<int> tempPGX;
+    vector<int> patchVertexX(nScoresX, vacant);
+    vector<vector<int> > TpatchX;
+
+    //MakePath
+    vector<int> completePathX;
+    vector<int> fullCycleX;
+    //endregion
+
+    if(feasible == 0) {
+        //region Creating Instance
+
+        for (k = 0; k < nScoresX; ++k) {
+            orderX.push_back(k);
+        }
+
+        /*cout << "Scores:\n";
+        for (k = 0; k < nScoresX; ++k) {
+            cout << scoresX[k] << " ";
+        }
+        cout << endl << endl;*/
+
+        /*cout << "Order:\n";
+        for (k = 0; k < nScoresX; ++k) {
+            cout << orderX[k] << " ";
+        }
+        cout << endl << endl;*/
+
+        for (i = 1; i < nScoresX; ++i) {
+            for (j = i - 1; j >= 0; --j) {
+                if (scoresX[i] < scoresX[orderX[j]]) {
+                    orderX[j + 1] = orderX[j];
+                    orderX[j] = i;
+                }
+            }
+        }
+
+        /*cout << "Order:\n";
+        for (k = 0; k < nScoresX; ++k) {
+            cout << orderX[k] << " ";
+        }
+        cout << endl << endl;*/
+
+
+        for (k = 0; k < nScoresX; ++k) {
+            invOrderX[orderX[k]] = k;
+        }
+
+        /*cout << "Inverse Order:\n";
+        for (k = 0; k < nScoresX; ++k) {
+            cout << invOrderX[k] << " ";
+        }
+        cout << endl << endl;*/
+
+        for (i = 0; i < nScoresX - 1; i += 2) {
+            adjMatX[invOrderX[i]][invOrderX[i + 1]] = 2;
+            adjMatX[invOrderX[i + 1]][invOrderX[i]] = 2;
+        }
+
+        sort(scoresX.begin(), scoresX.end());
+
+        for (i = 0; i < scoresX.size() - 1; ++i) {
+            for (j = i + 1; j < scoresX.size(); ++j) {
+                if (scoresX[i] + scoresX[j] >= threshold && adjMatX[i][j] != 2) {
+                    adjMatX[i][j] = 1;
+                    adjMatX[j][i] = 1;
+                }
+            }
+
+        }
+
+        /*cout << "Adjacency Matrix\n";
+        for (i = 0; i < nScoresX; ++i) {
+            for (j = 0; j < nScoresX; ++j) {
+                cout << adjMatX[i][j] << " ";
+            }
+            cout << endl;
+        }
+        cout << endl << endl;*/
+
+        for (i = 0; i < nScoresX; ++i) {
+            for (j = 0; j < nScoresX; ++j) {
+                if (adjMatX[i][j] == 2) {
+                    matesX[i] = j;
+                    break;
+                }
+            }
+        }
+        /*cout << "Mates Vector:\n";
+        for (i = 0; i < matesX.size(); ++i) {
+            cout << matesX[i] << " ";
+        }
+        cout << endl << endl;*/
+        //endregion
+
+        //region MTGMA
+        /**MTGMA**/
+        for (i = 0; i < nScoresX; ++i) { //check all vertices
+            vacantFlagX = 0;
+            if (matchListX[i] == vacant) { //if vertex has not yet been matched
+                for (j = nScoresX - 1; j >
+                                       i; --j) { //try match vertex i with largest unmatched vertex, start from largest vertex j, go down list of vertices in decreasing order of size
+                    if (adjMatX[i][j] == 1 && matchListX[j] ==
+                                              vacant) { //if vertices i and j are adjacent, and if vertex j has not yet been matched
+                        matchListX[i] = j;
+                        matchListX[j] = i;
+                        lastMatchX = i;
+                        ++matchSizeX;
+                        if (vacantFlagX ==
+                            1) { //delete edge for FCA if matching was not with highest vertex due to the highest vertex being its mate
+                            cycleVertexX[i] = vacant;
+                            cycleVertexX[j] = vacant;
+                        }
+                        break;
+                    }
+                    else if (adjMatX[i][j] == 2 && matchListX[j] == vacant) { //if potential match == mate
+                        vacantFlagX = 1;
+                    }
+                }//end for j
+                if (matchListX[i] == vacant) { //if vertex has still not been matched
+                    for (k = 0; k < nScoresX - 2; ++k) {
+                        if (adjMatX[i][k] == 2) { //if vertex i and vertex k are mates
+                            mateMatchX = k;
+                            break;
+                        }
+                    }
+                    if ((scoresX[i] + scoresX[mateMatchX] >= threshold) //match with mate?
+                        && (matchListX[mateMatchX] == vacant) //is mate unmatched?
+                        && (lastMatchX != vacant) //has the previous vertex been matched?
+                        && (mateMatchX >
+                            i) //is the mate larger? (sorted in increasing order of vertex weight, so index will be higher if vertex has larger value)
+                        && (scoresX[lastMatchX] + scoresX[mateMatchX] >=
+                            threshold)) { //can mate be matched with last matched vertex?
+                        // if so, then swap mates
+                        matchListX[i] = matchListX[lastMatchX];
+                        matchListX[lastMatchX] = mateMatchX;
+                        matchListX[mateMatchX] = lastMatchX;
+                        matchListX[matchListX[i]] = i;
+                        cycleVertexX[lastMatchX] = vacant; //edge from mate swap will not count for FCA
+                        cycleVertexX[mateMatchX] = vacant; //edge from mate swap will not count for FCA
+                        lastMatchX = i;
+                        ++matchSizeX;
+                    }
+                }//end if matchList == vacant
+            }//end if matchList[i] == i
+        }//end for i
+
+
+        /*cout << "Cycle Vertex vector after MTGMA:\n";
+        for(i = 0; i < cycleVertexX.size(); ++i){
+            cout << cycleVertexX[i] << " ";
+        }
+        cout << endl << endl;
+
+        cout << "Matching List:\n";
+        for(i = 0; i < matchListX.size(); ++i){
+            cout << matchListX[i] << " ";
+        }
+        cout << endl << endl;*/
+
+        //endregion
+        if (matchSizeX < nBoxX) {
+            //NOT ENOUGH MATCHING EDGES
+            feasible = 0;
+            goto End;
+        }
+
+        //region MIS
+        /**MIS**/
+        //find the smallest vertex not yet checked for mate-induced structure - start with this vertex
+        for (i = 0; i < nScoresX; ++i) {
+            if (checkedX[i] == 0) {
+                smallestVertexX = i;
+                break;
+            }
+        }
+
+        //Building the mate-induced structure
+        do {
+            currentVertexX = smallestVertexX;
+            do {
+                tempMISX.push_back(currentVertexX);
+                checkedX[currentVertexX] = 1;
+                tempMISX.push_back(matesX[currentVertexX]);
+                checkedX[matesX[currentVertexX]] = 1;
+                currentVertexX = matchListX[matesX[currentVertexX]];
+            } while (currentVertexX != smallestVertexX);
+
+            mateInducedX.push_back(tempMISX);
+            tempMISX.clear();
+
+            for (i = 0; i < nScoresX; ++i) {
+                if (checkedX[i] == 0) {
+                    smallestVertexX = i;
+                    break;
+                }
+            }
+
+
+        } while (smallestVertexX != currentVertexX);
+
+        tempMISX.clear(); //clear cycle vector again for next instance
+
+        numCyclesX = mateInducedX.size(); //number of cycles in the mate-induced structure
+
+        /*cout << "Mate-Induced Structure:\n";
+        for(i = 0; i < mateInducedX.size(); ++i){
+            for(j = 0; j < mateInducedX[i].size(); ++j){
+                cout << mateInducedX[i][j] << " ";
+            }
+            cout << endl;
+        }
+        cout << endl << endl;*/
+        //cout << "Number of cycles in mate-induced structure: " << numCycles << endl;
+
+        for (i = 0; i < mateInducedX.size(); ++i) {
+            lengthMateInducedX.push_back(mateInducedX[i].size());
+        }
+
+        //endregion
+        if (lengthMateInducedX[0] == nScoresX) {
+            for (j = 0; j < mateInducedX[0].size(); ++j) {
+                fullCycleX.push_back(mateInducedX[0][j]);
+            }
+            //region MAKEPATH
+            /**MAKEPATH FUNCTION**/
+            for (i = 0; i < fullCycleX.size() - 1; ++i) {
+                if ((fullCycleX[i] == nScoresX - 1 && fullCycleX[i + 1] == nScoresX - 2) ||
+                    (fullCycleX[i] == nScoresX - 2 && fullCycleX[i + 1] == nScoresX - 1)) {
+                    if (i == 0) { //if the dominating vertices are at the beginning of the fullCycle vector
+                        for (j = 2; j < fullCycleX.size(); ++j) {
+                            completePathX.push_back(fullCycleX[j]);
+                        }
+                        break;
+                    }
+
+                    else if (i == fullCycleX.size() -
+                                  2) { //if the dominating vertices are at the end of the fullCycle vector
+                        for (j = 0; j < fullCycleX.size() - 2; ++j) {
+                            completePathX.push_back(fullCycleX[j]);
+                        }
+                        break;
+                    }
+                    else { //if the dominating vertices are in the middle of the fullCycle vector
+                        for (j = i + 2; j < fullCycleX.size(); ++j) {
+                            completePathX.push_back(fullCycleX[j]);
+                        }
+                        for (j = 0; j < i; ++j) {
+                            completePathX.push_back(fullCycleX[j]);
+                        }
+                        break;
+
+                    }
+
+                }
+            }
+
+            for (i = 0; i < completePathX.size(); ++i) {
+                finalX.push_back(originalX[orderX[completePathX[i]]]);
+            }
+            feasible = 1;
+            goto End;
+
+            //END MAKE PATH FUNCTION
+            //endregion
+        }
+
+        //region FCA
+        /**FCA**/
+        //create list cycleVertex that contains for each vertex the cycle that each edge belongs to
+        for (i = 0; i < mateInducedX.size(); ++i) {
+            for (j = 0; j < mateInducedX[i].size(); ++j) {
+                if (cycleVertexX[mateInducedX[i][j]] != vacant) { //if edge is not deleted for FCA
+                    cycleVertexX[mateInducedX[i][j]] = i;
+                }
+            }
+        }
+
+        /*cout << "Cycle Vertex:\n";
+        for (i = 0; i < cycleVertexX.size(); ++i) {
+            cout << cycleVertexX[i] << " ";
+        }
+        cout << endl << endl;*/
+
+        //create list of edges without empty edges (those generated by mate swap)
+        for (i = 0; i < matchSizeX; ++i) {
+            while (cycleVertexX[i] == vacant) {
+                ++i;
+            }
+            edgeX.push_back(i);
+        }
+        numEdgesX = edgeX.size();
+
+        /*cout << "Edges vector:\n";
+        for (i = 0; i < edgeX.size(); ++i) {
+            cout << edgeX[i] << " ";
+        }
+        cout << endl << endl;*/
+
+        //cout << "Number of Edges: " << numEdges << endl;
+        //FCA Algorithm
+        qstarX = -1;
+        k = 0; //edge from matching that is under consideration
+
+        do {
+            while (k < numEdgesX - 2 && (adjMatX[edgeX[k]][matchListX[edgeX[k + 1]]] != 1 ||
+                                         cycleVertexX[edgeX[k]] == cycleVertexX[edgeX[k + 1]])) {
+                ++k;
+            }
+            if (adjMatX[edgeX[k]][matchListX[edgeX[k + 1]]] == 1 &&
+                cycleVertexX[edgeX[k]] != cycleVertexX[edgeX[k + 1]]) {
+                ++qstarX;
+                tX.push_back(edgeX[k]);
+                SX[qstarX][cycleVertexX[edgeX[k]]] = 1;
+                while (k < numEdgesX - 1 && adjMatX[edgeX[k]][matchListX[edgeX[k + 1]]] == 1 &&
+                       SX[qstarX][cycleVertexX[edgeX[k + 1]]] == 0) { //add more edges to current T-cycle
+                    ++k;
+                    tX.push_back(edgeX[k]);
+                    SX[qstarX][cycleVertexX[edgeX[k]]] = 1;
+                }
+                TX.push_back(tX);
+                tX.clear();
+            } // end if
+            ++k;
+        } while (k < numEdgesX - 1);
+
+        tX.clear();
+
+        /*cout << "T matrix:\n";
+        for(i = 0; i < TX.size(); ++i){
+            for(j = 0; j < TX[i].size(); ++j){
+                cout << TX[i][j] << "  ";
+            }
+            cout << endl;
+        }
+        cout << endl << endl;*/
+
+        /*cout << "S Matrix:\n";
+        for(i = 0; i < SX.size(); ++i){
+            for(j = 0; j < SX[i].size(); ++j){
+                cout << SX[i][j] << "  ";
+            }
+            cout << endl;
+        }
+        cout << endl;*/
+
+        //cout << "qstar: " << qstarX << endl << endl;
+
+        //endregion
+        if (qstarX == -1) {
+            //INFEASIBLE, EXIT
+            feasible = 0;
+            goto End;
+        }
+
+        //region PATCHGRAPH
+        /**PATCHGRAPH**/
+        vector<int> QSetX(nCompX, 0);
+        vector<int> patchCycleX(nCompX, vacant);
+        for (i = 0; i < TX.size(); ++i) {
+            if (TX[i].size() == numCyclesX) {
+                fullX = i;
+                break;
+            }
+        }
+
+        if (fullX != vacant) {
+            saveX = 0;
+            //cout << "Full: " << full << endl;
+            for (v = 0; v < TX[fullX].size(); ++v) {
+                for (j = 0; j < mateInducedX[cycleVertexX[TX[fullX][v]]].size(); ++j) {
+                    if (mateInducedX[cycleVertexX[TX[fullX][v]]][j] == matchListX[TX[fullX][v]]) {
+                        saveX = j;
+                        break;
+                    }
+                }
+                //region oneTCyclePatch
+                /****************************oneTCyclePatch algorithm: ***********************************/
+                //CASE ONE: if element matchList[T[full][v]] is before element T[full][v] in the mateInduced cycle
+                //i.e. if the element at position 'save' in the cycle is matchList[T[full][v]] and the element at position "save + 1" is T[full][v]
+                if (mateInducedX[cycleVertexX[TX[fullX][v]]][saveX + 1] == TX[fullX][v]) {
+                    for (i = saveX + 1; i-- > 0;) { //from element at position 'save' to the first element in the cycle
+                        fullCycleX.push_back(mateInducedX[cycleVertexX[TX[fullX][v]]][i]);
+                    }
+                    for (i = mateInducedX[cycleVertexX[TX[fullX][v]]].size();
+                         i-- > saveX + 1;) { //from end of cycle to element at position save+1
+                        fullCycleX.push_back(mateInducedX[cycleVertexX[TX[fullX][v]]][i]);
+                    }
+                }
+
+                    //CASE TWO: if element matchList[T[full][v]] is after element T[full][v] in the mateInduced cycle
+                    //i.e. if the element at position 'save' in the cycle is matchList[T[full][v]] and the element at position "save - 1" is T[full][v]
+                else if (mateInducedX[cycleVertexX[TX[fullX][v]]][saveX - 1] == TX[fullX][v]) {
+                    for (i = saveX; i < mateInducedX[cycleVertexX[TX[fullX][v]]].size(); ++i) {
+                        fullCycleX.push_back(mateInducedX[cycleVertexX[TX[fullX][v]]][i]);
+                    }
+                    for (i = 0; i < saveX; ++i) {
+                        fullCycleX.push_back(mateInducedX[cycleVertexX[TX[fullX][v]]][i]);
+                    }
+                }
+
+                    //CASE THREE: if element matchList[T[full][v]] is the first element in the cycle, and T[full][v] is the last element in the cycle
+                    //i.e. if save = 0 and T[full][v] is at position mateInduced[cycleVertex[T[full][v]]].size()-1
+                else if (saveX == 0 &&
+                         mateInducedX[cycleVertexX[TX[fullX][v]]][mateInducedX[cycleVertexX[TX[fullX][v]]].size() -
+                                                                  1] == TX[fullX][v]) {
+                    for (i = 0; i < mateInducedX[cycleVertexX[TX[fullX][v]]].size(); ++i) {
+                        fullCycleX.push_back(mateInducedX[cycleVertexX[TX[fullX][v]]][i]);
+                    }
+                }
+
+                    //CASE FOUR: if element matchList[T[full][v]] is the last element in the cycle, and T[full][v] is the first element in the cycle
+                    //i.e. if save = mateInduced[cycleVertex[T[full][v]]].size()-1 and T[full][v] is at position 0
+                else if (saveX == mateInducedX[cycleVertexX[TX[fullX][v]]].size() - 1 &&
+                         mateInducedX[cycleVertexX[TX[fullX][v]]][0] == TX[fullX][v]) {
+                    for (i = mateInducedX[cycleVertexX[TX[fullX][v]]].size(); i-- > 0;) {
+                        fullCycleX.push_back(mateInducedX[cycleVertexX[TX[fullX][v]]][i]);
+                    }
+                }
+                //END ONETCYCLEPATCH FUNCTION
+                //endregion
+            }
+
+            //region MAKEPATH
+            /**MAKEPATH FUNCTION**/
+            for (i = 0; i < fullCycleX.size() - 1; ++i) {
+                if ((fullCycleX[i] == nScoresX - 1 && fullCycleX[i + 1] == nScoresX - 2) ||
+                    (fullCycleX[i] == nScoresX - 2 && fullCycleX[i + 1] == nScoresX - 1)) {
+                    if (i == 0) { //if the dominating vertices are at the beginning of the fullCycle vector
+                        for (j = 2; j < fullCycleX.size(); ++j) {
+                            completePathX.push_back(fullCycleX[j]);
+                        }
+                        break;
+                    }
+
+                    else if (i == fullCycleX.size() -
+                                  2) { //if the dominating vertices are at the end of the fullCycle vector
+                        for (j = 0; j < fullCycleX.size() - 2; ++j) {
+                            completePathX.push_back(fullCycleX[j]);
+                        }
+                        break;
+                    }
+                    else { //if the dominating vertices are in the middle of the fullCycle vector
+                        for (j = i + 2; j < fullCycleX.size(); ++j) {
+                            completePathX.push_back(fullCycleX[j]);
+                        }
+                        for (j = 0; j < i; ++j) {
+                            completePathX.push_back(fullCycleX[j]);
+                        }
+                        break;
+
+                    }
+
+                }
+            }
+
+            for (i = 0; i < completePathX.size(); ++i) {
+                finalX.push_back(originalX[orderX[completePathX[i]]]);
+            }
+            feasible = 1;
+            goto End;
+            //END MAKE PATH FUNCTION
+            //endregion
+
+        }
+
+        else {
+            q = 0; //Start with first Tq-cycle
+            QSetX[0] = 1;
+            SSumX = 0; //number of MIS-cycles that have been included
+            for (i = 0; i < numCyclesX; ++i) {
+                SSetX.push_back(SX[q][i]); // ==1 if MIS cycle i has been included
+            }
+            for (i = 0; i < numCyclesX; ++i) {
+                SSumX = SSumX + SSetX[i];
+            }
+
+            if (SSumX >= 1) {
+                patchCycleX[q] = 1;
+            }
+
+            //Start connectivity check
+            while (q <= qstarX && SSumX < numCyclesX) {
+                do {
+                    ++q;
+                    SqIntSX = vacant;
+                    if (q <= qstarX) {
+                        for (j = 0; j < numCyclesX; ++j) { //is there a j such that S[q][j] = 1 and SSet[j] = 1?
+                            if (SX[q][j] == 1 && SSetX[j] == 1) {
+                                SqIntSX = 1;
+                                //break here? no need to check all other j indices once one has been found such that S[q][j] =1 and SSet[j] = 1
+                            }
+                        }
+                    }
+                } while (q < qstarX + 1 && (QSetX[q] == 1 || SqIntSX == vacant));
+
+                if (q <= qstarX) { //if Tq-cyce for enlargement has been found
+                    for (i = 0; i < numCyclesX; ++i) {
+                        if (SSetX[i] == 0 && SX[q][i] == 1) {
+                            SSetX[i] = 1;
+                            ++SSumX;
+                            patchCycleX[q] = 1;
+                        }
+                    }
+                    QSetX[q] = 1;
+                    q = 0;
+                }
+            }//end while
+
+
+            //If patching graph is connected, then instance is feasible, else infeasible
+            if (SSumX == numCyclesX) {
+                for (i = 0; i < patchCycleX.size(); ++i) {
+                    if (patchCycleX[i] == 1) {
+                        for (j = 0; j < TX[i].size(); ++j) {
+                            tempPGX.push_back(TX[i][j]);
+                        }
+                        TpatchX.push_back(tempPGX);
+                        tempPGX.clear();
+                    }
+                }
+                tempPGX.clear();
+
+                vector<int> patchML;
+                vector<int> inCycle(nScoresX, 0);
+
+                copy(matchListX.begin(), matchListX.end(), back_inserter(patchML));
+
+                /*cout << "Patch MatchList:\n";
+                for(int w : patchML){
+                    cout << w << " ";
+                }
+                cout << endl;*/
+
+                for(u = 0; u < TpatchX.size(); ++u){
+                    for(v = 0; v < TpatchX[u].size() - 1; ++v){
+                        patchML[TpatchX[u][v]] = matchListX[TpatchX[u][v+1]];
+                        patchML[matchListX[TpatchX[u][v+1]]] = TpatchX[u][v];
+                    }
+                    patchML[TpatchX[u][TpatchX[u].size()-1]] = matchListX[TpatchX[u][0]];
+                    patchML[matchListX[TpatchX[u][0]]] = TpatchX[u][TpatchX[u].size()-1];
+                }
+
+                /*cout << "Patch MatchList:\n";
+                for(int w : patchML){
+                    cout << w << " ";
+                }
+                cout << endl;*/
+
+                int current = nScoresX - 2;
+
+                do{
+                    fullCycleX.push_back(current);
+                    inCycle[current] = 1;
+                    fullCycleX.push_back(matesX[current]);
+                    inCycle[matesX[current]] = 1;
+                    if(inCycle[patchML[matesX[current]]] == 0){
+                        current = patchML[matesX[current]];
+                    }
+                    else{
+                        current = matchListX[matesX[current]];
+                    }
+                } while(fullCycleX.size() < nScoresX);
 
                 //region MAKEPATH
                 /**MAKEPATH FUNCTION**/

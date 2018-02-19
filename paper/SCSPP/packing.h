@@ -28,6 +28,9 @@ void packStripsFFDExact(int instance, int &opt, int &opt90, int &opt80, int &opt
                         int maxStripWidth, double totalBoxWidth, vector<int> &allScores, vector<int> &mates, vector<vector<int> > &adjMatrix,
                         vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<vector<int> > &strip);
 
+void MBAHRA1(int i1, int j1, int &feasible, vector<int> &allScores, vector<int> &mates, vector<vector<int> > &adjMatrix,
+            vector<vector<int> > &boxWidths, vector<int> &boxDecrease, vector<int> &stripSum, vector<vector<int> > &strip);
+
 void MBAHRA(int i1, int j1, int &feasible, vector<int> &allScores, vector<int> &mates, vector<vector<int> > &adjMatrix,
             vector<vector<int> > &boxWidths, vector<int> &boxDecrease, vector<int> &stripSum, vector<vector<int> > &strip);
 
