@@ -1522,7 +1522,7 @@ void MBAHRA(int i1, int j1, int &feasible, vector<int> &allScores, vector<int> &
     int nCompX = (nBoxX + (nBoxX % 2)) / 2;
     vector<int> invOrderX(nScoresX);
     vector<vector<int> > adjMatX(nScoresX, vector<int>(nScoresX, 0));
-    vector<int> matesX(nScoresX, 0);
+    vector<int> matesX(nScoresX, vacant);
 
     //MTGMA
     int lastMatchX = vacant;
@@ -1537,7 +1537,6 @@ void MBAHRA(int i1, int j1, int &feasible, vector<int> &allScores, vector<int> &
     int smallestVertexX;
     int currentVertexX;
     vector<vector<int> > mateInducedX;
-    vector<int> lengthMateInducedX;
     vector<int> tempMISX;
     vector<int> checkedX(nScoresX, 0);
 
@@ -1550,15 +1549,13 @@ void MBAHRA(int i1, int j1, int &feasible, vector<int> &allScores, vector<int> &
     vector<int> tX;
 
     //PatchGraph
-    int q, u, v, saveX, SSumX, SqIntSX;
+    int q, u, v, SSumX, SqIntSX;
     int fullX = vacant;
     vector<int> SSetX;
     vector<int> tempPGX;
-    vector<int> patchVertexX(nScoresX, vacant);
     vector<vector<int> > TpatchX;
 
     //MakePath
-    vector<int> completePathX;
     vector<int> fullCycleX;
     //endregion
 
@@ -1634,10 +1631,13 @@ void MBAHRA(int i1, int j1, int &feasible, vector<int> &allScores, vector<int> &
         cout << endl << endl;*/
 
         for (i = 0; i < nScoresX; ++i) {
-            for (j = 0; j < nScoresX; ++j) {
-                if (adjMatX[i][j] == 2) {
-                    matesX[i] = j;
-                    break;
+            if(matesX[i] == vacant) {
+                for (j = 0; j < nScoresX; ++j) {
+                    if (adjMatX[i][j] == 2) {
+                        matesX[i] = j;
+                        matesX[j] = i;
+                        break;
+                    }
                 }
             }
         }
@@ -1653,16 +1653,13 @@ void MBAHRA(int i1, int j1, int &feasible, vector<int> &allScores, vector<int> &
         for (i = 0; i < nScoresX; ++i) { //check all vertices
             vacantFlagX = 0;
             if (matchListX[i] == vacant) { //if vertex has not yet been matched
-                for (j = nScoresX - 1; j >
-                                       i; --j) { //try match vertex i with largest unmatched vertex, start from largest vertex j, go down list of vertices in decreasing order of size
-                    if (adjMatX[i][j] == 1 && matchListX[j] ==
-                                              vacant) { //if vertices i and j are adjacent, and if vertex j has not yet been matched
+                for (j = nScoresX - 1; j > i; --j) { //try match vertex i with largest unmatched vertex, start from largest vertex j, go down list of vertices in decreasing order of size
+                    if (adjMatX[i][j] == 1 && matchListX[j] == vacant) { //if vertices i and j are adjacent, and if vertex j has not yet been matched
                         matchListX[i] = j;
                         matchListX[j] = i;
                         lastMatchX = i;
                         ++matchSizeX;
-                        if (vacantFlagX ==
-                            1) { //delete edge for FCA if matching was not with highest vertex due to the highest vertex being its mate
+                        if (vacantFlagX == 1) { //delete edge for FCA if matching was not with highest vertex due to the highest vertex being its mate
                             cycleVertexX[i] = vacant;
                             cycleVertexX[j] = vacant;
                         }
@@ -1673,19 +1670,12 @@ void MBAHRA(int i1, int j1, int &feasible, vector<int> &allScores, vector<int> &
                     }
                 }//end for j
                 if (matchListX[i] == vacant) { //if vertex has still not been matched
-                    for (k = 0; k < nScoresX - 2; ++k) {
-                        if (adjMatX[i][k] == 2) { //if vertex i and vertex k are mates
-                            mateMatchX = k;
-                            break;
-                        }
-                    }
-                    if ((scoresX[i] + scoresX[mateMatchX] >= threshold) //match with mate?
+                    mateMatchX = matesX[i];
+                    if ((adjMatX[i][mateMatchX] >= 1) //match with mate?
                         && (matchListX[mateMatchX] == vacant) //is mate unmatched?
                         && (lastMatchX != vacant) //has the previous vertex been matched?
-                        && (mateMatchX >
-                            i) //is the mate larger? (sorted in increasing order of vertex weight, so index will be higher if vertex has larger value)
-                        && (scoresX[lastMatchX] + scoresX[mateMatchX] >=
-                            threshold)) { //can mate be matched with last matched vertex?
+                        && (mateMatchX > i) //is the mate larger? (sorted in increasing order of vertex weight, so index will be higher if vertex has larger value)
+                        && (adjMatX[lastMatchX][mateMatchX] == 1)) { //can mate be matched with last matched vertex?
                         // if so, then swap mates
                         matchListX[i] = matchListX[lastMatchX];
                         matchListX[lastMatchX] = mateMatchX;
@@ -1723,12 +1713,7 @@ void MBAHRA(int i1, int j1, int &feasible, vector<int> &allScores, vector<int> &
         //region MIS
         /**MIS**/
         //find the smallest vertex not yet checked for mate-induced structure - start with this vertex
-        for (i = 0; i < nScoresX; ++i) {
-            if (checkedX[i] == 0) {
-                smallestVertexX = i;
-                break;
-            }
-        }
+        smallestVertexX = nScoresX - 2;
 
         //Building the mate-induced structure
         do {
@@ -1754,7 +1739,6 @@ void MBAHRA(int i1, int j1, int &feasible, vector<int> &allScores, vector<int> &
 
         } while (smallestVertexX != currentVertexX);
 
-        tempMISX.clear(); //clear cycle vector again for next instance
 
         numCyclesX = mateInducedX.size(); //number of cycles in the mate-induced structure
 
@@ -1768,56 +1752,20 @@ void MBAHRA(int i1, int j1, int &feasible, vector<int> &allScores, vector<int> &
         cout << endl << endl;*/
         //cout << "Number of cycles in mate-induced structure: " << numCycles << endl;
 
-        for (i = 0; i < mateInducedX.size(); ++i) {
-            lengthMateInducedX.push_back(mateInducedX[i].size());
-        }
-
         //endregion
-        if (lengthMateInducedX[0] == nScoresX) {
+        if (mateInducedX[0].size() == nScoresX) {
             for (j = 0; j < mateInducedX[0].size(); ++j) {
                 fullCycleX.push_back(mateInducedX[0][j]);
             }
-            //region MAKEPATH
-            /**MAKEPATH FUNCTION**/
-            for (i = 0; i < fullCycleX.size() - 1; ++i) {
-                if ((fullCycleX[i] == nScoresX - 1 && fullCycleX[i + 1] == nScoresX - 2) ||
-                    (fullCycleX[i] == nScoresX - 2 && fullCycleX[i + 1] == nScoresX - 1)) {
-                    if (i == 0) { //if the dominating vertices are at the beginning of the fullCycle vector
-                        for (j = 2; j < fullCycleX.size(); ++j) {
-                            completePathX.push_back(fullCycleX[j]);
-                        }
-                        break;
-                    }
 
-                    else if (i == fullCycleX.size() -
-                                  2) { //if the dominating vertices are at the end of the fullCycle vector
-                        for (j = 0; j < fullCycleX.size() - 2; ++j) {
-                            completePathX.push_back(fullCycleX[j]);
-                        }
-                        break;
-                    }
-                    else { //if the dominating vertices are in the middle of the fullCycle vector
-                        for (j = i + 2; j < fullCycleX.size(); ++j) {
-                            completePathX.push_back(fullCycleX[j]);
-                        }
-                        for (j = 0; j < i; ++j) {
-                            completePathX.push_back(fullCycleX[j]);
-                        }
-                        break;
+            fullCycleX.erase(fullCycleX.begin(), fullCycleX.begin() + 2);
 
-                    }
-
-                }
-            }
-
-            for (i = 0; i < completePathX.size(); ++i) {
-                finalX.push_back(originalX[orderX[completePathX[i]]]);
+            for (i = 0; i < fullCycleX.size(); ++i) {
+                finalX.push_back(originalX[orderX[fullCycleX[i]]]);
             }
             feasible = 1;
             goto End;
 
-            //END MAKE PATH FUNCTION
-            //endregion
         }
 
         //region FCA
@@ -1912,6 +1860,9 @@ void MBAHRA(int i1, int j1, int &feasible, vector<int> &allScores, vector<int> &
         /**PATCHGRAPH**/
         vector<int> QSetX(nCompX, 0);
         vector<int> patchCycleX(nCompX, vacant);
+        vector<int> patchML;
+        vector<int> inCycle(nScoresX, 0);
+        int current = nScoresX - 2;
         for (i = 0; i < TX.size(); ++i) {
             if (TX[i].size() == numCyclesX) {
                 fullX = i;
@@ -1920,102 +1871,38 @@ void MBAHRA(int i1, int j1, int &feasible, vector<int> &allScores, vector<int> &
         }
 
         if (fullX != vacant) {
-            saveX = 0;
-            //cout << "Full: " << full << endl;
-            for (v = 0; v < TX[fullX].size(); ++v) {
-                for (j = 0; j < mateInducedX[cycleVertexX[TX[fullX][v]]].size(); ++j) {
-                    if (mateInducedX[cycleVertexX[TX[fullX][v]]][j] == matchListX[TX[fullX][v]]) {
-                        saveX = j;
-                        break;
-                    }
-                }
-                //region oneTCyclePatch
-                /****************************oneTCyclePatch algorithm: ***********************************/
-                //CASE ONE: if element matchList[T[full][v]] is before element T[full][v] in the mateInduced cycle
-                //i.e. if the element at position 'save' in the cycle is matchList[T[full][v]] and the element at position "save + 1" is T[full][v]
-                if (mateInducedX[cycleVertexX[TX[fullX][v]]][saveX + 1] == TX[fullX][v]) {
-                    for (i = saveX + 1; i-- > 0;) { //from element at position 'save' to the first element in the cycle
-                        fullCycleX.push_back(mateInducedX[cycleVertexX[TX[fullX][v]]][i]);
-                    }
-                    for (i = mateInducedX[cycleVertexX[TX[fullX][v]]].size();
-                         i-- > saveX + 1;) { //from end of cycle to element at position save+1
-                        fullCycleX.push_back(mateInducedX[cycleVertexX[TX[fullX][v]]][i]);
-                    }
-                }
 
-                    //CASE TWO: if element matchList[T[full][v]] is after element T[full][v] in the mateInduced cycle
-                    //i.e. if the element at position 'save' in the cycle is matchList[T[full][v]] and the element at position "save - 1" is T[full][v]
-                else if (mateInducedX[cycleVertexX[TX[fullX][v]]][saveX - 1] == TX[fullX][v]) {
-                    for (i = saveX; i < mateInducedX[cycleVertexX[TX[fullX][v]]].size(); ++i) {
-                        fullCycleX.push_back(mateInducedX[cycleVertexX[TX[fullX][v]]][i]);
-                    }
-                    for (i = 0; i < saveX; ++i) {
-                        fullCycleX.push_back(mateInducedX[cycleVertexX[TX[fullX][v]]][i]);
-                    }
-                }
+            copy(matchListX.begin(), matchListX.end(), back_inserter(patchML));
 
-                    //CASE THREE: if element matchList[T[full][v]] is the first element in the cycle, and T[full][v] is the last element in the cycle
-                    //i.e. if save = 0 and T[full][v] is at position mateInduced[cycleVertex[T[full][v]]].size()-1
-                else if (saveX == 0 &&
-                         mateInducedX[cycleVertexX[TX[fullX][v]]][mateInducedX[cycleVertexX[TX[fullX][v]]].size() -
-                                                                  1] == TX[fullX][v]) {
-                    for (i = 0; i < mateInducedX[cycleVertexX[TX[fullX][v]]].size(); ++i) {
-                        fullCycleX.push_back(mateInducedX[cycleVertexX[TX[fullX][v]]][i]);
-                    }
-                }
-
-                    //CASE FOUR: if element matchList[T[full][v]] is the last element in the cycle, and T[full][v] is the first element in the cycle
-                    //i.e. if save = mateInduced[cycleVertex[T[full][v]]].size()-1 and T[full][v] is at position 0
-                else if (saveX == mateInducedX[cycleVertexX[TX[fullX][v]]].size() - 1 &&
-                         mateInducedX[cycleVertexX[TX[fullX][v]]][0] == TX[fullX][v]) {
-                    for (i = mateInducedX[cycleVertexX[TX[fullX][v]]].size(); i-- > 0;) {
-                        fullCycleX.push_back(mateInducedX[cycleVertexX[TX[fullX][v]]][i]);
-                    }
-                }
-                //END ONETCYCLEPATCH FUNCTION
-                //endregion
+            for(v = 0; v < TX[fullX].size() - 1; ++v){
+                patchML[TX[fullX][v]] = matchListX[TX[fullX][v+1]];
+                patchML[matchListX[TX[fullX][v+1]]] = TX[fullX][v];
             }
+            patchML[TX[fullX][TX[fullX].size()-1]] = matchListX[TX[fullX][0]];
+            patchML[matchListX[TX[fullX][0]]] = TX[fullX][TX[fullX].size()-1];
 
-            //region MAKEPATH
-            /**MAKEPATH FUNCTION**/
-            for (i = 0; i < fullCycleX.size() - 1; ++i) {
-                if ((fullCycleX[i] == nScoresX - 1 && fullCycleX[i + 1] == nScoresX - 2) ||
-                    (fullCycleX[i] == nScoresX - 2 && fullCycleX[i + 1] == nScoresX - 1)) {
-                    if (i == 0) { //if the dominating vertices are at the beginning of the fullCycle vector
-                        for (j = 2; j < fullCycleX.size(); ++j) {
-                            completePathX.push_back(fullCycleX[j]);
-                        }
-                        break;
-                    }
 
-                    else if (i == fullCycleX.size() -
-                                  2) { //if the dominating vertices are at the end of the fullCycle vector
-                        for (j = 0; j < fullCycleX.size() - 2; ++j) {
-                            completePathX.push_back(fullCycleX[j]);
-                        }
-                        break;
-                    }
-                    else { //if the dominating vertices are in the middle of the fullCycle vector
-                        for (j = i + 2; j < fullCycleX.size(); ++j) {
-                            completePathX.push_back(fullCycleX[j]);
-                        }
-                        for (j = 0; j < i; ++j) {
-                            completePathX.push_back(fullCycleX[j]);
-                        }
-                        break;
-
-                    }
-
+            do{
+                fullCycleX.push_back(current);
+                inCycle[current] = 1;
+                fullCycleX.push_back(matesX[current]);
+                inCycle[matesX[current]] = 1;
+                if(inCycle[patchML[matesX[current]]] == 0){
+                    current = patchML[matesX[current]];
                 }
-            }
+                else{
+                    current = matchListX[matesX[current]];
+                }
+            } while(fullCycleX.size() < nScoresX);
 
-            for (i = 0; i < completePathX.size(); ++i) {
-                finalX.push_back(originalX[orderX[completePathX[i]]]);
+
+            fullCycleX.erase(fullCycleX.begin(), fullCycleX.begin() + 2);
+
+            for (i = 0; i < fullCycleX.size(); ++i) {
+                finalX.push_back(originalX[orderX[fullCycleX[i]]]);
             }
             feasible = 1;
             goto End;
-            //END MAKE PATH FUNCTION
-            //endregion
 
         }
 
@@ -2074,18 +1961,9 @@ void MBAHRA(int i1, int j1, int &feasible, vector<int> &allScores, vector<int> &
                         tempPGX.clear();
                     }
                 }
-                tempPGX.clear();
 
-                vector<int> patchML;
-                vector<int> inCycle(nScoresX, 0);
 
                 copy(matchListX.begin(), matchListX.end(), back_inserter(patchML));
-
-                /*cout << "Patch MatchList:\n";
-                for(int w : patchML){
-                    cout << w << " ";
-                }
-                cout << endl;*/
 
                 for(u = 0; u < TpatchX.size(); ++u){
                     for(v = 0; v < TpatchX[u].size() - 1; ++v){
@@ -2095,14 +1973,6 @@ void MBAHRA(int i1, int j1, int &feasible, vector<int> &allScores, vector<int> &
                     patchML[TpatchX[u][TpatchX[u].size()-1]] = matchListX[TpatchX[u][0]];
                     patchML[matchListX[TpatchX[u][0]]] = TpatchX[u][TpatchX[u].size()-1];
                 }
-
-                /*cout << "Patch MatchList:\n";
-                for(int w : patchML){
-                    cout << w << " ";
-                }
-                cout << endl;*/
-
-                int current = nScoresX - 2;
 
                 do{
                     fullCycleX.push_back(current);
@@ -2117,41 +1987,10 @@ void MBAHRA(int i1, int j1, int &feasible, vector<int> &allScores, vector<int> &
                     }
                 } while(fullCycleX.size() < nScoresX);
 
-                //region MAKEPATH
-                /**MAKEPATH FUNCTION**/
-                for (i = 0; i < fullCycleX.size() - 1; ++i) {
-                    if ((fullCycleX[i] == nScoresX - 1 && fullCycleX[i + 1] == nScoresX - 2) ||
-                        (fullCycleX[i] == nScoresX - 2 && fullCycleX[i + 1] == nScoresX - 1)) {
-                        if (i == 0) { //if the dominating vertices are at the beginning of the fullCycle vector
-                            for (j = 2; j < fullCycleX.size(); ++j) {
-                                completePathX.push_back(fullCycleX[j]);
-                            }
-                            break;
-                        }
+                fullCycleX.erase(fullCycleX.begin(), fullCycleX.begin() + 2);
 
-                        else if (i == fullCycleX.size() -
-                                      2) { //if the dominating vertices are at the end of the fullCycle vector
-                            for (j = 0; j < fullCycleX.size() - 2; ++j) {
-                                completePathX.push_back(fullCycleX[j]);
-                            }
-                            break;
-                        }
-                        else { //if the dominating vertices are in the middle of the fullCycle vector
-                            for (j = i + 2; j < fullCycleX.size(); ++j) {
-                                completePathX.push_back(fullCycleX[j]);
-                            }
-                            for (j = 0; j < i; ++j) {
-                                completePathX.push_back(fullCycleX[j]);
-                            }
-                            break;
-
-                        }
-
-                    }
-                }
-
-                for (i = 0; i < completePathX.size(); ++i) {
-                    finalX.push_back(originalX[orderX[completePathX[i]]]);
+                for (i = 0; i < fullCycleX.size(); ++i) {
+                    finalX.push_back(originalX[orderX[fullCycleX[i]]]);
                 }
                 feasible = 1;
                 goto End;
