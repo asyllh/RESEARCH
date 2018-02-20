@@ -5,147 +5,179 @@ mainexact.cpp
 /--------------*/
 #include <iostream>
 #include <fstream>
+#include <cstring>
 #include <ctime>
 using namespace std;
 
 #include "base.h"
 #include "packing.h"
 
+void programInfo(){
+
+    cout << "SCSPP:\n-------------\n"
+         << "PARAMETERS:\n"
+         << "       -i <int>    [Number of instances. Default = 1000.]\n"
+         << "       -t <int>    [Constraint value. Default = 70.]\n"
+         << "       -n <int>    [Number of items. Default = 500.]\n"
+         << "       -a <int>    [Minimum score width. Default = 1.]\n"
+         << "       -b <int>    [Maximum score width. Default = 70.]\n"
+         << "       -w <int>    [Minimum item width. Default = 150.]\n"
+         << "       -W <int>    [Maximum item width. Default = 1000.]\n"
+         << "       -l <int>    [Length of strips. Default = 5000.]\n"
+         << "       -A          [Basic approximate FFD.]\n"
+         << "       -B          [Pack strips in turn, choosing smallest feasible score width.]\n"
+         << "       -C          [FFD combined with AHCA (exact algorithm). Default.]\n"
+         << "       -s <int>    [Random seed. Default = 1.]";
+}
+
+void argumentCheck(int tau, int minWidth, int maxWidth, int minItemWidth, int maxItemWidth, int maxStripWidth){
+    if(tau == 0){
+        cout << "[ERROR]: Constraint value cannot be zero.\n";
+        exit(1);
+    }
+    if(maxStripWidth == 0){
+        cout << "[ERROR]: Strip cannot have length zero.\n";
+        exit(1);
+    }
+    if(2*minWidth >= tau){
+        cout << "[ERROR]: Constraint value is less than or equal to twice the minimum score width, vicinal sum constraint always valid.\n";
+        cout << "         Problem instance is therefore classical strip-packing problem without score constraint (i.e. tau = 0).\n";
+        exit(1);
+    }
+    if(2*maxWidth < tau){
+        cout << "[ERROR]: Constraint value is greater than double maximum score width, vicinal sum constraint never valid.\n";
+        exit(1);
+    }
+    if(2*maxWidth >= minItemWidth){
+        cout << "[ERROR]: Minimum item width is less than double maximum score width, scores may overlap.\n";
+        exit(1);
+    }
+    if(minWidth > maxWidth){
+        cout << "[ERROR]: Minimum score width is greater than maximum score width.\n";
+        exit(1);
+    }
+    if(maxItemWidth > maxStripWidth){
+        cout << "[ERROR]: Maximum item width is larger than length of strip.\n";
+        exit(1);
+    }
+}
+
 int main(int argc, char **argv){
-    //region USAGE - ARGUMENTS REQUIRED
-    if(argc < 9){
-        cout << "Minimum Score Separation Problem: MBAHRA.\n";
-        cout << "Arguments are the following:\n";
-        cout << "- Number of instances (integer)\n";
-        cout << "- Number of boxes (integer)\n";
-        cout << "- Minimum width of scores (millimeters, min = 1)\n";
-        cout << "- Maximum width of scores (millimeters, max = 70)\n";
-        cout << "- Minimum width of boxes (millimeters, min = 140)\n";
-        cout << "- Maximum width of boxes (millimeters, max = 1000)\n";
-        cout << "- Maximum width of strips (millimeters)\n";
-        cout << "- Random Seed (integer)\n";
-        cout << "- Name of input file (must have .txt extension)\n";
-        cout << "- packType: 1 = Approx, 2 = Smallest, 3 = Exact\n";
+    if(argc < 11){
+        programInfo();
         exit(1);
     }
-    //endregion
+    cout << "SCSSP\n-------------\n";
 
-    //region VARIABLES
-    int numInstances = 1000; //number of instances of mssp, use in main for loop
-    int numBox = atoi(argv[1]); //number of boxes in mssp plus 1 extra box (scores on either side of extra box will be dominating vertices, score widths = 71)
-    int minWidth = atoi(argv[2]); //minimum width of scores (millimeters)
-    int maxWidth = atoi(argv[3]); //maximum width of scores (millimeters)
-    int minBoxWidth = atoi(argv[4]); //min box width (mm)
-    int maxBoxWidth = atoi(argv[5]); //max box width (mm)
-    int maxStripWidth = atoi(argv[6]);
-    int randomSeed = atoi(argv[7]); //random seed
-    int packType = atoi(argv[8]);
+    /*int x;
+    int numInstances = 1000;
+    int tau = 70;
+    int numItem = 500;
+    int minWidth = 1;
+    int maxWidth = 70;
+    int minItemWidth = 150;
+    int maxItemWidth = 1000;
+    int maxStripWidth = 5000;
+    int packType = 3;
+    int randomSeed = 1;*/
 
-    int i, j;
-    int instance; //counter for instances loop
-    int numScores = numBox * 2; //number of scores, 2 per box (1 either side), last two scores are dominating vertices
-    vector<int> allScores;
-    vector<vector<int> > adjMatrix(numScores, vector<int>(numScores, 0)); //adjaceny matrix (createInstance, MTGMA, MIS, FCA)
-    vector<int> mates(numScores, 0); //contains vertex index for mates, e.g if vertex 0 is mates with vertex 4, then mates[0] = 4 (createInstance, MIS)
-    vector<vector<int> > boxWidths(numScores, vector<int>(numScores, 0)); // holds widths in mm for the widths of boxes
-    //srand(unsigned(time(NULL))); //seed
-    srand(randomSeed);
-    vector<vector<int> > userInput;
-    vector<int> tempUser(3, 0);
-    int choice;
-    double totalBoxWidth = 0.0;
-    vector<int> stripSum(numBox, 0);
-    vector<vector<int> > strip(numBox);
-    int opt = 0;
-    int opt90 = 0;
-    int opt80 = 0;
-    int opt70 = 0;
-    int opt60 = 0;
-    int opt50 = 0;
-    int optLow = 0;
-
-    //endregion
-
-
-    cout << "MSSP - MBAHRA\n-------------\n";
-
-    //region READ FILE
-    /*ifstream inStream;
-    inStream.open(argv[8]);
-    if(inStream.fail()){
-        cout << "ERROR: file cannot be opened.\n";
-        exit(1);
-    }
-    inStream >> n;
-
-    for(i = 0; i < n; ++i){
-        for(j = 0; j < 3; ++j) {
-            inStream >> tempUser[j];
+    /*for(x = 1; x < argc; ++x){
+        if(strcmp("-i", argv[x]) == 0){
+            numInstances = atoi(argv[++x]);
         }
-        userInput.push_back(tempUser);
-    }
-    inStream.close();*/
+        else if(strcmp("-t", argv[x]) == 0){
+            tau = atoi(argv[++x]);
+        }
+        else if(strcmp("-n", argv[x]) == 0){
+            numItem = atoi(argv[++x]);
+        }
+        else if(strcmp("-a", argv[x]) == 0){
+            minWidth = atoi(argv[++x]);
+        }
+        else if(strcmp("-b", argv[x]) == 0){
+            maxWidth = atoi(argv[++x]);
+        }
+        else if(strcmp("-w", argv[x]) == 0){
+            minItemWidth = atoi(argv[++x]);
+        }
+        else if(strcmp("-W", argv[x]) == 0){
+            maxItemWidth = atoi(argv[++x]);
+        }
+        else if(strcmp("-l", argv[x]) == 0){
+            maxStripWidth = atoi(argv[++x]);
+        }
+        else if(strcmp("-A", argv[x]) == 0){
+            packType = 1;
+        }
+        else if(strcmp("-B", argv[x]) == 0){
+            packType = 2;
+        }
+        else if(strcmp("-C", argv[x]) == 0){
+            packType = 3;
+        }
+        else if(strcmp("-s", argv[x]) == 0){
+            randomSeed = atoi(argv[++x]);
+        }
+    }*/
 
-    //endregion
 
-    time_t startTime, endTime; //start clock
+    //Variables
+    int numInstances = atoi(argv[1]);
+    int tau = atoi(argv[2]);
+    int numItem = atoi(argv[3]);
+    int minWidth = atoi(argv[4]);
+    int maxWidth = atoi(argv[5]);
+    int minItemWidth = atoi(argv[6]);
+    int maxItemWidth = atoi(argv[7]);
+    int maxStripWidth = atoi(argv[8]);
+    int packType = atoi(argv[9]);
+    int randomSeed = atoi(argv[10]);
+
+    argumentCheck(tau, minWidth, maxWidth, minItemWidth, maxItemWidth, maxStripWidth);
+
+    int i, j, instance, choice;
+    int opt = 0, opt90 = 0, opt80= 0, opt70 = 0, opt60 = 0, opt50 = 0, optLow = 0;
+    int numScores = numItem * 2;
+    double totalItemWidth = 0.0;
+    vector<int> allScores;
+    vector<int> stripSum(numItem, 0);
+    vector<int> partners(numScores, 0);
+    vector<vector<int> > strip(numItem);
+    vector<vector<int> > itemWidths(numScores, vector<int>(numScores, 0));
+    vector<vector<int> > adjMatrix(numScores, vector<int>(numScores, 0));
+    srand(randomSeed);
+    //srand(unsigned(time(NULL))); //seed
+
+
+    time_t startTime, endTime;
     startTime = clock();
 
-    //region READ FILE CHOICE
-
-        /*cout << "Please choose from the following:\n";
-        cout << "1: Create MSSP instance using random values\n";
-        cout << "2: Create MSSP instance from file\n";
-        cout << "Enter choice:  ";
-        cin >> choice;
-        while(choice !=1 && choice != 2){
-            cout << "Please enter either 1 or 2:";
-            cin >> choice;
-        }
-        switch(choice){
-            case 1:
-                createInstance(threshold, minWidth, maxWidth, minBoxWidth, maxBoxWidth, numScores, numBox, totalBoxWidth, allScores, adjMatrix, mates, boxWidths, allBoxes);
-                break;
-
-            case 2:
-                createInstanceUser(threshold, numScores, totalBoxWidth, allScores, userInput, adjMatrix, mates, boxWidths, allBoxes);
-                break;
-
-            default:
-                cout << "Please enter 1 or 2.\n";
-                break;
-
-        }*/
-
-        //endregion
-
-    //createInstance(numScores, numBox, minWidth, maxWidth, minBoxWidth, maxBoxWidth, totalBoxWidth, allScores, mates, adjMatrix, boxWidths);
 
     switch(packType){
         case 1:
             cout << "FFD Approx:\n";
             for(instance = 0; instance < numInstances; ++instance){
-                createInstance(numScores, numBox, minWidth, maxWidth, minBoxWidth, maxBoxWidth, totalBoxWidth, allScores, mates, adjMatrix, boxWidths);
-                packStripsFFDApprox(opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numBox, maxBoxWidth, maxStripWidth, totalBoxWidth, allScores, mates, adjMatrix, boxWidths, stripSum, strip);
-                resetVectors(numScores, numBox, allScores, mates, adjMatrix, boxWidths, stripSum, strip);
+                createInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths);
+                basicFFD(opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem, maxItemWidth, maxStripWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
+                resetVectors(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
             }
             break;
 
         case 2:
             cout << "FFD Smallest:\n";
             for(instance = 0; instance < numInstances; ++instance){
-                createInstance(numScores, numBox, minWidth, maxWidth, minBoxWidth, maxBoxWidth, totalBoxWidth, allScores, mates, adjMatrix, boxWidths);
-                packStripsFFDSmallest(opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numBox, maxBoxWidth, maxStripWidth, totalBoxWidth, allScores, mates, adjMatrix, boxWidths, stripSum, strip);
-                resetVectors(numScores, numBox, allScores, mates, adjMatrix, boxWidths, stripSum, strip);
+                createInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths);
+                pairSmallest(opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, maxStripWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
+                resetVectors(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
             }
             break;
 
         case 3:
             cout << "FFD Exact:\n";
             for(instance = 0; instance < numInstances; ++instance){
-                createInstance(numScores, numBox, minWidth, maxWidth, minBoxWidth, maxBoxWidth, totalBoxWidth, allScores, mates, adjMatrix, boxWidths);
-                packStripsFFDExact(instance, opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numBox, maxBoxWidth, maxStripWidth, totalBoxWidth, allScores, mates, adjMatrix, boxWidths, stripSum, strip);
-                resetVectors(numScores, numBox, allScores, mates, adjMatrix, boxWidths, stripSum, strip);
+                createInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths);
+                FFDincAHCA(instance, tau, opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem, maxItemWidth, maxStripWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
+                resetVectors(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
             }
             break;
 
@@ -155,22 +187,12 @@ int main(int argc, char **argv){
 
     }
 
-
-
-    resetVectors(numScores, numBox, allScores, mates, adjMatrix, boxWidths, stripSum, strip);
-    cout << endl;
-
+    resetVectors(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
     output(opt, opt90, opt80, opt70, opt60, opt50, optLow, numInstances);
-
-    
 
     endTime = clock();
     double totalTime = (((endTime - startTime) / double(CLOCKS_PER_SEC)) * 1000);
     cout << "\nCPU Time = " << totalTime << " milliseconds.\nEND.\n";
-
-
-
-
 
 
 }//END INT MAIN
