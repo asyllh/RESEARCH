@@ -9,32 +9,59 @@ Fixing bug in mbahra from SCSPP
 #include <algorithm>
 #include <iterator>
 #include <ctime>
+#include <random>
+#include <cmath>
 
 using namespace std;
 
-int main() {
+int main(int argc, char **argv) {
 
+	//int randseed = atoi(argv[1]);
+	int instance;
     int i, j, k;
     int feasible = 0;
     int threshold = 70;
     int vacant = 999;
-    vector<int> scores = {1, 69, 8, 3, 70, 13, 68, 10, 68, 6, 70, 30, 62, 45, 57, 5, 19, 43, 70, 70};
+    //vector<int> scores = {1, 69, 8, 3, 70, 13, 68, 10, 68, 6, 70, 30, 62, 45, 57, 5, 19, 43, 70, 70};
+    vector<int> scores;
+    int minWidth = 1;
+    int maxWidth = atoi(argv[1]);
+    int nScores = atoi(argv[2]);
+    int nBox = nScores / 2;
+    int nComp = (nBox + (nBox%2)) /2;
+    vector<int> randOrder;
     vector<int> order;
     vector<int> final;
-    vector<int> original = {4, 974, 118, 32, 989, 182, 951, 133, 968, 80, 991, 439, 876, 633, 794, 69, 279, 611};
-
-    int nScores = scores.size();
-    int nBox = nScores / 2;
-    int nComp = (nBox + (nBox % 2)) / 2;
+    //vector<int> original = {4, 974, 118, 32, 989, 182, 951, 133, 968, 80, 991, 439, 876, 633, 794, 69, 279, 611};
+    //int nScores = scores.size();
+    //int nBox = nScores / 2;
+    //int nComp = (nBox + (nBox % 2)) / 2;
     vector<int> invOrder(nScores);
     vector<vector<int> > adjMat(nScores, vector<int>(nScores, 0));
     vector<int> mates(nScores, vacant);
     vector<int> fullCycle;
     vector<int> completePath;
+    //srand(randseed);
 
+for(instance = 10; instance < 100; ++instance){
+	//srand(1);
+	scores.clear();
+	randOrder.clear();
+	for(i = 0; i < adjMat.size(); ++i){
+		for(j = 0; j < adjMat[i].size(); ++j){
+			adjMat[i][j] = 0;
+		}
+	}
+	for(i = 0; i < mates.size(); ++i){
+		mates[i] = vacant;
+	}
+	completePath.clear();
+	fullCycle.clear();
+	final.clear();
+	feasible = 0;
     if (feasible == 0) {
 
-        for (i = 0; i < nScores; ++i) {
+        /*for (i = 0; i < nScores; ++i) {
             order.push_back(i);
         }
 
@@ -45,9 +72,9 @@ int main() {
                     order[j] = i;
                 }
             }
-        }
+        }*/
 
-        cout << "Order:\n";
+        /*cout << "Order:\n";
         for (int v : order) {
             cout << v << " ";
         }
@@ -61,26 +88,26 @@ int main() {
         for (int v : invOrder) {
             cout << v << " ";
         }
-        cout << endl;
+        cout << endl;*/
 
-        for (i = 0; i < nScores; i += 2) {
+        /*for (i = 0; i < nScores; i += 2) {
             adjMat[invOrder[i]][invOrder[i + 1]] = 2;
             adjMat[invOrder[i + 1]][invOrder[i]] = 2;
-        }
+        }*/
 
-        sort(scores.begin(), scores.end());
+        //sort(scores.begin(), scores.end());
 
-        for (i = 0; i < scores.size() - 1; ++i) {
+        /*for (i = 0; i < scores.size() - 1; ++i) {
             for (j = i + 1; j < scores.size(); ++j) {
                 if (scores[i] + scores[j] >= threshold && adjMat[i][j] != 2) {
                     adjMat[i][j] = 1;
                     adjMat[j][i] = 1;
                 }
             }
-        }
+        }*/
 
 
-        for (i = 0; i < nScores; ++i) {
+        /*for (i = 0; i < nScores; ++i) {
             if (mates[i] == vacant) {
                 for (j = 0; j < nScores; ++j) {
                     if (adjMat[i][j] == 2) {
@@ -90,13 +117,80 @@ int main() {
                     }
                 }
             }
-        }
+        }*/
 
-        cout << "Mates:\n";
-        for (int v : mates) {
-            cout << v << " ";
-        }
-        cout << endl;
+        for(i = 0; i < nScores - 2; ++i){
+    		scores.push_back(rand() % (maxWidth - minWidth + 1) + minWidth);
+	    }
+	    scores.push_back(70);
+	    scores.push_back(70);
+
+	    if(instance == 22){
+	    	cout << "scores:\n";
+		    for(int v : scores){
+		    	cout << v << " ";
+		    }
+		    cout << endl;
+		}
+
+	    sort(scores.begin(), scores.end());
+
+	    for(i = 0; i < scores.size() - 1; ++i){
+	    	for(j = i+1; j < scores.size(); ++j){
+	    		if(scores[i] + scores[j] >= threshold){
+	    			adjMat[i][j] = 1;
+	    			adjMat[j][i] = 1;
+	    		}
+	    	}
+	    }
+
+	    for(i = 0; i < nScores - 2; ++i){
+	    	randOrder.push_back(i);
+	    }
+
+	    random_shuffle(randOrder.begin(), randOrder.end());
+
+	    /*cout << "randorder:\n";
+	    for(int v : randOrder){
+	    	cout << v << " ";
+	    }
+	    cout << endl;*/
+
+	    for(i = 0; i < (nScores - 2) / 2; ++i){
+	    	//cout << "hi\n";
+	    	adjMat[randOrder[2*i]][randOrder[2*i+1]] = 2;
+	    	adjMat[randOrder[2*i+1]][randOrder[2*i]] = 2;
+	    }
+	    //cout << "hi\n";
+	    adjMat[nScores-1][nScores-2] = 2;
+	    adjMat[nScores - 2][nScores - 1] = 2;
+
+		/*cout << "adjMat:\n";
+	    for(i = 0; i < adjMat.size(); ++i){
+	       	for(j = 0; j < adjMat[i].size(); ++j){
+	       		cout << adjMat[i][j] << " ";
+	       	}
+	       	cout << endl;
+	    }
+	    cout << endl;*/
+
+	    for(i = 0; i < nScores; ++i){
+	    	for(j = 0; j < nScores; ++j){
+	    		if(adjMat[i][j] == 2){
+	    			mates[i] = j;
+	    			break;
+	    		}
+	    	}
+	    }
+
+	    if(instance == 90){
+		    cout << "Mates:\n";
+		    for (int v : mates) {
+		        cout << v << " ";
+		    }
+		    cout << endl;
+		}
+
 
 
         //MTGMA
@@ -142,7 +236,17 @@ int main() {
                     }
                 }
             }
+            //cout << "hi2\n";
         }
+        //cout << matchSize << endl;
+
+        if(instance == 90){
+        	cout << "matchlist:\n";
+        	for(int c: matchList){
+        		cout << c << " ";
+        	}
+        	cout << endl;
+     	}
 
 
         if (matchSize < nBox) {
@@ -191,6 +295,20 @@ int main() {
             lengthMateInduced.push_back(mateInduced[i].size());
         }
 
+        if(mateInduced.size() > 4){
+	        cout << "MPS - instance = " << instance << ": \n";
+	        for(i = 0; i < mateInduced.size(); ++i){
+	        	for(j = 0; j < mateInduced[i].size(); ++j){
+	        		cout << mateInduced[i][j] << " ";
+	        	}
+	        	cout << endl;
+	        }
+	        cout << endl << endl;
+    	}
+    	else{
+    		continue;
+    	}
+        //cout << "hi\n";
         if (lengthMateInduced[0] == nScores) {
             for (j = 0; j < mateInduced[0].size(); ++j) {
                 fullCycle.push_back(mateInduced[0][j]);
@@ -224,9 +342,9 @@ int main() {
                 }
             }
 
-            for (i = 0; i < completePath.size(); ++i) {
+            /*for (i = 0; i < completePath.size(); ++i) {
                 final.push_back(original[order[completePath[i]]]);
-            }
+            }*/
             feasible = 1;
             goto End;
 
@@ -279,6 +397,29 @@ int main() {
             ++k;
         } while (k < numEdges - 1);
         t.clear();
+
+        if(instance == 90){
+	        cout << "T - instance = " << instance << ": \n";
+	        for(i = 0; i < T.size(); ++i){
+	        	for(j = 0; j < T[i].size(); ++j){
+	        		cout << T[i][j] << " ";
+	        	}
+	        	cout << endl;
+	        }
+	        cout << endl << endl;
+    	}
+
+    	if(instance == 90){
+	        cout << "S - instance = " << instance << ": \n";
+	        for(i = 0; i < T.size(); ++i){
+	        	for(j = 0; j < numCycles; ++j){
+	        		cout << S[i][j] << " ";
+	        	}
+	        	cout << endl;
+	        }
+	        cout << endl << endl;
+    	}
+
 
         if (qstar == -1) {
             feasible = 0;
@@ -390,9 +531,9 @@ int main() {
             }
 
 
-            for (i = 0; i < completePath.size(); ++i) {
+            /*for (i = 0; i < completePath.size(); ++i) {
                 final.push_back(original[order[completePath[i]]]);
-            }
+            }*/
             feasible = 1;
             goto End;
             //endregion
@@ -528,9 +669,9 @@ int main() {
                     }
                 }
 
-                for (i = 0; i < completePath.size(); ++i) {
+                /*for (i = 0; i < completePath.size(); ++i) {
                     final.push_back(original[order[completePath[i]]]);
-                }
+                }*/
                 feasible = 1;
                 goto End;
                 //END MAKE PATH FUNCTION
@@ -553,13 +694,21 @@ int main() {
 
 
     End:
+    
+    //cout << "end:\n";
     if (feasible == 1) {
-        cout << "Final:\n";
-        for (int v : final) {
+        //cout << "Final:\n";
+        /*for (int v : final) {
             cout << v << " ";
-        }
+        }*/
         cout << endl;
     }
+
+}
+
+cout << "COMPLETE.\n";
+
+
 }
 
 /*
