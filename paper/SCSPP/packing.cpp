@@ -233,7 +233,7 @@ void FFDincAHCA(int instance, int tau, int &opt, int &opt90, int &opt80, int &op
             if(!strip[i].empty()){
                 if(stripSum[i] + itemWidths[itemDecrease[j]][partners[itemDecrease[j]]] <= maxStripWidth){
                     feasible = false;
-                    AHCA(tau, i, j, feasible, allScores, partners, adjMatrix, itemWidths, itemDecrease, stripSum, strip);
+                    AHCA(instance, tau, i, j, feasible, allScores, partners, adjMatrix, itemWidths, itemDecrease, stripSum, strip);
                     if(feasible){
                         break;
                     }
@@ -454,13 +454,13 @@ void BR(int &qstar, int matchSize, vector<vector<int> > adjMat, vector<int> &mat
 
 
 // Connecting Procedure (CP).
-void CP(int nScores, int nComp, bool &feasible, int qstar, int nCycles, vector<int> &partnersX, vector<int> &matchList, vector<int> &cycleVertex,
+void CP(int instance, int j1, int nScores, int nComp, bool &feasible, int qstar, int nCycles, vector<int> &partnersX, vector<int> &matchList, vector<int> &cycleVertex,
         vector<vector<int> > &C, vector<vector<int> > &S, vector<int> &altHam){
 
     int i, j, q, u, v, CSum, CqIntC;
     int vacant = 999;
     int full = vacant;
-    int current;
+    int current = nScores - 2;
     vector<int> temp;
     vector<int> CSet;
     vector<int> connectML; //was patchML;
@@ -596,7 +596,7 @@ void CP(int nScores, int nComp, bool &feasible, int qstar, int nCycles, vector<i
 
 
 // Alternating Hamiltonian Construction Algorithm (AHCA).
-void AHCA(int tau, int i1, int j1, bool &feasible, vector<int> &allScores, vector<int> &partners, vector<vector<int> > &adjMatrix,
+void AHCA(int instance, int tau, int i1, int j1, bool &feasible, vector<int> &allScores, vector<int> &partners, vector<vector<int> > &adjMatrix,
           vector<vector<int> > &itemWidths, vector<int> &itemDecrease, vector<int> &stripSum, vector<vector<int> > &strip){
 
     int k;
@@ -667,7 +667,7 @@ void AHCA(int tau, int i1, int j1, bool &feasible, vector<int> &allScores, vecto
             break;
         }
 
-        CP(nScores, nComp, feasible, qstar, nCycles, partnersX, matchList, cycleVertex, C, S, altHam);
+        CP(instance, j1, nScores, nComp, feasible, qstar, nCycles, partnersX, matchList, cycleVertex, C, S, altHam);
         if (feasible) {
             for (i = 0; i < altHam.size(); ++i) {
                 final.push_back(original[order[altHam[i]]]);
