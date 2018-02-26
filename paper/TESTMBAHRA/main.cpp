@@ -428,6 +428,10 @@ for(instance = 10; instance < 100; ++instance){
 
         /**PatchGraph**/
         int q, u, v, save, SSum, SqIntS;
+        int a;
+        bool found = false;
+        int v1 = 0;
+        int v2 = 0;
         int full = vacant;
         vector<int> SSet;
         vector<int> tempPG;
@@ -542,7 +546,32 @@ for(instance = 10; instance < 100; ++instance){
         }
 
         else {
-            q = 0;
+
+            for(a = 0; a < T.size() - 1; ++a){
+                for(q = a+1; q < T.size(); ++q){
+                    SqIntS = 0;
+                    for(i = 0; i < numCycles; ++i){
+                        if(S[a][i] + S[q][i] == 0){
+                            SqIntS = 0;
+                            break;
+                        }
+                        if(S[a][i] + S[q][i] == 2){
+                            ++SqIntS;
+                        }
+                    }
+                    if(SqIntS == 1){
+                        v1 = a;
+                        v2 = q;
+                        SSum = numCycles;
+                        found = true;
+                        break;
+                    }
+                }
+                if(found){
+                    break;
+                }
+            }
+            /*q = 0;
             QSet[0] = 1;
             SSum = 0;
             for (i = 0; i < numCycles; ++i) {
@@ -579,11 +608,11 @@ for(instance = 10; instance < 100; ++instance){
                     QSet[q] = 1;
                     q = 0;
                 }
-            }//endwhile
+            }//endwhile*/
 
             //If patching graph is connected, then instance is feasible, else infeasible
             if (SSum == numCycles) {
-                for (i = 0; i < patchCycle.size(); ++i) {
+                /*for (i = 0; i < patchCycle.size(); ++i) {
                     if (patchCycle[i] == 1) {
                         for (j = 0; j < T[i].size(); ++j) {
                             tempPG.push_back(T[i][j]);
@@ -592,7 +621,30 @@ for(instance = 10; instance < 100; ++instance){
                         tempPG.clear();
                     }
                 }
+                tempPG.clear();*/
+
+                for(j = 0; j < T[v1].size(); ++j){
+                    tempPG.push_back(T[v1][j]);
+                }
+                Tpatch.push_back(tempPG);
                 tempPG.clear();
+
+                for(j = 0; j < T[v2].size(); ++j){
+                    tempPG.push_back(T[v2][j]);
+                }
+                Tpatch.push_back(tempPG);
+                tempPG.clear();
+
+                if(instance == 90){
+                    cout << "Tpatch:\n";
+                    for(i =0; i < Tpatch.size(); ++i){
+                        for(j = 0; j < Tpatch[i].size(); ++j){
+                            cout << Tpatch[i][j] << " ";
+                        }
+                        cout << endl;
+                    }
+                    cout << endl;
+                }
 
                 vector<int> patchML;
                 vector<int> inCycle(nScores, 0);
