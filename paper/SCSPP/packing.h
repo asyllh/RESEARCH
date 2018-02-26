@@ -51,12 +51,12 @@ void BR(int &qstar, int matchSize, vector<vector<int> > adjMat, vector<int> &mat
 
 
 // Connecting Procedure (CP).
-void CP(int nScores, int nComp, bool &feasible, int qstar, int nCycles, vector<int> &partnersX, vector<int> &matchList, vector<int> &cycleVertex,
+void CP(int instance, int j1, int nScores, int nComp, bool &feasible, int qstar, int nCycles, vector<int> &partnersX, vector<int> &matchList, vector<int> &cycleVertex,
         vector<vector<int> > &C, vector<vector<int> > &S, vector<int> &altHam);
 
 
 // Alternating Hamiltonian Construction Algorithm (AHCA).
-void AHCA(int tau, int i1, int j1, bool &feasible, vector<int> &allScores, vector<int> &partners, vector<vector<int> > &adjMatrix,
+void AHCA(int instance, int tau, int i1, int j1, bool &feasible, vector<int> &allScores, vector<int> &partners, vector<vector<int> > &adjMatrix,
             vector<vector<int> > &itemWidths, vector<int> &itemDecrease, vector<int> &stripSum, vector<vector<int> > &strip);
 
 #endif
