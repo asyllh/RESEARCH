@@ -195,7 +195,7 @@ void pairSmallest(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int 
 
 
 // FFD including AHCA, instead of attempting to place item on end of strip, run AHCA to find feasible solution.
-void FFDincAHCA(int instance, int tau, int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int numScores, int numItem, int maxItemWidth,
+void FFDincAHCA(int &multipleCycles, int instance, int tau, int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int numScores, int numItem, int maxItemWidth,
                 int maxStripWidth, double totalItemWidth, vector<int> &allScores, vector<int> &partners, vector<vector<int> > &adjMatrix,
                 vector<vector<int> > &itemWidths, vector<int> &stripSum, vector<vector<int> > &strip){
 
@@ -233,7 +233,7 @@ void FFDincAHCA(int instance, int tau, int &opt, int &opt90, int &opt80, int &op
             if(!strip[i].empty()){
                 if(stripSum[i] + itemWidths[itemDecrease[j]][partners[itemDecrease[j]]] <= maxStripWidth){
                     feasible = false;
-                    AHCA(instance, tau, i, j, feasible, allScores, partners, adjMatrix, itemWidths, itemDecrease, stripSum, strip);
+                    AHCA(multipleCycles, instance, tau, i, j, feasible, allScores, partners, adjMatrix, itemWidths, itemDecrease, stripSum, strip);
                     if(feasible){
                         break;
                     }
@@ -405,12 +405,11 @@ void MPS(int nScores, int &nCycles, vector<int> &partnersX, vector<int> &matchLi
 
 
 // Bridge Recognition (BR) Algorithm.
-void BR(int &qstar, int matchSize, vector<vector<int> > adjMat, vector<int> &matchList, vector<int> &cycleVertex, vector<vector<int> > &mpStructure,
+void BR(int &qstar, int matchSize, vector<vector<int> > adjMat, vector<int> &matchList, vector<int> &cycleVertex, vector<int> &edge, vector<vector<int> > &mpStructure,
         vector<vector<int> > &C, vector<vector<int> > &S){
 
     int i, j, k, nEdges;
     int vacant = 999;
-    vector<int> edge;
     vector<int> temp;
 
     for (i = 0; i < mpStructure.size(); ++i) {
@@ -454,20 +453,27 @@ void BR(int &qstar, int matchSize, vector<vector<int> > adjMat, vector<int> &mat
 
 
 // Connecting Procedure (CP).
-void CP(int instance, int j1, int nScores, int nComp, bool &feasible, int qstar, int nCycles, vector<int> &partnersX, vector<int> &matchList, vector<int> &cycleVertex,
-        vector<vector<int> > &C, vector<vector<int> > &S, vector<int> &altHam){
+void CP(int &multipleCycles, int instance, int j1, int nScores, int nComp, bool &feasible, int qstar, int nCycles, vector<int> &partnersX, vector<int> &matchList,
+        vector<int> &cycleVertex, vector<int> &edge, vector<vector<int> > &adjMat, vector<vector<int> > &C, vector<vector<int> > &S, vector<int> &altHam){
 
-    int i, j, q, u, v, CSum, CqIntC;
+    int a, i, j, k, q, u, v, SSum, SqIntS;
+    int v1 = 0;
+    int v2 = 0;
     int vacant = 999;
     int full = vacant;
     int current = nScores - 2;
+    int maxRowSize = 0;
+    int maxRow;
+    int nEdges = edge.size();
     vector<int> temp;
-    vector<int> CSet;
+    vector<int> SSet;
     vector<int> connectML; //was patchML;
     vector<int> QSet(nComp, 0);
     vector<int> inCycle(nScores, 0);
     vector<int> connectCycle(nComp, vacant); //was patchCycleX
     vector<vector<int> > Cconnect;
+    vector<int> Cq;
+
 
     for (i = 0; i < C.size(); ++i) {
         if (C[i].size() == nCycles) {
@@ -504,56 +510,158 @@ void CP(int instance, int j1, int nScores, int nComp, bool &feasible, int qstar,
     }
 
     else {
-        q = 0;
-        QSet[0] = 1;
-        CSum = 0;
-        for (i = 0; i < nCycles; ++i) {
-            CSet.push_back(S[q][i]);
-        }
-        for (i = 0; i < nCycles; ++i) {
-            CSum = CSum + CSet[i];
-        }
-
-        if (CSum >= 1) {
-            connectCycle[q] = 1;
-        }
-
-        while (q <= qstar && CSum < nCycles) {
-            do {
-                ++q;
-                CqIntC = vacant;
-                if (q <= qstar) {
-                    for (j = 0; j < nCycles; ++j) {
-                        if (S[q][j] == 1 && CSet[j] == 1) {
-                            CqIntC = 1;
-                            break;
-                        }
+        int type = 0;
+        SSum = 0;
+        for(a = 0; a < C.size() - 1; ++a){
+            for(q = a+1; q < C.size(); ++q){
+                SqIntS = 0;
+                for(i = 0; i < nCycles; ++i){
+                    if(S[a][i] + S[q][i] == 0){
+                        SqIntS = 0;
+                        break;
+                    }
+                    if(S[a][i] + S[q][i] == 2){
+                        ++SqIntS;
                     }
                 }
-            } while (q < qstar + 1 && (QSet[q] == 1 || CqIntC == vacant));
-
-            if (q <= qstar) {
-                for (i = 0; i < nCycles; ++i) {
-                    if (CSet[i] == 0 && S[q][i] == 1) {
-                        CSet[i] = 1;
-                        ++CSum;
-                        connectCycle[q] = 1;
-                    }
+                if(SqIntS == 1){
+                    v1 = a;
+                    v2 = q;
+                    SSum = nCycles;
+                    type = 1;
+                    break;
                 }
-                QSet[q] = 1;
-                q = 0;
+            }
+            if(v1 != v2){
+                break;
             }
         }
 
-        if (CSum == nCycles) {
-            for (i = 0; i < connectCycle.size(); ++i) {
-                if (connectCycle[i] == 1) {
-                    for (j = 0; j < C[i].size(); ++j) {
-                        temp.push_back(C[i][j]);
-                    }
-                    Cconnect.push_back(temp);
-                    temp.clear();
+
+        /** finding overlaps **/
+        if(SSum < nCycles){
+            temp.clear();
+            SSum = 0;
+            type = 3;
+            for(i = 0; i < C.size(); ++i){
+                if(C[i].size() > maxRowSize){
+                    maxRowSize = C[i].size();
+                    maxRow = i;
                 }
+            }
+
+            for(j = 0; j < C[maxRow].size(); ++j){
+                temp.push_back(C[maxRow][j]);
+            }
+            Cconnect.push_back(temp);
+            temp.clear();
+
+            for(j = 0; j < nCycles; ++j){
+                SSet.push_back(S[maxRow][j]);
+            }
+            for(j = 0; j < nCycles; ++j) {
+                SSum = SSum + SSet[j];
+            }
+
+            for(i = 0; i < Cconnect[0].size(); ++i){
+                for(j = 0; j < edge.size(); ++j){
+                    if(edge[j] == Cconnect[0][i]){
+                        edge[j] = vacant;
+                        break;
+                    }
+                }
+            }
+
+            /*do{
+                k = 0;
+                while(k < nEdges - 2 && ((edge[k] == vacant || edge[k+1] == vacant) || (adjMat[])))
+
+
+
+            } while (k < nEdges);*/
+
+
+
+
+
+
+
+        }// End find overlaps
+
+
+        /**-**/
+
+
+        if(SSum < nCycles){
+            type = 2;
+            q = 0;
+            QSet[0] = 1;
+            SSum = 0;
+            for (i = 0; i < nCycles; ++i) {
+                SSet.push_back(S[q][i]);
+            }
+            for (i = 0; i < nCycles; ++i) {
+                SSum = SSum + SSet[i];
+            }
+
+            if (SSum >= 1) {
+                connectCycle[q] = 1;
+            }
+
+            while (q <= qstar && SSum < nCycles) {
+                do {
+                    ++q;
+                    SqIntS = vacant;
+                    if (q <= qstar) {
+                        for (j = 0; j < nCycles; ++j) {
+                            if (S[q][j] == 1 && SSet[j] == 1) {
+                                SqIntS = 1;
+                                break;
+                            }
+                        }
+                    }
+                } while (q < qstar + 1 && (QSet[q] == 1 || SqIntS == vacant));
+
+                if (q <= qstar) {
+                    for (i = 0; i < nCycles; ++i) {
+                        if (SSet[i] == 0 && S[q][i] == 1) {
+                            SSet[i] = 1;
+                            ++SSum;
+                            connectCycle[q] = 1;
+                        }
+                    }
+                    QSet[q] = 1;
+                    q = 0;
+                }
+            }
+        }
+
+        if (SSum == nCycles) {
+            if(type == 1){
+                for (j = 0; j < C[v1].size(); ++j) {
+                    temp.push_back(C[v1][j]);
+                }
+                Cconnect.push_back(temp);
+                temp.clear();
+
+                for (j = 0; j < C[v2].size(); ++j) {
+                    temp.push_back(C[v2][j]);
+                }
+                Cconnect.push_back(temp);
+                temp.clear();
+            }
+            else if(type == 2){
+                ++multipleCycles;
+                for (i = 0; i < connectCycle.size(); ++i) {
+                    if (connectCycle[i] == 1) {
+                        for (j = 0; j < C[i].size(); ++j) {
+                            temp.push_back(C[i][j]);
+                        }
+                        Cconnect.push_back(temp);
+                        temp.clear();
+                    }
+                }
+
             }
 
             copy(matchList.begin(), matchList.end(), back_inserter(connectML));
@@ -596,7 +704,7 @@ void CP(int instance, int j1, int nScores, int nComp, bool &feasible, int qstar,
 
 
 // Alternating Hamiltonian Construction Algorithm (AHCA).
-void AHCA(int instance, int tau, int i1, int j1, bool &feasible, vector<int> &allScores, vector<int> &partners, vector<vector<int> > &adjMatrix,
+void AHCA(int &multipleCycles, int instance, int tau, int i1, int j1, bool &feasible, vector<int> &allScores, vector<int> &partners, vector<vector<int> > &adjMatrix,
           vector<vector<int> > &itemWidths, vector<int> &itemDecrease, vector<int> &stripSum, vector<vector<int> > &strip){
 
     int k;
@@ -631,6 +739,7 @@ void AHCA(int instance, int tau, int i1, int j1, bool &feasible, vector<int> &al
     vector<int> cycleVertex(nScores, 1);
     vector<int> partnersX(nScores, vacant);
     vector<int> matchList(nScores, vacant);
+    vector<int> edge;
     vector<vector<int> > C;
     vector<vector<int> > mpStructure;
     vector<vector<int> > S(nComp, vector<int>(nComp, 0));
@@ -661,13 +770,13 @@ void AHCA(int instance, int tau, int i1, int j1, bool &feasible, vector<int> &al
             break;
         }
 
-        BR(qstar, matchSize, adjMat, matchList, cycleVertex, mpStructure, C, S);
+        BR(qstar, matchSize, adjMat, matchList, cycleVertex, edge, mpStructure, C, S);
         if (qstar == -1) {
             feasible = false;
             break;
         }
 
-        CP(instance, j1, nScores, nComp, feasible, qstar, nCycles, partnersX, matchList, cycleVertex, C, S, altHam);
+        CP(multipleCycles, instance, j1, nScores, nComp, feasible, qstar, nCycles, partnersX, matchList, cycleVertex, edge, adjMat, C, S, altHam);
         if (feasible) {
             for (i = 0; i < altHam.size(); ++i) {
                 final.push_back(original[order[altHam[i]]]);
