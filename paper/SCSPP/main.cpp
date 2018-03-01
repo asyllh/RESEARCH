@@ -135,6 +135,25 @@ int main(int argc, char **argv){
 
     argumentCheck(tau, minWidth, maxWidth, minItemWidth, maxItemWidth, maxStripWidth);
 
+    cout << "Number of instances:\t" << numInstances << endl
+         << "Constraint value:\t" << numInstances << endl
+         << "Number of items:\t" << numInstances << endl
+         << "Minimum score width:\t" << numInstances << endl
+         << "Maximum score width:\t" << numInstances << endl
+         << "Minimum item width:\t" << numInstances << endl
+         << "Maxmimum item width:\t" << numInstances << endl
+         << "Length of strips:\t" << numInstances << endl;
+    if(packType == 1){
+        cout << "Heuristic:\tBasic approximate FFD.\n";
+    }
+    else if(packType == 2){
+        cout << "Heuristic:\tPack strips in turn, choosing smallest feasible score width.\n";
+    }
+    else if(packType == 3){
+        cout << "Heuristic:\tFFD combined with AHCA (exact algorithm).\n";
+    }
+    cout << "Random seed:\t" << randomSeed << endl;
+
     int i, j, instance, choice;
     int opt = 0, opt90 = 0, opt80= 0, opt70 = 0, opt60 = 0, opt50 = 0, optLow = 0;
     int numScores = numItem * 2;
@@ -146,6 +165,7 @@ int main(int argc, char **argv){
     vector<vector<int> > itemWidths(numScores, vector<int>(numScores, 0));
     vector<vector<int> > adjMatrix(numScores, vector<int>(numScores, 0));
     srand(randomSeed);
+    int multipleCycles = 0;
     //srand(unsigned(time(NULL))); //seed
 
 
@@ -176,7 +196,7 @@ int main(int argc, char **argv){
             cout << "FFD Exact:\n";
             for(instance = 0; instance < numInstances; ++instance){
                 createInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths);
-                FFDincAHCA(instance, tau, opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem, maxItemWidth, maxStripWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
+                FFDincAHCA(multipleCycles, instance, tau, opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem, maxItemWidth, maxStripWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
                 resetVectors(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
             }
             break;
@@ -189,6 +209,8 @@ int main(int argc, char **argv){
 
     resetVectors(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
     output(opt, opt90, opt80, opt70, opt60, opt50, optLow, numInstances);
+    cout << endl;
+    cout << "Number of times type 2 used " << multipleCycles << endl;
 
     endTime = clock();
     double totalTime = (((endTime - startTime) / double(CLOCKS_PER_SEC)) * 1000);
