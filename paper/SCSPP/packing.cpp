@@ -195,7 +195,7 @@ void pairSmallest(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int 
 
 
 // FFD including AHCA, instead of attempting to place item on end of strip, run AHCA to find feasible solution.
-void FFDincAHCA(int &multipleCycles, int instance, int tau, int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int numScores, int numItem, int maxItemWidth,
+void FFDincAHCA(int &cp, int &na, int &type0, int &type1, int &type2, int &type3, int instance, int tau, int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int numScores, int numItem, int maxItemWidth,
                 int maxStripWidth, double totalItemWidth, vector<int> &allScores, vector<int> &partners, vector<vector<int> > &adjMatrix,
                 vector<vector<int> > &itemWidths, vector<int> &stripSum, vector<vector<int> > &strip){
 
@@ -222,7 +222,6 @@ void FFDincAHCA(int &multipleCycles, int instance, int tau, int &opt, int &opt90
         max = min;
         min = 0;
     }
-    if(instance == 9){ cout << "instance = 9\n"; }
 
     strip[0].push_back(itemDecrease[0]);
     strip[0].push_back(partners[itemDecrease[0]]);
@@ -233,7 +232,7 @@ void FFDincAHCA(int &multipleCycles, int instance, int tau, int &opt, int &opt90
             if(!strip[i].empty()){
                 if(stripSum[i] + itemWidths[itemDecrease[j]][partners[itemDecrease[j]]] <= maxStripWidth){
                     feasible = false;
-                    AHCA(multipleCycles, instance, tau, i, j, feasible, allScores, partners, adjMatrix, itemWidths, itemDecrease, stripSum, strip);
+                    AHCA(cp, na, type0, type1, type2, type3, instance, tau, i, j, feasible, allScores, partners, adjMatrix, itemWidths, itemDecrease, stripSum, strip);
                     if(feasible){
                         break;
                     }
@@ -453,7 +452,7 @@ void BR(int &qstar, int matchSize, vector<vector<int> > adjMat, vector<int> &mat
 
 
 // Connecting Procedure (CP).
-void CP(int &multipleCycles, int instance, int j1, int nScores, int nComp, bool &feasible, int qstar, int nCycles, vector<int> &partnersX, vector<int> &matchList,
+void CP(int &cp, int &na, int &type0, int &type1, int &type2, int &type3, int instance, int j1, int nScores, int nComp, bool &feasible, int qstar, int nCycles, vector<int> &partnersX, vector<int> &matchList,
         vector<int> &cycleVertex, vector<int> &edge, vector<vector<int> > &adjMat, vector<vector<int> > &C, vector<vector<int> > &S, vector<int> &altHam){
 
     int a, i, j, k, q, u, v, SSum, SqIntS;
@@ -464,16 +463,19 @@ void CP(int &multipleCycles, int instance, int j1, int nScores, int nComp, bool 
     int current = nScores - 2;
     int maxRowSize = 0;
     int maxRow;
-    int nEdges = edge.size();
+    int type;
+    //int nEdges = edge.size();
     vector<int> temp;
-    vector<int> SSet;
+    vector<int> SSet2;
+    vector<int> SSet3;
+    vector<int> edgeCopy;
     vector<int> connectML; //was patchML;
     vector<int> QSet(nComp, 0);
     vector<int> inCycle(nScores, 0);
     vector<int> connectCycle(nComp, vacant); //was patchCycleX
     vector<vector<int> > Cconnect;
-    vector<int> Cq;
 
+    ++cp;
 
     for (i = 0; i < C.size(); ++i) {
         if (C[i].size() == nCycles) {
@@ -482,35 +484,43 @@ void CP(int &multipleCycles, int instance, int j1, int nScores, int nComp, bool 
         }
     }
 
+
     if (full != vacant) {
+
         copy(matchList.begin(), matchList.end(), back_inserter(connectML));
 
-        for(v = 0; v < C[full].size() - 1; ++v){
-            connectML[C[full][v]] = matchList[C[full][v+1]];
-            connectML[matchList[C[full][v+1]]] = C[full][v];
+        for (v = 0; v < C[full].size() - 1; ++v) {
+            connectML[C[full][v]] = matchList[C[full][v + 1]];
+            connectML[matchList[C[full][v + 1]]] = C[full][v];
         }
-        connectML[C[full][C[full].size()-1]] = matchList[C[full][0]];
-        connectML[matchList[C[full][0]]] = C[full][C[full].size()-1];
+        connectML[C[full][C[full].size() - 1]] = matchList[C[full][0]];
+        connectML[matchList[C[full][0]]] = C[full][C[full].size() - 1];
 
-        do{
+        do {
             altHam.push_back(current);
             inCycle[current] = 1;
             altHam.push_back(partnersX[current]);
             inCycle[partnersX[current]] = 1;
-            if(inCycle[connectML[partnersX[current]]] == 0){
+            if (inCycle[connectML[partnersX[current]]] == 0) {
                 current = connectML[partnersX[current]];
             }
-            else{
+            else {
                 current = matchList[partnersX[current]];
             }
-        } while(altHam.size() < nScores);
+        } while (altHam.size() < nScores);
 
         altHam.erase(altHam.begin(), altHam.begin() + 2);
         feasible = true;
+        ++type0;
+
     }
 
+
     else {
-        int type = 0;
+        type = 0;
+
+        //region TYPE 1
+        //TYPE 1: Searching for two C-cycles that connect all MPS cycles, S rows only intersect once.
         SSum = 0;
         for(a = 0; a < C.size() - 1; ++a){
             for(q = a+1; q < C.size(); ++q){
@@ -528,21 +538,22 @@ void CP(int &multipleCycles, int instance, int j1, int nScores, int nComp, bool 
                     v1 = a;
                     v2 = q;
                     SSum = nCycles;
-                    type = 1;
                     break;
                 }
             }
-            if(v1 != v2){
+            if(SSum == nCycles){
+                type = 1;
                 break;
             }
-        }
+        } //End Type 1
+        //endregion
 
-
-        /** finding overlaps **/
-        if(SSum < nCycles){
+        //region TYPE 2
+        //TYPE 2: Search for longest C-cycle, then find other C-cycles that intersect once with the longest cycle and cover cycles not yet connected.
+        if(type == 0){
             temp.clear();
             SSum = 0;
-            type = 3;
+            copy(edge.begin(), edge.end(), back_inserter(edgeCopy));
             for(i = 0; i < C.size(); ++i){
                 if(C[i].size() > maxRowSize){
                     maxRowSize = C[i].size();
@@ -557,64 +568,79 @@ void CP(int &multipleCycles, int instance, int j1, int nScores, int nComp, bool 
             temp.clear();
 
             for(j = 0; j < nCycles; ++j){
-                SSet.push_back(S[maxRow][j]);
+                SSet2.push_back(S[maxRow][j]);
             }
             for(j = 0; j < nCycles; ++j) {
-                SSum = SSum + SSet[j];
+                SSum = SSum + SSet2[j];
             }
 
             for(i = 0; i < Cconnect[0].size(); ++i){
-                for(j = 0; j < edge.size(); ++j){
-                    if(edge[j] == Cconnect[0][i]){
-                        edge[j] = vacant;
+                for(j = 0; j < edgeCopy.size(); ++j){
+                    if(edgeCopy[j] == Cconnect[0][i]){
+                        edgeCopy.erase(edgeCopy.begin()+j);
                         break;
                     }
                 }
             }
 
-            /*do{
-                k = 0;
-                while(k < nEdges - 2 && ((edge[k] == vacant || edge[k+1] == vacant) || (adjMat[])))
+            int nEdgesC = edgeCopy.size();
+            k = 0;
 
-
-
-            } while (k < nEdges);*/
-
-
-
-
-
-
+            do{
+                while(k < nEdgesC - 2 && (adjMat[edgeCopy[k]][matchList[edgeCopy[k+1]]] != 1 || cycleVertex[edgeCopy[k]] == cycleVertex[edgeCopy[k+1]])){
+                    ++k;
+                }
+                if(adjMat[edgeCopy[k]][matchList[edgeCopy[k+1]]] == 1 && cycleVertex[edgeCopy[k]] != cycleVertex[edgeCopy[k+1]]
+                   && ((SSet2[cycleVertex[edgeCopy[k]]] == 0 && SSet2[cycleVertex[edgeCopy[k+1]]] == 1)
+                   || (SSet2[cycleVertex[edgeCopy[k]]] == 1 && SSet2[cycleVertex[edgeCopy[k+1]]] == 0))){
+                    temp.push_back(edgeCopy[k]);
+                    temp.push_back(edgeCopy[k+1]);
+                    SSet2[cycleVertex[edgeCopy[k]]] = 1;
+                    SSet2[cycleVertex[edgeCopy[k+1]]] = 1;
+                    ++SSum;
+                    if(SSum < nCycles){
+                        ++k;
+                        while(k < nEdgesC - 1 && SSet2[cycleVertex[edgeCopy[k+1]]] == 0 && adjMat[edgeCopy[k]][matchList[edgeCopy[k+1]]] == 1){
+                            ++k;
+                            temp.push_back(edge[k]);
+                            SSet2[cycleVertex[edgeCopy[k]]] = 1;
+                            ++SSum;
+                        }
+                    }
+                    Cconnect.push_back(temp);
+                    temp.clear();
+                }
+                ++k;
+            } while (k < nEdgesC - 1 && SSum < nCycles);
+            if(SSum == nCycles){
+                type = 2;
+            }
 
         }// End find overlaps
+        //endregion
 
-
-        /**-**/
-
-
-        if(SSum < nCycles){
-            type = 2;
+        //region TYPE 3
+        //TYPE 3: Original
+        if(type == 0){
             q = 0;
             QSet[0] = 1;
             SSum = 0;
             for (i = 0; i < nCycles; ++i) {
-                SSet.push_back(S[q][i]);
+                SSet3.push_back(S[q][i]);
             }
             for (i = 0; i < nCycles; ++i) {
-                SSum = SSum + SSet[i];
+                SSum = SSum + SSet3[i];
             }
-
             if (SSum >= 1) {
                 connectCycle[q] = 1;
             }
-
             while (q <= qstar && SSum < nCycles) {
                 do {
                     ++q;
                     SqIntS = vacant;
                     if (q <= qstar) {
                         for (j = 0; j < nCycles; ++j) {
-                            if (S[q][j] == 1 && SSet[j] == 1) {
+                            if (S[q][j] == 1 && SSet3[j] == 1) {
                                 SqIntS = 1;
                                 break;
                             }
@@ -624,8 +650,8 @@ void CP(int &multipleCycles, int instance, int j1, int nScores, int nComp, bool 
 
                 if (q <= qstar) {
                     for (i = 0; i < nCycles; ++i) {
-                        if (SSet[i] == 0 && S[q][i] == 1) {
-                            SSet[i] = 1;
+                        if (SSet3[i] == 0 && S[q][i] == 1) {
+                            SSet3[i] = 1;
                             ++SSum;
                             connectCycle[q] = 1;
                         }
@@ -634,10 +660,16 @@ void CP(int &multipleCycles, int instance, int j1, int nScores, int nComp, bool 
                     q = 0;
                 }
             }
-        }
+            if(SSum == nCycles){
+                type = 3;
+            }
+        } //End Type 3
+        //endregion
 
         if (SSum == nCycles) {
+            temp.clear();
             if(type == 1){
+                ++type1;
                 for (j = 0; j < C[v1].size(); ++j) {
                     temp.push_back(C[v1][j]);
                 }
@@ -651,7 +683,10 @@ void CP(int &multipleCycles, int instance, int j1, int nScores, int nComp, bool 
                 temp.clear();
             }
             else if(type == 2){
-                ++multipleCycles;
+                ++type2;
+            }
+            else if(type == 3){
+                ++type3;
                 for (i = 0; i < connectCycle.size(); ++i) {
                     if (connectCycle[i] == 1) {
                         for (j = 0; j < C[i].size(); ++j) {
@@ -663,6 +698,11 @@ void CP(int &multipleCycles, int instance, int j1, int nScores, int nComp, bool 
                 }
 
             }
+            else{
+                cout << "[ERROR]: NO TYPE.\n";
+                exit(1);
+            }
+
 
             copy(matchList.begin(), matchList.end(), back_inserter(connectML));
 
@@ -690,12 +730,11 @@ void CP(int &multipleCycles, int instance, int j1, int nScores, int nComp, bool 
             } while (altHam.size() < nScores);
 
             altHam.erase(altHam.begin(), altHam.begin() + 2);
-            //mkaepath here erase nscores find algorithm function
-
             feasible = true;
         }
 
         else {
+            ++na;
             feasible = false;
         }
     }
@@ -704,7 +743,7 @@ void CP(int &multipleCycles, int instance, int j1, int nScores, int nComp, bool 
 
 
 // Alternating Hamiltonian Construction Algorithm (AHCA).
-void AHCA(int &multipleCycles, int instance, int tau, int i1, int j1, bool &feasible, vector<int> &allScores, vector<int> &partners, vector<vector<int> > &adjMatrix,
+void AHCA(int &cp, int &na, int &type0, int &type1, int &type2, int &type3, int instance, int tau, int i1, int j1, bool &feasible, vector<int> &allScores, vector<int> &partners, vector<vector<int> > &adjMatrix,
           vector<vector<int> > &itemWidths, vector<int> &itemDecrease, vector<int> &stripSum, vector<vector<int> > &strip){
 
     int k;
@@ -776,7 +815,7 @@ void AHCA(int &multipleCycles, int instance, int tau, int i1, int j1, bool &feas
             break;
         }
 
-        CP(multipleCycles, instance, j1, nScores, nComp, feasible, qstar, nCycles, partnersX, matchList, cycleVertex, edge, adjMat, C, S, altHam);
+        CP(cp, na, type0, type1, type2, type3, instance, j1, nScores, nComp, feasible, qstar, nCycles, partnersX, matchList, cycleVertex, edge, adjMat, C, S, altHam);
         if (feasible) {
             for (i = 0; i < altHam.size(); ++i) {
                 final.push_back(original[order[altHam[i]]]);
