@@ -63,13 +63,13 @@ void argumentCheck(int tau, int minWidth, int maxWidth, int minItemWidth, int ma
 }
 
 int main(int argc, char **argv){
-    if(argc < 11){
+    if(argc < 1){
         programInfo();
         exit(1);
     }
     cout << "SCSSP\n-------------\n";
 
-    /*int x;
+    int x;
     int numInstances = 1000;
     int tau = 70;
     int numItem = 500;
@@ -79,9 +79,9 @@ int main(int argc, char **argv){
     int maxItemWidth = 1000;
     int maxStripWidth = 5000;
     int packType = 3;
-    int randomSeed = 1;*/
+    int randomSeed = 1;
 
-    /*for(x = 1; x < argc; ++x){
+    for(x = 1; x < argc; ++x){
         if(strcmp("-i", argv[x]) == 0){
             numInstances = atoi(argv[++x]);
         }
@@ -118,11 +118,11 @@ int main(int argc, char **argv){
         else if(strcmp("-s", argv[x]) == 0){
             randomSeed = atoi(argv[++x]);
         }
-    }*/
+    }
 
 
     //Variables
-    int numInstances = atoi(argv[1]);
+    /*int numInstances = atoi(argv[1]);
     int tau = atoi(argv[2]);
     int numItem = atoi(argv[3]);
     int minWidth = atoi(argv[4]);
@@ -131,18 +131,18 @@ int main(int argc, char **argv){
     int maxItemWidth = atoi(argv[7]);
     int maxStripWidth = atoi(argv[8]);
     int packType = atoi(argv[9]);
-    int randomSeed = atoi(argv[10]);
+    int randomSeed = atoi(argv[10]);*/
 
     argumentCheck(tau, minWidth, maxWidth, minItemWidth, maxItemWidth, maxStripWidth);
 
     cout << "Number of instances:\t" << numInstances << endl
-         << "Constraint value:\t" << numInstances << endl
-         << "Number of items:\t" << numInstances << endl
-         << "Minimum score width:\t" << numInstances << endl
-         << "Maximum score width:\t" << numInstances << endl
-         << "Minimum item width:\t" << numInstances << endl
-         << "Maxmimum item width:\t" << numInstances << endl
-         << "Length of strips:\t" << numInstances << endl;
+         << "Constraint value:\t" << tau << endl
+         << "Number of items:\t" << numItem << endl
+         << "Minimum score width:\t" << minWidth << endl
+         << "Maximum score width:\t" << maxWidth << endl
+         << "Minimum item width:\t" << minItemWidth << endl
+         << "Maxmimum item width:\t" << maxItemWidth << endl
+         << "Length of strips:\t" << maxStripWidth << endl;
     if(packType == 1){
         cout << "Heuristic:\tBasic approximate FFD.\n";
     }
@@ -165,7 +165,12 @@ int main(int argc, char **argv){
     vector<vector<int> > itemWidths(numScores, vector<int>(numScores, 0));
     vector<vector<int> > adjMatrix(numScores, vector<int>(numScores, 0));
     srand(randomSeed);
-    int multipleCycles = 0;
+    int cp = 0;
+    int na = 0;
+    int type0 = 0;
+    int type1 = 0;
+    int type2 = 0;
+    int type3 = 0;
     //srand(unsigned(time(NULL))); //seed
 
 
@@ -196,7 +201,7 @@ int main(int argc, char **argv){
             cout << "FFD Exact:\n";
             for(instance = 0; instance < numInstances; ++instance){
                 createInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths);
-                FFDincAHCA(multipleCycles, instance, tau, opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem, maxItemWidth, maxStripWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
+                FFDincAHCA(cp, na, type0, type1, type2, type3, instance, tau, opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem, maxItemWidth, maxStripWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
                 resetVectors(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
             }
             break;
@@ -209,8 +214,13 @@ int main(int argc, char **argv){
 
     resetVectors(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
     output(opt, opt90, opt80, opt70, opt60, opt50, optLow, numInstances);
-    cout << endl;
-    cout << "Number of times type 2 used " << multipleCycles << endl;
+    cout << endl << endl;
+    cout << "Number of times CP used " << cp << endl;
+    cout << "Number of times noConnect " << na << endl;
+    cout << "Number of times type 0 used " << type0 << endl;
+    cout << "Number of times type 1 used " << type1 << endl;
+    cout << "Number of times type 2 used " << type2 << endl;
+    cout << "Number of times type 3 used " << type3 << endl;
 
     endTime = clock();
     double totalTime = (((endTime - startTime) / double(CLOCKS_PER_SEC)) * 1000);
