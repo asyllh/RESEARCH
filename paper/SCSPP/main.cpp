@@ -7,6 +7,7 @@ mainexact.cpp
 #include <fstream>
 #include <cstring>
 #include <ctime>
+#include <iomanip>
 using namespace std;
 
 #include "base.h"
@@ -24,13 +25,19 @@ void programInfo(){
          << "       -w <int>    [Minimum item width. Default = 150.]\n"
          << "       -W <int>    [Maximum item width. Default = 1000.]\n"
          << "       -l <int>    [Length of strips. Default = 5000.]\n"
-         << "       -A          [Basic approximate FFD.]\n"
-         << "       -B          [Pack strips in turn, choosing smallest feasible score width.]\n"
-         << "       -C          [FFD combined with AHCA (exact algorithm). Default.]\n"
-         << "       -s <int>    [Random seed. Default = 1.]";
+         << "       -s <int>    [Random seed. Default = 1.]\n"
+         << "---------------\n"
+         << "HEURISTICS:\n"
+         << "       -p <int>    [Type of heuristic to be used.]\n"
+         << "                   [1 = Basic approximate FFD.]\n"
+         << "                   [2 = Pack strips in turn, choosing smallest feasible score width.]\n"
+         << "                   [3 = FFD combined with AHCA (exact algorithm).]\n"
+         << "---------------\n\n";
 }
 
-void argumentCheck(int tau, int minWidth, int maxWidth, int minItemWidth, int maxItemWidth, int maxStripWidth){
+void argumentCheck(int numInstances, int tau, int numItem, int minWidth, int maxWidth, int minItemWidth, int maxItemWidth,
+                   int maxStripWidth, int packType, int randomSeed){
+    cout << "SCSSP\n------------------------------\n";
     if(tau == 0){
         cout << "[ERROR]: Constraint value cannot be zero.\n";
         exit(1);
@@ -60,14 +67,37 @@ void argumentCheck(int tau, int minWidth, int maxWidth, int minItemWidth, int ma
         cout << "[ERROR]: Maximum item width is larger than length of strip.\n";
         exit(1);
     }
+    if(packType == 0){
+        cout << "[ERROR]: No heuristic specified.\n";
+        exit(1);
+    }
+
+    cout << std::left << setw(20) << "Number of instances:" << std::right << setw(10) << numInstances << endl
+         << std::left << setw(20) << "Constraint value:" << std::right << setw(10) << tau << endl
+         << std::left << setw(20) << "Number of items:" << std::right << setw(10) << numItem << endl
+         << std::left << setw(20) << "Minimum score width:" << std::right << setw(10) << minWidth << endl
+         << std::left << setw(20) << "Maximum score width:" << std::right << setw(10) << maxWidth << endl
+         << std::left << setw(20) << "Minimum item width:" << std::right << setw(10) << minItemWidth << endl
+         << std::left << setw(20) << "Maxmimum item width:" << std::right << setw(10) << maxItemWidth << endl
+         << std::left << setw(20) << "Length of strips:" << std::right << setw(10) << maxStripWidth << endl
+         << std::left << setw(20) << "Random seed:" << std::right << setw(10) << randomSeed << endl;
+    if(packType == 1){
+        cout << std::left << setw(18) << "Heuristic:" << std::right << setw(13) << "basicFFD\n";
+    }
+    else if(packType == 2){
+        cout << std::left << setw(18) << "Heuristic:" << std::right << setw(13) << "packSmallest\n";
+    }
+    else if(packType == 3){
+        cout << std::left << setw(18) << "Heuristic:" << std::right << setw(13) << "FFDincAHCA\n";
+    }
+    cout << "------------------------------\n\n";
 }
 
 int main(int argc, char **argv){
-    if(argc < 1){
+    if(argc <= 1){
         programInfo();
         exit(1);
     }
-    cout << "SCSSP\n-------------\n";
 
     int x;
     int numInstances = 1000;
@@ -78,7 +108,7 @@ int main(int argc, char **argv){
     int minItemWidth = 150;
     int maxItemWidth = 1000;
     int maxStripWidth = 5000;
-    int packType = 3;
+    int packType = 0;
     int randomSeed = 1;
 
     for(x = 1; x < argc; ++x){
@@ -106,53 +136,15 @@ int main(int argc, char **argv){
         else if(strcmp("-l", argv[x]) == 0){
             maxStripWidth = atoi(argv[++x]);
         }
-        else if(strcmp("-A", argv[x]) == 0){
-            packType = 1;
-        }
-        else if(strcmp("-B", argv[x]) == 0){
-            packType = 2;
-        }
-        else if(strcmp("-C", argv[x]) == 0){
-            packType = 3;
+        else if(strcmp("-p", argv[x]) == 0){
+            packType = atoi(argv[++x]);
         }
         else if(strcmp("-s", argv[x]) == 0){
             randomSeed = atoi(argv[++x]);
         }
     }
 
-
-    //Variables
-    /*int numInstances = atoi(argv[1]);
-    int tau = atoi(argv[2]);
-    int numItem = atoi(argv[3]);
-    int minWidth = atoi(argv[4]);
-    int maxWidth = atoi(argv[5]);
-    int minItemWidth = atoi(argv[6]);
-    int maxItemWidth = atoi(argv[7]);
-    int maxStripWidth = atoi(argv[8]);
-    int packType = atoi(argv[9]);
-    int randomSeed = atoi(argv[10]);*/
-
-    argumentCheck(tau, minWidth, maxWidth, minItemWidth, maxItemWidth, maxStripWidth);
-
-    cout << "Number of instances:\t" << numInstances << endl
-         << "Constraint value:\t" << tau << endl
-         << "Number of items:\t" << numItem << endl
-         << "Minimum score width:\t" << minWidth << endl
-         << "Maximum score width:\t" << maxWidth << endl
-         << "Minimum item width:\t" << minItemWidth << endl
-         << "Maxmimum item width:\t" << maxItemWidth << endl
-         << "Length of strips:\t" << maxStripWidth << endl;
-    if(packType == 1){
-        cout << "Heuristic:\tBasic approximate FFD.\n";
-    }
-    else if(packType == 2){
-        cout << "Heuristic:\tPack strips in turn, choosing smallest feasible score width.\n";
-    }
-    else if(packType == 3){
-        cout << "Heuristic:\tFFD combined with AHCA (exact algorithm).\n";
-    }
-    cout << "Random seed:\t" << randomSeed << endl;
+    argumentCheck(numInstances, tau, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth, maxStripWidth, packType, randomSeed);
 
     int i, j, instance, choice;
     int opt = 0, opt90 = 0, opt80= 0, opt70 = 0, opt60 = 0, opt50 = 0, optLow = 0;
@@ -180,28 +172,28 @@ int main(int argc, char **argv){
 
     switch(packType){
         case 1:
-            cout << "FFD Approx:\n";
+            //cout << "FFD Approx:\n";
             for(instance = 0; instance < numInstances; ++instance){
-                createInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths);
+                createInstance(instance, tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths);
                 basicFFD(opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem, maxItemWidth, maxStripWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
                 resetVectors(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
             }
             break;
 
         case 2:
-            cout << "FFD Smallest:\n";
+            //cout << "FFD Smallest:\n";
             for(instance = 0; instance < numInstances; ++instance){
-                createInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths);
-                pairSmallest(opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, maxStripWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
+                createInstance(instance, tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths);
+                pairSmallest(instance, opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, maxStripWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
                 resetVectors(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
             }
             break;
 
         case 3:
-            cout << "FFD Exact:\n";
+            //cout << "FFD Exact:\n";
             for(instance = 0; instance < numInstances; ++instance){
-                createInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths);
-                FFDincAHCA(cp, na, type0, type1, type2, type3, instance, tau, opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem, maxItemWidth, maxStripWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
+                createInstance(instance, tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths);
+                FFDincAHCA(instance, tau, opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem, maxItemWidth, maxStripWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
                 resetVectors(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
             }
             break;
@@ -214,17 +206,13 @@ int main(int argc, char **argv){
 
     resetVectors(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
     output(opt, opt90, opt80, opt70, opt60, opt50, optLow, numInstances);
-    cout << endl << endl;
-    cout << "Number of times CP used " << cp << endl;
-    cout << "Number of times noConnect " << na << endl;
-    cout << "Number of times type 0 used " << type0 << endl;
-    cout << "Number of times type 1 used " << type1 << endl;
-    cout << "Number of times type 2 used " << type2 << endl;
-    cout << "Number of times type 3 used " << type3 << endl;
+    cout << endl;
 
     endTime = clock();
-    double totalTime = (((endTime - startTime) / double(CLOCKS_PER_SEC)) * 1000);
-    cout << "\nCPU Time = " << totalTime << " milliseconds.\nEND.\n";
+    double totalTimeMS = (((endTime - startTime) / double(CLOCKS_PER_SEC)) * 1000);
+    double totalTimeS = totalTimeMS / 1000;
+    cout << "\nCPU Time = " << totalTimeMS << " milliseconds (" << totalTimeS << " seconds.)\nEND.\n";
+
 
 
 }//END INT MAIN
