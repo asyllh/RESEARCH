@@ -12,7 +12,7 @@ Evolutionary Algorithm with Local Search
 #include <vector>
 using namespace std;
 
-void createInstance(int numScores, int numBox, int minWidth, int maxWidth, int minBoxWidth, int maxBoxWidth, double &totalBoxWidth,
-                    vector<int> &allScores, vector<int> &mates, vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths, vector<vector<int> > &allBoxes);
+void createInstance(int numScores, int numItem, int minWidth, int maxWidth, int minItemWidth, int maxItemWidth, double &totalItemWidth,
+                    vector<int> &allScores, vector<int> &partners, vector<vector<int> > &adjMatrix, vector<vector<int> > &itemWidths, vector<vector<int> > &allItems);
 
 #endif

@@ -1,12 +1,13 @@
-cmake_minimum_required(VERSION 3.7)              # CMake version check
-project(RESEARCH)                                # Create project "RESEARCH"
+cmake_minimum_required(VERSION 3.8)
+project(EA)
 
-set(CMAKE_CXX_STANDARD 11)                       # Enable C++11 standard
+set(CMAKE_CXX_STANDARD 11)
 
-set(SOURCE_FILES asylmssp.cpp)                   # Add asylmssp.cpp file of project root directory as source file
-
-add_executable(MAIN main.cpp
-        packing.cpp
-        packing.h
+set(SOURCE_FILES
         base.cpp
-        base.h)                                  # Add executable target with source files listed in SOURCE_FILES variable
+        base.h
+        main.cpp
+        packing.cpp
+        packing.h)
+
+add_executable(EA ${SOURCE_FILES})

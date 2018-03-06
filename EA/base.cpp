@@ -9,15 +9,16 @@ Evolutionary Algorithm with Local Search
 #include "base.h"
 using namespace std;
 
-void createInstance(int numScores, int numBox, int minWidth, int maxWidth, int minBoxWidth, int maxBoxWidth, double &totalBoxWidth,
-                    vector<int> &allScores, vector<int> &mates, vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths, vector<vector<int> > &allBoxes){
+void createInstance(int numScores, int numItem, int minWidth, int maxWidth, int minItemWidth, int maxItemWidth, double &totalItemWidth,
+                    vector<int> &allScores, vector<int> &partners, vector<vector<int> > &adjMatrix, vector<vector<int> > &itemWidths,
+                    vector<vector<int> > &allItems){
 
     int i, j, k;
-    int threshold = 70;
+    int tau = 70;
     int count = 1;
     vector<int> randOrder;
-    vector<int> checkBox(numScores, 0);
-    totalBoxWidth = 0.0;
+    vector<int> checkItem(numScores, 0);
+    totalItemWidth = 0.0;
 
     //Create random values to be used as score widths, put in allScores vector (except last two elements)
     for (i = 0; i < numScores; ++i) {
@@ -34,10 +35,10 @@ void createInstance(int numScores, int numBox, int minWidth, int maxWidth, int m
     }
     cout << endl;
 
-    //Filling in adjacency matrix - if sum of two scores >= threshold (70), then insert 1 into the matrix, else leave as 0
+    //Filling in adjacency matrix - if sum of two scores >= tau (70), then insert 1 into the matrix, else leave as 0
     for (i = 0; i < allScores.size() - 1; ++i) {
         for (j = i + 1; j < allScores.size(); ++j) {
-            if (allScores[i] + allScores[j] >= threshold) {
+            if (allScores[i] + allScores[j] >= tau) {
                 adjMatrix[i][j] = 1;
                 adjMatrix[j][i] = 1;
             }
@@ -53,10 +54,10 @@ void createInstance(int numScores, int numBox, int minWidth, int maxWidth, int m
     //Randomly shuffle all values in randOrder vector
     random_shuffle(randOrder.begin(), randOrder.end());
 
-    //Assign mates to each score (i.e. pair up scores to define which scores are either side of the same box)
+    //Assign partners to each score (i.e. pair up scores to define which scores are either side of the same box)
     //In the adjacency matrix, this will be represented by value 2
     //Therefore there will be a value of 2 in every row and every column, non repeating
-    for (i = 0; i < numBox; ++i) {
+    for (i = 0; i < numItem; ++i) {
         adjMatrix[randOrder[2 * i]][randOrder[2 * i + 1]] = 2;
         adjMatrix[randOrder[2 * i + 1]][randOrder[2 * i]] = 2;
     }
@@ -75,22 +76,22 @@ void createInstance(int numScores, int numBox, int minWidth, int maxWidth, int m
     for (i = 0; i < numScores; ++i) {
         for (j = 0; j < numScores; ++j) {
             if (adjMatrix[i][j] == 2) {
-                mates[i] = j;
+                partners[i] = j;
                 break;
             }
         }
     }
     /*cout << "Mates Vector:\n";
-    for(i = 0; i < mates.size(); ++i){
-        cout << mates[i] << " ";
+    for(i = 0; i < partners.size(); ++i){
+        cout << partners[i] << " ";
     }
     cout << endl << endl;*/
 
     for(i = 0; i < numScores; ++i){
         for(j = 0; j < numScores; ++j){
-            if(adjMatrix[i][j] == 2 && boxWidths[i][j] == 0){
-                boxWidths[i][j] = rand() % (maxBoxWidth - minBoxWidth + 1) + minBoxWidth;
-                boxWidths[j][i] = boxWidths[i][j];
+            if(adjMatrix[i][j] == 2 && itemWidths[i][j] == 0){
+                itemWidths[i][j] = rand() % (maxItemWidth - minItemWidth + 1) + minItemWidth;
+                itemWidths[j][i] = itemWidths[i][j];
                 break;
             }
 
@@ -101,8 +102,8 @@ void createInstance(int numScores, int numBox, int minWidth, int maxWidth, int m
     for(i = 0; i < numScores; ++i){
         for(j = i+1; j < numScores; ++j){
             if(adjMatrix[i][j] == 2){
-                allBoxes[i][j] = k;
-                allBoxes[j][i] = k * -1;
+                allItems[i][j] = k;
+                allItems[j][i] = k * -1;
                 ++k;
                 break;
             }
@@ -112,23 +113,23 @@ void createInstance(int numScores, int numBox, int minWidth, int maxWidth, int m
 
     cout << right << setw(5) << "Box#" << setw(12) << "Scores" << setw(12) << "Mates" << setw(12) << "Width\n";
     for(i = 0; i < numScores; ++i){
-        if(checkBox[i] == 1){
+        if(checkItem[i] == 1){
             continue;
         }
-        cout << setw(5) << count << setw(10) << allScores[i] << "-" << allScores[mates[i]] << setw(10) << i  << "-" << mates[i] << setw(10) << boxWidths[i][mates[i]] << endl;
-        totalBoxWidth += boxWidths[i][mates[i]];
-        checkBox[i] = 1;
-        checkBox[mates[i]] = 1;
+        cout << setw(5) << count << setw(10) << allScores[i] << "-" << allScores[partners[i]] << setw(10) << i  << "-" << partners[i] << setw(10) << itemWidths[i][partners[i]] << endl;
+        totalItemWidth += itemWidths[i][partners[i]];
+        checkItem[i] = 1;
+        checkItem[partners[i]] = 1;
         ++count;
 
     }
 
-    cout << "Total Box Widths: " << totalBoxWidth << endl << endl;
+    cout << "Total Box Widths: " << totalItemWidth << endl << endl;
 
-    /*cout << "allBoxes:\n";
+    /*cout << "allItems:\n";
     for(i = 0; i < numScores; ++i){
         for(j = 0; j < numScores; ++j){
-            cout << allBoxes[i][j] << " ";
+            cout << allItems[i][j] << " ";
         }
         cout << endl;
     }

@@ -16,10 +16,10 @@ void swap(int &a, int &b){
     b = temp;
 }
 
-int lowerBound(double totalBoxWidth, int maxStripWidth){
+int lowerBound(double totalItemWidth, int maxStripWidth){
     int lBound;
 
-    lBound = ceil(totalBoxWidth/maxStripWidth);
+    lBound = ceil(totalItemWidth/maxStripWidth);
     return lBound;
 }
 
@@ -40,26 +40,26 @@ double fitness (int maxStripWidth, vector<int> &stripSum, vector<vector<int> > &
 
 }
 
-void FFDecreasing(int numScores, int numBox, int maxBoxWidth, vector<int> &mates, vector<vector<int> > &boxWidths, vector<int> &boxOrder){
+void FFDecreasing(int numScores, int numItem, int maxItemWidth, vector<int> &partners, vector<vector<int> > &itemWidths, vector<int> &itemOrder){
 
     int i, mini;
     int min = 0;
-    int max = maxBoxWidth;
+    int max = maxItemWidth;
     vector<int> checked(numScores, 0);
 
-    while(boxOrder.size() < numBox) {
+    while(itemOrder.size() < numItem) {
         for (i = 0; i < numScores; ++i) {
             if(checked[i] == 1){
                 continue;
             }
-            if (boxWidths[i][mates[i]] > min && boxWidths[i][mates[i]] <= max) {
-                min = boxWidths[i][mates[i]];
+            if (itemWidths[i][partners[i]] > min && itemWidths[i][partners[i]] <= max) {
+                min = itemWidths[i][partners[i]];
                 mini = i;
             }
         }
-        boxOrder.push_back(mini);
+        itemOrder.push_back(mini);
         checked[mini] = 1;
-        checked[mates[mini]] = 1;
+        checked[partners[mini]] = 1;
         max = min;
         min = 0;
     }
@@ -67,25 +67,25 @@ void FFDecreasing(int numScores, int numBox, int maxBoxWidth, vector<int> &mates
 
 }
 
-void FFRandom(int numScores, int numBox, vector<int> &mates, vector<vector<int> > &boxWidths, vector<int> &boxOrder){
+void FFRandom(int numScores, int numItem, vector<int> &partners, vector<vector<int> > &itemWidths, vector<int> &itemOrder){
 
     int i, r;
     vector<int> checked(numScores, 0);
 
-    while(boxOrder.size() < numBox){
+    while(itemOrder.size() < numItem){
         r = rand() % numScores;
         if(checked[r] == 1){
             continue;
         }
-        if(r < mates[r]){
-            boxOrder.push_back(r);
+        if(r < partners[r]){
+            itemOrder.push_back(r);
             checked[r] = 1;
-            checked[mates[r]] = 1;
+            checked[partners[r]] = 1;
         }
         else{
-            boxOrder.push_back(mates[r]);
+            itemOrder.push_back(partners[r]);
             checked[r] = 1;
-            checked[mates[r]] = 1;
+            checked[partners[r]] = 1;
         }
     }
 
@@ -93,52 +93,52 @@ void FFRandom(int numScores, int numBox, vector<int> &mates, vector<vector<int> 
 
 }
 
-void FFShell(int numScores, int numBox, int maxBoxWidth, int maxStripWidth, vector<int> &mates,
-         vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<vector<int> > &strip, bool decrease){
+void FFShell(int numScores, int numItem, int maxItemWidth, int maxStripWidth, vector<int> &partners,
+         vector<vector<int> > &adjMatrix, vector<vector<int> > &itemWidths, vector<int> &stripSum, vector<vector<int> > &strip, bool decrease){
 
     int i, j, k, l;
-    vector<int> boxOrder;
+    vector<int> itemOrder;
 
     if(decrease){
-        FFDecreasing(numScores, numBox, maxBoxWidth, mates, boxWidths, boxOrder);
+        FFDecreasing(numScores, numItem, maxItemWidth, partners, itemWidths, itemOrder);
     }
     else{
-        FFRandom(numScores, numBox, mates, boxWidths, boxOrder);
+        FFRandom(numScores, numItem, partners, itemWidths, itemOrder);
     }
 
-    /*cout << "Box Order:\n";
-    for(i = 0; i < boxOrder.size(); ++i){
-        cout << boxOrder[i] << " ";
+    /*cout << "Item Order:\n";
+    for(i = 0; i < itemOrder.size(); ++i){
+        cout << itemOrder[i] << " ";
     }
     cout << endl << endl;*/
 
-    strip[0].push_back(boxOrder[0]);
-    strip[0].push_back(mates[boxOrder[0]]);
-    stripSum[0] += boxWidths[boxOrder[0]][mates[boxOrder[0]]];
+    strip[0].push_back(itemOrder[0]);
+    strip[0].push_back(partners[itemOrder[0]]);
+    stripSum[0] += itemWidths[itemOrder[0]][partners[itemOrder[0]]];
 
 
-    for(j = 1; j < boxOrder.size(); ++j){
+    for(j = 1; j < itemOrder.size(); ++j){
         for(i = 0; i < strip.size(); ++i){
             if(!strip[i].empty()){
-                if(stripSum[i] + boxWidths[boxOrder[j]][mates[boxOrder[j]]] <= maxStripWidth){
-                    if(adjMatrix[strip[i].back()][boxOrder[j]] == 1){
-                        strip[i].push_back(boxOrder[j]);
-                        strip[i].push_back(mates[boxOrder[j]]);
-                        stripSum[i] += boxWidths[boxOrder[j]][mates[boxOrder[j]]];
+                if(stripSum[i] + itemWidths[itemOrder[j]][partners[itemOrder[j]]] <= maxStripWidth){
+                    if(adjMatrix[strip[i].back()][itemOrder[j]] == 1){
+                        strip[i].push_back(itemOrder[j]);
+                        strip[i].push_back(partners[itemOrder[j]]);
+                        stripSum[i] += itemWidths[itemOrder[j]][partners[itemOrder[j]]];
                         break;
                     }
-                    else if (adjMatrix[strip[i].back()][mates[boxOrder[j]]] == 1){
-                        strip[i].push_back(mates[boxOrder[j]]);
-                        strip[i].push_back(boxOrder[j]);
-                        stripSum[i] += boxWidths[boxOrder[j]][mates[boxOrder[j]]];
+                    else if (adjMatrix[strip[i].back()][partners[itemOrder[j]]] == 1){
+                        strip[i].push_back(partners[itemOrder[j]]);
+                        strip[i].push_back(itemOrder[j]);
+                        stripSum[i] += itemWidths[itemOrder[j]][partners[itemOrder[j]]];
                         break;
                     }
                 }
             }
             else if (strip[i].empty()){
-                strip[i].push_back(boxOrder[j]);
-                strip[i].push_back(mates[boxOrder[j]]);
-                stripSum[i] += boxWidths[boxOrder[j]][mates[boxOrder[j]]];
+                strip[i].push_back(itemOrder[j]);
+                strip[i].push_back(partners[itemOrder[j]]);
+                stripSum[i] += itemWidths[itemOrder[j]][partners[itemOrder[j]]];
                 break;
             }
         }
@@ -160,7 +160,7 @@ void FFShell(int numScores, int numBox, int maxBoxWidth, int maxStripWidth, vect
 
     //cout << "After FFD: " << strip.size() << " strips\n";
 
-    //cout << "Lower Bound: " << lowerBound(totalBoxWidth, maxStripWidth) << " strips\n";
+    //cout << "Lower Bound: " << lowerBound(totalItemWidth, maxStripWidth) << " strips\n";
 
 
     /*cout << "Strips FFD (scores):\n";
@@ -185,66 +185,66 @@ void FFShell(int numScores, int numBox, int maxBoxWidth, int maxStripWidth, vect
 
 }
 
-void partialFFD(int numScores, int maxBoxWidth, int maxStripWidth, vector<int> &mates, vector<vector<int> > &adjMatrix,
-                vector<vector<int> > &boxWidths, vector<int> &partialBoxes, vector<int> &partialSum, vector<vector<int> > &partialSol){
+void partialFFD(int numScores, int maxItemWidth, int maxStripWidth, vector<int> &partners, vector<vector<int> > &adjMatrix,
+                vector<vector<int> > &itemWidths, vector<int> &partialItem, vector<int> &partialSum, vector<vector<int> > &partialSol){
 
     int i, j, mini, k, l;
     int min = 0;
-    int max = maxBoxWidth;
-    vector<int> boxDecrease;
+    int max = maxItemWidth;
+    vector<int> itemDecrease;
     vector<int> checked(numScores, 0);
 
 
-    while(boxDecrease.size() < partialBoxes.size()/2) {
-        for (i = 0; i < partialBoxes.size(); ++i) {
-            if(checked[partialBoxes[i]] == 1){
+    while(itemDecrease.size() < partialItem.size()/2) {
+        for (i = 0; i < partialItem.size(); ++i) {
+            if(checked[partialItem[i]] == 1){
                 continue;
             }
-            if (boxWidths[partialBoxes[i]][mates[partialBoxes[i]]] > min && boxWidths[partialBoxes[i]][mates[partialBoxes[i]]] <= max) {
-                min = boxWidths[partialBoxes[i]][mates[partialBoxes[i]]];
-                mini = partialBoxes[i];
+            if (itemWidths[partialItem[i]][partners[partialItem[i]]] > min && itemWidths[partialItem[i]][partners[partialItem[i]]] <= max) {
+                min = itemWidths[partialItem[i]][partners[partialItem[i]]];
+                mini = partialItem[i];
             }
         }
-        boxDecrease.push_back(mini);
+        itemDecrease.push_back(mini);
         checked[mini] = 1;
-        checked[mates[mini]] = 1;
+        checked[partners[mini]] = 1;
         max = min;
         min = 0;
     }
 
     /*cout << "\nBox decrease:\n";
-    for(i = 0; i < boxDecrease.size(); ++i){
-        cout << boxDecrease[i] << " ";
+    for(i = 0; i < itemDecrease.size(); ++i){
+        cout << itemDecrease[i] << " ";
     }
     cout << endl << endl;*/
 
-    partialSol[0].push_back(boxDecrease[0]);
-    partialSol[0].push_back(mates[boxDecrease[0]]);
-    partialSum[0] += boxWidths[boxDecrease[0]][mates[boxDecrease[0]]];
+    partialSol[0].push_back(itemDecrease[0]);
+    partialSol[0].push_back(partners[itemDecrease[0]]);
+    partialSum[0] += itemWidths[itemDecrease[0]][partners[itemDecrease[0]]];
 
 
-    for(j = 1; j < boxDecrease.size(); ++j){
+    for(j = 1; j < itemDecrease.size(); ++j){
         for(i = 0; i < partialSol.size(); ++i){
             if(!partialSol[i].empty()){
-                if(partialSum[i] + boxWidths[boxDecrease[j]][mates[boxDecrease[j]]] <= maxStripWidth){
-                    if(adjMatrix[partialSol[i].back()][boxDecrease[j]] == 1){
-                        partialSol[i].push_back(boxDecrease[j]);
-                        partialSol[i].push_back(mates[boxDecrease[j]]);
-                        partialSum[i] += boxWidths[boxDecrease[j]][mates[boxDecrease[j]]];
+                if(partialSum[i] + itemWidths[itemDecrease[j]][partners[itemDecrease[j]]] <= maxStripWidth){
+                    if(adjMatrix[partialSol[i].back()][itemDecrease[j]] == 1){
+                        partialSol[i].push_back(itemDecrease[j]);
+                        partialSol[i].push_back(partners[itemDecrease[j]]);
+                        partialSum[i] += itemWidths[itemDecrease[j]][partners[itemDecrease[j]]];
                         break;
                     }
-                    else if (adjMatrix[partialSol[i].back()][mates[boxDecrease[j]]] == 1){
-                        partialSol[i].push_back(mates[boxDecrease[j]]);
-                        partialSol[i].push_back(boxDecrease[j]);
-                        partialSum[i] += boxWidths[boxDecrease[j]][mates[boxDecrease[j]]];
+                    else if (adjMatrix[partialSol[i].back()][partners[itemDecrease[j]]] == 1){
+                        partialSol[i].push_back(partners[itemDecrease[j]]);
+                        partialSol[i].push_back(itemDecrease[j]);
+                        partialSum[i] += itemWidths[itemDecrease[j]][partners[itemDecrease[j]]];
                         break;
                     }
                 }
             }
             else if (partialSol[i].empty()){
-                partialSol[i].push_back(boxDecrease[j]);
-                partialSol[i].push_back(mates[boxDecrease[j]]);
-                partialSum[i] += boxWidths[boxDecrease[j]][mates[boxDecrease[j]]];
+                partialSol[i].push_back(itemDecrease[j]);
+                partialSol[i].push_back(partners[itemDecrease[j]]);
+                partialSum[i] += itemWidths[itemDecrease[j]][partners[itemDecrease[j]]];
                 break;
             }
         }
@@ -286,32 +286,32 @@ void partialFFD(int numScores, int maxBoxWidth, int maxStripWidth, vector<int> &
 
 }
 
-void createInitialPopulation(int numScores, int numBox, int maxBoxWidth, int maxStripWidth, vector<int> &allScores,
-                             vector<int> &mates, vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths,
+void createInitialPopulation(int numScores, int numItem, int maxItemWidth, int maxStripWidth, vector<int> &allScores,
+                             vector<int> &partners, vector<vector<int> > &adjMatrix, vector<vector<int> > &itemWidths,
                              vector<vector<int> > &populationSum, vector<vector<vector<int> > > &population){
 
     int i, j, k, l;
-    vector<vector<int> > strip(numBox);
-    vector<int> stripSum(numBox, 0);
+    vector<vector<int> > strip(numItem);
+    vector<int> stripSum(numItem, 0);
 
-    FFShell(numScores, numBox, maxBoxWidth, maxStripWidth, mates, adjMatrix, boxWidths, stripSum, strip, true);
+    FFShell(numScores, numItem, maxItemWidth, maxStripWidth, partners, adjMatrix, itemWidths, stripSum, strip, true);
 
-    mutation(numScores, maxBoxWidth, maxStripWidth, allScores, mates, adjMatrix, boxWidths, stripSum, strip);
+    mutation(numScores, maxItemWidth, maxStripWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
 
     population.push_back(strip);
     populationSum.push_back(stripSum);
 
     for(i = 0; i < 5; ++i){
         strip.clear();
-        strip.resize(numBox);
+        strip.resize(numItem);
         stripSum.clear();
-        for(j = 0; j < numBox; ++j){
+        for(j = 0; j < numItem; ++j){
             stripSum.push_back(0);
         }
 
-        FFShell(numScores, numBox, maxBoxWidth, maxStripWidth, mates, adjMatrix, boxWidths, stripSum, strip, false);
+        FFShell(numScores, numItem, maxItemWidth, maxStripWidth, partners, adjMatrix, itemWidths, stripSum, strip, false);
 
-        mutation(numScores, maxBoxWidth, maxStripWidth, allScores, mates, adjMatrix, boxWidths, stripSum, strip);
+        mutation(numScores, maxItemWidth, maxStripWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
 
         population.push_back(strip);
         populationSum.push_back(stripSum);
@@ -336,8 +336,8 @@ void createInitialPopulation(int numScores, int numBox, int maxBoxWidth, int max
 
 }
 
-void mutation(int numScores, int maxBoxWidth, int maxStripWidth, vector<int> &allScores, vector<int> &mates,
-              vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<vector<int> > &strip){
+void mutation(int numScores, int maxItemWidth, int maxStripWidth, vector<int> &allScores, vector<int> &partners,
+              vector<vector<int> > &adjMatrix, vector<vector<int> > &itemWidths, vector<int> &stripSum, vector<vector<int> > &strip){
 
     int i, j;
     vector<int> stripSumX;
@@ -390,12 +390,12 @@ void mutation(int numScores, int maxBoxWidth, int maxStripWidth, vector<int> &al
     }*/
     //cout << endl << endl;
 
-    localSearch(numScores, maxBoxWidth, maxStripWidth, allScores, mates, adjMatrix, boxWidths, stripSum, strip, stripSumX, stripX, stripSumY, stripY);
+    localSearch(numScores, maxItemWidth, maxStripWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip, stripSumX, stripX, stripSumY, stripY);
 
 }
 
-void localSearch(int numScores, int maxBoxWidth, int maxStripWidth, vector<int> &allScores, vector<int> &mates,
-                 vector<vector<int> > &adjMatrix, vector<vector<int> > &boxWidths, vector<int> &stripSum, vector<vector<int> > &strip,
+void localSearch(int numScores, int maxItemWidth, int maxStripWidth, vector<int> &allScores, vector<int> &partners,
+                 vector<vector<int> > &adjMatrix, vector<vector<int> > &itemWidths, vector<int> &stripSum, vector<vector<int> > &strip,
                  vector<int> &stripSumX, vector<vector<int> > &stripX, vector<int> &stripSumY, vector<vector<int> > &stripY){
 
     int a, b, c, d, i, j, k, l, pairSizeX, pairSizeY;
@@ -411,49 +411,54 @@ void localSearch(int numScores, int maxBoxWidth, int maxStripWidth, vector<int> 
             //Go through each pair of boxes on stripX[i]
             for(a = 0; a < stripX[i].size()-3; a+=2){ //Starting from the first score on the first box until the first score on the penultimate box
                 for(b = a+2; b < stripX[i].size()-1; b+=2){ //Starting from the first score on the second box until the first score on the last box
-                    pairSizeX = boxWidths[stripX[i][a]][stripX[i][a+1]] + boxWidths[stripX[i][b]][stripX[i][b+1]]; //Sum box widths
+                    pairSizeX = itemWidths[stripX[i][a]][stripX[i][a+1]] + itemWidths[stripX[i][b]][stripX[i][b+1]]; //Sum box widths
                     //Check if there exists a pair of boxes on a strip in set stripY that have a combined width larger than pairSizeX
                     for(j = 0; j < stripY.size(); ++j){ //For each strip in the set stripY
                         if(stripY[j].size() >= 4){ //If there are at least 2 boxes on stripY[j]
                             //Go through each pair of boxes on stripY[j]
                             for(c = 0; c < stripY[j].size()-3; c+=2){ //Starting from the first score on the first box until the first score on the penultimate box
                                 for(d = c+2; d < stripY[j].size()-1; d+=2){ //Starting from the first score on the second box until the first score on the last box
-                                    pairSizeY = boxWidths[stripY[j][c]][stripY[j][c+1]] + boxWidths[stripY[j][d]][stripY[j][d+1]]; //Sum box widths
+                                    pairSizeY = itemWidths[stripY[j][c]][stripY[j][c+1]] + itemWidths[stripY[j][d]][stripY[j][d+1]]; //Sum box widths
                                     //Check if pairSizeX < pairSizeY and that boxes can fit onto strip
                                     if(pairSizeX < pairSizeY && stripSumX[i] - pairSizeX + pairSizeY <= maxStripWidth){
                                         swapType = 1;
                                         //cout << "i: " << i << " j: " << j << " a: " << a << " b: " << b << " c: " << c << " d: " << d << endl;
                                         if(stripX[i].size() == 4){ //If stripX[i] only contains 2 boxes
                                             if(stripY[j].size() == 4){ //If stripY[j] only contains 2 boxes
-                                                //Do a straight swap, no need for MBAHRA
+                                                //Do a straight swap, no need for AHCA
                                                 stripX[i].swap(stripY[j]);
                                                 swap(stripSumX[i], stripSumY[j]);
                                                 feasible = 1;
                                             }
                                             else if (d == c+2){ //If stripY[j] contains more than 2 boxes & the two chosen boxes in stripY[j] are adjacent
-                                                //Only perform MBAHRA on stripY[j]
+                                                //Only perform AHCA on stripY[j]
                                                 moveType = 11;
-                                                MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripSumX, stripX, stripSumY, stripY);
+                                                AHCA(swapType, moveType, feasible, i, a, b, j, c, d, allScores,
+                                                     itemWidths, stripSumX, stripX, stripSumY, stripY);
                                             }
                                             else{ //IIf stripY[j] contains more than 2 boxes & boxes c and d are not adjacent
                                                 moveType = 0;
-                                                MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripSumX, stripX, stripSumY, stripY);
+                                                AHCA(swapType, moveType, feasible, i, a, b, j, c, d, allScores,
+                                                     itemWidths, stripSumX, stripX, stripSumY, stripY);
                                             }
                                         }
                                         else if (stripY[j].size() == 4){ //If stripY[j] only contains 2 boxes but stripX[i] contains > 2 boxes
                                             if(b == a+2){ //If the two chosen boxes in stripX[i] are adjacent to one another
-                                                //Only perform MBAHRA on stripX[i]
+                                                //Only perform AHCA on stripX[i]
                                                 moveType = 12;
-                                                MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripSumX, stripX, stripSumY, stripY);
+                                                AHCA(swapType, moveType, feasible, i, a, b, j, c, d, allScores,
+                                                     itemWidths, stripSumX, stripX, stripSumY, stripY);
                                             }
                                             else{ //If boxes a and b are not adjacent
                                                 moveType = 0;
-                                                MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripSumX, stripX, stripSumY, stripY);
+                                                AHCA(swapType, moveType, feasible, i, a, b, j, c, d, allScores,
+                                                     itemWidths, stripSumX, stripX, stripSumY, stripY);
                                             }
                                         }
                                         else{ //If stripX[i].size() > 4 && stripY[j[.size() > 4
                                             moveType = 0;
-                                            MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripSumX, stripX, stripSumY, stripY);
+                                            AHCA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, itemWidths,
+                                                 stripSumX, stripX, stripSumY, stripY);
                                         }
                                         if(feasible == 1){
                                             //++count;
@@ -481,13 +486,13 @@ void localSearch(int numScores, int maxBoxWidth, int maxStripWidth, vector<int> 
         if(stripX[i].size() >= 4){ //If there are at least 2 boxes on stripX[i]
             for(a = 0; a < stripX[i].size()-3; a+=2){ //Starting from the first score on the first box until the first score on the penultimate box
                 for(b = a+2; b < stripX[i].size()-1; b+=2){ //Starting from the first score on the second box until the first score on the last box
-                    pairSizeX = boxWidths[stripX[i][a]][stripX[i][a+1]] + boxWidths[stripX[i][b]][stripX[i][b+1]]; //Sum box widths
+                    pairSizeX = itemWidths[stripX[i][a]][stripX[i][a+1]] + itemWidths[stripX[i][b]][stripX[i][b+1]]; //Sum box widths
                     //Check if there exists a box on a strip in set stripY whose width is larger than pairSizeX
                     for(j = 0; j < stripY.size(); ++j){
                         //Go through each box on stripY[j]
                         for(c = 0; c < stripY[j].size()-1; c+=2){ //Starting from the first score on the first box unil the first score on the last box
                             //Check if pairSizeX < width of box in stripY, and that box can fit onto strip
-                            if(pairSizeX <= boxWidths[stripY[j][c]][stripY[j][c+1]] && stripSumX[i] - pairSizeX + boxWidths[stripY[j][c]][stripY[j][c+1]] <= maxStripWidth){
+                            if(pairSizeX <= itemWidths[stripY[j][c]][stripY[j][c+1]] && stripSumX[i] - pairSizeX + itemWidths[stripY[j][c]][stripY[j][c+1]] <= maxStripWidth){
                                 swapType = 2;
                                 if(stripX[i].size() == 4){ //If stripX[i] only contains 2 boxes
                                     if(stripY[j].size() == 2){ //If stripY[j] only contains 1 box
@@ -497,25 +502,29 @@ void localSearch(int numScores, int maxBoxWidth, int maxStripWidth, vector<int> 
                                         feasible = 1;
                                     }
                                     else{ //If stripY[j] contains more than 1 box
-                                        //Only perform MBAHRA on stripY[j]
+                                        //Only perform AHCA on stripY[j]
                                         moveType = 21;
-                                        MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripSumX, stripX, stripSumY, stripY);
+                                        AHCA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, itemWidths,
+                                             stripSumX, stripX, stripSumY, stripY);
                                     }
                                 }
                                 else if(stripY[j].size() == 2){ //If stripY[j] only contains 1 box, but stripX[i] contains > 2 boxes
                                     if(b == a+2){ //If the two boxes chosen from stripX[i] are adjacent to one another
-                                        //Only perform MBAHRA on stripX[i]
+                                        //Only perform AHCA on stripX[i]
                                         moveType = 22;
-                                        MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripSumX, stripX, stripSumY, stripY);
+                                        AHCA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, itemWidths,
+                                             stripSumX, stripX, stripSumY, stripY);
                                     }
                                     else{ //If the two boxes chosen from stripX[i] are not adjacent to one another
                                         moveType = 0;
-                                        MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripSumX, stripX, stripSumY, stripY);
+                                        AHCA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, itemWidths,
+                                             stripSumX, stripX, stripSumY, stripY);
                                     }
                                 }
                                 else { //If stripX[i].size() > 4 && stripY[j].size() > 2
                                     moveType = 0;
-                                    MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripSumX, stripX, stripSumY, stripY);
+                                    AHCA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, itemWidths,
+                                         stripSumX, stripX, stripSumY, stripY);
                                 }
 
                                 if(feasible == 1){
@@ -543,8 +552,8 @@ void localSearch(int numScores, int maxBoxWidth, int maxStripWidth, vector<int> 
             for(j = 0; j < stripY.size(); ++j){ // For each strip in the set stripY
                 for(c = 0; c < stripY[j].size()-1; c+=2){ //Starting from the first score on the first box until the first score on the last box
                     //Check if boxwidth[a] < boxWidth[c] and that box can fit on strip
-                    if(boxWidths[stripX[i][a]][stripX[i][a+1]] < boxWidths[stripY[j][c]][stripY[j][c+1]]
-                       && stripSumX[i] - boxWidths[stripX[i][a]][stripX[i][a+1]] + boxWidths[stripY[j][c]][stripY[j][c+1]] <= maxStripWidth){
+                    if(itemWidths[stripX[i][a]][stripX[i][a+1]] < itemWidths[stripY[j][c]][stripY[j][c+1]]
+                       && stripSumX[i] - itemWidths[stripX[i][a]][stripX[i][a+1]] + itemWidths[stripY[j][c]][stripY[j][c+1]] <= maxStripWidth){
                         swapType = 3;
                         if(stripX[i].size() == 2){ //If stripX[i] only contains 1 box
                             if(stripY[j].size() == 2){ //If stripY[j] only contains 1 box
@@ -554,19 +563,22 @@ void localSearch(int numScores, int maxBoxWidth, int maxStripWidth, vector<int> 
                                 feasible = 1;
                             }
                             else{ //If stripY[j] contains more than 1 box
-                                //Only peform MBAHRA on stripY[j]
+                                //Only peform AHCA on stripY[j]
                                 moveType = 31;
-                                MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripSumX, stripX, stripSumY, stripY);
+                                AHCA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, itemWidths, stripSumX,
+                                     stripX, stripSumY, stripY);
                             }
                         }
                         else if(stripY[j].size() == 2){ //If stripY[j] only contains 1 box but stripX[i].size() > 2
-                            //Only perform MBAHRA on stripX[i]
+                            //Only perform AHCA on stripX[i]
                             moveType = 32;
-                            MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripSumX, stripX, stripSumY, stripY);
+                            AHCA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, itemWidths, stripSumX,
+                                 stripX, stripSumY, stripY);
                         }
                         else{ //stripX[i].size() > 2 && stripY[j].size() > 2
                             moveType = 0;
-                            MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripSumX, stripX, stripSumY, stripY);
+                            AHCA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, itemWidths, stripSumX,
+                                 stripX, stripSumY, stripY);
                         }
                         if(feasible == 1){
                             //++count;
@@ -589,14 +601,22 @@ void localSearch(int numScores, int maxBoxWidth, int maxStripWidth, vector<int> 
     for(j = 0; j < stripY.size(); ++j){ //For each strip in the set stripY
         for(c = 0; c < stripY[j].size()-1; c+=2){ //Starting from the first score on the first box until the first score on the last box
             for(i = 0; i < stripX.size(); ++i){ //For each strip in the set stripX
-                if(stripSumX[i] + boxWidths[stripY[j][c]][stripY[j][c+1]] <= maxStripWidth){
+                if(stripSumX[i] + itemWidths[stripY[j][c]][stripY[j][c+1]] <= maxStripWidth){
                     swapType = 4;
                     if(stripY[j].size() == 2){ //If stripY[j] only contains one box
                         moveType = 41;
-                        MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripSumX, stripX, stripSumY, stripY);
+                        AHCA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, itemWidths, stripSumX, stripX,
+                             stripSumY, stripY);
+                    }
+                    else if(stripY[j].size() == 4){
+                        moveType = 42;
+                        AHCA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, itemWidths, stripSumX, stripX,
+                             stripSumY, stripY);
                     }
                     else {
-                        MBAHRA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, boxWidths, stripSumX, stripX, stripSumY, stripY);
+                        moveType = 0;
+                        AHCA(swapType, moveType, feasible, i, a, b, j, c, d, allScores, itemWidths, stripSumX, stripX,
+                             stripSumY, stripY);
                     }
                     if(feasible == 2){
                         //++count;
@@ -672,22 +692,22 @@ void localSearch(int numScores, int maxBoxWidth, int maxStripWidth, vector<int> 
 
         //Do FFD on stripY
 
-        vector<int> partialBoxes;
+        vector<int> partialItem;
         for(i = 0; i < stripY.size(); ++i){
             for(j = 0; j < stripY[i].size(); ++j){
-                partialBoxes.push_back(stripY[i][j]);
+                partialItem.push_back(stripY[i][j]);
             }
         }
-        sort(partialBoxes.begin(), partialBoxes.end());
+        sort(partialItem.begin(), partialItem.end());
 
         stripY.clear();
-        stripY.resize(partialBoxes.size()/2);
+        stripY.resize(partialItem.size()/2);
         stripSumY.clear();
-        for(i = 0; i < partialBoxes.size()/2; ++i){
+        for(i = 0; i < partialItem.size()/2; ++i){
             stripSumY.push_back(0);
         }
 
-        partialFFD(numScores, maxBoxWidth, maxStripWidth, mates, adjMatrix, boxWidths, partialBoxes, stripSumY, stripY);
+        partialFFD(numScores, maxItemWidth, maxStripWidth, partners, adjMatrix, itemWidths, partialItem, stripSumY, stripY);
 
         //join sets stripX and stripY together back into vector<vector<int> > strip
 
@@ -730,8 +750,452 @@ void localSearch(int numScores, int maxBoxWidth, int maxStripWidth, vector<int> 
 
 }
 
-void MBAHRA(int swapType, int moveType, int &feasible, int i1, int a1, int b1, int j1, int c1, int d1, vector<int> &allScores,
-            vector<vector<int> > &boxWidths, vector<int> &stripSumX, vector<vector<int> > &stripX, vector<int> &stripSumY, vector<vector<int> > &stripY){
+void initAHCA(int swapType, int moveType, int &feasible, int i1, int a1, int b1, int j1, int c1, int d1, vector<int> &allScores,
+              vector<vector<int> > &itemWidths, vector<int> &stripSumX, vector<vector<int> > &stripX, vector<int> &stripSumY, vector<vector<int> > &stripY){
+
+    int k;
+    feasible = 0;
+    vector<int> scoresX;
+    vector<int> scoresY;
+    vector<int> originalX;
+    vector<int> originalY;
+    vector<int> finalX;
+    vector<int> finalY;
+
+    //region swapType == 1
+    /**PAIRPAIR**/
+    if(swapType == 1){
+        if(moveType == 11){ //X[i] = 2 items, Y[j] > 2 items, c and d adjacent, AHCA on Y[j] only.
+            originalX.push_back(stripY[j1][c1]);
+            originalX.push_back(stripY[j1][c1+1]);
+            originalX.push_back(stripY[j1][d1]);
+            originalX.push_back(stripY[j1][d1+1]);
+            for (k = 0; k < stripY[j1].size(); ++k) {
+                if (k == c1 || k == c1 + 1 || k == d1 || k == d1 + 1) {
+                    continue;
+                }
+                scoresY.push_back(allScores[stripY[j1][k]]);
+                originalY.push_back(stripY[j1][k]);
+
+            }
+            scoresY.push_back(allScores[stripX[i1][a1]]);
+            originalY.push_back(stripX[i1][a1]);
+            scoresY.push_back(allScores[stripX[i1][a1 + 1]]);
+            originalY.push_back(stripX[i1][a1 + 1]);
+            scoresY.push_back(allScores[stripX[i1][b1]]);
+            originalY.push_back(stripX[i1][b1]);
+            scoresY.push_back(allScores[stripX[i1][b1 + 1]]);
+            originalY.push_back(stripX[i1][b1 + 1]);
+            scoresY.push_back(70);
+            scoresY.push_back(70);
+            //Run AHCA on scoresY, originalY, finalY, feasible
+            if(feasible == 1){
+                stripSumX[i1] = stripSumX[i1] - (itemWidths[stripX[i1][a1]][stripX[i1][a1 + 1]] + itemWidths[stripX[i1][b1]][stripX[i1][b1 + 1]])
+                                + (itemWidths[stripY[j1][c1]][stripY[j1][c1 + 1]] + itemWidths[stripY[j1][d1]][stripY[j1][d1 + 1]]);
+                stripSumY[j1] = stripSumY[j1] - (itemWidths[stripY[j1][c1]][stripY[j1][c1 + 1]] + itemWidths[stripY[j1][d1]][stripY[j1][d1 + 1]])
+                                + (itemWidths[stripX[i1][a1]][stripX[i1][a1 + 1]] + itemWidths[stripX[i1][b1]][stripX[i1][b1 + 1]]);
+                stripX[i1].swap(originalX);
+                stripY[j1].swap(finalY);
+            }
+        } //End moveType = 11
+
+        else if(moveType == 12){ //Y[j] = 2 items, X[i] > 2 items, a and b adjacent, AHCA on X[i] only.
+            for (k = 0; k < stripX[i1].size(); ++k) {
+                if (k == a1 || k == a1 + 1 || k == b1 || k == b1 + 1) {
+                    continue;
+                }
+                scoresX.push_back(allScores[stripX[i1][k]]);
+                originalX.push_back(stripX[i1][k]);
+
+            }
+            scoresX.push_back(allScores[stripY[j1][c1]]);
+            originalX.push_back(stripY[j1][c1]);
+            scoresX.push_back(allScores[stripY[j1][c1 + 1]]);
+            originalX.push_back(stripY[j1][c1 + 1]);
+            scoresX.push_back(allScores[stripY[j1][d1]]);
+            originalX.push_back(stripY[j1][d1]);
+            scoresX.push_back(allScores[stripY[j1][d1 + 1]]);
+            originalX.push_back(stripY[j1][d1 + 1]);
+            scoresX.push_back(70);
+            scoresX.push_back(70);
+            //Run AHCA on scoresX, originalX, finalX, feasible
+            if(feasible == 1){
+                originalY.push_back(stripX[i1][a1]);
+                originalY.push_back(stripX[i1][a1+1]);
+                originalY.push_back(stripX[i1][b1]);
+                originalY.push_back(stripX[i1][b1+1]);
+                stripSumX[i1] = stripSumX[i1] - (itemWidths[stripX[i1][a1]][stripX[i1][a1 + 1]] + itemWidths[stripX[i1][b1]][stripX[i1][b1 + 1]])
+                                + (itemWidths[stripY[j1][c1]][stripY[j1][c1 + 1]] + itemWidths[stripY[j1][d1]][stripY[j1][d1 + 1]]);
+                stripSumY[j1] = stripSumY[j1] - (itemWidths[stripY[j1][c1]][stripY[j1][c1 + 1]] + itemWidths[stripY[j1][d1]][stripY[j1][d1 + 1]])
+                                + (itemWidths[stripX[i1][a1]][stripX[i1][a1 + 1]] + itemWidths[stripX[i1][b1]][stripX[i1][b1 + 1]]);
+                stripX[i1].swap(finalX);
+                stripY[j1].swap(originalY);
+            }
+        } //End moveType = 12
+
+        else{ //moveType == 0, AHCA on both X and Y.
+            /* X[i] = 2 items, Y[j] > 2 items, c and d not adjacent
+             * Y[i] = 2 items, X[i] > 2 items, a and b not adjacent
+             * X[i] > 2 items, Y[j] > 2 items */
+            for (k = 0; k < stripX[i1].size(); ++k) {
+                if (k == a1 || k == a1 + 1 || k == b1 || k == b1 + 1) {
+                    continue;
+                }
+                scoresX.push_back(allScores[stripX[i1][k]]);
+                originalX.push_back(stripX[i1][k]);
+
+            }
+            scoresX.push_back(allScores[stripY[j1][c1]]);
+            originalX.push_back(stripY[j1][c1]);
+            scoresX.push_back(allScores[stripY[j1][c1 + 1]]);
+            originalX.push_back(stripY[j1][c1 + 1]);
+            scoresX.push_back(allScores[stripY[j1][d1]]);
+            originalX.push_back(stripY[j1][d1]);
+            scoresX.push_back(allScores[stripY[j1][d1 + 1]]);
+            originalX.push_back(stripY[j1][d1 + 1]);
+            scoresX.push_back(70);
+            scoresX.push_back(70);
+            //Run AHCA on scoresX, originalX, finalX, feasible
+            if(feasible == 1){
+                feasible = 0;
+                for (k = 0; k < stripY[j1].size(); ++k) {
+                    if (k == c1 || k == c1 + 1 || k == d1 || k == d1 + 1) {
+                        continue;
+                    }
+                    scoresY.push_back(allScores[stripY[j1][k]]);
+                    originalY.push_back(stripY[j1][k]);
+
+                }
+                scoresY.push_back(allScores[stripX[i1][a1]]);
+                originalY.push_back(stripX[i1][a1]);
+                scoresY.push_back(allScores[stripX[i1][a1 + 1]]);
+                originalY.push_back(stripX[i1][a1 + 1]);
+                scoresY.push_back(allScores[stripX[i1][b1]]);
+                originalY.push_back(stripX[i1][b1]);
+                scoresY.push_back(allScores[stripX[i1][b1 + 1]]);
+                originalY.push_back(stripX[i1][b1 + 1]);
+                scoresY.push_back(70);
+                scoresY.push_back(70);
+                //Run AHCA on scoresY, originalY, finalY, feasible
+                if(feasible == 1){
+                    stripSumX[i1] = stripSumX[i1] - (itemWidths[stripX[i1][a1]][stripX[i1][a1 + 1]] + itemWidths[stripX[i1][b1]][stripX[i1][b1 + 1]])
+                                    + (itemWidths[stripY[j1][c1]][stripY[j1][c1 + 1]] + itemWidths[stripY[j1][d1]][stripY[j1][d1 + 1]]);
+                    stripSumY[j1] = stripSumY[j1] - (itemWidths[stripY[j1][c1]][stripY[j1][c1 + 1]] + itemWidths[stripY[j1][d1]][stripY[j1][d1 + 1]])
+                                    + (itemWidths[stripX[i1][a1]][stripX[i1][a1 + 1]] + itemWidths[stripX[i1][b1]][stripX[i1][b1 + 1]]);
+                    stripX[i1].swap(finalX);
+                    stripY[j1].swap(finalY);
+                }
+            }
+        } //End moveType = 0
+    } //End swapType = 1
+    //endregion
+
+    //region swapType == 2
+    /**PAIRSIN**/
+    if(swapType == 2){
+        if(moveType == 21){ //X[i] = 2 items, Y[j] > 1 item, AHCA on Y[j] only.
+            originalX.push_back(stripY[j1][c1]);
+            originalX.push_back(stripY[j1][c1+1]);
+            for (k = 0; k < stripY[j1].size(); ++k) {
+                if (k == c1 || k == c1 + 1) {
+                    continue;
+                }
+                scoresY.push_back(allScores[stripY[j1][k]]);
+                originalY.push_back(stripY[j1][k]);
+
+            }
+            scoresY.push_back(allScores[stripX[i1][a1]]);
+            originalY.push_back(stripX[i1][a1]);
+            scoresY.push_back(allScores[stripX[i1][a1 + 1]]);
+            originalY.push_back(stripX[i1][a1 + 1]);
+            scoresY.push_back(allScores[stripX[i1][b1]]);
+            originalY.push_back(stripX[i1][b1]);
+            scoresY.push_back(allScores[stripX[i1][b1 + 1]]);
+            originalY.push_back(stripX[i1][b1 + 1]);
+            scoresY.push_back(70);
+            scoresY.push_back(70);
+            //Run AHCA on scoresY, originalY, finalY, feasible
+            if(feasible == 1){
+                stripSumX[i1] = stripSumX[i1] - (itemWidths[stripX[i1][a1]][stripX[i1][a1+1]] + itemWidths[stripX[i1][b1]][stripX[i1][b1+1]])
+                                + itemWidths[stripY[j1][c1]][stripY[j1][c1+1]];
+                stripSumY[j1] = stripSumY[j1] - itemWidths[stripY[j1][c1]][stripY[j1][c1+1]]
+                                + (itemWidths[stripX[i1][a1]][stripX[i1][a1+1]] + itemWidths[stripX[i1][b1]][stripX[i1][b1+1]]);
+                stripX[i1].swap(originalX);
+                stripY[j1].swap(finalY);
+            }
+        } //End moveType = 21
+        else if(moveType == 22){ //Y[j] = 1 item, X[i] > 2 items, a and b adjacent, AHCA on X[i] only.
+            for (k = 0; k < stripX[i1].size(); ++k) {
+                if (k == a1 || k == a1 + 1 || k == b1 || k == b1 + 1) {
+                    continue;
+                }
+                scoresX.push_back(allScores[stripX[i1][k]]);
+                originalX.push_back(stripX[i1][k]);
+            }
+            scoresX.push_back(allScores[stripY[j1][c1]]);
+            originalX.push_back(stripY[j1][c1]);
+            scoresX.push_back(allScores[stripY[j1][c1 + 1]]);
+            originalX.push_back(stripY[j1][c1 + 1]);
+            scoresX.push_back(70);
+            scoresX.push_back(70);
+            //Run AHCA on scoresX, originalX, finalX, feasible
+            if(feasible == 1){
+                originalY.push_back(stripX[i1][a1]);
+                originalY.push_back(stripX[i1][a1+1]);
+                originalY.push_back(stripX[i1][b1]);
+                originalY.push_back(stripX[i1][b1+1]);
+                stripSumX[i1] = stripSumX[i1] - (itemWidths[stripX[i1][a1]][stripX[i1][a1+1]] + itemWidths[stripX[i1][b1]][stripX[i1][b1+1]])
+                                + itemWidths[stripY[j1][c1]][stripY[j1][c1+1]];
+                stripSumY[j1] = stripSumY[j1] - itemWidths[stripY[j1][c1]][stripY[j1][c1+1]]
+                                + (itemWidths[stripX[i1][a1]][stripX[i1][a1+1]] + itemWidths[stripX[i1][b1]][stripX[i1][b1+1]]);
+                stripX[i1].swap(finalX);
+                stripY[j1].swap(originalY);
+            }
+        } // End moveType = 22
+
+        else{ //moveType == 0, AHCA on both X and Y.
+            /* Y[j] = 1 item, X[i] > 2 items, a and b not adjacent
+             * X[i] > 2 items, Y[j] > 1 item */
+            for (k = 0; k < stripX[i1].size(); ++k) {
+                if (k == a1 || k == a1 + 1 || k == b1 || k == b1 + 1) {
+                    continue;
+                }
+                scoresX.push_back(allScores[stripX[i1][k]]);
+                originalX.push_back(stripX[i1][k]);
+            }
+            scoresX.push_back(allScores[stripY[j1][c1]]);
+            originalX.push_back(stripY[j1][c1]);
+            scoresX.push_back(allScores[stripY[j1][c1 + 1]]);
+            originalX.push_back(stripY[j1][c1 + 1]);
+            scoresX.push_back(70);
+            scoresX.push_back(70);
+            //Run AHCA on scoresX, originalX, finalX, feasible
+            if(feasible == 1){
+                feasible = 0;
+                for (k = 0; k < stripY[j1].size(); ++k) {
+                    if (k == c1 || k == c1 + 1) {
+                        continue;
+                    }
+                    scoresY.push_back(allScores[stripY[j1][k]]);
+                    originalY.push_back(stripY[j1][k]);
+
+                }
+                scoresY.push_back(allScores[stripX[i1][a1]]);
+                originalY.push_back(stripX[i1][a1]);
+                scoresY.push_back(allScores[stripX[i1][a1 + 1]]);
+                originalY.push_back(stripX[i1][a1 + 1]);
+                scoresY.push_back(allScores[stripX[i1][b1]]);
+                originalY.push_back(stripX[i1][b1]);
+                scoresY.push_back(allScores[stripX[i1][b1 + 1]]);
+                originalY.push_back(stripX[i1][b1 + 1]);
+                scoresY.push_back(70);
+                scoresY.push_back(70);
+                //Run AHCA on scoresY, originalY, finalY, feasible
+                if(feasible == 1){
+                    stripSumX[i1] = stripSumX[i1] - (itemWidths[stripX[i1][a1]][stripX[i1][a1+1]] + itemWidths[stripX[i1][b1]][stripX[i1][b1+1]])
+                                    + itemWidths[stripY[j1][c1]][stripY[j1][c1+1]];
+                    stripSumY[j1] = stripSumY[j1] - itemWidths[stripY[j1][c1]][stripY[j1][c1+1]]
+                                    + (itemWidths[stripX[i1][a1]][stripX[i1][a1+1]] + itemWidths[stripX[i1][b1]][stripX[i1][b1+1]]);
+                    stripX[i1].swap(finalX);
+                    stripY[j1].swap(finalY);
+                }
+            }
+        } //End moveType = 0
+    } //End swapType = 2
+    //endregion
+
+    //region swapType == 3
+    /**SINSIN**/
+    if(swapType == 3){
+        if(moveType == 31){ //X[i] = 1 item, Y[j] > 1 item, AHCA on Y[j] only.
+            originalX.push_back(stripY[j1][c1]);
+            originalX.push_back(stripY[j1][c1+1]);
+            for (k = 0; k < stripY[j1].size(); ++k) {
+                if (k == c1 || k == c1 + 1) {
+                    continue;
+                }
+                scoresY.push_back(allScores[stripY[j1][k]]);
+                originalY.push_back(stripY[j1][k]);
+            }
+            scoresY.push_back(allScores[stripX[i1][a1]]);
+            originalY.push_back(stripX[i1][a1]);
+            scoresY.push_back(allScores[stripX[i1][a1 + 1]]);
+            originalY.push_back(stripX[i1][a1 + 1]);
+            scoresY.push_back(70);
+            scoresY.push_back(70);
+            //Run AHCA on scoresY, originalY, finalY, feasible
+            if(feasible == 1){
+                stripSumX[i1] = stripSumX[i1] - itemWidths[stripX[i1][a1]][stripX[i1][a1+1]] + itemWidths[stripY[j1][c1]][stripY[j1][c1+1]];
+                stripSumY[j1] = stripSumY[j1] - itemWidths[stripY[j1][c1]][stripY[j1][c1+1]] + itemWidths[stripX[i1][a1]][stripX[i1][a1+1]];
+                stripX[i1].swap(originalX);
+                stripY[j1].swap(finalY);
+            }
+        } //End moveType = 31
+
+        else if(moveType == 32){ //Y[j] = 1 item, X[i] > 1 item, AHCA on X[i] only.
+            for (k = 0; k < stripX[i1].size(); ++k) {
+                if (k == a1 || k == a1 + 1) {
+                    continue;
+                }
+                scoresX.push_back(allScores[stripX[i1][k]]);
+                originalX.push_back(stripX[i1][k]);
+            }
+            scoresX.push_back(allScores[stripY[j1][c1]]);
+            originalX.push_back(stripY[j1][c1]);
+            scoresX.push_back(allScores[stripY[j1][c1 + 1]]);
+            originalX.push_back(stripY[j1][c1 + 1]);
+            scoresX.push_back(70);
+            scoresX.push_back(70);
+            //Run AHCA on scoresX, originalX, finalX, feasible
+            if(feasible == 1){
+                originalY.push_back(stripX[i1][a1]);
+                originalY.push_back(stripX[i1][a1+1]);
+                stripSumX[i1] = stripSumX[i1] - itemWidths[stripX[i1][a1]][stripX[i1][a1+1]] + itemWidths[stripY[j1][c1]][stripY[j1][c1+1]];
+                stripSumY[j1] = stripSumY[j1] - itemWidths[stripY[j1][c1]][stripY[j1][c1+1]] + itemWidths[stripX[i1][a1]][stripX[i1][a1+1]];
+                stripX[i1].swap(finalX);
+                stripY[j1].swap(originalY);
+            }
+        } //End moveType = 32
+
+        else{ //moveType == 0, X[i] > 1 item, Y[j] > 1 item, AHCA on both X and Y.
+            for (k = 0; k < stripX[i1].size(); ++k) {
+                if (k == a1 || k == a1 + 1) {
+                    continue;
+                }
+                scoresX.push_back(allScores[stripX[i1][k]]);
+                originalX.push_back(stripX[i1][k]);
+            }
+            scoresX.push_back(allScores[stripY[j1][c1]]);
+            originalX.push_back(stripY[j1][c1]);
+            scoresX.push_back(allScores[stripY[j1][c1 + 1]]);
+            originalX.push_back(stripY[j1][c1 + 1]);
+            scoresX.push_back(70);
+            scoresX.push_back(70);
+            //Run AHCA on scoresX, originalX, finalX, feasible
+            if(feasible == 1){
+                feasible = 0;
+                for (k = 0; k < stripY[j1].size(); ++k) {
+                    if (k == c1 || k == c1 + 1) {
+                        continue;
+                    }
+                    scoresY.push_back(allScores[stripY[j1][k]]);
+                    originalY.push_back(stripY[j1][k]);
+                }
+                scoresY.push_back(allScores[stripX[i1][a1]]);
+                originalY.push_back(stripX[i1][a1]);
+                scoresY.push_back(allScores[stripX[i1][a1 + 1]]);
+                originalY.push_back(stripX[i1][a1 + 1]);
+                scoresY.push_back(70);
+                scoresY.push_back(70);
+                //Run AHCA on scoresY, originalY, finalY, feasible
+                if(feasible == 1){
+                    stripSumX[i1] = stripSumX[i1] - itemWidths[stripX[i1][a1]][stripX[i1][a1+1]] + itemWidths[stripY[j1][c1]][stripY[j1][c1+1]];
+                    stripSumY[j1] = stripSumY[j1] - itemWidths[stripY[j1][c1]][stripY[j1][c1+1]] + itemWidths[stripX[i1][a1]][stripX[i1][a1+1]];
+                    stripX[i1].swap(finalX);
+                    stripY[j1].swap(finalY);
+                }
+            }
+        } //End moveType = 0
+    } //End swapType = 3
+    //endregion
+
+    //region swapType == 4
+    /**MOVESIN**/
+    if(swapType == 4){
+        if(moveType == 41){ //Y[j] = 1 item, AHCA on X[i] only (if feasible, row of Y[j] becomes empty and is deleted).
+            for(k = 0; k < stripX[i1].size(); ++k){
+                scoresX.push_back(allScores[stripX[i1][k]]);
+                originalX.push_back(stripX[i1][k]);
+            }
+            scoresX.push_back(allScores[stripY[j1][c1]]);
+            originalX.push_back(stripY[j1][c1]);
+            scoresX.push_back(allScores[stripY[j1][c1 + 1]]);
+            originalX.push_back(stripY[j1][c1 + 1]);
+            scoresX.push_back(70);
+            scoresX.push_back(70);
+            //Run AHCA on scoresX, originalX, finalX, feasible
+            if(feasible == 1){
+                stripSumX[i1] += itemWidths[stripY[j1][c1]][stripY[j1][c1+1]];
+                stripX[i1].swap(finalX);
+                stripY.erase(stripY.begin() + j1);
+                stripSumY.erase(stripSumY.begin() + j1);
+                if(stripY.empty()){
+                    feasible = 2;
+                }
+            }
+        } //End moveType = 41
+
+        else if(moveType == 42){ //Y[j] = 2 items, AHCA on X[i] only (if feasible, Y[j] will only have 1 item left).
+            for(k = 0; k < stripX[i1].size(); ++k){
+                scoresX.push_back(allScores[stripX[i1][k]]);
+                originalX.push_back(stripX[i1][k]);
+            }
+            scoresX.push_back(allScores[stripY[j1][c1]]);
+            originalX.push_back(stripY[j1][c1]);
+            scoresX.push_back(allScores[stripY[j1][c1 + 1]]);
+            originalX.push_back(stripY[j1][c1 + 1]);
+            scoresX.push_back(70);
+            scoresX.push_back(70);
+            //Run AHCA on scoresX, originalX, finalX, feasible
+            if(feasible == 1){
+                if(c1 == 0){
+                    stripY[j1].pop_back();
+                    stripY[j1].pop_back();
+                }
+                else if(c1 == 2){
+                    stripY[j1].erase(stripY[j1].begin(), stripY[j1].begin() + 2);
+                }
+                else{
+                    cout << "[ERROR]: c1 in stripY[j1] is neither 0 nor 2, check that stripY[j1].size() == 4\n";
+                    exit(1);
+                }
+                stripSumX[i1] += itemWidths[stripY[j1][c1]][stripY[j1][c1 + 1]];
+                stripSumY[j1] -= itemWidths[stripY[j1][c1]][stripY[j1][c1 + 1]];
+                stripX[i1].swap(finalX);
+            }
+        } //End moveType = 42
+
+        else{ //moveType = 0, Y[j] > 2 items, AHCA on both X and Y.
+            for(k = 0; k < stripX[i1].size(); ++k){
+                scoresX.push_back(allScores[stripX[i1][k]]);
+                originalX.push_back(stripX[i1][k]);
+            }
+            scoresX.push_back(allScores[stripY[j1][c1]]);
+            originalX.push_back(stripY[j1][c1]);
+            scoresX.push_back(allScores[stripY[j1][c1 + 1]]);
+            originalX.push_back(stripY[j1][c1 + 1]);
+            scoresX.push_back(70);
+            scoresX.push_back(70);
+            //Run AHCA on scoresX, originalX, finalX, feasible
+            if(feasible == 1){
+                feasible = 0;
+                for(k = 0; k < stripY[j1].size(); ++k){
+                    if(k == c1 || k == c1 + 1){
+                        continue;
+                    }
+                    scoresY.push_back(allScores[stripY[j1][k]]);
+                    originalY.push_back(stripY[j1][k]);
+                }
+                scoresY.push_back(70);
+                scoresY.push_back(70);
+                //Run AHCA on scoresY, originalY, finalY, feasible
+                if(feasible == 1){
+                    stripSumX[i1] += itemWidths[stripY[j1][c1]][stripY[j1][c1 + 1]];
+                    stripSumY[j1] -= itemWidths[stripY[j1][c1]][stripY[j1][c1 + 1]];
+                    stripX[i1].swap(finalX);
+                    stripY[j1].swap(finalY);
+                }
+            }
+        } //End moveType = 0
+    } //End swapType = 4
+    //endregion
+
+
+} //End void initAHCA
+
+void AHCA(int swapType, int moveType, int &feasible, int i1, int a1, int b1, int j1, int c1, int d1, vector<int> &allScores,
+          vector<vector<int> > &itemWidths, vector<int> &stripSumX, vector<vector<int> > &stripX, vector<int> &stripSumY,
+          vector<vector<int> > &stripY){
 
     feasible = 0;
     int i, j, k;
@@ -779,7 +1243,7 @@ void MBAHRA(int swapType, int moveType, int &feasible, int i1, int a1, int b1, i
     }
         /**FOR NEW STRIPX PAIRSIN**/
     else if(swapType == 2){
-        if(moveType == 21){ //stripX[i] contains 2 boxes, stripY[j] contains more than 1 box, MBAHRA on stripY[j] only
+        if(moveType == 21){ //stripX[i] contains 2 boxes, stripY[j] contains more than 1 box, AHCA on stripY[j] only
             originalX.push_back(stripY[j1][c1]);
             originalX.push_back(stripY[j1][c1+1]);
             goto Part2;
@@ -802,7 +1266,7 @@ void MBAHRA(int swapType, int moveType, int &feasible, int i1, int a1, int b1, i
     }
         /**FOR NEW STRIPX SINSIN**/
     else if(swapType == 3){
-        if(moveType == 31){ //stripX[i] contains 1 box, stripY[j] contains more than 1 box, MBAHRA on stripY[j] only
+        if(moveType == 31){ //stripX[i] contains 1 box, stripY[j] contains more than 1 box, AHCA on stripY[j] only
             originalX.push_back(stripY[j1][c1]);
             originalX.push_back(stripY[j1][c1+1]);
             goto Part2;
@@ -1879,7 +2343,7 @@ void MBAHRA(int swapType, int moveType, int &feasible, int i1, int a1, int b1, i
         //endregion
     }
 
-    //END MBAHRA STRIPX
+    //END AHCA STRIPX
 
     /*********************************************************************************************************/
 
@@ -3035,16 +3499,16 @@ void MBAHRA(int swapType, int moveType, int &feasible, int i1, int a1, int b1, i
         //endregion
     }
 
-    //END MBAHRA STRIPY
+    //END AHCA STRIPY
 
     //region End
     End:
     if(feasible == 1){
         if(swapType == 1){ //PairPair
-            stripSumX[i1] = stripSumX[i1] - (boxWidths[stripX[i1][a1]][stripX[i1][a1 + 1]] + boxWidths[stripX[i1][b1]][stripX[i1][b1 + 1]])
-                            + (boxWidths[stripY[j1][c1]][stripY[j1][c1 + 1]] + boxWidths[stripY[j1][d1]][stripY[j1][d1 + 1]]);
-            stripSumY[j1] = stripSumY[j1] - (boxWidths[stripY[j1][c1]][stripY[j1][c1 + 1]] + boxWidths[stripY[j1][d1]][stripY[j1][d1 + 1]])
-                            + (boxWidths[stripX[i1][a1]][stripX[i1][a1 + 1]] + boxWidths[stripX[i1][b1]][stripX[i1][b1 + 1]]);
+            stripSumX[i1] = stripSumX[i1] - (itemWidths[stripX[i1][a1]][stripX[i1][a1 + 1]] + itemWidths[stripX[i1][b1]][stripX[i1][b1 + 1]])
+                            + (itemWidths[stripY[j1][c1]][stripY[j1][c1 + 1]] + itemWidths[stripY[j1][d1]][stripY[j1][d1 + 1]]);
+            stripSumY[j1] = stripSumY[j1] - (itemWidths[stripY[j1][c1]][stripY[j1][c1 + 1]] + itemWidths[stripY[j1][d1]][stripY[j1][d1 + 1]])
+                            + (itemWidths[stripX[i1][a1]][stripX[i1][a1 + 1]] + itemWidths[stripX[i1][b1]][stripX[i1][b1 + 1]]);
             if(moveType == 11){
                 stripX[i1].swap(originalX);
                 stripY[j1].swap(finalY);
@@ -3060,10 +3524,10 @@ void MBAHRA(int swapType, int moveType, int &feasible, int i1, int a1, int b1, i
         }
 
         else if(swapType == 2){ //PairSin
-            stripSumX[i1] = stripSumX[i1] - (boxWidths[stripX[i1][a1]][stripX[i1][a1+1]] + boxWidths[stripX[i1][b1]][stripX[i1][b1+1]])
-                            + boxWidths[stripY[j1][c1]][stripY[j1][c1+1]];
-            stripSumY[j1] = stripSumY[j1] - boxWidths[stripY[j1][c1]][stripY[j1][c1+1]]
-                            + (boxWidths[stripX[i1][a1]][stripX[i1][a1+1]] + boxWidths[stripX[i1][b1]][stripX[i1][b1+1]]);
+            stripSumX[i1] = stripSumX[i1] - (itemWidths[stripX[i1][a1]][stripX[i1][a1+1]] + itemWidths[stripX[i1][b1]][stripX[i1][b1+1]])
+                            + itemWidths[stripY[j1][c1]][stripY[j1][c1+1]];
+            stripSumY[j1] = stripSumY[j1] - itemWidths[stripY[j1][c1]][stripY[j1][c1+1]]
+                            + (itemWidths[stripX[i1][a1]][stripX[i1][a1+1]] + itemWidths[stripX[i1][b1]][stripX[i1][b1+1]]);
             if(moveType == 21){
                 stripX[i1].swap(originalX);
                 stripY[j1].swap(finalY);
@@ -3079,8 +3543,8 @@ void MBAHRA(int swapType, int moveType, int &feasible, int i1, int a1, int b1, i
         }
 
         else if(swapType == 3){ //SinSin
-            stripSumX[i1] = stripSumX[i1] - boxWidths[stripX[i1][a1]][stripX[i1][a1+1]] + boxWidths[stripY[j1][c1]][stripY[j1][c1+1]];
-            stripSumY[j1] = stripSumY[j1] - boxWidths[stripY[j1][c1]][stripY[j1][c1+1]] + boxWidths[stripX[i1][a1]][stripX[i1][a1+1]];
+            stripSumX[i1] = stripSumX[i1] - itemWidths[stripX[i1][a1]][stripX[i1][a1+1]] + itemWidths[stripY[j1][c1]][stripY[j1][c1+1]];
+            stripSumY[j1] = stripSumY[j1] - itemWidths[stripY[j1][c1]][stripY[j1][c1+1]] + itemWidths[stripX[i1][a1]][stripX[i1][a1+1]];
             if(moveType == 31){
                 stripX[i1].swap(originalX);
                 stripY[j1].swap(finalY);
@@ -3097,7 +3561,7 @@ void MBAHRA(int swapType, int moveType, int &feasible, int i1, int a1, int b1, i
 
         else if(swapType == 4){
             if(moveType == 41){
-                stripSumX[i1] += boxWidths[stripY[j1][c1]][stripY[j1][c1+1]];
+                stripSumX[i1] += itemWidths[stripY[j1][c1]][stripY[j1][c1+1]];
                 stripX[i1].swap(finalX);
                 stripY.erase(stripY.begin() + j1);
                 stripSumY.erase(stripSumY.begin() + j1);
@@ -3106,8 +3570,8 @@ void MBAHRA(int swapType, int moveType, int &feasible, int i1, int a1, int b1, i
                 }
             }
             else {
-                stripSumX[i1] += boxWidths[stripY[j1][c1]][stripY[j1][c1 + 1]];
-                stripSumY[j1] -= boxWidths[stripY[j1][c1]][stripY[j1][c1 + 1]];
+                stripSumX[i1] += itemWidths[stripY[j1][c1]][stripY[j1][c1 + 1]];
+                stripSumY[j1] -= itemWidths[stripY[j1][c1]][stripY[j1][c1 + 1]];
                 stripX[i1].swap(finalX);
                 stripY[j1].swap(finalY);
             }
@@ -3118,8 +3582,9 @@ void MBAHRA(int swapType, int moveType, int &feasible, int i1, int a1, int b1, i
 
 }
 
-void EA(int numScores, int maxBoxWidth, int maxStripWidth, double &parent1cost, double &parent2cost, vector<int> &allScores, vector<int> &mates, vector<vector<int> > &adjMatrix,
-        vector<vector<int> > &boxWidths, vector<vector<int> > &populationSum, vector<vector<vector<int> > > &population){
+void EA(int numScores, int maxItemWidth, int maxStripWidth, double &parent1cost, double &parent2cost, vector<int> &allScores, vector<int> &partners,
+        vector<vector<int> > &adjMatrix, vector<vector<int> > &itemWidths, vector<vector<int> > &populationSum,
+        vector<vector<vector<int> > > &population){
 
     int i;
     vector<vector<int> > stripX;
@@ -3146,19 +3611,19 @@ void EA(int numScores, int maxBoxWidth, int maxStripWidth, double &parent1cost, 
     parent1cost = fitness(maxStripWidth, stripSumX, stripX);
     parent2cost = fitness(maxStripWidth, stripSumY, stripY);
 
-    GGA(numScores, maxBoxWidth, maxStripWidth, allScores, mates, adjMatrix, boxWidths, stripSumX, stripX, stripSumY, stripY);
+    GGA(numScores, maxItemWidth, maxStripWidth, allScores, partners, adjMatrix, itemWidths, stripSumX, stripX, stripSumY, stripY);
 
 
 }
 
-void GGA(int numScores, int maxBoxWidth, int maxStripWidth, vector<int> &allScores, vector<int> &mates, vector<vector<int> > &adjMatrix,
-         vector<vector<int> > &boxWidths, vector<int> &stripSumX, vector<vector<int> > &stripX, vector<int> &stripSumY, vector<vector<int> > &stripY){
+void GGA(int numScores, int maxItemWidth, int maxStripWidth, vector<int> &allScores, vector<int> &partners, vector<vector<int> > &adjMatrix,
+         vector<vector<int> > &itemWidths, vector<int> &stripSumX, vector<vector<int> > &stripX, vector<int> &stripSumY, vector<vector<int> > &stripY){
 
     int i, j, k, l;
     vector<int> checked(numScores, 0);
     vector<vector<int> > offspring;
     vector<int> offspringSum;
-    vector<int> absentBoxes;
+    vector<int> absentItems;
 
     k = 3;
     l = 4;
@@ -3210,35 +3675,35 @@ void GGA(int numScores, int maxBoxWidth, int maxStripWidth, vector<int> &allScor
 
     for(i = 0; i < checked.size(); ++i){
         if(checked[i] == 1){
-            absentBoxes.push_back(i);
+            absentItems.push_back(i);
         }
     }
 
 
-    if(absentBoxes.empty()){
-        cout << "absentBoxes vector is empty - no boxes are missing\n";
+    if(absentItems.empty()){
+        cout << "absentItems vector is empty - no boxes are missing\n";
     }
     else {
         //repair = 1;
-        sort(absentBoxes.begin(), absentBoxes.end());
+        sort(absentItems.begin(), absentItems.end());
 
         stripY.clear();
-        stripY.resize(absentBoxes.size()/2);
+        stripY.resize(absentItems.size()/2);
         stripSumY.clear();
-        for(i = 0; i < absentBoxes.size()/2; ++i){
+        for(i = 0; i < absentItems.size()/2; ++i){
             stripSumY.push_back(0);
         }
 
-        /*for (i = 0; i < absentBoxes.size(); ++i) {
-            cout << absentBoxes[i] << " ";
+        /*for (i = 0; i < absentItems.size(); ++i) {
+            cout << absentItems[i] << " ";
         }
         cout << endl;*/
 
-        partialFFD(numScores, maxBoxWidth, maxStripWidth, mates, adjMatrix, boxWidths, absentBoxes, stripSumY, stripY);
+        partialFFD(numScores, maxItemWidth, maxStripWidth, partners, adjMatrix, itemWidths, absentItems, stripSumY, stripY);
 
-        localSearch(numScores, maxBoxWidth, maxStripWidth, allScores, mates, adjMatrix, boxWidths, offspringSum, offspring, stripSumX, stripX, stripSumY, stripY);
+        localSearch(numScores, maxItemWidth, maxStripWidth, allScores, partners, adjMatrix, itemWidths, offspringSum, offspring, stripSumX, stripX, stripSumY, stripY);
 
-        mutation(numScores, maxBoxWidth, maxStripWidth, allScores, mates, adjMatrix, boxWidths, offspringSum, offspring);
+        mutation(numScores, maxItemWidth, maxStripWidth, allScores, partners, adjMatrix, itemWidths, offspringSum, offspring);
 
 
     }

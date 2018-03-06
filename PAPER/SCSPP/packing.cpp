@@ -887,11 +887,11 @@ void AHCA(int tau, int i1, int j1, bool &feasible, vector<int> &allScores, vecto
 
         MPS(nScores, nCycles, partnersX, matchList, mpStructure);
         if (mpStructure[0].size() == nScores) {
-            for (j = 0; j < mpStructure[0].size(); ++j) {
+            for (j = 2; j < mpStructure[0].size(); ++j) {
                 altHam.push_back(mpStructure[0][j]);
             }
 
-            altHam.erase(altHam.begin(), altHam.begin() + 2);
+            //altHam.erase(altHam.begin(), altHam.begin() + 2);
 
             for (i = 0; i < altHam.size(); ++i) {
                 final.push_back(original[order[altHam[i]]]);
