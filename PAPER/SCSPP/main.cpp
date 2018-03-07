@@ -175,7 +175,7 @@ int main(int argc, char **argv){
             //cout << "FFD Approx:\n";
             for(instance = 0; instance < numInstances; ++instance){
                 createInstance(instance, tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths);
-                basicFFD(opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem, maxItemWidth, maxStripWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
+                basicFFD(instance, opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem, maxItemWidth, maxStripWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
                 resetVectors(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
             }
             break;
