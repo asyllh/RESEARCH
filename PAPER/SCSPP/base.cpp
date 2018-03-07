@@ -111,7 +111,7 @@ void createInstance(int instance, int tau, int numScores, int numItem, int minWi
     }
 
     //cout << "Box#" << setw(10) << "Mates" << setw(10) << "Scores" << setw(10) << "Width\n";
-    for(i = 0; i < numScores; ++i){
+    /*for(i = 0; i < numScores; ++i){
         if(checkItem[i] == 1){
             continue;
         }
@@ -121,11 +121,11 @@ void createInstance(int instance, int tau, int numScores, int numItem, int minWi
         checkItem[partners[i]] = 1;
         ++count;
 
-    }
+    }*/
 
 
 
-    /*if(instance < 5){
+    if(instance == 0){
         cout << "INSTANCE = " << instance << endl;
         cout << "Box#" << setw(10) << "Mates" << setw(10) << "Scores" << setw(10) << "Width\n";
         for(i = 0; i < numScores; ++i){
@@ -155,7 +155,7 @@ void createInstance(int instance, int tau, int numScores, int numItem, int minWi
 
         }
 
-    }*/
+    }
 
 
 
