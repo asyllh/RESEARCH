@@ -40,7 +40,7 @@ void optimality(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &o
 } //End optimality
 
 // FFD checking vicinal sum constraint for both sides of each item.
-void basicFFD(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int numScores, int numItem, int maxItemWidth,
+void basicFFD(int instance, int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int numScores, int numItem, int maxItemWidth,
               int maxStripWidth, double totalItemWidth, vector<int> &allScores, vector<int> &partners, vector<vector<int> > &adjMatrix,
               vector<vector<int> > &itemWidths, vector<int> &stripSum, vector<vector<int> > &strip){
     int i, j, mini;
@@ -111,6 +111,40 @@ void basicFFD(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt
 
     int stripSize = strip.size();
     int LB = lowerBound(maxStripWidth, totalItemWidth);
+    double c = static_cast<double>(LB) / stripSize;
+
+    if(instance == 0){
+        cout << "\nscores on strips:\n";
+        for(i = 0; i < strip.size(); ++i){
+            cout << "strip " << i << ":\t";
+            for(j = 0; j < strip[i].size(); ++j){
+                cout << strip[i][j] << " ";
+            }
+            cout << endl;
+        }
+        cout << endl;
+
+        cout << "item widths on strips:\n";
+        for(i = 0; i < strip.size(); ++i){
+            cout << "strip " << i << ":\t";
+            for(j = 0; j < strip[i].size() - 1; j+=2){
+                cout << itemWidths[strip[i][j]][strip[i][j+1]] << " ";
+            }
+            cout << endl;
+        }
+        cout << endl;
+
+        cout << "stripSum:\n";
+        for(i = 0; i < stripSum.size(); ++i){
+            cout << stripSum[i] << " ";
+        }
+        cout << endl;
+
+
+        cout << "LB = " << LB << "\tstripSize = " << stripSize << "\tOPT = " << c << endl;
+        cout << "END INSTANCE = " << instance << endl << endl;
+
+    }
 
     optimality(opt, opt90, opt80, opt70,opt60, opt50, optLow, stripSize, LB);
 
@@ -289,10 +323,10 @@ void FFDincAHCA(int instance, int tau, int &opt, int &opt90, int &opt80, int &op
 
     int stripSize = strip.size();
     int LB = lowerBound(maxStripWidth, totalItemWidth);
-    //double c = static_cast<double>(LB) / stripSize;
+    double c = static_cast<double>(LB) / stripSize;
 
-    /*if(instance == 1){
-        cout << "\nstrips:\n";
+    if(instance == 2){
+        cout << "\nscores on strips:\n";
         for(i = 0; i < strip.size(); ++i){
             cout << "strip " << i << ":\t";
             for(j = 0; j < strip[i].size(); ++j){
@@ -301,9 +335,31 @@ void FFDincAHCA(int instance, int tau, int &opt, int &opt90, int &opt80, int &op
             cout << endl;
         }
         cout << endl;
+
+        cout << "item widths on strips:\n";
+        for(i = 0; i < strip.size(); ++i){
+            cout << "strip " << i << ":\t";
+            for(j = 0; j < strip[i].size() - 1; j+=2){
+                cout << itemWidths[strip[i][j]][strip[i][j+1]] << " ";
+            }
+            cout << endl;
+        }
+        cout << endl;
+
+        cout << "stripSum:\n";
+        for(i = 0; i < stripSum.size(); ++i){
+            cout << stripSum[i] << " ";
+        }
+        cout << endl;
+
+
+        cout << "LB = " << LB << "\tstripSize = " << stripSize << "\tOPT = " << c << endl;
+        cout << "END INSTANCE = " << instance << endl << endl;
+
     }
 
-    if(instance < 5){
+
+    /*if(instance < 5){
         //cout << "INSTANCE = " << instance << endl;
         cout << "LB = " << LB << "\tstripSize = " << stripSize << "\tOPT = " << c << endl;
         cout << "END INSTANCE = " << instance << endl << endl;
@@ -452,7 +508,7 @@ void MPS(int nScores, int &nCycles, vector<int> &partnersX, vector<int> &matchLi
 
 
 // Bridge Recognition (BR) Algorithm.
-void BR(int &qstar, int matchSize, vector<vector<int> > adjMat, vector<int> &matchList, vector<int> &cycleVertex, vector<int> &edge, vector<vector<int> > &mpStructure,
+void BR(int &qstar, int matchSize, vector<vector<int> > &adjMat, vector<int> &matchList, vector<int> &cycleVertex, vector<int> &edge, vector<vector<int> > &mpStructure,
         vector<vector<int> > &C, vector<vector<int> > &S){
 
     int i, j, k, nEdges;
@@ -687,37 +743,6 @@ void CP(int nScores, int nComp, bool &feasible, int qstar, int nCycles, vector<i
                 }
 
             }//end while
-
-            /*do{
-                while(k < nEdgesC - 2 && (adjMat[edgeCopy[k]][matchList[edgeCopy[k+1]]] != 1 || cycleVertex[edgeCopy[k]] == cycleVertex[edgeCopy[k+1]])){
-                    ++k;
-                }
-                if(adjMat[edgeCopy[k]][matchList[edgeCopy[k+1]]] == 1 && cycleVertex[edgeCopy[k]] != cycleVertex[edgeCopy[k+1]]
-                   && ((SSet2[cycleVertex[edgeCopy[k]]] == 0 && SSet2[cycleVertex[edgeCopy[k+1]]] == 1)
-                   || (SSet2[cycleVertex[edgeCopy[k]]] == 1 && SSet2[cycleVertex[edgeCopy[k+1]]] == 0))){
-                    temp.push_back(edgeCopy[k]);
-                    temp.push_back(edgeCopy[k+1]);
-                    SSet2[cycleVertex[edgeCopy[k]]] = 1;
-                    SSet2[cycleVertex[edgeCopy[k+1]]] = 1;
-                    ++SSum;
-                    if(SSum < nCycles){
-                        ++k;
-                        while(k < nEdgesC - 1 && SSet2[cycleVertex[edgeCopy[k+1]]] == 0 && adjMat[edgeCopy[k]][matchList[edgeCopy[k+1]]] == 1){
-                            ++k;
-                            temp.push_back(edgeCopy[k]);
-                            SSet2[cycleVertex[edgeCopy[k]]] = 1;
-                            ++SSum;
-                        }
-                    }
-                    Cconnect.push_back(temp);
-                    temp.clear();
-                }
-                ++k;
-            } while (k < nEdgesC - 1 && SSum < nCycles);
-            if(SSum == nCycles){
-                type = 2;
-            }*/
-
         }// End find overlaps
         //endregion
 
