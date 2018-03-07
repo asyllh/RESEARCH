@@ -16,7 +16,7 @@ int lowerBound(int maxStripWidth, double totalItemWidth);
 void optimality(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int stripSize, int LB);
 
 // FFD checking vicinal sum constraint for both sides of each item.
-void basicFFD(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int numScores, int numItem, int maxItemWidth,
+void basicFFD(int instance, int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int numScores, int numItem, int maxItemWidth,
                          int maxStripWidth, double totalItemWidth, vector<int> &allScores, vector<int> &partners, vector<vector<int> > &adjMatrix,
                          vector<vector<int> > &itemWidths, vector<int> &stripSum, vector<vector<int> > &strip);
 
@@ -47,7 +47,7 @@ void MPS(int nScores, int &nCycles, vector<int> &partnersX, vector<int> &matchLi
 
 
 // Bridge Recognition (BR) Algorithm.
-void BR(int &qstar, int matchSize, vector<vector<int> > adjMat, vector<int> &matchList, vector<int> &cycleVertex, vector<int> &edge, vector<vector<int> > &mpStructure,
+void BR(int &qstar, int matchSize, vector<vector<int> > &adjMat, vector<int> &matchList, vector<int> &cycleVertex, vector<int> &edge, vector<vector<int> > &mpStructure,
         vector<vector<int> > &C, vector<vector<int> > &S);
 
 
