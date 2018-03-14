@@ -30,10 +30,10 @@ void createInstance(int tau, int numScores, int numItem, int minWidth, int maxWi
     sort(allScores.begin(), allScores.end()); //sorts elements of vector in ascending order
 
     //cout << "All scores:\n";
-    for(i = 0; i < allScores.size(); ++i){
+    /*for(i = 0; i < allScores.size(); ++i){
         cout << allScores[i] << " ";
     }
-    cout << endl;
+    cout << endl;*/
 
     //Filling in adjacency matrix - if sum of two scores >= tau (70), then insert 1 into the matrix, else leave as 0
     for (i = 0; i < allScores.size() - 1; ++i) {
@@ -124,7 +124,7 @@ void createInstance(int tau, int numScores, int numItem, int minWidth, int maxWi
 
     }
 
-    cout << "Total Box Widths: " << totalItemWidth << endl << endl;
+    cout << "Total Item Widths: " << totalItemWidth << endl << endl;
 
     /*cout << "allItems:\n";
     for(i = 0; i < numScores; ++i){
