@@ -18,9 +18,10 @@ int LowerBound(int stripLength, double totalItemWidth);
 
 double Fitness(int stripLength, vector<int> &stripSum, vector<vector<int> > &strip);
 
-void FFDecreasing(int numScores, int numItem, int maxItemWidth, vector<int> &partners, vector<vector<int> > &itemWidths, vector<int> &itemOrder);
+void FFD(int numScores, int numItem, int maxItemWidth, vector<int> &partners, vector<vector<int> > &itemWidths,
+         vector<int> &itemOrder);
 
-void FFRandom(int numScores, int numItem, vector<int> &partners, vector<vector<int> > &itemWidths, vector<int> &itemOrder);
+void FFR(int numScores, int numItem, vector<int> &partners, vector<vector<int> > &itemWidths, vector<int> &itemOrder);
 
 void FFShell(int numScores, int numItem, int maxItemWidth, int stripLength, vector<int> &partners,
              vector<vector<int> > &adjMatrix, vector<vector<int> > &itemWidths, vector<int> &stripSum, vector<vector<int> > &strip, bool decrease);

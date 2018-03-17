@@ -41,7 +41,8 @@ double Fitness(int stripLength, vector<int> &stripSum, vector<vector<int> > &str
 
 }
 
-void FFDecreasing(int numScores, int numItem, int maxItemWidth, vector<int> &partners, vector<vector<int> > &itemWidths, vector<int> &itemOrder){
+void FFD(int numScores, int numItem, int maxItemWidth, vector<int> &partners, vector<vector<int> > &itemWidths,
+         vector<int> &itemOrder){
 
     int i, mini;
     int min = 0;
@@ -68,7 +69,7 @@ void FFDecreasing(int numScores, int numItem, int maxItemWidth, vector<int> &par
 
 }
 
-void FFRandom(int numScores, int numItem, vector<int> &partners, vector<vector<int> > &itemWidths, vector<int> &itemOrder){
+void FFR(int numScores, int numItem, vector<int> &partners, vector<vector<int> > &itemWidths, vector<int> &itemOrder){
 
     int i, r;
     vector<int> checked(numScores, 0);
@@ -101,10 +102,10 @@ void FFShell(int numScores, int numItem, int maxItemWidth, int stripLength, vect
     vector<int> itemOrder;
 
     if(decrease){
-        FFDecreasing(numScores, numItem, maxItemWidth, partners, itemWidths, itemOrder);
+        FFD(numScores, numItem, maxItemWidth, partners, itemWidths, itemOrder);
     }
     else{
-        FFRandom(numScores, numItem, partners, itemWidths, itemOrder);
+        FFR(numScores, numItem, partners, itemWidths, itemOrder);
     }
 
     /*cout << "Item Order:\n";
