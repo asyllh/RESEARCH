@@ -24,4 +24,5 @@ cmake-build-debug/
 *.nav
 *.snm
 *.vrb
+*.spl
 
