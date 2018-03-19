@@ -1,18 +1,25 @@
-\documentclass[oribibl]{llncs}
+\documentclass[preprint]{elsarticle}
 
 \input{includes/preamble.tex}
 
-\title{Heuristics for the Score-Constrained Strip-Packing Problem}
-\author{Asyl L. Hawa \and Rhyd M. R. Lewis \and Jonathan M. Thompson}
-\institute{School of Mathematics, Cardiff University, Senghennydd Road, Cardiff, UK, CF24 4AG}
-\date{\today}
 
 \begin{document}
-\maketitle
+	
+\begin{frontmatter}
+\title{Heuristics for the Score-Constrained Strip-Packing Problem}
+\author{Asyl L. Hawa}
+\author{Rhyd Lewis}
+\author{Jonathan M. Thompson}
+\address{School of Mathematics, Cardiff University, Senghennydd Road, Cardiff, UK, CF24 4AG}
+\date{\today}
+
+%\maketitle
 
 \begin{abstract}
 	
 \end{abstract}
+
+\end{frontmatter}
 
 \section{Introduction}
 \label{sec:intro}
@@ -137,6 +144,7 @@ This next heuristic focusses on packing each strip in turn, rather than each ite
 The last heuristic in this paper is formed by integrating the Alternating Hamiltonian Construction Algorithm (AHCA) detailed in Section ref{} with the classical FFD heuristic. Again, all items in $\mathcal{I}$ are sorted into non-increasing order of widths, with ties broken by choosing the item with the smallest score width. For each item $i \in \mathcal{I}$, the heuristic finds the lowest-indexed feasible strip $S_j$. As in the first heuristic, if $S_j$ is empty, $i$ is placed in a regular orientation onto $S_j$, and $S_j$ is then added to the solution set $\mathcal{S}$. Unlike the first heuristic, however, if $S_j$ is not empty ($S_j \in \mathcal{S}$), AHCA is applied on all items in $S_j$ and the current item $i$. If AHCA is successful, the items currently on $S_j$ are replaced by the new arrangement, which of course includes $i$. In the event that AHCA is unable to produce a solution, $S_j$ remains intact, and the heuristic attempts to pack $i$ onto the next lowest-indexed feasible strip.
 
 
+\section*{References}
 
 \bibliographystyle{dcu}
 \bibliography{includes/bibliography}
