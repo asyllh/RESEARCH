@@ -112,11 +112,11 @@ void ArgumentCheck(int numInstances, int tau, int numItem, int minWidth, int max
         cout << std::left << setw(18) << "Algorithm:" << std::right << setw(13) << "FFDincAHCA\n";
     }
     else if(algType == 4  && xOver == 1){
-        cout << std::left << setw(20) << "Algorithm: " << std::right << setw(6) << "EA with GGA" << endl;
+        cout << std::left << setw(19) << "Algorithm: " << std::right << setw(6) << "EA with GGA" << endl;
         cout << std::left << setw(20) << "Population size:" << std::right << setw(10) << numPop << endl;
     }
     else if(algType == 4 && xOver == 2){
-        cout << std::left << setw(20) << "Algorithm: " << std::right << setw(6) << "EA with GPX'" << endl;
+        cout << std::left << setw(18) << "Algorithm: " << std::right << setw(6) << "EA with GPX'" << endl;
         cout << std::left << setw(20) << "Population size:" << std::right << setw(10) << numPop << endl;
     }
     cout << std::left << setw(20) << "Random seed:" << std::right << setw(10) << randomSeed << endl;
@@ -212,27 +212,36 @@ int main(int argc, char **argv){
     switch(algType){
         case 1:
             for(instance = 0; instance < numInstances; ++instance){
+                //srand(1);
+                //cout << "Tau: " << tau << endl;
                 CreateInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths);
                 BasicFFD(opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem, maxItemWidth, stripLength, totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
                 ResetVar(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
+                //tau += 10;
             }
             Output(opt, opt90, opt80, opt70, opt60, opt50, optLow, numInstances);
             break;
 
         case 2:
             for(instance = 0; instance < numInstances; ++instance){
+                //srand(1);
+                //cout << "Tau: " << tau << endl;
                 CreateInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths);
-                PairSmallest(opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, stripLength, totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
+                PairSmallest(opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem, stripLength, totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
                 ResetVar(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
+                //tau += 10;
             }
             Output(opt, opt90, opt80, opt70, opt60, opt50, optLow, numInstances);
             break;
 
         case 3:
             for(instance = 0; instance < numInstances; ++instance){
+                //srand(1);
+                //cout << "Tau: " << tau << endl;
                 CreateInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths);
                 FFDincAHCA(tau, opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem, maxItemWidth, stripLength, totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
                 ResetVar(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
+                //tau += 10;
             }
             Output(opt, opt90, opt80, opt70, opt60, opt50, optLow, numInstances);
             break;

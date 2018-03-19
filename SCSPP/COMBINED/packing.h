@@ -16,6 +16,8 @@ void Swap(int &a, int &b);
 
 int LowerBound(int stripLength, double totalItemWidth);
 
+double Fitness(int stripLength, vector<int> &stripSum, vector<vector<int> > &strip);
+
 void Optimality(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int stripSize,
                 int LB);
 
@@ -25,7 +27,7 @@ void BasicFFD(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt
 
 
 // Packing each strip in turn, choosing smallest score width that meets vicinal sum constraint.
-void PairSmallest(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int numScores,
+void PairSmallest(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int numScores, int numItem,
                   int stripLength, double totalItemWidth, vector<int> &allScores, vector<int> &partners, vector<vector<int> > &adjMatrix,
                   vector<vector<int> > &itemWidths, vector<int> &stripSum, vector<vector<int> > &strip);
 
@@ -36,8 +38,6 @@ void FFDincAHCA(int tau, int &opt, int &opt90, int &opt80, int &opt70,
                 vector<int> &allScores, vector<int> &partners, vector<vector<int> > &adjMatrix, vector<vector<int> > &itemWidths, vector<int> &stripSum,
                 vector<vector<int> > &strip);
 
-
-double Fitness(int stripLength, vector<int> &stripSum, vector<vector<int> > &strip);
 
 void FFD(int numScores, int numItem, int maxItemWidth, vector<int> &partners, vector<vector<int> > &itemWidths, vector<int> &itemOrder);
 
@@ -80,8 +80,10 @@ void GPX(int tau, int numScores, int maxItemWidth, int stripLength, vector<int> 
          vector<vector<int> > &itemWidths, vector<int> &offspringSum, vector<vector<int> > &offspring, vector<int> &stripSumX, vector<vector<int> > &stripX,
          vector<int> &stripSumY, vector<vector<int> > &stripY);
 
-void AHCA(int tau, int i1, int j1, int &feasible, vector<int> &allScores, vector<int> &partners, vector<vector<int> > &adjMatrix,
-          vector<vector<int> > &itemWidths, vector<int> &itemDecrease, vector<int> &stripSum, vector<vector<int> > &strip);
+void AHCAH(int tau, int i1, int j1, int &feasible, vector<int> &allScores, vector<int> &partners,
+           vector<vector<int> > &adjMatrix,
+           vector<vector<int> > &itemWidths, vector<int> &itemDecrease, vector<int> &stripSum,
+           vector<vector<int> > &strip);
 
 
 void AHCAEA(int tau, int &feasible, vector<int> &scores, vector<int> &original, vector<int> &final);
