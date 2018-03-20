@@ -132,11 +132,14 @@ void BasicFFD(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt
     int stripSize = strip.size();
     int LB = LowerBound(stripLength, totalItemWidth);
 
-    /*double avg = static_cast<double>(numItem) / static_cast<double>(stripSize);
+    double avg = static_cast<double>(numItem) / static_cast<double>(stripSize);
 
-    cout << "Lower Bound: " << LB << endl;
+    /*cout << "Lower Bound: " << LB << endl;
     cout << "# strips BasicFFD: " << stripSize << endl;
-    cout << "Avg # items/strip: " << avg << endl << endl;*/
+    cout << "Avg # items per strip: " << avg << endl << endl;*/
+
+    //cout << stripSize << endl;
+    //cout << avg << endl;
 
     Optimality(opt, opt90, opt80, opt70, opt60, opt50, optLow, stripSize, LB);
 
@@ -208,11 +211,14 @@ void PairSmallest(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int 
     int stripSize = strip.size();
     int LB = LowerBound(stripLength, totalItemWidth);
 
-    /*double avg = static_cast<double>(numItem) / static_cast<double>(stripSize);
+    double avg = static_cast<double>(numItem) / static_cast<double>(stripSize);
 
-    cout << "Lower Bound: " << LB << endl;
+    /*cout << "Lower Bound: " << LB << endl;
     cout << "# strips PairSmallest: " << stripSize << endl;
     cout << "Avg # items per strip: " << avg << endl << endl;*/
+
+    //cout << stripSize << endl;
+    //cout << avg << endl;
 
     Optimality(opt, opt90, opt80, opt70, opt60, opt50, optLow, stripSize, LB);
 
@@ -281,11 +287,14 @@ void FFDincAHCA(int tau, int &opt, int &opt90, int &opt80, int &opt70, int &opt6
     int stripSize = strip.size();
     int LB = LowerBound(stripLength, totalItemWidth);
 
-    /*double avg = static_cast<double>(numItem) / static_cast<double>(stripSize);
+    double avg = static_cast<double>(numItem) / static_cast<double>(stripSize);
 
-    cout << "Lower Bound: " << LB << endl;
+    /*cout << "Lower Bound: " << LB << endl;
     cout << "# strips FFDincAHCA: " << stripSize << endl;
     cout << "Avg # items per strip: " << avg << endl << endl;*/
+
+    //cout << stripSize << endl;
+    //cout << avg << endl;
 
     Optimality(opt, opt90, opt80, opt70, opt60, opt50, optLow, stripSize, LB);
 
