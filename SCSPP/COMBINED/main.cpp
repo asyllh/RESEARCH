@@ -47,23 +47,23 @@ void ArgumentCheck(int numInstances, int tau, int numItem, int minWidth, int max
     bool error = false;
 
     cout << "SCSPP\n------------------------------\n";
-    /*if(tau == 0){
+    if(tau == 0){
         cout << "[ERROR]: Constraint value cannot be zero.\n";
         error = true;
-    }*/
+    }
     if(stripLength == 0){
         cout << "[ERROR]: Strip cannot have length zero.\n";
         error = true;
     }
-    /*if(2*minWidth >= tau){
+    if(2*minWidth >= tau){
         cout << "[ERROR]: Constraint value is less than or equal to twice the minimum score width, vicinal sum constraint always valid.\n";
         cout << "         Problem instance is therefore classical strip-packing problem without score constraint (i.e. tau = 0).\n";
         error = true;
-    }*/
-    /*if(2*maxWidth < tau){
+    }
+    if(2*maxWidth < tau){
         cout << "[ERROR]: Constraint value is greater than double maximum score width, vicinal sum constraint never valid.\n";
         error = true;
-    }*/
+    }
     if(2*maxWidth >= minItemWidth){
         cout << "[ERROR]: Minimum item width is less than double maximum score width, scores may overlap.\n";
         error = true;
@@ -131,7 +131,7 @@ int main(int argc, char **argv){
 
     int x;
     int numInstances = 1000;
-    int tau = 0;
+    int tau = 70;
     int numItem = 500;
     int minWidth = 1;
     int maxWidth = 70;
@@ -203,12 +203,6 @@ int main(int argc, char **argv){
     vector<int> bestSolnStartSum;
     double bestFitness = 0.0;
     double tempFitness;
-
-    //values of tau for alpha = 0.0 to 1.0 in 0.1 incremenents, for n = 100, 500, and 1000. for srand(1) only.
-    vector<int> alpha100 = { 150, 105, 93, 84, 75, 68, 61, 53, 44, 32, 0 };
-    vector<int> alpha500 = { 150, 110, 97, 88, 79, 72, 64, 56, 46, 34, 0 };
-    vector<int> alpha1000 = { 150, 111, 98, 89, 80, 73, 65, 57, 47, 34, 0 };
-    double alpha = 0.0;
     srand(randomSeed);
 
     time_t startTime, endTime;
@@ -216,68 +210,30 @@ int main(int argc, char **argv){
 
     switch(algType){
         case 1:
-            for(instance = 0; instance < alpha1000.size(); ++instance){
-                srand(1);
-                tau = alpha1000[instance];
-                //cout << "Alpha: " << alpha << "\tTau: " << tau << endl;
-                CreateInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths);
-                BasicFFD(opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem, maxItemWidth, stripLength, totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
-                ResetVar(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
-                alpha += 0.1;
-            }
-            /*
             for(instance = 0; instance < numInstances; ++instance){
-                srand(1);
-                //cout << "Tau: " << tau << endl;
                 CreateInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths);
                 BasicFFD(opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem, maxItemWidth, stripLength, totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
                 ResetVar(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
-            }*/
-            //Output(opt, opt90, opt80, opt70, opt60, opt50, optLow, numInstances);
+            }
+            Output(opt, opt90, opt80, opt70, opt60, opt50, optLow, numInstances);
             break;
 
         case 2:
-            for(instance = 0; instance < alpha1000.size(); ++instance){
-                srand(1);
-                tau = alpha1000[instance];
-                //cout << "Alpha: " << alpha << "\tTau: " << tau << endl;
+            for(instance = 0; instance < numInstances; ++instance){
                 CreateInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths);
                 PairSmallest(opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem, stripLength, totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
                 ResetVar(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
-                alpha += 0.1;
             }
-
-            /*for(instance = 0; instance < numInstances; ++instance){
-                //srand(1);
-                //cout << "Tau: " << tau << endl;
-                CreateInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths);
-                PairSmallest(opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem, stripLength, totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
-                ResetVar(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
-                //tau += 10;
-            }*/
-            //Output(opt, opt90, opt80, opt70, opt60, opt50, optLow, numInstances);
+            Output(opt, opt90, opt80, opt70, opt60, opt50, optLow, numInstances);
             break;
 
         case 3:
-            for(instance = 0; instance < alpha1000.size(); ++instance){
-                srand(1);
-                tau = alpha1000[instance];
-                //cout << "Alpha: " << alpha << "\tTau: " << tau << endl;
+            for(instance = 0; instance < numInstances; ++instance){
                 CreateInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths);
                 FFDincAHCA(tau, opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem, maxItemWidth, stripLength, totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
                 ResetVar(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
-                alpha += 0.1;
             }
-
-            /*for(instance = 0; instance < numInstances; ++instance){
-                //srand(1);
-                //cout << "Tau: " << tau << endl;
-                CreateInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths);
-                FFDincAHCA(tau, opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem, maxItemWidth, stripLength, totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
-                ResetVar(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
-                //tau += 10;
-            }*/
-            //Output(opt, opt90, opt80, opt70, opt60, opt50, optLow, numInstances);
+            Output(opt, opt90, opt80, opt70, opt60, opt50, optLow, numInstances);
             break;
 
         case 4:
