@@ -132,7 +132,7 @@ void BasicFFD(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt
     int stripSize = strip.size();
     int LB = LowerBound(stripLength, totalItemWidth);
 
-    double avg = static_cast<double>(numItem) / static_cast<double>(stripSize);
+    //double avg = static_cast<double>(numItem) / static_cast<double>(stripSize);
 
     /*cout << "Lower Bound: " << LB << endl;
     cout << "# strips BasicFFD: " << stripSize << endl;
@@ -211,7 +211,7 @@ void PairSmallest(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int 
     int stripSize = strip.size();
     int LB = LowerBound(stripLength, totalItemWidth);
 
-    double avg = static_cast<double>(numItem) / static_cast<double>(stripSize);
+    //double avg = static_cast<double>(numItem) / static_cast<double>(stripSize);
 
     /*cout << "Lower Bound: " << LB << endl;
     cout << "# strips PairSmallest: " << stripSize << endl;
@@ -287,7 +287,7 @@ void FFDincAHCA(int tau, int &opt, int &opt90, int &opt80, int &opt70, int &opt6
     int stripSize = strip.size();
     int LB = LowerBound(stripLength, totalItemWidth);
 
-    double avg = static_cast<double>(numItem) / static_cast<double>(stripSize);
+    //double avg = static_cast<double>(numItem) / static_cast<double>(stripSize);
 
     /*cout << "Lower Bound: " << LB << endl;
     cout << "# strips FFDincAHCA: " << stripSize << endl;
@@ -1608,7 +1608,7 @@ void AHCAH(int tau, int i1, int j1, int &feasible, vector<int> &allScores, vecto
     vector<int> original;
     feasible = 0;
 
-    int dom = 140; /****/
+    int dom = 140; /****/ //dominating score widths
 
     //Creating scores vector
     for(k = 0; k < strip[i1].size(); ++k){
@@ -2025,7 +2025,7 @@ void CP(int nScores, int nComp, int &feasible, int qstar, int nCycles, vector<in
         if(type == 0){
             temp.clear();
             SSum = 0;
-            copy(edge.begin(), edge.end(), back_inserter(edgeCopy));
+            edgeCopy = edge;
             for(i = 0; i < C.size(); ++i){
                 if(C[i].size() > maxRowSize){
                     maxRowSize = C[i].size();
