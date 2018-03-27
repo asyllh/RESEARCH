@@ -121,4 +121,6 @@ void CreateInstance(int tau, int numScores, int numItem, int minWidth, int maxWi
 
     }
 
+    //cout << "TotalItemWidth: " << totalItemWidth << endl;
+
 } //End CreateInstance
