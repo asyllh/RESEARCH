@@ -7,14 +7,33 @@ Combined Program with Heuristics and EA
 
 #include <iostream>
 #include <fstream>
-#include <ctime>
-#include <cstring>
-#include <iomanip>
 #include <cmath>
+#include <cstring>
+#include <ctime>
+#include <chrono>
+#include <iomanip>
 using namespace std;
 
 #include "base.h"
 #include "packing.h"
+
+struct Timer{
+
+    std::chrono::high_resolution_clock::time_point startTime, endTime;
+    std::chrono::duration<float> totalTime;
+
+    Timer(){
+        startTime = std::chrono::high_resolution_clock::now();
+    }
+
+    ~Timer(){
+        endTime = std::chrono::high_resolution_clock::now();
+        totalTime = endTime - startTime;
+
+        float totalTimems = totalTime.count() * 1000.0f;
+        cout << "\nCPU Time: " << totalTimems << "ms (" << totalTime.count() << "s)\n[END OF PROGRAM]\n" << endl;
+    }
+};
 
 void ProgramInfo(){
 
@@ -48,21 +67,25 @@ void ArgumentCheck(int numInstances, int tau, int numItem, int minWidth, int max
 
     cout << "SCSPP\n------------------------------\n";
     if(tau == 0){
-        cout << "[ERROR]: Constraint value cannot be zero.\n";
-        error = true;
+        //cout << "[ERROR]: Constraint value cannot be zero.\n";
+        cout << "[WARNING]: Constraint value is zero, problem instances are equivalent to classical SPP without score constraints.\n";
+        //error = true;
     }
     if(stripLength == 0){
         cout << "[ERROR]: Strip cannot have length zero.\n";
         error = true;
     }
     if(2*minWidth >= tau){
-        cout << "[ERROR]: Constraint value is less than or equal to twice the minimum score width, vicinal sum constraint always valid.\n";
+        //cout << "[ERROR]: Constraint value is less than or equal to twice the minimum score width, vicinal sum constraint always valid.\n";
+        cout << "[WARNING]: Constraint value is less than or equal to twice the minimum score width, vicinal sum constraint always valid.\n";
         cout << "         Problem instance is therefore classical strip-packing problem without score constraint (i.e. tau = 0).\n";
-        error = true;
+        //error = true;
     }
     if(2*maxWidth < tau){
-        cout << "[ERROR]: Constraint value is greater than double maximum score width, vicinal sum constraint never valid.\n";
-        error = true;
+        //cout << "[ERROR]: Constraint value is greater than double maximum score width, vicinal sum constraint never valid.\n";
+        cout << "[WARNING]: Constraint value is greater than double maximum score width, vicinal sum constraint never valid.\n";
+        cout << "           Number of strips required = number of items.\n";
+        //error = true;
     }
     if(2*maxWidth >= minItemWidth){
         cout << "[ERROR]: Minimum item width is less than double maximum score width, scores may overlap.\n";
@@ -88,7 +111,6 @@ void ArgumentCheck(int numInstances, int tau, int numItem, int minWidth, int max
         cout << "[ERROR]: Invalid choice of recombination operator. Please choose either 1: GGA, or 2: GPX'.\n";
         error = true;
     }
-
     if(error){
         cout << "[EXIT PROGRAM.]\n";
         exit(1);
@@ -187,7 +209,7 @@ int main(int argc, char **argv){
 
     ArgumentCheck(numInstances, tau, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth, stripLength, algType, numPop, xOver, randomSeed);
 
-    int i, j, k, instance, bestStart, bestEnd;
+    int a, i, j, k, instance, bestStart, bestEnd;
     int opt = 0, opt90 = 0, opt80= 0, opt70 = 0, opt60 = 0, opt50 = 0, optLow = 0;
     int numScores = numItem * 2;
     double totalItemWidth = 0.0;
@@ -203,45 +225,64 @@ int main(int argc, char **argv){
     vector<int> bestSolnStartSum;
     double bestFitness = 0.0;
     double tempFitness;
+    double totalOpt = 0.0;
+    double avgOpt;
+    vector<int> alpha = { 145, 109, 97, 87, 79, 72, 65, 57, 47, 34, 0 };
+
     srand(randomSeed);
 
-    time_t startTime, endTime;
-    startTime = clock();
+    Timer timer;
 
     switch(algType){
         case 1:
-            for(instance = 0; instance < numInstances; ++instance){
-                CreateInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths);
-                BasicFFD(opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem, maxItemWidth, stripLength, totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
-                ResetVar(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
+            for(a = 0; a < alpha.size(); ++a) {
+                tau = alpha[a];
+                for (instance = 0; instance < numInstances; ++instance) {
+                    CreateInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths);
+                    BasicFFD(totalOpt, opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem, maxItemWidth, stripLength, totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
+                    ResetVar(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
+                }
+                //Output(opt, opt90, opt80, opt70, opt60, opt50, optLow, numInstances);
+                avgOpt = totalOpt / numInstances;
+                cout << avgOpt << endl;
+                totalOpt = 0.0;
             }
-            Output(opt, opt90, opt80, opt70, opt60, opt50, optLow, numInstances);
             break;
 
         case 2:
-            for(instance = 0; instance < numInstances; ++instance){
-                CreateInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths);
-                PairSmallest(opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem, stripLength, totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
-                ResetVar(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
+            for(a = 0; a < alpha.size(); ++a) {
+                tau = alpha[a];
+                for (instance = 0; instance < numInstances; ++instance) {
+                    CreateInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths);
+                    PairSmallest(totalOpt, opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem, stripLength, totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
+                    ResetVar(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
+                }
+                //Output(opt, opt90, opt80, opt70, opt60, opt50, optLow, numInstances);
+                avgOpt = totalOpt / numInstances;
+                cout << avgOpt << endl;
+                totalOpt = 0.0;
             }
-            Output(opt, opt90, opt80, opt70, opt60, opt50, optLow, numInstances);
             break;
 
         case 3:
-            for(instance = 0; instance < numInstances; ++instance){
-                CreateInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths);
-                FFDincAHCA(tau, opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem, maxItemWidth, stripLength, totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
-                ResetVar(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
+            for(a = 0; a < alpha.size(); ++a) {
+                tau = alpha[a];
+                for (instance = 0; instance < numInstances; ++instance) {
+                    CreateInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths);
+                    FFDincAHCA(totalOpt, tau, opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem, maxItemWidth, stripLength, totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
+                    ResetVar(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
+                }
+                //Output(opt, opt90, opt80, opt70, opt60, opt50, optLow, numInstances);
+                avgOpt = totalOpt / numInstances;
+                cout << avgOpt << endl;
+                totalOpt = 0.0;
             }
-            Output(opt, opt90, opt80, opt70, opt60, opt50, optLow, numInstances);
             break;
 
         case 4:
             CreateInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths);
-
             int LB = LowerBound(stripLength, totalItemWidth);
             cout << "Lower bound: " << LB << " strips." << endl << endl;
-
             CreateInitPop(tau, numPop, numScores, numItem, maxItemWidth, stripLength, allScores, partners, adjMatrix, itemWidths, populationSum, population);
 
             //Finding the solution in the population that has the best fitness value
@@ -265,13 +306,10 @@ int main(int argc, char **argv){
 
             cout << "END - Best solution in the population:\n"
                  << "Solution: " << bestEnd << "\nFitness: " << bestFitness << "\nSize: " << population[bestEnd].size() << " strips." << endl << endl;
+            break;
+
     }
 
-
-    endTime = clock();
-    double totalTimeMS = (((endTime - startTime) / double(CLOCKS_PER_SEC)) * 1000);
-    double totalTimeS = totalTimeMS / 1000;
-    cout << "\nCPU Time = " << totalTimeMS << " milliseconds (" << totalTimeS << " seconds.)\nEND.\n";
 
 
 }//END INT MAIN
