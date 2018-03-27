@@ -67,7 +67,7 @@ void Optimality(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &o
 } //End Optimality
 
 // FFD checking vicinal sum constraint for both sides of each item.
-void BasicFFD(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int numScores, int numItem, int maxItemWidth,
+void BasicFFD(double &totalOpt, int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int numScores, int numItem, int maxItemWidth,
               int stripLength, double totalItemWidth, vector<int> &allScores, vector<int> &partners, vector<vector<int> > &adjMatrix,
               vector<vector<int> > &itemWidths, vector<int> &stripSum, vector<vector<int> > &strip){
     int i, j, mini;
@@ -132,11 +132,16 @@ void BasicFFD(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt
     int stripSize = strip.size();
     int LB = LowerBound(stripLength, totalItemWidth);
 
+    double c = static_cast<double>(LB) / stripSize;
+    totalOpt += c;
+
+
     //double avg = static_cast<double>(numItem) / static_cast<double>(stripSize);
 
-    /*cout << "Lower Bound: " << LB << endl;
-    cout << "# strips BasicFFD: " << stripSize << endl;
-    cout << "Avg # items per strip: " << avg << endl << endl;*/
+    //cout << "Lower Bound: " << LB << endl;
+    //cout << "# strips BasicFFD: " << stripSize << endl;
+    //cout << "Avg # items per strip: " << avg << endl << endl;
+    //cout << endl;
 
     //cout << stripSize << endl;
     //cout << avg << endl;
@@ -147,7 +152,7 @@ void BasicFFD(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt
 
 
 // Packing each strip in turn, choosing smallest score width that meets vicinal sum constraint.
-void PairSmallest(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int numScores, int numItem, int stripLength,
+void PairSmallest(double &totalOpt, int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int numScores, int numItem, int stripLength,
                   double totalItemWidth, vector<int> &allScores, vector<int> &partners, vector<vector<int> > &adjMatrix,
                   vector<vector<int> > &itemWidths, vector<int> &stripSum, vector<vector<int> > &strip){
     int i, j;
@@ -211,11 +216,15 @@ void PairSmallest(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int 
     int stripSize = strip.size();
     int LB = LowerBound(stripLength, totalItemWidth);
 
+    double c = static_cast<double>(LB) / stripSize;
+    totalOpt += c;
+
     //double avg = static_cast<double>(numItem) / static_cast<double>(stripSize);
 
-    /*cout << "Lower Bound: " << LB << endl;
-    cout << "# strips PairSmallest: " << stripSize << endl;
-    cout << "Avg # items per strip: " << avg << endl << endl;*/
+    //cout << "Lower Bound: " << LB << endl;
+    //cout << "# strips PairSmallest: " << stripSize << endl;
+    //cout << "Avg # items per strip: " << avg << endl << endl;
+    //cout << endl;
 
     //cout << stripSize << endl;
     //cout << avg << endl;
@@ -226,7 +235,7 @@ void PairSmallest(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int 
 
 
 // FFD including AHCA, instead of attempting to place item on end of strip, run AHCA to find feasible solution.
-void FFDincAHCA(int tau, int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int numScores, int numItem, int maxItemWidth,
+void FFDincAHCA(double &totalOpt, int tau, int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int numScores, int numItem, int maxItemWidth,
                 int stripLength, double totalItemWidth, vector<int> &allScores, vector<int> &partners, vector<vector<int> > &adjMatrix,
                 vector<vector<int> > &itemWidths, vector<int> &stripSum, vector<vector<int> > &strip){
 
@@ -287,11 +296,15 @@ void FFDincAHCA(int tau, int &opt, int &opt90, int &opt80, int &opt70, int &opt6
     int stripSize = strip.size();
     int LB = LowerBound(stripLength, totalItemWidth);
 
+    double c = static_cast<double>(LB) / stripSize;
+    totalOpt += c;
+
     //double avg = static_cast<double>(numItem) / static_cast<double>(stripSize);
 
-    /*cout << "Lower Bound: " << LB << endl;
-    cout << "# strips FFDincAHCA: " << stripSize << endl;
-    cout << "Avg # items per strip: " << avg << endl << endl;*/
+    //cout << "Lower Bound: " << LB << endl;
+    //cout << "# strips FFDincAHCA: " << stripSize << endl;
+    //cout << "Avg # items per strip: " << avg << endl << endl;
+    //cout << endl;
 
     //cout << stripSize << endl;
     //cout << avg << endl;
@@ -1608,7 +1621,7 @@ void AHCAH(int tau, int i1, int j1, int &feasible, vector<int> &allScores, vecto
     vector<int> original;
     feasible = 0;
 
-    int dom = 140; /****/ //dominating score widths
+    int dom = 150; /****/ //dominating score widths
 
     //Creating scores vector
     for(k = 0; k < strip[i1].size(); ++k){
