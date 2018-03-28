@@ -20,19 +20,19 @@ double Fitness(int stripLength, vector<int> &stripSum, vector<vector<int> > &str
 
 void Optimality(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int stripSize, int LB);
 
-void BasicFFD(double &totalOpt, int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int numScores, int numItem, int maxItemWidth,
+void BasicFFD(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int numScores, int numItem, int maxItemWidth,
               int stripLength, double totalItemWidth, vector<int> &allScores, vector<int> &partners, vector<vector<int> > &adjMatrix,
               vector<vector<int> > &itemWidths, vector<int> &stripSum, vector<vector<int> > &strip);
 
 
 // Packing each strip in turn, choosing smallest score width that meets vicinal sum constraint.
-void PairSmallest(double &totalOpt, int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int numScores, int numItem,
+void PairSmallest(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int numScores, int numItem,
                   int stripLength, double totalItemWidth, vector<int> &allScores, vector<int> &partners, vector<vector<int> > &adjMatrix,
                   vector<vector<int> > &itemWidths, vector<int> &stripSum, vector<vector<int> > &strip);
 
 
 // FFD including AHCA, instead of attempting to place item on end of strip, run AHCA to find feasible solution.
-void FFDincAHCA(double &totalOpt, int tau, int &opt, int &opt90, int &opt80, int &opt70,
+void FFDincAHCA(int tau, int &opt, int &opt90, int &opt80, int &opt70,
                 int &opt60, int &opt50, int &optLow, int numScores, int numItem, int maxItemWidth, int stripLength, double totalItemWidth,
                 vector<int> &allScores, vector<int> &partners, vector<vector<int> > &adjMatrix, vector<vector<int> > &itemWidths, vector<int> &stripSum,
                 vector<vector<int> > &strip);

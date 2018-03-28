@@ -67,7 +67,7 @@ void Optimality(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &o
 } //End Optimality
 
 // FFD checking vicinal sum constraint for both sides of each item.
-void BasicFFD(double &totalOpt, int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int numScores, int numItem, int maxItemWidth,
+void BasicFFD(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int numScores, int numItem, int maxItemWidth,
               int stripLength, double totalItemWidth, vector<int> &allScores, vector<int> &partners, vector<vector<int> > &adjMatrix,
               vector<vector<int> > &itemWidths, vector<int> &stripSum, vector<vector<int> > &strip){
     int i, j, mini;
@@ -132,10 +132,6 @@ void BasicFFD(double &totalOpt, int &opt, int &opt90, int &opt80, int &opt70, in
     int stripSize = strip.size();
     int LB = LowerBound(stripLength, totalItemWidth);
 
-    double c = static_cast<double>(LB) / stripSize;
-    totalOpt += c;
-
-
     //double avg = static_cast<double>(numItem) / static_cast<double>(stripSize);
 
     //cout << "Lower Bound: " << LB << endl;
@@ -152,7 +148,7 @@ void BasicFFD(double &totalOpt, int &opt, int &opt90, int &opt80, int &opt70, in
 
 
 // Packing each strip in turn, choosing smallest score width that meets vicinal sum constraint.
-void PairSmallest(double &totalOpt, int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int numScores, int numItem, int stripLength,
+void PairSmallest(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int numScores, int numItem, int stripLength,
                   double totalItemWidth, vector<int> &allScores, vector<int> &partners, vector<vector<int> > &adjMatrix,
                   vector<vector<int> > &itemWidths, vector<int> &stripSum, vector<vector<int> > &strip){
     int i, j;
@@ -216,9 +212,6 @@ void PairSmallest(double &totalOpt, int &opt, int &opt90, int &opt80, int &opt70
     int stripSize = strip.size();
     int LB = LowerBound(stripLength, totalItemWidth);
 
-    double c = static_cast<double>(LB) / stripSize;
-    totalOpt += c;
-
     //double avg = static_cast<double>(numItem) / static_cast<double>(stripSize);
 
     //cout << "Lower Bound: " << LB << endl;
@@ -235,7 +228,7 @@ void PairSmallest(double &totalOpt, int &opt, int &opt90, int &opt80, int &opt70
 
 
 // FFD including AHCA, instead of attempting to place item on end of strip, run AHCA to find feasible solution.
-void FFDincAHCA(double &totalOpt, int tau, int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int numScores, int numItem, int maxItemWidth,
+void FFDincAHCA(int tau, int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int numScores, int numItem, int maxItemWidth,
                 int stripLength, double totalItemWidth, vector<int> &allScores, vector<int> &partners, vector<vector<int> > &adjMatrix,
                 vector<vector<int> > &itemWidths, vector<int> &stripSum, vector<vector<int> > &strip){
 
@@ -295,9 +288,6 @@ void FFDincAHCA(double &totalOpt, int tau, int &opt, int &opt90, int &opt80, int
     }
     int stripSize = strip.size();
     int LB = LowerBound(stripLength, totalItemWidth);
-
-    double c = static_cast<double>(LB) / stripSize;
-    totalOpt += c;
 
     //double avg = static_cast<double>(numItem) / static_cast<double>(stripSize);
 
