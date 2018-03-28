@@ -136,7 +136,7 @@ This next heuristic focuses on packing each strip in turn, rather than each item
 
 \subsection{FFD Exact}
 \label{sec:ffdexact}
-The last heuristic in this paper is formed by integrating the Alternating Hamiltonian Construction Algorithm (AHCA) detailed in Section ref{} with the classical FFD heuristic. Again, all items in $\mathcal{I}$ are sorted into non-increasing order of widths, with ties broken by choosing the item with the smallest score width. For each item $i \in \mathcal{I}$, the heuristic finds the lowest-indexed feasible strip $S_j$. As in the first heuristic, if $S_j$ is empty, $i$ is placed in a regular orientation onto $S_j$, and $S_j$ is then added to the solution set $\mathcal{S}$. Unlike the first heuristic, however, if $S_j$ is not empty ($S_j \in \mathcal{S}$), AHCA is applied on all items in $S_j$ and the current item $i$. If AHCA is successful, the items currently on $S_j$ are replaced by the new arrangement, which of course includes $i$. In the event that AHCA is unable to produce a solution, $S_j$ remains intact, and the heuristic attempts to pack $i$ onto the next lowest-indexed feasible strip. Due to the inclusion of AHCA, this heuristic is slower than the previous heuristics, with complexity $O(n^2)$. This heuristic has a significant advantage, however, as it is able to rearrange items entirely in order to find a feasible solution. In addition, we know that if a feasible alignment for a given set of items exists, AHCA is guaranteed to find and produce this solution. Thus, every subproblem in this heuristic, i.e. every time an item needs to be placed on a strip, can be solved exactly. For example, Figure \ref{fig:comparestrips} illustrates an instance of the SCSPP in which an item can feasibly fit onto a strip, i.e. the addition of the item onto the strip does not cause the strip's capacity to be exceed. In the original version of FFD, the items on the strip are, as expected, in non-increasing order, and the right-most score width has a value of 3. Regardless of orientation, the current item cannot meet the vicinal sum constraint. The heuristic will therefore attempt to place the item onto another strip, or, if there are no other open strips, a new strip will be required to accommodate the item, thus increasing the total number of strips. However, by using FFDincAHCA, a feasible alignment of the items including the current item exists, and hence the item does not need to be placed elsewhere, minimising the risk of potentially adding a new strip to the solution.
+The last heuristic in this paper is formed by integrating the Alternating Hamiltonian Construction Algorithm (AHCA) detailed in Section ref{} with the classical FFD heuristic. Again, all items in $\mathcal{I}$ are sorted into non-increasing order of widths, with ties broken by choosing the item with the smallest score width. For each item $i \in \mathcal{I}$, the heuristic finds the lowest-indexed feasible strip $S_j$. As in the first heuristic, if $S_j$ is empty, $i$ is placed in a regular orientation onto $S_j$, and $S_j$ is then added to the solution set $\mathcal{S}$. Unlike the first heuristic, however, if $S_j$ is not empty ($S_j \in \mathcal{S}$), AHCA is applied on all items in $S_j$ and the current item $i$. If AHCA is successful, the items currently on $S_j$ are replaced by the new arrangement, which of course includes $i$. In the event that AHCA is unable to produce a solution, $S_j$ remains intact, and the heuristic attempts to pack $i$ onto the next lowest-indexed feasible strip. Due to the inclusion of AHCA, this heuristic is slower than the previous heuristics, with complexity $O(n^2)$. This heuristic has a significant advantage, however, as it is able to rearrange items entirely in order to find a feasible solution. In addition, we know that if a feasible alignment for a given set of items exists, AHCA is guaranteed to find and produce this solution. Thus, every subproblem in this heuristic, i.e. every time an item needs to be placed on a strip, can be solved exactly. For example, Figure \ref{fig:comparestrips} illustrates an instance of the SCSPP in which an item can feasibly fit onto a strip, i.e. the addition of the item onto the strip does not cause the strip's capacity to be exceeded. In the original version of FFD, the items on the strip are, as expected, in non-increasing order, and the right-most score width has a value of 3. Regardless of orientation, the current item cannot meet the vicinal sum constraint. The heuristic will therefore attempt to place the item onto another strip, or, if there are no other open strips, a new strip will be required to accommodate the item, thus increasing the total number of strips. However, by using FFDincAHCA, a feasible alignment of the items including the current item exists, and hence the item does not need to be placed elsewhere, minimising the risk of potentially adding a new strip to the solution.
 
 \begin{figure}[h!]	
 	\centering
@@ -146,7 +146,94 @@ The last heuristic in this paper is formed by integrating the Alternating Hamilt
 \end{figure}
 
 \section{Comparison}
-In order to provide a complete overview of the heuristics, sets of 100, 500, and 1000 items were used on strips of lengths 1500, 2500, and 5000. Item widths were randomly selected between 150 and 1000, and score widths between 1 and 70. This ensures that each item has two score lines. 
+In order to provide a complete overview of the heuristics, sets of 100, 500, and 1000 items were used on strips of lengths 1250, 2500, and 5000. Item widths were randomly selected between 150 and 1000, and score widths between 1 and 70. This ensures that each item has two score lines. Changing the strip lengths changes the average number of items per strip. 
+
+\begin{table}[!htb]
+\centering
+\caption{$n = 100$}
+\begin{tabular}{c@{\hspace{15pt}}c@{\hspace{10pt}}c@{\hspace{10pt}}c@{\hspace{7pt}}| @{\hspace{7pt}}c@{\hspace{10pt}}c@{\hspace{10pt}}c@{\hspace{7pt}}| @{\hspace{7pt}} c@{\hspace{10pt}}c@{\hspace{10pt}}c}
+	\noalign{\smallskip}
+	& \multicolumn{3}{c}{$l = 5000$} & \multicolumn{3}{c}{$l = 2500$} & \multicolumn{3}{c}{$l = 1250$} \\
+	\hline\noalign{\smallskip}
+	$\delta$ & Basic & Pair & FFD+ & Basic & Pair & FFD+ & Basic & Pair & FFD+ \\
+	\noalign{\smallskip}
+	\hline 
+	\noalign{\smallskip}
+	0.0 & 0.119930 & 0.119930 & 0.119930 & 0.234780 & 0.234780 & 0.234780 & 0.464660 & 0.464660 & 0.464660 \\
+	0.1 & 0.190373 & \textbf{0.209209} & 0.195007 & \textbf{0.368315} & 0.403484 & 0.372649 & 0.653776 & 0.662649 & 0.654527 \\
+	0.2 & 0.241823 & \textbf{0.291742} & 0.252201 & \textbf{0.455307} & 0.537355 & 0.464804 & 0.740613 & 0.743163 & 0.74212 \\
+	0.3 & 0.308598 & \textbf{0.423971} & 0.330489 & \textbf{0.552257} & 0.700541 & 0.573676 & 0.817858 & 0.801526 & 0.820929 \\
+	0.4 & 0.387256 & \textbf{0.634770} & 0.435353 & \textbf{0.648313} & 0.860270 & 0.688716 & 0.874070 & 0.835449 & 0.878158 \\
+	0.5 & 0.491093 & \textbf{0.900872} & 0.586398 & \textbf{0.747025} & 0.953757 & 0.806812 & 0.915534 & 0.854677 & 0.920727 \\
+	0.6	& 0.612443 & \textbf{0.982422} & 0.753466 & \textbf{0.834971} & 0.962939 & 0.896095 & 0.939964 & 0.864190 & 0.945036 \\
+	0.7 & 0.773879 & \textbf{0.986985} & 0.909705 & \textbf{0.916026} & 0.965898 & 0.959666 & 0.957970 & 0.873854 & 0.961036 \\
+	0.8	& 0.904347 & \textbf{0.987407} & 0.980250 & 0.966750 & 0.967486 & \textbf{0.984634} & 0.964117 & 0.885786 & 0.965271 \\
+	0.9	& 0.978801 & 0.984535 &	\textbf{0.991745} & 0.987382 & 0.967989 & \textbf{0.990479} & 0.968735 & 0.897915 & 0.968928 \\
+	1.0 & \textbf{0.995493} & 0.988851 & \textbf{0.995493} & \textbf{0.992539} & 0.969239 & \textbf{0.992539} & 0.967834 & 0.904161 & 0.967834 \\
+	\hline
+\end{tabular}
+\label{table:n100}
+\end{table}	
+
+
+
+\begin{table}[!htb]
+	\centering
+	\caption{$n = 500$}
+	\begin{tabular}{c@{\hspace{15pt}}c@{\hspace{10pt}}c@{\hspace{10pt}}c@{\hspace{7pt}}| @{\hspace{7pt}}c@{\hspace{10pt}}c@{\hspace{10pt}}c@{\hspace{7pt}}| @{\hspace{7pt}} c@{\hspace{10pt}}c@{\hspace{10pt}}c}
+		\noalign{\smallskip}
+		& \multicolumn{3}{c}{$l = 5000$} & \multicolumn{3}{c}{$l = 2500$} & \multicolumn{3}{c}{$l = 1250$} \\
+		\hline\noalign{\smallskip}
+		$\delta$ & Basic & Pair & FFD+ & Basic & Pair & FFD+ & Basic & Pair & FFD+ \\
+		\noalign{\smallskip}
+		\hline
+		\noalign{\smallskip}
+		0.0 & 0.116078 & 0.116078 &	0.116078 & 0.231142 & 0.231142 & 0.231142 & 0.461296 & 0.461296 & 0.461296 \\
+		0.1 & 0.191817 & 0.206796 &	0.193715 & 0.375914 & 0.403863 & 0.376151 & 0.65971 & 0.67634 & 0.659638 \\
+		0.2	& 0.247985 & 0.289553 &	0.251505 & 0.471136 & 0.541779 & 0.471511 & 0.753568 & 0.757848 & 0.753592 \\
+		0.3	& 0.321577 & 0.426852 &	0.329629 & 0.578598 & 0.717203 & 0.585497 & 0.836553 & 0.813063 & 0.837042 \\
+		0.4	& 0.411209 & 0.660488 &	0.436567 & 0.686034 & 0.886587 & 0.709649 & 0.900865 & 0.846469 & 0.902393 \\
+		0.5	& 0.526376 & 0.967058 &	0.597456 & 0.793717 & 0.968396 & 0.838188 & 0.946179 & 0.867053 & 0.950434 \\
+		0.6	& 0.672678 & 0.987213 &	0.805681 & 0.890082 & 0.971239 & 0.935295 & 0.97161 & 0.881001 & 0.976682 \\
+		0.7	& 0.839117 & 0.987909 &	0.959455 & 0.953589 & 0.973028 & 0.981477 & 0.983071 & 0.898796 & 0.986087 \\
+		0.8	& 0.954183 & 0.987787 &	0.991791 & 0.984277 & 0.97413 & 0.992152 & 0.987373 & 0.917181 & 0.988403 \\
+		0.9	& 0.99056 &	0.988561 & 0.995444 & 0.992356 & 0.974811 & 0.993584 & 0.988397 & 0.931674 & 0.988545 \\
+		1.0	& 0.99555 &	0.987811 & 0.99555 & 0.993626 & 0.974892 & 0.993626 & 0.988883 & 0.938649 & 0.988883 \\
+		\hline
+	\end{tabular}
+	\label{table:n500}
+\end{table}	
+
+
+
+\begin{table}[!htb]
+	\centering
+	\caption{$n = 1000$}
+	\begin{tabular}{c@{\hspace{15pt}}c@{\hspace{10pt}}c@{\hspace{10pt}}c@{\hspace{7pt}}| @{\hspace{7pt}}c@{\hspace{10pt}}c@{\hspace{10pt}}c@{\hspace{7pt}}| @{\hspace{7pt}} c@{\hspace{10pt}}c@{\hspace{10pt}}c}
+		\noalign{\smallskip}
+		& \multicolumn{3}{c}{$l = 5000$} & \multicolumn{3}{c}{$l = 2500$} & \multicolumn{3}{c}{$l = 1250$} \\
+		\hline\noalign{\smallskip}
+		$\delta$ & Basic & Pair & FFD+ & Basic & Pair & FFD+ & Basic & Pair & FFD+ \\
+		\noalign{\smallskip}
+		\hline
+		\noalign{\smallskip}
+		0.0	&0.115534&	0.115534&	0.115534&	0.230563&	0.230563&	0.230563&	0.460623&	0.460623&	0.460623 \\
+		0.1	&0.193119&	0.206222&	0.194298&	0.379134&	0.402463&	0.378162&	0.6614&	0.681008&	0.661144 \\
+		0.2	&0.251658&	0.289114&	0.253138&	0.478121&	0.538655&	0.475984&	0.758956&	0.763423&	0.758428 \\
+		0.3	&0.328699&	0.427652&	0.332872&	0.590141&	0.711773&	0.593915&	0.84551&	0.818874&	0.845116 \\
+		0.4	&0.420561&	0.65769&	0.44084&	0.701106&	0.8834&	0.722513&	0.909988&	0.854863&	0.910882 \\
+		0.5	&0.542993&	0.976737&	0.611842&	0.814597&	0.970731&	0.856799&	0.957862&	0.874602&	0.961627 \\
+		0.6	&0.703725&	0.987923&	0.839692&	0.911433&	0.973308&	0.95286&	0.980911&	0.889836&	0.985533 \\
+		0.7	&0.866696&	0.98822	& 0.974979&	0.966382&	0.974971&	0.987669&	0.98836&	0.907816&	0.990632 \\
+		0.8	&0.968441&	0.988482&	0.993951&	0.989124&	0.976005&	0.993392&	0.991248&	0.927659&	0.991882 \\
+		0.9	&0.99348&	0.988613&	0.995965&	0.993528&	0.97652&	0.994038&	0.992179&	0.944748&	0.992259 \\
+		1.0	&0.995915&	0.988288&	0.995915&	0.994067&	0.976631&	0.994067&	0.992197&	0.948814&	0.992197 \\
+		\hline
+	\end{tabular}
+	\label{table:n1000}
+\end{table}	
+
+
 
 
 
@@ -154,3 +241,30 @@ In order to provide a complete overview of the heuristics, sets of 100, 500, and
 \bibliography{includes/bibliography}
 
 \end{document}
+
+\begin{comment}
+\begin{table}[!htb]
+\centering
+\caption{n = 100 l = 5000}
+\begin{tabular}{c@{\hspace{20pt}}c@{\hspace{20pt}}c@{\hspace{10pt}}c}
+\hline\noalign{\smallskip}
+$\delta$ & BasicFFD & PairSmallest & FFDincAHCA \\ 
+\noalign{\smallskip}
+\hline
+\noalign{\smallskip}
+0.0 & 0.11993 & 0.11993 & 0.11993 \\ 
+0.1 & 0.190373 & 0.209209 & 0.195007 \\ 
+0.2 & 0.241823 & 0.291742 & 0.252201 \\ 
+0.3 & 0.308598 & 0.423971 & 0.330489 \\ 
+0.4 & 0.387256 & 0.634770 & 0.435353 \\ 
+0.5 & 0.491093 & 0.900872 & 0.586398 \\ 
+0.6 & 0.612443 & 0.982422 & 0.753466 \\
+0.7 & 0.773879 & 0.986985 & 0.909705 \\
+0.8 & 0.904347 & 0.987407 &	0.980250 \\
+0.9 & 0.978801 & 0.984535 &	0.991745 \\
+1.0 & 0.995493 & 0.988851 &	0.995493 \\
+\hline
+\end{tabular}
+%\label{table:100/5000}
+\end{table}	
+\end{comment}
