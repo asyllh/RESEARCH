@@ -31,7 +31,9 @@ struct Timer{
         totalTime = endTime - startTime;
 
         float totalTimems = totalTime.count() * 1000.0f;
-        cout << "\nCPU Time: " << totalTimems << "ms (" << totalTime.count() << "s)\n[END OF PROGRAM]\n" << endl;
+        //cout << "\nCPU Time: " << totalTimems << "ms (" << totalTime.count() << "s)" << endl;
+        cout << totalTime.count() << endl;
+        //cout << totalTimems << endl;
     }
 };
 
@@ -225,57 +227,63 @@ int main(int argc, char **argv){
     vector<int> bestSolnStartSum;
     double bestFitness = 0.0;
     double tempFitness;
-    double totalOpt = 0.0;
-    double avgOpt;
     vector<int> alpha = { 145, 109, 97, 87, 79, 72, 65, 57, 47, 34, 0 };
 
     srand(randomSeed);
 
-    Timer timer;
+    //Timer timer;
 
     switch(algType){
         case 1:
             for(a = 0; a < alpha.size(); ++a) {
                 tau = alpha[a];
-                for (instance = 0; instance < numInstances; ++instance) {
-                    CreateInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths);
-                    BasicFFD(totalOpt, opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem, maxItemWidth, stripLength, totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
-                    ResetVar(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
+                {
+                    Timer timer;
+                    for (instance = 0; instance < numInstances; ++instance) {
+                        CreateInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth,
+                                       totalItemWidth, allScores, partners, adjMatrix, itemWidths);
+                        BasicFFD(opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem, maxItemWidth,
+                                 stripLength, totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum,
+                                 strip);
+                        ResetVar(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
+                    }
                 }
                 //Output(opt, opt90, opt80, opt70, opt60, opt50, optLow, numInstances);
-                avgOpt = totalOpt / numInstances;
-                cout << avgOpt << endl;
-                totalOpt = 0.0;
             }
             break;
 
         case 2:
             for(a = 0; a < alpha.size(); ++a) {
                 tau = alpha[a];
-                for (instance = 0; instance < numInstances; ++instance) {
-                    CreateInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths);
-                    PairSmallest(totalOpt, opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem, stripLength, totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
-                    ResetVar(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
+                {
+                    Timer timer;
+                    for (instance = 0; instance < numInstances; ++instance) {
+                        CreateInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth,
+                                       totalItemWidth, allScores, partners, adjMatrix, itemWidths);
+                        PairSmallest(opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem, stripLength,
+                                     totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
+                        ResetVar(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
+                    }
                 }
                 //Output(opt, opt90, opt80, opt70, opt60, opt50, optLow, numInstances);
-                avgOpt = totalOpt / numInstances;
-                cout << avgOpt << endl;
-                totalOpt = 0.0;
             }
             break;
 
         case 3:
             for(a = 0; a < alpha.size(); ++a) {
                 tau = alpha[a];
-                for (instance = 0; instance < numInstances; ++instance) {
-                    CreateInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths);
-                    FFDincAHCA(totalOpt, tau, opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem, maxItemWidth, stripLength, totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
-                    ResetVar(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
+                {
+                    Timer timer;
+                    for (instance = 0; instance < numInstances; ++instance) {
+                        CreateInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth,
+                                       totalItemWidth, allScores, partners, adjMatrix, itemWidths);
+                        FFDincAHCA(tau, opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem,
+                                   maxItemWidth, stripLength, totalItemWidth, allScores, partners, adjMatrix,
+                                   itemWidths, stripSum, strip);
+                        ResetVar(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
+                    }
                 }
                 //Output(opt, opt90, opt80, opt70, opt60, opt50, optLow, numInstances);
-                avgOpt = totalOpt / numInstances;
-                cout << avgOpt << endl;
-                totalOpt = 0.0;
             }
             break;
 
