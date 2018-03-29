@@ -221,7 +221,7 @@ In order to provide a complete overview of the heuristics, sets of 100, 500, and
 		0.0	&0.115534&	0.115534&	0.115534&	0.230563&	0.230563&	0.230563&	0.460623&	0.460623&	0.460623 \\
 		0.1	&0.193119&	\textbf{0.206222} &	0.194298&	0.379134&	\textbf{0.402463}&	0.378162&	0.6614&	\textbf{0.681008}&	0.661144 \\
 		0.2	&0.251658&	\textbf{0.289114} &	0.253138&	0.478121&	\textbf{0.538655}&	0.475984&	0.758956&	\textbf{0.763423}&	0.758428 \\
-		0.3	&0.328699&	\textbf{0.427652} &	0.332872&	0.590141&	\textbf{0.711773}&	0.593915&	\textbf{0.84551}&	0.818874&	0.845116 \\
+		0.3	&0.328699&	\textbf{0.427652} &	0.332872&	0.590141&	\textbf{0.711773}&	0.593915&	0.84501&	0.818874&	\textbf{0.845116} \\
 		0.4	&0.420561&	\textbf{0.65769} &	0.44084&	0.701106&	\textbf{0.8834}&	0.722513&	0.909988&	0.854863&	\textbf{0.910882} \\
 		0.5	&0.542993&	\textbf{0.976737} &	0.611842&	0.814597&	\textbf{0.970731}&	0.856799&	0.957862&	0.874602&	\textbf{0.961627} \\
 		0.6	&0.703725&	\textbf{0.987923} &	0.839692&	0.911433&	\textbf{0.973308}&	0.95286&	0.980911&	0.889836&	\textbf{0.985533} \\
@@ -233,6 +233,28 @@ In order to provide a complete overview of the heuristics, sets of 100, 500, and
 	\end{tabular}
 	\label{table:n1000}
 \end{table}	
+
+\begin{itemize}
+	\item Uniform distribution
+	\item only $n = 500$, the other two show the exact same trend, no need for unecessary data. 
+	\item $n = 500$, avg total item widths per instance (sum of all item widths) = 287684
+	\item $l = 5000$, avg lower bound = 58.039, avg items/strip = 8.62069
+	\item $l = 2500$, avg lower bound = 115.571, avg items/strip = 4.31034
+	\item $l = 1250$, avg lower bound = 230.648, avg items/strip = 2.16450
+	\item all items have height $h = 1$, strips have height $h = 1$
+	\item changing the value of $\tau$ changes the proportion of the number of score widths that meet the vicinal sum constraint, excluding itself and its partner
+	\item parameter $\delta$ defines the proportion, in 0.1 increments
+	\item if $\delta = 0.0$, then no score widths can be aligned, no matchings exist, each item requires its own strip, number of strips = $n$
+	\item if $\delta = 1.0$, then all score widths can be aligned with any other score width, problem becomes analogous to the classical one-dimensional BPP.
+	\item \cite{lewis2011}
+	\item As the strip length is decreased, ffd+ improves, number of items/strip decreases
+	\item basicffd never excels over the other two heuristics, only equals ffd+, since when $\delta = 1.0$, the problem is the same as a normal bpp, and so basicffd and ffd+ will perform in the same manner (standard ffd)
+	\item Pairsmallest does not reach highest optimality at $\delta = 0.8$ onwards in any strip length
+\end{itemize}
+
+
+
+
 
 
 
