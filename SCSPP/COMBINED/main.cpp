@@ -6,7 +6,6 @@ Combined Program with Heuristics and EA
 /--------------*/
 
 #include <iostream>
-#include <fstream>
 #include <cmath>
 #include <cstring>
 #include <ctime>
@@ -227,7 +226,7 @@ int main(int argc, char **argv){
     vector<int> bestSolnStartSum;
     double bestFitness = 0.0;
     double tempFitness;
-    vector<int> alpha = { 145, 109, 97, 87, 79, 72, 65, 57, 47, 34, 0 };
+    vector<int> delta = { 145, 109, 97, 87, 79, 72, 65, 57, 47, 34, 0 };
 
     srand(randomSeed);
 
@@ -235,8 +234,8 @@ int main(int argc, char **argv){
 
     switch(algType){
         case 1:
-            for(a = 0; a < alpha.size(); ++a) {
-                tau = alpha[a];
+            for (a = 0; a < delta.size(); ++a) {
+                tau = delta[a];
                 {
                     Timer timer;
                     for (instance = 0; instance < numInstances; ++instance) {
@@ -248,13 +247,14 @@ int main(int argc, char **argv){
                         ResetVar(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
                     }
                 }
+
                 //Output(opt, opt90, opt80, opt70, opt60, opt50, optLow, numInstances);
             }
             break;
 
         case 2:
-            for(a = 0; a < alpha.size(); ++a) {
-                tau = alpha[a];
+            for (a = 0; a < delta.size(); ++a) {
+                tau = delta[a];
                 {
                     Timer timer;
                     for (instance = 0; instance < numInstances; ++instance) {
@@ -270,8 +270,8 @@ int main(int argc, char **argv){
             break;
 
         case 3:
-            for(a = 0; a < alpha.size(); ++a) {
-                tau = alpha[a];
+            for (a = 0; a < delta.size(); ++a) {
+                tau = delta[a];
                 {
                     Timer timer;
                     for (instance = 0; instance < numInstances; ++instance) {
@@ -289,7 +289,7 @@ int main(int argc, char **argv){
 
         case 4:
             CreateInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths);
-            int LB = LowerBound(stripLength, totalItemWidth);
+            int LB = LowerBound(totalItemWidth, stripLength);
             cout << "Lower bound: " << LB << " strips." << endl << endl;
             CreateInitPop(tau, numPop, numScores, numItem, maxItemWidth, stripLength, allScores, partners, adjMatrix, itemWidths, populationSum, population);
 
