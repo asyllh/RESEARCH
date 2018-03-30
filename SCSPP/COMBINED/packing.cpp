@@ -16,7 +16,7 @@ void Swap(int &a, int &b){
     b = temp;
 }
 
-int LowerBound(int stripLength, double totalItemWidth){
+int LowerBound(double totalItemWidth, int stripLength){
     int lBound;
 
     lBound = ceil(totalItemWidth/stripLength);
@@ -129,8 +129,8 @@ void BasicFFD(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt
         strip.pop_back();
     }
 
-    int stripSize = strip.size();
-    int LB = LowerBound(stripLength, totalItemWidth);
+    //int stripSize = strip.size();
+    //int LB = LowerBound(totalItemWidth, stripLength);
 
     //double avg = static_cast<double>(numItem) / static_cast<double>(stripSize);
 
@@ -142,7 +142,7 @@ void BasicFFD(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt
     //cout << stripSize << endl;
     //cout << avg << endl;
 
-    Optimality(opt, opt90, opt80, opt70, opt60, opt50, optLow, stripSize, LB);
+    //Optimality(opt, opt90, opt80, opt70, opt60, opt50, optLow, stripSize, LB);
 
 } //End BasicFFD
 
@@ -209,8 +209,8 @@ void PairSmallest(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int 
         strip.pop_back();
     }
 
-    int stripSize = strip.size();
-    int LB = LowerBound(stripLength, totalItemWidth);
+    //int stripSize = strip.size();
+    //int LB = LowerBound(totalItemWidth, stripLength);
 
     //double avg = static_cast<double>(numItem) / static_cast<double>(stripSize);
 
@@ -222,7 +222,7 @@ void PairSmallest(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int 
     //cout << stripSize << endl;
     //cout << avg << endl;
 
-    Optimality(opt, opt90, opt80, opt70, opt60, opt50, optLow, stripSize, LB);
+    //Optimality(opt, opt90, opt80, opt70, opt60, opt50, optLow, stripSize, LB);
 
 } //End PairSmallest
 
@@ -286,8 +286,9 @@ void FFDincAHCA(int tau, int &opt, int &opt90, int &opt80, int &opt70, int &opt6
         stripSum.pop_back();
         strip.pop_back();
     }
-    int stripSize = strip.size();
-    int LB = LowerBound(stripLength, totalItemWidth);
+
+    //int stripSize = strip.size();
+    //int LB = LowerBound(totalItemWidth, stripLength);
 
     //double avg = static_cast<double>(numItem) / static_cast<double>(stripSize);
 
@@ -299,7 +300,7 @@ void FFDincAHCA(int tau, int &opt, int &opt90, int &opt80, int &opt70, int &opt6
     //cout << stripSize << endl;
     //cout << avg << endl;
 
-    Optimality(opt, opt90, opt80, opt70, opt60, opt50, optLow, stripSize, LB);
+    //Optimality(opt, opt90, opt80, opt70, opt60, opt50, optLow, stripSize, LB);
 
 } //End FFDincAHCA
 

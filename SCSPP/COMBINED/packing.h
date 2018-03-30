@@ -14,7 +14,7 @@ using namespace std;
 
 void Swap(int &a, int &b);
 
-int LowerBound(int stripLength, double totalItemWidth);
+int LowerBound(double totalItemWidth, int stripLength);
 
 double Fitness(int stripLength, vector<int> &stripSum, vector<vector<int> > &strip);
 
