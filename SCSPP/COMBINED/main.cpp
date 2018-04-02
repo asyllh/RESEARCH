@@ -6,6 +6,7 @@ Combined Program with Heuristics and EA
 /--------------*/
 
 #include <iostream>
+#include <fstream>
 #include <cmath>
 #include <cstring>
 #include <ctime>
@@ -227,15 +228,20 @@ int main(int argc, char **argv){
     double bestFitness = 0.0;
     double tempFitness;
     vector<int> delta = { 145, 109, 97, 87, 79, 72, 65, 57, 47, 34, 0 };
+    //double Delta = 0.0;
 
-    srand(randomSeed);
+    //srand(randomSeed);
 
     //Timer timer;
 
     switch(algType){
-        case 1:
+        case 1: {
+            /*ofstream results("1k1kbf.txt");
+            results << numItem << "\t" << stripLength << "\tBasic" << endl;
+            results.close();*/
             for (a = 0; a < delta.size(); ++a) {
                 tau = delta[a];
+                srand(randomSeed);
                 {
                     Timer timer;
                     for (instance = 0; instance < numInstances; ++instance) {
@@ -244,17 +250,32 @@ int main(int argc, char **argv){
                         BasicFFD(opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem, maxItemWidth,
                                  stripLength, totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum,
                                  strip);
+                        /*int lb = LowerBound(totalItemWidth, stripLength);
+                        double opt = static_cast<double>(strip.size()) / static_cast<double>(lb);
+                        double itemPerStrip = static_cast<double>(numItem) / static_cast<double>(strip.size());
+                        results.open("1k1kbf.txt", ios::app);
+                        results << Delta << "\t" << totalItemWidth << "\t" << lb << "\t" << strip.size() << "\t" << itemPerStrip << "\t" << opt << endl;
+                        results.close();*/
                         ResetVar(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
                     }
                 }
-
+                /*results.open("1k1kbf.txt", ios::app);
+                results << endl << endl << endl;
+                results.close();
+                Delta += 0.1;*/
                 //Output(opt, opt90, opt80, opt70, opt60, opt50, optLow, numInstances);
             }
+        }
             break;
 
-        case 2:
+        case 2: {
+            /*ofstream results("1k1kps.txt");
+            results << numItem << "\t" << stripLength << "\tPair" << endl;
+            results << "d\tsum\tlb\tlbsoln\ti/s\topt" << endl;
+            results.close();*/
             for (a = 0; a < delta.size(); ++a) {
                 tau = delta[a];
+                srand(randomSeed);
                 {
                     Timer timer;
                     for (instance = 0; instance < numInstances; ++instance) {
@@ -262,16 +283,32 @@ int main(int argc, char **argv){
                                        totalItemWidth, allScores, partners, adjMatrix, itemWidths);
                         PairSmallest(opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem, stripLength,
                                      totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
+                        /*int lb = LowerBound(totalItemWidth, stripLength);
+                        double opt = static_cast<double>(strip.size()) / static_cast<double>(lb);
+                        double itemPerStrip = static_cast<double>(numItem) / static_cast<double>(strip.size());
+                        results.open("1k1kps.txt", ios::app);
+                        results << Delta << "\t" << totalItemWidth << "\t" << lb << "\t" << strip.size() << "\t" << itemPerStrip << "\t" << opt << endl;
+                        results.close();*/
                         ResetVar(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
                     }
                 }
+                /*results.open("1k1kps.txt", ios::app);
+                results << endl << endl << endl;
+                results.close();
+                Delta += 0.1;*/
                 //Output(opt, opt90, opt80, opt70, opt60, opt50, optLow, numInstances);
             }
+        }
             break;
 
-        case 3:
+        case 3: {
+            /*ofstream results("5001kfa.txt");
+            results << numItem << "\t" << stripLength << "\tFFD+" << endl;
+            results << "d\tsum\tlb\tlbsoln\ti/s\topt" << endl;
+            results.close();*/
             for (a = 0; a < delta.size(); ++a) {
                 tau = delta[a];
+                srand(randomSeed);
                 {
                     Timer timer;
                     for (instance = 0; instance < numInstances; ++instance) {
@@ -280,11 +317,22 @@ int main(int argc, char **argv){
                         FFDincAHCA(tau, opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem,
                                    maxItemWidth, stripLength, totalItemWidth, allScores, partners, adjMatrix,
                                    itemWidths, stripSum, strip);
+                        /*int lb = LowerBound(totalItemWidth, stripLength);
+                        double opt = static_cast<double>(strip.size()) / static_cast<double>(lb);
+                        double itemPerStrip = static_cast<double>(numItem) / static_cast<double>(strip.size());
+                        results.open("5001kfa.txt", ios::app);
+                        results << Delta << "\t" << totalItemWidth << "\t" << lb << "\t" << strip.size() << "\t" << itemPerStrip << "\t" << opt << endl;
+                        results.close();*/
                         ResetVar(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
                     }
                 }
+                /*results.open("5001kfa.txt", ios::app);
+                results << endl << endl << endl;
+                results.close();
+                Delta += 0.1;*/
                 //Output(opt, opt90, opt80, opt70, opt60, opt50, optLow, numInstances);
             }
+        }
             break;
 
         case 4:
