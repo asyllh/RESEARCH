@@ -69,6 +69,22 @@ Let $\mathcal{M}$ be an instance of the CPOP of cardinality $n$ as described in 
 
 provided $p(v_i) \neq v_j$. Hence, $G(V, P \cup E)$ is an undirected graph with $2n + 2$ vertices and edge sets $P$ and $E$, such that $P \cap E = \emptyset$. Observe that $P$ is in fact a perfect matching, with $|P|= n+1$.
 
+
+\begin{figure}	
+\centering
+\begin{subfigure}[h]{0.4\textwidth}
+	\includestandalone[width=\textwidth]{figures/partners}
+	\caption{\textcolor{red}{partners.}}	
+	\label{fig:partners}
+\end{subfigure} \hspace{40pt}
+\begin{subfigure}[h]{0.4\textwidth}
+	\includestandalone[width=\textwidth]{figures/threshold}
+	\caption{\textcolor{red}{threshold.}}	
+	\label{fig:threshold}
+\end{subfigure}
+\caption{main caption}
+\end{figure}
+
 The following definition describes a variant of the classical Hamiltonian cycle on a graph $G$.
 
 \begin{definition}
@@ -90,6 +106,21 @@ Therefore, the aim of this algorithm is to construct an alternating Hamiltonian 
 To find a matching $Q \subset E$, the following modified maximum cardinality matching (MMCM) algorithm is executed (\citealp{mahadev1994, becker2010}): for each vertex $v_i$, $i = 1, 2,...,2n+2$, find the largest vertex $v_j \in \Gamma(v_i)\backslash p(v_i)$ (i.e. the largest vertex $v_j$ in $v_i$'s neighbourhood that is not $v_i$'s partner) that is not incident to any edge in $Q$. Add the edge connecting these two vertices to $Q$, and proceed to the next vertex until all vertices have been assessed. The pair of vertices incident to each edge in $Q$ are referred to as being ``matched'', and are connected by a ``matching'' edge. 
 
 During this algorithm, if a vertex $v_i$ is not adjacent to any other unmatched vertex except its partner $p(v_i)$, the preceeding vertex $v_{i-1}$ can be ``rematched'', provided $v_i$ is not the first vertex (i.e $i \neq 1$), $v_{i-1}$ has been matched, and $(v_{i-1}, p(v_i)) \in E$. Then, $v_{i-1}$ is matched with $p(v_i)$, and $v_i$ is matched with the vertex that was previously matched with $v_{i-1}$. It is guaranteed that MMCM will produce a maximum cardinality matching $Q \subset E$, and is able to do so in at most $O(n \log n)$ time.
+
+\begin{figure}	
+	\centering
+	\begin{subfigure}[h]{0.4\textwidth}
+		\includestandalone[width=\textwidth]{figures/matching}
+		\caption{\textcolor{red}{matching.}}	
+		\label{fig:matching}
+	\end{subfigure} \quad
+	\begin{subfigure}[h]{0.5\textwidth}
+		\includestandalone[width=\textwidth]{figures/mps}
+		\caption{\textcolor{red}{mps}}	
+		\label{fig:mps}
+	\end{subfigure}
+	\caption{main caption}
+\end{figure}
 
 Clearly, if $|Q| < n+1$, there are not enough matching edges to form an alternating Hamiltonian cycle along with the edges in $P$, and hence in accordance with Theorem $\ref{thm:cpopsoln}$ no feasible solution exists for the given instance $\mathcal{M}$ of the CPOP. Otherwise, if $Q$ is a perfect matching of cardinality $n+1$, the spanning subgraph $G'(V, P \cup Q)$ is a 2-regular graph, where each vertex is adjacent to its partner via an edge in $P$, and its match via an edge in $Q$. $G'$ thus consists of a collection of alternating cycles $A_1, A_2, ..., A_{\lambda}$. If there is only one component on $G'$, i.e. $\lambda = 1$, then this alternating cycle is in fact Hamiltonian, and therefore a feasible solution exists. For a graph $G'$ with $\lambda > 1$, the components of $G'$ must be combined to form one single alternating Hamiltonian cycle. The algorithm thus executes a Bridge Recognition (BR) procedure that selects suitable edges in $E$ to be used as bridges between the components of $G'$, and will replace certain edges in $Q$.
 
