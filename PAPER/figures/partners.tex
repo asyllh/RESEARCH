@@ -24,7 +24,7 @@
 
 \foreach \n in {0,...,13}
 	\fill (90-\n*25.71428571:5cm) coordinate (v\n) circle [radius = 0.1]
-		++(90-\n*25.71428571:10pt) node {\n};
+		++(90-\n*25.71428571:12pt) node {\Large{$v_{\n}$}};
 \foreach \m/\n in {0/2, 1/11, 3/4, 5/9, 6/8, 7/10, 12/13}
 	\draw [thick, cyan] (v\n) -- (v\m);
 \foreach \n in {0,...,13}
