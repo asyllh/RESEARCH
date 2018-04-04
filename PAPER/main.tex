@@ -8,7 +8,6 @@
 \title{Heuristics for the Score-Constrained Strip-Packing Problem}
 \author{Asyl L. Hawa \and Rhyd M. R. Lewis \and Jonathan M. Thompson}
 \institute{School of Mathematics, Cardiff University, Senghennydd Road, Cardiff, UK, CF24 4AG}
-\date{\today}
 
 \maketitle
 
@@ -31,7 +30,7 @@ Firstly, let us introduce the Constrained Pair-Ordering Problem:
 	where \textup{\textbf{lhs}($i$)} and \textup{\textbf{rhs}($i$)} denote the left- and right-hand values of the $i$th tuple. The inequality is referred to as the \textup{vicinal sum constraint}.
 \end{definition}
 
-For example, given the multiset $\mathcal{M} = \{\{1,2\}, \{1,6\}, \{2,3\}, \{3,5\}, \{4,4\}, \{4,5\}\}$ and $\tau = 7$, one possible feasible solution is $\mathcal{T} = \langle(1,2), (5,4), (4,4), (3,5), (3,2), (6,1) \rangle$.
+For example, given the multiset $\mathcal{M} = \{\{1,2\}, \{1,7\}, \{2,4\}, \{3,5\}, \{3,6\}, \{4,4\}\}$ and $\tau = 7$, one possible feasible solution is $\mathcal{T} = \langle(1,2), (6,3), (5,3), (4,4), (4,2), (7,1) \rangle$.
 
 One prominent application of the CPOP is in a strip-packing problem brought to light as an open-combinatorial problem by \citeauthor{goulimis2004} in 2004. A set $\mathcal{I}$ of rectangular items of equal height $h$ made from cardboard are to be packed onto a strip from left to right. Each item $i \in \mathcal{I}$ has width $w_i \in \mathbb{Z}^{+}$, and possesses two vertical score lines, marked in predetermined places. A pair of knives mounted onto a bar cuts along the score lines of two adjacent items simultaneously, which allows the items to be folded with ease (see Figure \ref{fig:boxknife}). However, by design, the scoring knives cannot be placed too close to one another, and as such have a ``minimum scoring distance'' (around 70mm in industry). The distances between each score line and the nearest edge on an item $i \in \mathcal{I}$ are the score widths, $a_i, b_i \in \mathbb{Z}^{+}$, assigned such that $a_i \leq b_i$. Since these score widths are not necessarily equal, an item $i$ can be positioned in one of two orientations: ``regular'', denoted $(a_i, b_i)$, or ``rotated'', denoted $(b_i, a_i)$, where the smaller of the two score widths $a_i$ is on the left- and right- hand side of the item respectively. Clearly, for two items to be placed alongside one another feasibly the sum of the adjacent score widths must equal or exceed the minimum scoring distance, else the knives will not be able to score the items in the correct locations. Thus, the problem consists of finding a suitable ordering and orientation of the items such that the sum of every pair of adjacent score widths is greater than or equal to the minimum scoring distance. Specifically, as the items are packed from left to right, this involved checking the sum of the right-hand score width of each item $i$ and the left-hand score width of the next item $i+1$ on the strip. The left-hand score width of the first item and the right-hand score width of the last item on the strip are not adjacent to any other item, and are therefore ignored. 
 
@@ -72,17 +71,17 @@ provided $p(v_i) \neq v_j$. Hence, $G(V, P \cup E)$ is an undirected graph with 
 
 \begin{figure}	
 \centering
-\begin{subfigure}[h]{0.4\textwidth}
+\begin{subfigure}[h]{0.45\textwidth}
 	\includestandalone[width=\textwidth]{figures/partners}
 	\caption{\textcolor{red}{partners.}}	
 	\label{fig:partners}
 \end{subfigure} \hspace{40pt}
-\begin{subfigure}[h]{0.4\textwidth}
+\begin{subfigure}[h]{0.45\textwidth}
 	\includestandalone[width=\textwidth]{figures/threshold}
 	\caption{\textcolor{red}{threshold.}}	
 	\label{fig:threshold}
 \end{subfigure}
-\caption{main caption}
+\caption{$v_0 = 1, v_1 = 1, v_2 = 2, v_3 = 2, v_4 = 3, v_5 = 3, v_6 = 4, v_7 = 4, v_8 = 4, v_9 = 5, v_{10} = 6, v_{11} = 7, v_{12} = 7, v_{13} = 7$}
 \end{figure}
 
 The following definition describes a variant of the classical Hamiltonian cycle on a graph $G$.
@@ -124,7 +123,7 @@ During this algorithm, if a vertex $v_i$ is not adjacent to any other unmatched 
 
 Clearly, if $|Q| < n+1$, there are not enough matching edges to form an alternating Hamiltonian cycle along with the edges in $P$, and hence in accordance with Theorem $\ref{thm:cpopsoln}$ no feasible solution exists for the given instance $\mathcal{M}$ of the CPOP. Otherwise, if $Q$ is a perfect matching of cardinality $n+1$, the spanning subgraph $G'(V, P \cup Q)$ is a 2-regular graph, where each vertex is adjacent to its partner via an edge in $P$, and its match via an edge in $Q$. $G'$ thus consists of a collection of alternating cycles $A_1, A_2, ..., A_{\lambda}$. If there is only one component on $G'$, i.e. $\lambda = 1$, then this alternating cycle is in fact Hamiltonian, and therefore a feasible solution exists. For a graph $G'$ with $\lambda > 1$, the components of $G'$ must be combined to form one single alternating Hamiltonian cycle. The algorithm thus executes a Bridge Recognition (BR) procedure that selects suitable edges in $E$ to be used as bridges between the components of $G'$, and will replace certain edges in $Q$.
 
-For each edge $(v_i, v_j) \in Q$, where $i < j$, $v_i$ is referred to as the ``smaller'' vertex, and $v_j$ as the ``larger'' vertex, since the value associated with $v_i$ is less than or equal to the value associated with $v_j$. The procedure initially sorts the edges in $Q$ into a list such that the smaller vertices of the edges are in lexicographical order, and therefore in non-decreasing order of values. Any edges whose smaller vertices, during MMCM, were unable to be matched with the largest possible vertex available due to being partners are then removed from this list. Any edges that do not connect the smaller vertex to the largest possible vertex, due to the largest vertex being its partner, are also removed. the Starting from the first edge, BR searches through the list to find an edge that meets the following conditions:
+For each edge $(v_i, v_j) \in Q$, where $i < j$, $v_i$ is referred to as the ``smaller'' vertex, and $v_j$ as the ``larger'' vertex, since the value associated with $v_i$ is less than or equal to the value associated with $v_j$. The procedure initially sorts the edges in $Q$ into a list such that the smaller vertices of the edges are in lexicographical order, and therefore in non-decreasing order of values. Any edges whose smaller vertices, during MMCM, were unable to be matched with the largest possible vertex available due to being partners are then removed from this list. Any edges that do not connect the smaller vertex to the largest possible vertex, due to the largest vertex being its partner, are also removed. Then, starting from the first edge, BR searches through the list to find an edge that meets the following conditions:
 \begin{enumerate}
 	\item The smaller vertex of the current edge and the larger vertex of the succeeding edge are connected by an edge in $E$.
 	\item The current edge and the succeeding edge are members of different components on $G'$.
