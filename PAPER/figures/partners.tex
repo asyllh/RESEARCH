@@ -16,8 +16,8 @@
 % 7 = 4
 % 8 = 4
 % 9 = 5
-% 10 = 5
-% 11 = 6
+% 10 = 6
+% 11 = 7
 % 12 = 7
 % 13 = 7
 % threshold tau = 7
@@ -25,7 +25,7 @@
 \foreach \n in {0,...,13}
 	\fill (90-\n*25.71428571:5cm) coordinate (v\n) circle [radius = 0.1]
 		++(90-\n*25.71428571:12pt) node {\Large{$v_{\n}$}};
-\foreach \m/\n in {0/2, 1/11, 3/4, 5/9, 6/8, 7/10, 12/13}
+\foreach \m/\n in {0/2, 1/11, 3/6, 4/9, 5/10, 7/8, 12/13}
 	\draw [thick, cyan] (v\n) -- (v\m);
 \foreach \n in {0,...,13}
 	\fill (90-\n*25.71428571:5cm) coordinate (v\n) circle [radius = 0.13];
