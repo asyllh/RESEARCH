@@ -160,7 +160,7 @@ An optimal solution of an instance of the SCSPP is a solution that consists of t
 	k \geq \ceil*{\frac{\sum_{i=1}^{n}w_i}{W}}
 \end{equation}
 
-where $n$ is the number of items in the set $\mathcal{I}$, $w_i$ the width of each item $i \in \mathcal{I}$, and $l$ is the length of the strips (\citealp{martello1990b}). In 1973, \citeauthor{johnson1973} showed that FFD is guaranteed to return a solution that uses no more than $\frac{11}{9}k + 4$ strips. More recently, \cite{dosa2007} has proven that the worst case for FFD is in fact $\frac{11}{9}k + \frac{6}{9}$, and that this bound is tight. Due to the initial sorting of the $n$ items in non-increasing order of sizes, the time complexity of FFD is $O(n\log n)$.
+where $n$ is the number of items in the set $\mathcal{I}$, $w_i$ the width of each item $i \in \mathcal{I}$, and $W$ is the width of the strips (\citealp{martello1990b}). In 1973, \citeauthor{johnson1973} showed that FFD is guaranteed to return a solution that uses no more than $\frac{11}{9}k + 4$ strips. More recently, \cite{dosa2007} has proven that the worst case for FFD is in fact $\frac{11}{9}k + \frac{6}{9}$, and that this bound is tight. Due to the initial sorting of the $n$ items in non-increasing order of sizes, the time complexity of FFD is $O(n\log n)$.
 
 
 \subsection{FFD Approx}
