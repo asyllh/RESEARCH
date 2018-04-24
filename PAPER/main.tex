@@ -21,10 +21,10 @@
 Firstly, let us introduce the Constrained Ordering Problem:
 
 \begin{definition}
-	\label{defn:cpop}
+	\label{defn:cop}
 	Let $\mathcal{M}$ be a multiset of unordered pairs of positive integers $\mathcal{M} = \{\{a_1, b_1\}, \{a_2,b_2\},...,\{a_n,b_n\}\}$, and let $\mathcal{T}$ be an ordering of the elements of $\mathcal{M}$ such that each element is a tuple. The Constrained Ordering Problem (COP) consists of finding a solution $\mathcal{T}$ such that, given a fixed value $\tau \in \mathbb{Z}^{+},$
 	\begin{equation}
-		\label{eqn:cpop}
+		\label{eqn:cop}
 		\textup{\textbf{rhs}}(i) + \textup{\textbf{lhs}}(i+1) \geq \tau \hspace{5mm} \forall \hspace{1mm} i \in \{1,2,..., n-1\},
 	\end{equation}
 	where \textup{\textbf{lhs}($i$)} and \textup{\textbf{rhs}($i$)} denote the left- and right-hand values of the $i$th tuple. The inequality is referred to as the \textup{vicinal sum constraint}.
@@ -51,26 +51,47 @@ Observe that, in this particular strip-packing problem, the widths of the indivi
 	Let $\mathcal{S} = S_1, S_2, ..., S_k$ be a set of strips of height $H$ and width $W$, and let $\mathcal{I}$ be a set of rectangular items of height $H$ and varying widths $w_i \in \mathbb{Z}^+ < W$ and score widths $a_i, b_i \in \mathbb{Z}^+$ such that $a_i \leq b_i$ and $a_i + b_i < w_i$ for each item $i \in \mathcal{I}$. Given a minimum scoring distance $\tau \in \mathbb{Z}^+$, the Score-Constrained Strip-Packing Problem (SCSPP) consists of finding the minimum number of strips $k$ required to pack all items in $\mathcal{I}$ such that the sum of every pair of adjacent score widths is greater than or equal to $\tau$.
 \end{definition}
 
-The remainder of this article will firstly, in Section 2, detail a polynomial-time algorithm that is able to produce a solution to any instance of the COP, if a solution exists. Section 3 describes the heuristics that will be used to find feasible solutions to the SCSPP, and discusses the associated advantages and disadvantages. A comparison of these heuristics and an analysis of the results will be provided in Section 4, and finally Section 5 concludes the paper and proposes some potential directions for future work.
+The SCSPP is a generalisation of the classical one-dimensional bin-packing problem (BPP), where in the latter problem the minimum scoring distance $\tau$ can be said to be equal to zero. It follows that the SCSPP is at least as hard as the BPP, which is known to be NP-hard (\citealp{garey1979}), and so (under the assumption that $P \neq NP$) there is no known algorithm that is able to find an optimal solution for every instance of the SCSPP in polynomial time. Instead, heuristics can be used to find near-optimal solutions in a shorter amount of time.
+
+The remainder of this article will firstly, in Section 2, detail a polynomial-time algorithm that is able to produce a solution to any instance of the COP, if a solution exists. Section 3 describes three heuristics that will be used to find feasible solutions to the SCSPP, and discusses the associated advantages and disadvantages. A comparison of these heuristics and an analysis of the results will be provided in Section 4, and finally Section 5 concludes the paper and proposes some potential directions for future work.
 
 
-\section{Solving the CPOP}
+\section{Solving the COP}
 \label{sec:ahca}
 
 %We shall now present an algorithm for solving the COP, which operates by expressing the problem instance graphically. 
-We shall now present an algorithm for solving the COP in polynomial time. The original(underlying) algorithm was created by \cite{becker2010}, and determines whether or not a solution exists for a given instance. We have extended this algorithm so that, if a solution does indeed exist, the algorithm is able to formulate and present us with this final solution. This is especially useful for problems such as the previously mentioned strip-packing problem, where a tangible solution is required in order to place the items in the correct order and orientation.
+We shall now present an algorithm for solving the COP in polynomial time. The original(underlying) algorithm was created by \cite{becker2010}, and determines whether or not a solution exists for a given instance. We have extended this algorithm so that, if a solution does indeed exist, the algorithm is able to formulate and present us with this final solution. This is especially useful for problems such as the previously mentioned strip-packing problem, where a tangible solution is required in order to place the items in the correct order and orientation. \textcolor{OrangeRed}{USING GRAPH.}
+
+\begin{itemize}
+	\item Figure \ref{fig:partners} shows the graph with the values from the example above
+	\item Model each of the values of all pairs in $\mathcal{M}$ as a vertex on a graph $G$
+	\item Each vertex is assigned a value from $\mathcal{M}$
+	\item Add an extra pair of vertices, dominating vertices, that are assigned values equal to $\tau$
+	\item The values in $\mathcal{M}$, and thus the vertices on the graph, are arranged in pairs.
+	\item This is represented on the graph by adding a set of ``blue'' edge, $B$, that are a perfect matching of all vertices on the graph
+	\item Under such a matching, each vertex (each value in $\mathcal{M}$) has a partner that represents the other value in the pair.
+	\item Then, we add to $G$ another set of ``red'' edges, $R$, that consists of edges between vertices whose corresponding values in $\mathcal{M}$ can be arrange alongside one another
+	\item That is, for two distinct vertices, EQUATION, provided $p(v_i) \neq v_j$ i.e. not partners
+	\item Bijective function $p: V \to V$ assoc each vertex with its partner, $v_j = p(v_i)$
+	\item $G$ has $2n + 2$ vertices, edge sets $B$ and $R$ such that $B \cap R = \emptyset$
+	\item $B = |n+1|$
+	\item Dominating vertices are partners
+	\item Dominating vertices will be removed at end, are not part of final solution
+	\item Vertex set $V = \{v_1,...,v_{2n+2}\}$
+	\item Each vertex assigned value from $\mathcal{M}$ s.t. $V-1 \leq ... \leq v_{2n+2}$
+\end{itemize}
 
 
 
 
-Let $\mathcal{M}$ be an instance of the COP of cardinality $n$ as described in Definition \ref{defn:cpop}. Then, a graph $G$ is defined by a vertex set $V = \{v_1, v_2, ...v_{2n+2}\}$, where each vertex is assigned a value from $\mathcal{M}$ such that $v_1 \leq v_2 \leq ... \leq v_{2n+2}$. Note that there are two extra ``dominating'' vertices, $v_{2n+1}$ and $v_{2n+2}$, which have values equivalent to $\tau$. In $\mathcal{M}$, the values that make up a pair are referred to as ``partners''. Thus, let $p: V \to V$ be a bijective function that associates each vertex $v_i \in V$ on $G$ with its partner, $v_j = p(v_i)$. $G$ comprises two distinct edge sets: $B$, which contains edges between vertices that are partners, and $R$, which consists of edges between vertices whose corresponding values in $\mathcal{M}$ can be arranged alongside one another. That is, for two distinct vertices $v_i, v_j$,
+Let $\mathcal{M}$ be an instance of the COP of cardinality $n$ as described in Definition \ref{defn:cop}. Then, a graph $G$ is defined by a vertex set $V = \{v_1, v_2, ...v_{2n+2}\}$, where each vertex is assigned a value from $\mathcal{M}$ such that $v_1 \leq v_2 \leq ... \leq v_{2n+2}$. Note that there are two extra ``dominating'' vertices, $v_{2n+1}$ and $v_{2n+2}$, which have values equivalent to $\tau$. In $\mathcal{M}$, the values that make up a pair are referred to as ``partners''. Thus, let $p: V \to V$ be a bijective function that associates each vertex $v_i \in V$ on $G$ with its partner, $v_j = p(v_i)$. $G$ comprises two distinct edge sets: $B$, which contains edges between vertices that are partners, and $R$, which consists of edges between vertices whose corresponding values in $\mathcal{M}$ can be arranged alongside one another. That is, for two distinct vertices $v_i, v_j$,
 
 \begin{equation}
 	\label{eqn:jointsum}
 	v_i + v_j \geq \tau,
 \end{equation}
 
-provided $p(v_i) \neq v_j$. Hence, $G=(V, B \cup R)$ is an undirected graph with $2n + 2$ vertices and edge sets $B$ and $R$, such that $B \cap R = \emptyset$. Observe that $B$ is in fact a perfect matching, with $|B|= n+1$.
+provided $p(v_i) \neq v_j$. Hence, $G=(V, B \cup R)$ is an undirected graph with $2n + 2$ vertices and edge sets $B$ and $R$, such that $B \cap R = \emptyset$. Observe that $B$ is also a perfect matching, with $|B|= n+1$.
 
 
 \begin{figure}	
@@ -85,7 +106,7 @@ provided $p(v_i) \neq v_j$. Hence, $G=(V, B \cup R)$ is an undirected graph with
 	\caption{\textcolor{red}{threshold.}}	
 	\label{fig:threshold}
 \end{subfigure}
-\caption{$v_0 = 1, v_1 = 1, v_2 = 2, v_3 = 2, v_4 = 3, v_5 = 3, v_6 = 4, v_7 = 4, v_8 = 4, v_9 = 5, v_{10} = 6, v_{11} = 7, v_{12} = 7, v_{13} = 7$}
+\caption{$v_1 = 1, v_2 = 1, v_3 = 2, v_4 = 2, v_5 = 3, v_6 = 3, v_7 = 4, v_8 = 4, v_9 = 4, v_{10} = 5, v_{11} = 6, v_{12} = 7, v_{13} = 7, v_{14} = 7$}
 \end{figure}
 
 The following definition now describes a variant of the classical Hamiltonian cycle on a graph $G$.
@@ -95,20 +116,20 @@ The following definition now describes a variant of the classical Hamiltonian cy
 	Let $G(V, B\cup R)$ be an undirected graph, where each edge is a member of one of two sets, $B$ or $R$. $G$ contains an alternating Hamiltonian cycle if there exists a Hamiltonian cycle such that successive edges alternate between sets $B$ and $R$. For example, if $(v_{i-1}, v_i) \in B$, then $(v_i, v_{i+1}) \in R$, or vice versa.
 \end{definition}
 
-\begin{theorem}
-	\label{thm:cpopsoln}
-	There exists a feasible solution $\mathcal{T}$ to an instance $\mathcal{M}$ of the COP if and only if its corresponding graph $G(V, B\cup R)$ contains an alternating Hamiltonian cycle.
-\end{theorem}
-\begin{proof}
-	Let $\mathcal{A} = \{v_1, v_2, ..., v_{2n+1}, v_{2n+2}\}$ be an alternating Hamiltonian cycle on $G$, where $v_{2n+1}$ and $v_{2n+2}$ are the dominating vertices. By definition, $\mathcal{A}$ contains all vertices on $G$, and all $n+1$ edgs in $B$. Thus, there exists a set of $n+1$ edges from $R$ that, together with the edges in $B$, form the alternating Hamiltonian cycle. Now, removing the dominating vertices and any incident edges gives rise to an alternating Hamiltonian path $\mathcal{A}' = \{v_1, v_2, ..., v_{2n-1}, v_{2n}\}$, whose first edge $(v_1, v_2)$ and last edge $(v_{2n-1}, v_{2n})$ are in $B$. The order of the values corresponding to each vertex of this path form a feasible solution $\mathcal{T}$, where values that are partners make up a tuple. \textcolor{OrangeRed}{edges R vicinal sum constraint equation 2}. \qed
-\end{proof}
+
 
 Therefore, the aim of this algorithm is to construct an alternating Hamiltonian cycle on $G$. Since the values in each unordered pair in $\mathcal{M}$ cannot be altered, every edge in $B$ must be present in the alternating Hamiltonian cycle. Consequently, the task now involves finding a matching $R' \subseteq R$ of cardinality $n+1$, such that the edge sets $B$ and $R'$ form an alternating Hamiltonian cycle as described in Definition $\ref{defn:althamcycle}$.  
 
 
 To find a matching $R' \subseteq R$, the following modified maximum cardinality matching (MMCM) algorithm is executed (\citealp{mahadev1994, becker2010}): for each vertex $v_i$, $i = 1, 2,...,2n+2$, find the largest vertex $v_j \in \Gamma(v_i)\backslash p(v_i)$ (i.e. the largest vertex $v_j$ in $v_i$'s neighbourhood that is not $v_i$'s partner) that is not incident to any edge in $R'$. Add the edge connecting these two vertices to $R'$, and proceed to the next vertex until all vertices have been assessed. The pair of vertices incident to each edge in $R'$ are referred to as being ``matched'', and are connected by a ``matching'' edge. 
 
-During this algorithm, if a vertex $v_i$ is not adjacent to any other unmatched vertex except its partner $p(v_i)$, the preceeding vertex $v_{i-1}$ can be ``rematched'', provided $v_i$ is not the first vertex (i.e $i \neq 1$), $v_{i-1}$ has been matched, and $(v_{i-1}, p(v_i)) \in R$. Then, $v_{i-1}$ is matched with $p(v_i)$, and $v_i$ is matched with the vertex that was previously matched with $v_{i-1}$. It is guaranteed that MMCM will produce a maximum cardinality matching $R' \subseteq R$, and is able to do so in at most $O(n \log n)$ time.
+During this algorithm, if a vertex $v_i$ is not adjacent to any other unmatched vertex except its partner $p(v_i)$, the preceeding vertex $v_{i-1}$ can be ``rematched'', provided that 
+\begin{enumerate*}[label={(\alph*)}]
+	\item $v_i$ is not the first vertex (i.e $i \neq 1$); 
+	\item $v_{i-1}$ has been matched; and
+	\item $(v_{i-1}, p(v_i)) \in R$.
+\end{enumerate*}
+Then, $v_{i-1}$ is matched with $p(v_i)$, and $v_i$ is matched with the vertex that was previously matched with $v_{i-1}$. It is guaranteed that MMCM will produce a maximum cardinality matching $R' \subseteq R$, and is able to do so in at most $O(n \log n)$ time. \textcolor{OrangeRed}{CITE.}
 
 \begin{figure}	
 	\centering
@@ -144,6 +165,14 @@ Else, if $k > 1$, it may be that multiple sets are required to combine the compo
 
 
 This algorithm, which will be referred to as the Alternating Hamiltonian Construction Algorithm (AHCA) is able to deduce whether a feasible solution $\mathcal{T}$ exists for any given instance $\mathcal{M}$ of the COP. If a solution does indeed exist, AHCA can produce this solution in at most $O(n^2)$ time.
+
+\begin{theorem}
+	\label{thm:copsoln}
+	There exists a feasible solution $\mathcal{T}$ to an instance $\mathcal{M}$ of the COP if and only if its corresponding graph $G(V, B\cup R)$ contains an alternating Hamiltonian cycle.
+\end{theorem}
+\begin{proof}
+	Let $\mathcal{A} = \{v_1, v_2, ..., v_{2n+1}, v_{2n+2}\}$ be an alternating Hamiltonian cycle on $G$, where $v_{2n+1}$ and $v_{2n+2}$ are the dominating vertices. By definition, $\mathcal{A}$ contains all vertices on $G$, and all $n+1$ edgs in $B$. Thus, there exists a set of $n+1$ edges from $R$ that, together with the edges in $B$, form the alternating Hamiltonian cycle. Now, removing the dominating vertices and any incident edges gives rise to an alternating Hamiltonian path $\mathcal{A}' = \{v_1, v_2, ..., v_{2n-1}, v_{2n}\}$, whose first edge $(v_1, v_2)$ and last edge $(v_{2n-1}, v_{2n})$ are in $B$. The order of the values corresponding to each vertex of this path form a feasible solution $\mathcal{T}$, where values that are partners make up a tuple. \textcolor{OrangeRed}{edges R vicinal sum constraint equation 2}. \qed
+\end{proof}
 %put theorem here
 %explanation removing dominating vertices
 %why is this different from becker
