@@ -38,7 +38,7 @@ One prominent application of the COP is in a strip-packing problem brought to li
 \begin{figure}[h!]	
 	\centering
 	\includestandalone[width=0.8\textwidth]{figures/boxesknifeannotate}
-	\caption{\textcolor{red}{Individual boxes.}}	
+	\caption{Width and score widths on an item $i \in \mathcal{I}$, and knives mounted on a bar score two items simultaneously}	
 	\label{fig:boxknife}
 \end{figure}
 
@@ -62,51 +62,33 @@ The remainder of this article will firstly, in Section 2, detail a polynomial-ti
 %We shall now present an algorithm for solving the COP, which operates by expressing the problem instance graphically. 
 We shall now present an algorithm for solving the COP in polynomial time. The original(underlying) algorithm was created by \cite{becker2010}, and determines whether or not a solution exists for a given instance. We have extended this algorithm so that, if a solution does indeed exist, the algorithm is able to formulate and present us with this final solution. This is especially useful for problems such as the previously mentioned strip-packing problem, where a tangible solution is required in order to place the items in the correct order and orientation. \textcolor{OrangeRed}{USING GRAPH.}
 
-\begin{itemize}
-	\item Figure \ref{fig:partners} shows the graph with the values from the example above
-	\item Model each of the values of all pairs in $\mathcal{M}$ as a vertex on a graph $G$
-	\item Each vertex is assigned a value from $\mathcal{M}$
-	\item Add an extra pair of vertices, dominating vertices, that are assigned values equal to $\tau$
-	\item The values in $\mathcal{M}$, and thus the vertices on the graph, are arranged in pairs.
-	\item This is represented on the graph by adding a set of ``blue'' edge, $B$, that are a perfect matching of all vertices on the graph
-	\item Under such a matching, each vertex (each value in $\mathcal{M}$) has a partner that represents the other value in the pair.
-	\item Then, we add to $G$ another set of ``red'' edges, $R$, that consists of edges between vertices whose corresponding values in $\mathcal{M}$ can be arrange alongside one another
-	\item That is, for two distinct vertices, EQUATION, provided $p(v_i) \neq v_j$ i.e. not partners
-	\item Bijective function $p: V \to V$ assoc each vertex with its partner, $v_j = p(v_i)$
-	\item $G$ has $2n + 2$ vertices, edge sets $B$ and $R$ such that $B \cap R = \emptyset$
-	\item $B = |n+1|$
-	\item Dominating vertices are partners
-	\item Dominating vertices will be removed at end, are not part of final solution
-	\item Vertex set $V = \{v_1,...,v_{2n+2}\}$
-	\item Each vertex assigned value from $\mathcal{M}$ s.t. $V-1 \leq ... \leq v_{2n+2}$
-\end{itemize}
+% Equation $v_i + v_j \geq \tau$ provided $p(v_i) \neq v_j$, i.e. not partners
+% Bijective function $p: V \to V$ assoc each vertex with its partner, $v_j = p(v_i)$
+% Values are assigned from $\mathcal{M}$ in non-decreasing order, i.e. value assoc with v_1 \leq value assoc with v_2 etc..
 
+Let $\mathcal{M}$ be an instance of the COP of cardinality $n$. We model each of the values of all elements in $\mathcal{M}$ as a vertex on a graph $G$, and assign each vertex a value from $\mathcal{M}$ in non-decreasing order. A pair of vertices, called ``dominating vertices'' are then added to the graph, both of which are assigned values equal to $\tau$. These dominating vertices aid the solution process, and are removed at the end. Thus, the graph $G$ has $2n+2$ vertices.
 
+The values in $\mathcal{M}$, and thus the vertices on $G$, are arranged in pairs. This is represented on $G$ by adding a set of ``blue'' edges, $B$, that contains edges between vertices that are ``partners'', i.e. whose values make up a pair in $\mathcal{M}$. It can be seen that $B$ is a perfect matching, with $|B|= n+1$.
 
+Now, we add to $G$ a set of ``red'' edges, $R$, that consists of edges between vertices whose values equal or exceed $\tau$, provided they are not partners. This corresponds to the vicinal sum constraint in Defintion \ref{defn:cop}. 
 
-Let $\mathcal{M}$ be an instance of the COP of cardinality $n$ as described in Definition \ref{defn:cop}. Then, a graph $G$ is defined by a vertex set $V = \{v_1, v_2, ...v_{2n+2}\}$, where each vertex is assigned a value from $\mathcal{M}$ such that $v_1 \leq v_2 \leq ... \leq v_{2n+2}$. Note that there are two extra ``dominating'' vertices, $v_{2n+1}$ and $v_{2n+2}$, which have values equivalent to $\tau$. In $\mathcal{M}$, the values that make up a pair are referred to as ``partners''. Thus, let $p: V \to V$ be a bijective function that associates each vertex $v_i \in V$ on $G$ with its partner, $v_j = p(v_i)$. $G$ comprises two distinct edge sets: $B$, which contains edges between vertices that are partners, and $R$, which consists of edges between vertices whose corresponding values in $\mathcal{M}$ can be arranged alongside one another. That is, for two distinct vertices $v_i, v_j$,
-
-\begin{equation}
-	\label{eqn:jointsum}
-	v_i + v_j \geq \tau,
-\end{equation}
-
-provided $p(v_i) \neq v_j$. Hence, $G=(V, B \cup R)$ is an undirected graph with $2n + 2$ vertices and edge sets $B$ and $R$, such that $B \cap R = \emptyset$. Observe that $B$ is also a perfect matching, with $|B|= n+1$.
+Thus, we have an undirected graph $G$ with vertex set $V = \{v_1, ..., v_{2n+2}\}$, and two distinct edge sets $B$ and $R$, such that $B \cap R = \emptyset$. Figure \ref{fig:partners/threshold} illustrates the construction of $G$ using the instance $\mathcal{M}$ from the example above. 
 
 
 \begin{figure}	
 \centering
 \begin{subfigure}[h]{0.45\textwidth}
 	\includestandalone[width=\textwidth]{figures/partners}
-	\caption{\textcolor{red}{partners.}}	
+	\caption{$G = (V, B)$}	
 	\label{fig:partners}
 \end{subfigure} \hspace{40pt}
 \begin{subfigure}[h]{0.45\textwidth}
 	\includestandalone[width=\textwidth]{figures/threshold}
-	\caption{\textcolor{red}{threshold.}}	
+	\caption{$G=(V, B \cup R)$}	
 	\label{fig:threshold}
 \end{subfigure}
-\caption{$v_1 = 1, v_2 = 1, v_3 = 2, v_4 = 2, v_5 = 3, v_6 = 3, v_7 = 4, v_8 = 4, v_9 = 4, v_{10} = 5, v_{11} = 6, v_{12} = 7, v_{13} = 7, v_{14} = 7$}
+\caption{Example construction of $G$ using instance $\mathcal{M}$ from the example above.}
+\label{fig:partners/threshold}
 \end{figure}
 
 The following definition now describes a variant of the classical Hamiltonian cycle on a graph $G$.
@@ -135,18 +117,18 @@ Then, $v_{i-1}$ is matched with $p(v_i)$, and $v_i$ is matched with the vertex t
 	\centering
 	\begin{subfigure}[h]{0.4\textwidth}
 		\includestandalone[width=\textwidth]{figures/matching}
-		\caption{\textcolor{red}{matching.}}	
+		\caption{$G' = (V, B \cup R')$}	
 		\label{fig:matching}
 	\end{subfigure} \quad
 	\begin{subfigure}[h]{0.5\textwidth}
 		\includestandalone[width=\textwidth]{figures/mps}
-		\caption{\textcolor{red}{mps}}	
+		\caption{$G' =(V, B \cup R')$ planar}	
 		\label{fig:mps}
 	\end{subfigure}
-	\caption{main caption}
+	\caption{Subgraph $G'$ consisting of a matching set $R' \subseteq R$ derived using MMCM algorithm. Planar graph, can see that $G'$ is made up of two components.}
 \end{figure}
 
-Clearly, if $|R'| < n+1$, there are not enough matching edges to form an alternating Hamiltonian cycle along with the edges in $B$, and hence in accordance with Theorem $\ref{thm:cpopsoln}$ no feasible solution exists for the given instance $\mathcal{M}$ of the COP. Otherwise, if $R'$ is a perfect matching of cardinality $n+1$, the spanning subgraph $G'=(V, B \cup R')$ is a 2-regular graph, where each vertex is adjacent to its partner via an edge in $B$, and its match via an edge in $R'$. $G'$ thus consists of a collection of alternating cycles $C_1, C_2, ..., C_{\lambda}$. If there is only one component on $G'$, i.e. $\lambda = 1$, then this alternating cycle is in fact Hamiltonian, and therefore a feasible solution exists. For a graph $G'$ with $\lambda > 1$, the components of $G'$ must be combined to form one single alternating Hamiltonian cycle. The algorithm thus executes a Bridge Recognition (BR) procedure that selects suitable edges in $R$ to be used as bridges between the components of $G'$, and will replace certain edges in $R'$.
+Clearly, if $|R'| < n+1$, there are not enough matching edges to form an alternating Hamiltonian cycle along with the edges in $B$, and hence in accordance with Theorem $\ref{thm:copsoln}$ no feasible solution exists for the given instance $\mathcal{M}$ of the COP. Otherwise, if $R'$ is a perfect matching of cardinality $n+1$, the spanning subgraph $G'=(V, B \cup R')$ is a 2-regular graph, where each vertex is adjacent to its partner via an edge in $B$, and its match via an edge in $R'$. $G'$ thus consists of a collection of alternating cycles $C_1, C_2, ..., C_{\lambda}$. If there is only one component on $G'$, i.e. $\lambda = 1$, then this alternating cycle is in fact Hamiltonian, and therefore a feasible solution exists. For a graph $G'$ with $\lambda > 1$, the components of $G'$ must be combined to form one single alternating Hamiltonian cycle. The algorithm thus executes a Bridge Recognition (BR) procedure that selects suitable edges in $R$ to be used as bridges between the components of $G'$, and will replace certain edges in $R'$.
 
 For each edge $(v_i, v_j) \in R'$, where $i < j$, $v_i$ is referred to as the ``smaller'' vertex, and $v_j$ as the ``larger'' vertex, since the value associated with $v_i$ is less than or equal to the value associated with $v_j$. The procedure initially sorts the edges in $R'$ into a list such that the smaller vertices of the edges are in lexicographical order, and therefore in non-decreasing order of values. Any edges whose smaller vertices, during MMCM, were unable to be matched with the largest possible vertex available due to being partners are then removed from this list. Any edges that do not connect the smaller vertex to the largest possible vertex, due to the largest vertex being its partner, are also removed. Then, starting from the first edge, BR searches through the list to find an edge that meets the following conditions:
 \begin{enumerate}
