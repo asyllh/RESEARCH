@@ -102,16 +102,15 @@ The following definition now describes a variant of the classical Hamiltonian cy
 
 Therefore, the aim of this algorithm is to construct an alternating Hamiltonian cycle on $G$. Since the values in each unordered pair in $\mathcal{M}$ cannot be altered, every edge in $B$ must be present in the alternating Hamiltonian cycle. Consequently, the task now involves finding a matching $R' \subseteq R$ of cardinality $n+1$, such that the edge sets $B$ and $R'$ form an alternating Hamiltonian cycle as described in Definition $\ref{defn:althamcycle}$.  
 
-
-To find a matching $R' \subseteq R$, the following modified maximum cardinality matching (MMCM) algorithm is executed (\citealp{mahadev1994, becker2010}): for each vertex $v_i$, $i = 1, 2,...,2n+2$, find the largest vertex $v_j \in \Gamma(v_i)\backslash p(v_i)$ (i.e. the largest vertex $v_j$ in $v_i$'s neighbourhood that is not $v_i$'s partner) that is not incident to any edge in $R'$. Add the edge connecting these two vertices to $R'$, and proceed to the next vertex until all vertices have been assessed. The pair of vertices incident to each edge in $R'$ are referred to as being ``matched'', and are connected by a ``matching'' edge. 
+To find a matching $R' \subseteq R$, the following modified maximum cardinality matching (MMCM) algorithm can be executed, as suggested by \cite{mahadev1994} and \cite{becker2010}: For each vertex $v_i, i=1,2,...,2n+2$, select the edge in $R$ connecting $v_i$ to the highest indexed vertex $v_j$ that is not already incident to an edge in $R'$. Add this edge $(v_i, v_j)$ to $R'$, and proceed to the next vertex until all the vertices have been assessed. The two vertices incident to each matching edge in $R'$ are now referred to as being ``matched''.
 
 During this algorithm, if a vertex $v_i$ is not adjacent to any other unmatched vertex except its partner $p(v_i)$, the preceeding vertex $v_{i-1}$ can be ``rematched'', provided that 
 \begin{enumerate*}[label={(\alph*)}]
-	\item $v_i$ is not the first vertex (i.e $i \neq 1$); 
-	\item $v_{i-1}$ has been matched; and
+	\item $v_i$ is not the first vertex; 
+	\item $v_{i-1} \in R'$; and
 	\item $(v_{i-1}, p(v_i)) \in R$.
 \end{enumerate*}
-Then, $v_{i-1}$ is matched with $p(v_i)$, and $v_i$ is matched with the vertex that was previously matched with $v_{i-1}$. It is guaranteed that MMCM will produce a maximum cardinality matching $R' \subseteq R$, and is able to do so in at most $O(n \log n)$ time. \textcolor{OrangeRed}{CITE.}
+Then, $v_{i-1}$ is matched with $p(v_i)$, and $v_i$ is matched with the vertex that was previously matched with $v_{i-1}$. It is guaranteed that MMCM will produce a maximum cardinality matching $R' \subseteq R$, and is able to do so in at most $O(n \log n)$ time (\citealp{mahadev1994}).
 
 \begin{figure}	
 	\centering
