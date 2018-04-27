@@ -32,6 +32,7 @@ Firstly, let us introduce the Constrained Ordering Problem:
 
 For example, given the multiset $\mathcal{M} = \{\{1,2\}, \{1,7\}, \{2,4\}, \{3,5\}, \{3,6\}, \{4,4\}\}$ and $\tau = 7$, one possible feasible solution is $\mathcal{T} = \langle(1,2), (6,3), (5,3), (4,4), (4,2), (7,1) \rangle$.
 
+
 One prominent application of the COP is in a strip-packing problem brought to light as an open-combinatorial problem by \citeauthor{goulimis2004} in 2004. A set $\mathcal{I}$ of rectangular items of equal height $H$ made from cardboard are to be packed onto a strip of height $H$ from left to right. Each item $i \in \mathcal{I}$ has width $w_i \in \mathbb{Z}^{+}$, and possesses two vertical score lines, marked in predetermined places. A pair of knives mounted onto a bar cuts along the score lines of two adjacent items simultaneously, which allows the items to be folded with ease (see Figure \ref{fig:boxknife}). However, by design, the scoring knives cannot be placed too close to one another, and as such have a ``minimum scoring distance'' (around 70mm in industry). The distances between each score line and the nearest edge on an item $i \in \mathcal{I}$ are the score widths, $a_i, b_i \in \mathbb{Z}^{+}$, assigned such that $a_i \leq b_i$. Since these score widths are not necessarily equal, an item $i$ can be positioned in one of two orientations: ``regular'', denoted $(a_i, b_i)$, or ``rotated'', denoted $(b_i, a_i)$, where the smaller of the two score widths $a_i$ is on the left- and right- hand side of the item respectively. Clearly, for two items to be placed alongside one another feasibly, the sum of the adjacent score widths must equal or exceed the minimum scoring distance, else the knives will not be able to score the items in the correct locations. Thus, the problem consists of finding a suitable ordering and orientation of the items such that the sum of every pair of adjacent score widths is greater than or equal to the minimum scoring distance. Specifically, as the items are packed from left to right, this involves checking the sum of the right-hand score width of each item $i$ and the left-hand score width of the next item $i+1$ on the strip. The left-hand score width of the first item and the right-hand score width of the last item on the strip are not adjacent to any other item, and are therefore ignored. 
 
 
@@ -42,16 +43,21 @@ One prominent application of the COP is in a strip-packing problem brought to li
 	\label{fig:boxknife}
 \end{figure}
 
+
 It can be seen that this problem is in fact analogous to the COP, where each unordered pair in an instance $\mathcal{M}$ contains values corresponding to the score widths of an item, and $\tau$ is the minimum scoring distance. Thus, a set $\mathcal{I}$ of items has a feasible arrangement if the equivalent COP has a solution $\mathcal{T}$ that meets the vicinal sum constraint.
+
 
 Observe that, in this particular strip-packing problem, the widths of the individual items are disregarded entirely, since the aim is to arrange the items onto a strip of seemingly infinite width. In practical applications, strips of material are often provided in fixed widths. Given a large problem instance, multiple strips may therefore be required to feasibly accommodate all of the items. For this reason, we define a new problem to be investigated.
 
+
 \begin{definition}
 	\label{defn:scspp}
-	Let $\mathcal{S} = S_1, S_2, ..., S_k$ be a set of strips of height $H$ and width $W$, and let $\mathcal{I}$ be a set of rectangular items of height $H$ and varying widths $w_i \in \mathbb{Z}^+ < W$ and score widths $a_i, b_i \in \mathbb{Z}^+$ such that $a_i \leq b_i$ and $a_i + b_i < w_i$ for each item $i \in \mathcal{I}$. Given a minimum scoring distance $\tau \in \mathbb{Z}^+$, the Score-Constrained Strip-Packing Problem (SCSPP) consists of finding the minimum number of strips $k$ required to pack all items in $\mathcal{I}$ such that the sum of every pair of adjacent score widths is greater than or equal to $\tau$.
+	Let $\mathcal{S} = \{S_1, S_2, ..., S_k\}$ be a set of strips of height $H$ and width $W$, and let $\mathcal{I}$ be a set of rectangular items of height $H$ and varying widths $w_i \in \mathbb{Z}^+ < W$ and score widths $a_i, b_i \in \mathbb{Z}^+$ such that $a_i \leq b_i$ and $a_i + b_i < w_i$ for each item $i \in \mathcal{I}$. Given a minimum scoring distance $\tau \in \mathbb{Z}^+$, the Score-Constrained Strip-Packing Problem (SCSPP) consists of finding the minimum number of strips $k$ required to pack all items in $\mathcal{I}$ such that the sum of every pair of adjacent score widths is greater than or equal to $\tau$.
 \end{definition}
 
+
 The SCSPP is a generalisation of the classical one-dimensional bin-packing problem (BPP), where in the latter problem the minimum scoring distance $\tau$ can be said to be equal to zero. It follows that the SCSPP is at least as hard as the BPP, which is known to be NP-hard (\citealp{garey1979}), and so (under the assumption that $P \neq NP$) there is no known algorithm that is able to find an optimal solution for every instance of the SCSPP in polynomial time. Instead, heuristics can be used to find near-optimal solutions in a shorter amount of time.
+
 
 The remainder of this article will firstly, in Section 2, detail a polynomial-time algorithm that is able to produce a solution to any instance of the COP, if a solution exists. Section 3 describes three heuristics that will be used to find feasible solutions to the SCSPP, and discusses the associated advantages and disadvantages. A comparison of these heuristics and an analysis of the results will be provided in Section 4, and finally Section 5 concludes the paper and proposes some potential directions for future work.
 
@@ -62,15 +68,18 @@ The remainder of this article will firstly, in Section 2, detail a polynomial-ti
 %We shall now present an algorithm for solving the COP, which operates by expressing the problem instance graphically. 
 We shall now present an algorithm for solving the COP in polynomial time. The original(underlying) algorithm was created by \cite{becker2010}, and determines whether or not a solution exists for a given instance. We have extended this algorithm so that, if a solution does indeed exist, the algorithm is able to formulate and present us with this final solution. This is especially useful for problems such as the previously mentioned strip-packing problem, where a tangible solution is required in order to place the items in the correct order and orientation. \textcolor{OrangeRed}{USING GRAPH.}
 
+
 % Equation $v_i + v_j \geq \tau$ provided $p(v_i) \neq v_j$, i.e. not partners
 % Bijective function $p: V \to V$ assoc each vertex with its partner, $v_j = p(v_i)$
 % Values are assigned from $\mathcal{M}$ in non-decreasing order, i.e. value assoc with v_1 \leq value assoc with v_2 etc..
-
 Let $\mathcal{M}$ be an instance of the COP of cardinality $n$. We model each of the values of all elements in $\mathcal{M}$ as a vertex on a graph $G$, and assign each vertex a value from $\mathcal{M}$ in non-decreasing order. A pair of vertices, called ``dominating vertices'' are then added to the graph, both of which are assigned values equal to $\tau$. These dominating vertices aid the solution process, and are removed at the end. Thus, the graph $G$ has $2n+2$ vertices.
+
 
 The values in $\mathcal{M}$, and thus the vertices on $G$, are arranged in pairs. This is represented on $G$ by adding a set of ``blue'' edges, $B$, that contains edges between vertices that are ``partners'', i.e. whose values make up a pair in $\mathcal{M}$. It can be seen that $B$ is a perfect matching, with $|B|= n+1$.
 
-Now, we add to $G$ a set of ``red'' edges, $R$, that consists of edges between vertices whose values equal or exceed $\tau$, provided they are not partners. This corresponds to the vicinal sum constraint in Defintion \ref{defn:cop}. 
+
+Next, a set of ``red'' edges $R$ is added to $G$ that consists of edges between vertices whose values equal or exceed $\tau$, provided they are not partners. This corresponds to the vicinal sum constraint in Defintion \ref{defn:cop}. 
+
 
 Thus, we have an undirected graph $G$ with vertex set $V = \{v_1, ..., v_{2n+2}\}$, and two distinct edge sets $B$ and $R$, such that $B \cap R = \emptyset$. Figure \ref{fig:partners/threshold} illustrates the construction of $G$ using the instance $\mathcal{M}$ from the example above. 
 
@@ -87,11 +96,12 @@ Thus, we have an undirected graph $G$ with vertex set $V = \{v_1, ..., v_{2n+2}\
 	\caption{$G=(V, B \cup R)$}	
 	\label{fig:threshold}
 \end{subfigure}
-\caption{Example construction of $G$ using instance $\mathcal{M}$ from the example above.}
+\caption{Example construction of $G$ using instance $\mathcal{M}  = \{\{1,2\}, \{1,7\}, \{2,4\}, \{3,5\}, \{3,6\}, \{4,4\}\}$ and $\tau = 7$}
 \label{fig:partners/threshold}
 \end{figure}
 
-The following definition now describes a variant of the classical Hamiltonian cycle on a graph $G$.
+
+Consider the following definition describing a variant of the classical Hamiltonian cycle on a graph $G$.
 
 \begin{definition}
 	\label{defn:althamcycle}
@@ -99,10 +109,15 @@ The following definition now describes a variant of the classical Hamiltonian cy
 \end{definition}
 
 
+An alternating Hamiltonian cycle on $G$ would correpsond to a feasible solution, as each ``blue'' edge from $B$ represents a pair of values in $\mathcal{M}$, and each ``red'' edge from $R$ shows values that can be placed alongside one another feasibly. Thus, by removing the dominating vertices and any incident edges, the remaining alternating Hamiltonian path illustrates the order in which the elements should be placed to produce a feasible solution $\mathcal{T}$.
 
-Therefore, the aim of this algorithm is to construct an alternating Hamiltonian cycle on $G$. Since the values in each unordered pair in $\mathcal{M}$ cannot be altered, every edge in $B$ must be present in the alternating Hamiltonian cycle. Consequently, the task now involves finding a matching $R' \subseteq R$ of cardinality $n+1$, such that the edge sets $B$ and $R'$ form an alternating Hamiltonian cycle as described in Definition $\ref{defn:althamcycle}$.  
+
+Since the values in each unordered pair in $\mathcal{M}$ cannot be altered, i.e. the values cannot be changed, and the values in each element cannot be separated, every edge in $B$ must be present in the alternating Hamiltonian cycle. Consequently, the task now involves finding a matching $R' \subseteq R$ of cardinality $n+1$ such that the edge sets $B$ and $R'$ form an alternating Hamiltonian cycle as described in Definition \ref{defn:althamcycle}. 
+
+
 
 To find a matching $R' \subseteq R$, the following modified maximum cardinality matching (MMCM) algorithm can be executed, as suggested by \cite{mahadev1994} and \cite{becker2010}: For each vertex $v_i, i=1,2,...,2n+2$, select the edge in $R$ connecting $v_i$ to the highest indexed vertex $v_j$ that is not already incident to an edge in $R'$. Add this edge $(v_i, v_j)$ to $R'$, and proceed to the next vertex until all the vertices have been assessed. The two vertices incident to each matching edge in $R'$ are now referred to as being ``matched''.
+
 
 During this algorithm, if a vertex $v_i$ is not adjacent to any other unmatched vertex except its partner $p(v_i)$, the preceeding vertex $v_{i-1}$ can be ``rematched'', provided that 
 \begin{enumerate*}[label={(\alph*)}]
@@ -111,6 +126,7 @@ During this algorithm, if a vertex $v_i$ is not adjacent to any other unmatched 
 	\item $(v_{i-1}, p(v_i)) \in R$.
 \end{enumerate*}
 Then, $v_{i-1}$ is matched with $p(v_i)$, and $v_i$ is matched with the vertex that was previously matched with $v_{i-1}$. It is guaranteed that MMCM will produce a maximum cardinality matching $R' \subseteq R$, and is able to do so in at most $O(n \log n)$ time (\citealp{mahadev1994}).
+
 
 \begin{figure}	
 	\centering
@@ -124,10 +140,25 @@ Then, $v_{i-1}$ is matched with $p(v_i)$, and $v_i$ is matched with the vertex t
 		\caption{$G' =(V, B \cup R')$ planar}	
 		\label{fig:mps}
 	\end{subfigure}
-	\caption{Subgraph $G'$ consisting of a matching set $R' \subseteq R$ derived using MMCM algorithm. Planar graph, can see that $G'$ is made up of two components.}
+	\caption{Spanning subgraph $G'$ consisting of a matching set $R' \subseteq R$ derived using MMCM algorithm. Planar graph, can see that $G'$ is made up of two components, $q = 2$}
+	\label{fig:matching/mps}
 \end{figure}
 
-Clearly, if $|R'| < n+1$, there are not enough matching edges to form an alternating Hamiltonian cycle along with the edges in $B$, and hence in accordance with Theorem $\ref{thm:copsoln}$ no feasible solution exists for the given instance $\mathcal{M}$ of the COP. Otherwise, if $R'$ is a perfect matching of cardinality $n+1$, the spanning subgraph $G'=(V, B \cup R')$ is a 2-regular graph, where each vertex is adjacent to its partner via an edge in $B$, and its match via an edge in $R'$. $G'$ thus consists of a collection of alternating cycles $C_1, C_2, ..., C_{\lambda}$. If there is only one component on $G'$, i.e. $\lambda = 1$, then this alternating cycle is in fact Hamiltonian, and therefore a feasible solution exists. For a graph $G'$ with $\lambda > 1$, the components of $G'$ must be combined to form one single alternating Hamiltonian cycle. The algorithm thus executes a Bridge Recognition (BR) procedure that selects suitable edges in $R$ to be used as bridges between the components of $G'$, and will replace certain edges in $R'$.
+
+Clearly, if $|R'| < n+1$, there are not enough matching edges to form an alternating Hamiltonian cycle along with the edges in $B$, and hence no feasible solution can be found for the given instance $\mathcal{M}$ of the COP. Otherwise, if $R'$ is a perfect matching of cardinality $n+1$, the spanning subgraph $G'=(V, B \cup R')$ is a 2-regular graph, where each vertex is adjacent to its partner via an edge in $B$, and its match via an edge in $R'$ (see Figure \ref{fig:matching/mps}). $G'$ thus consists of a collection of alternating cycles $C_1, C_2, ..., C_q$. In the case where $G'$ comprises one component, i.e. $q = 1$, then this alternating cycle is in fact Hamiltonian, and therefore a feasible solution exists. However, if $q > 1$, the components of $G'$ must be combined to form an alternating Hamiltonian cycle. To do this, a Bridge Recognition (BR) algorithm can be executed that selects suitable edges from $R$ that will replace certain edges in $R'$ in order to function as bridges and connect the components of $G'$.
+
+\begin{itemize}
+	\item smaller vertices lexicographical increasing, $v_1,..., v_{n+1}$
+	\item larger vertices lexicographical decreasing, $v_{2n+2},..., v_{n+2}$
+	\item any edge that doesn't abide by this order should be removed
+	\item caused during MMCM, highest indexed vertex could not be matched with current vertex due to being partners, so current vertex is matched with next highest indexed vertex available.
+	\item thus list of edges should be $(v_1, v_{2n+2}), (v_2, v_{2n+1}), ..., (v_{n+1}, v_{n+2})$.
+\end{itemize}
+
+
+
+
+
 
 For each edge $(v_i, v_j) \in R'$, where $i < j$, $v_i$ is referred to as the ``smaller'' vertex, and $v_j$ as the ``larger'' vertex, since the value associated with $v_i$ is less than or equal to the value associated with $v_j$. The procedure initially sorts the edges in $R'$ into a list such that the smaller vertices of the edges are in lexicographical order, and therefore in non-decreasing order of values. Any edges whose smaller vertices, during MMCM, were unable to be matched with the largest possible vertex available due to being partners are then removed from this list. Any edges that do not connect the smaller vertex to the largest possible vertex, due to the largest vertex being its partner, are also removed. Then, starting from the first edge, BR searches through the list to find an edge that meets the following conditions:
 \begin{enumerate}
@@ -137,7 +168,9 @@ For each edge $(v_i, v_j) \in R'$, where $i < j$, $v_i$ is referred to as the ``
 
 If such an edge is found, the procedure adds this edge to a set $R_i$, and continues to add all succeeding edges in the list to $R_i$, provided that for each edge conditions 1 and 2 hold, and the succeeding edge is not a member of a component on $G'$ that already has an edge in $R_i$. Once there are no more valid edges to add to $R_i$, BR resumes its search through the remaining edges in the list to find a new edge that meets conditions 1 and 2, and can therefore start a new set $R_{i+1}$. The procedure ends when the penultimate edge in the list has been examined.
 
-The sets $R_1, R_2, ..., R_k \subseteq R$ created during this process are then analysed. In the event that BR has been unable to produce a single set $R_1$, the components $C_1,..., C_{\lambda}$ of $G'$ cannot be combined, and therefore no solution exists. If there exists a set $R_i$ such that $|R_i| = \lambda$, then all components on $G'$ can be combined using the following ``connecting method'':
+
+The sets $R_1, R_2, ..., R_k \subseteq R$ created during this process are then analysed. In the event that BR has been unable to produce a single set $R_1$, the components $C_1,..., C_{\lambda}$ of $G'$ cannot be combined, and therefore no solution exists. If there exists a set $R_i$ such that $|R_i| = \lambda$, then all components on $G'$ can be combined using the following `
+`connecting method'':
 
 Starting from the first edge in $R_i$, add the edge from $R$ connecting the smaller vertex of each edge to the larger vertex of the succeeding edge to $R'$. For the final edge in $R_i$, add the edge from $R$ that connects its smaller vertex to the larger vertex of the first edge in $R_i$ to $R$. Finally, any edges that appear in both $R_i$ and $R'$ are removed from $R'$, such that $R_i \cap R' = \emptyset$, and $R'$ returns to being a perfect matching. $G'$ then comprises a single alternating Hamiltonian cycle, and thus the algorithm has found a solution to the problem instance.
 
@@ -146,6 +179,7 @@ Else, if $k > 1$, it may be that multiple sets are required to combine the compo
 
 
 This algorithm, which will be referred to as the Alternating Hamiltonian Construction Algorithm (AHCA) is able to deduce whether a feasible solution $\mathcal{T}$ exists for any given instance $\mathcal{M}$ of the COP. If a solution does indeed exist, AHCA can produce this solution in at most $O(n^2)$ time.
+
 
 \begin{theorem}
 	\label{thm:copsoln}
@@ -158,10 +192,12 @@ This algorithm, which will be referred to as the Alternating Hamiltonian Constru
 %explanation removing dominating vertices
 %why is this different from becker
 
+
 \section{Solving the SCSPP/Heuristics}
 \label{sec:scsppsoln}
 %move this to beginning
 The SCSPP is a generalisation of the classical one-dimensional bin-packing problem (BPP), where in the latter problem, the minimum scoring distance $\tau$ can be said to be equal to zero. It follows that the SCSPP is at least as hard as the BPP, which is known to be NP-hard (\citealp{garey1979}), and so (under the assumption that $P \neq NP$) there is no known algorithm that is able to find an optimal solution for every instance of the SCSPP in polynomial time. Instead, heuristics can be used to find near-optimal solutions in a shorter amount of time. One example is the greedy heuristic known as first-fit (FF), an online algorithm that places each item (in some arbitrary order) onto the lowest-indexed strip such that the capacity of the strip is not exceeded. It has been shown that by arranging the items in decreasing order of size, a packing heuristic will produce a solution that is closer to the optimal than if the items are arranged in any other order (\citealp{johnson1974fast}). Applying FF onto items sorted in this manner yields the well-known first-fit decreasing (FFD) heuristic.
+
 
 An optimal solution of an instance of the SCSPP is a solution that consists of the fewest number of strips, $k$. A simple lower bound for $k$ that can be computed in $O(n)$ time is given by
 
@@ -177,13 +213,16 @@ where $n$ is the number of items in the set $\mathcal{I}$, $w_i$ the width of ea
 \label{sec:ffdapprox}
 The first heuristic to be discussed is the Score-Constrained First-Fit Decreasing (SCFFD) heuristic, which is an extension of the original FFD. The items in $\mathcal{I}$ are, as usual, sorted in non-increasing order of widths, with ties broken by selecting the item with the smallest score width. Then, for each item $i \in \mathcal{I}$, SCFFD finds the lowest-indexed strip $S_j$ that can accommodate $i$ without being overfilled. If this strip $S_j$ is empty, place $i$ onto $S_j$ in a regular orientation, and add $S_j$ to the solution set $\mathcal{S}$. However, if $S_j$ is not empty, i.e. $S_j \in \mathcal{S}$, the algorithm checks if the vicinal sum constraint is met between the right-most score width on $S_j$ and one of the two score widths on $i$, assessing the smaller score width $a_i$ first. In either case, if the constraint is met, $i$ is placed accordingly onto $S_j$. Indeed, an item $i$ may not fulfil the vicinal sum constraint in any orientation, in which case SCFFD finds the next lowest-indexed strip and attempts to pack $i$ again. This process continues until every item $i \in \mathcal{I}$ has been placed onto a strip $S_j \in \mathcal{S}$. The additional check of the vicinal sum constraints and rotation of the items can be performed in constant time, and as such this heuristic has the same time complexity as FFD, $O(n \log n)$. This heuristic only checks the current items score widths against the right-most score width on a strip, and if the vicinal sum constraint is not met, the item cannot be placed on the strip. However, there may be another location on the strip that the item could be placed in feasibly, or a rearrangement of all items on the strip that produce a feasible alignment.
 
+
 \subsection{Smallest First}
 \label{sec:ffdsmall}
 This next heuristic focuses on packing each strip in turn, rather than each item as in the previous heuristic. Each new strip $S_j$ is initialised by placing the item $i \in \mathcal{I}'$ with the smallest score width onto $S_j$ in a regular position, where $\mathcal{I}'$ is the set of items that have not yet been packed onto a strip. The heuristic then continues to pack items onto $S_j$, by choosing an item in $\mathcal{I}'$ with the smallest score width that fulfils the vicinal sum constraint when placed alongside the right-most score width on $S_j$, and that does not exceed the capacity of $S_j$. Once there are no more items in $\mathcal{I}'$ that can be feasibly packed onto $S_j$, the heuristic adds $S_j$ to the solution set $\mathcal{S}$, and the next new strip $S_{j+1}$ is initialised. When $|\mathcal{I}'| = 0$, all items have been packed onto a strip, and the process terminates. This heuristic is designed to align score widths such that their sum is as close to the minimum scoring distance as possible, which eliminates the possibility of aligning larger score widths unecessarily. The larger score widths are then available to be aligned next to smaller score widths. Heuristic prioritises vicinal sum constraint over item widths. 
 
+
 \subsection{FFD Exact}
 \label{sec:ffdexact}
 The last heuristic in this paper is formed by integrating the Alternating Hamiltonian Construction Algorithm (AHCA) detailed in Section ref{} with the classical FFD heuristic. Again, all items in $\mathcal{I}$ are sorted into non-increasing order of widths, with ties broken by choosing the item with the smallest score width. For each item $i \in \mathcal{I}$, the heuristic finds the lowest-indexed feasible strip $S_j$. As in the first heuristic, if $S_j$ is empty, $i$ is placed in a regular orientation onto $S_j$, and $S_j$ is then added to the solution set $\mathcal{S}$. Unlike the first heuristic, however, if $S_j$ is not empty ($S_j \in \mathcal{S}$), AHCA is applied on all items in $S_j$ and the current item $i$. If AHCA is successful, the items currently on $S_j$ are replaced by the new arrangement, which of course includes $i$. In the event that AHCA is unable to produce a solution, $S_j$ remains intact, and the heuristic attempts to pack $i$ onto the next lowest-indexed feasible strip. Due to the inclusion of AHCA, this heuristic is slower than the previous heuristics, with complexity $O(n^2)$. This heuristic has a significant advantage, however, as it is able to rearrange items entirely in order to find a feasible solution. In addition, we know that if a feasible alignment for a given set of items exists, AHCA is guaranteed to find and produce this solution. Thus, every subproblem in this heuristic, i.e. every time an item needs to be placed on a strip, can be solved exactly. For example, Figure \ref{fig:comparestrips} illustrates an instance of the SCSPP in which an item can feasibly fit onto a strip, i.e. the addition of the item onto the strip does not cause the strip's capacity to be exceeded. In the original version of FFD, the items on the strip are, as expected, in non-increasing order, and the right-most score width has a value of 3. Regardless of orientation, the current item cannot meet the vicinal sum constraint. The heuristic will therefore attempt to place the item onto another strip, or, if there are no other open strips, a new strip will be required to accommodate the item, thus increasing the total number of strips. However, by using FFDincAHCA, a feasible alignment of the items including the current item exists, and hence the item does not need to be placed elsewhere, minimising the risk of potentially adding a new strip to the solution.
+
 
 \begin{figure}[h!]	
 	\centering
@@ -195,35 +234,32 @@ The last heuristic in this paper is formed by integrating the Alternating Hamilt
 \section{Comparison}
 In order to provide a complete overview of the heuristics, sets of 100, 500, and 1000 items were used on strips of lengths 1250, 2500, and 5000. Item widths were randomly selected between 150 and 1000, and score widths between 1 and 70. This ensures that each item has two score lines. Changing the strip lengths changes the average number of items per strip. 
 
-
 \begin{table}[!htb]
-\centering
-\caption{$n = 100$}
-\begin{tabular}{c@{\hspace{15pt}}c@{\hspace{10pt}}c@{\hspace{10pt}}c@{\hspace{7pt}}| @{\hspace{7pt}}c@{\hspace{10pt}}c@{\hspace{10pt}}c@{\hspace{7pt}}| @{\hspace{7pt}} c@{\hspace{10pt}}c@{\hspace{10pt}}c}
-	\noalign{\smallskip}
-	& \multicolumn{3}{c}{$l = 5000$} & \multicolumn{3}{c}{$l = 2500$} & \multicolumn{3}{c}{$l = 1250$} \\
-	\hline\noalign{\smallskip}
-	$\delta$ & Basic & Pair & FFD+ & Basic & Pair & FFD+ & Basic & Pair & FFD+ \\
-	\noalign{\smallskip}
-	\hline 
-	\noalign{\smallskip}
-	0.0 & 0.119930 & 0.119930 & 0.119930 & 0.234780 & 0.234780 & 0.234780 & 0.464660 & 0.464660 & 0.464660 \\
-	0.1 & 0.190373 & \textbf{0.209209} & 0.195007 & 0.368315 & \textbf{0.403484} & 0.372649 & 0.653776 & \textbf{0.662649} & 0.654527 \\
-	0.2 & 0.241823 & \textbf{0.291742} & 0.252201 & 0.455307 & \textbf{0.537355} & 0.464804 & 0.740613 & \textbf{0.743163} & 0.74212 \\
-	0.3 & 0.308598 & \textbf{0.423971} & 0.330489 & 0.552257 & \textbf{0.700541} & 0.573676 & 0.817858 & 0.801526 & \textbf{0.820929} \\
-	0.4 & 0.387256 & \textbf{0.634770} & 0.435353 & 0.648313 & \textbf{0.860270} & 0.688716 & 0.874070 & 0.835449 & \textbf{0.878158} \\
-	0.5 & 0.491093 & \textbf{0.900872} & 0.586398 & 0.747025 & \textbf{0.953757} & 0.806812 & 0.915534 & 0.854677 & \textbf{0.920727} \\
-	0.6	& 0.612443 & \textbf{0.982422} & 0.753466 & 0.834971 & \textbf{0.962939} & 0.896095 & 0.939964 & 0.864190 & \textbf{0.945036} \\
-	0.7 & 0.773879 & \textbf{0.986985} & 0.909705 & 0.916026 & \textbf{0.965898} & 0.959666 & 0.957970 & 0.873854 & \textbf{0.961036} \\
-	0.8	& 0.904347 & \textbf{0.987407} & 0.980250 & 0.966750 & 0.967486 & \textbf{0.984634} & 0.964117 & 0.885786 & \textbf{0.965271} \\
-	0.9	& 0.978801 & 0.984535 &	\textbf{0.991745} & 0.987382 & 0.967989 & \textbf{0.990479} & 0.968735 & 0.897915 & \textbf{0.968928} \\
-	1.0 & \textbf{0.995493} & 0.988851 & \textbf{0.995493} & \textbf{0.992539} & 0.969239 & \textbf{0.992539} & \textbf{0.967834} & 0.904161 & \textbf{0.967834} \\
-	\hline
-\end{tabular}
-\label{table:n100}
-\end{table}	
-
-
+	\centering
+	\caption{$n = 100$}
+	\begin{tabular}{c@{\hspace{15pt}}c@{\hspace{10pt}}c@{\hspace{10pt}}c@{\hspace{7pt}}| @{\hspace{7pt}}c@{\hspace{10pt}}c@{\hspace{10pt}}c@{\hspace{7pt}}| @{\hspace{7pt}} c@{\hspace{10pt}}c@{\hspace{10pt}}c}
+		\noalign{\smallskip}
+		& \multicolumn{3}{c}{$l = 5000$} & \multicolumn{3}{c}{$l = 2500$} & \multicolumn{3}{c}{$l = 1250$} \\
+		\hline\noalign{\smallskip}
+		$\delta$ & Basic & Pair & FFD+ & Basic & Pair & FFD+ & Basic & Pair & FFD+ \\
+		\noalign{\smallskip}
+		\hline 
+		\noalign{\smallskip}
+		0.0	& 8.35709 & 8.35709 & 8.35709 & 4.26800 & 4.26800 & 4.26800 & 2.15624 & 2.15624 & 2.15624 \\
+		0.1	& 5.27284 & \textbf{4.89963} & 5.14404 & 2.72299 & \textbf{2.48800} & 2.69191 & 1.53147 & \textbf{1.51049} & 1.52968 \\
+		0.2	& 4.16155 & \textbf{3.46467} & 3.98645 & 2.21096 & \textbf{1.87449} & 2.16338 & 1.34812 & \textbf{1.34499} & 1.34593 \\
+		0.3	& 3.27805 & \textbf{2.40153} & 3.05546 & 1.82199 & \textbf{1.43724} & 1.75610 & 1.22453 & 1.24810 & \textbf{1.21994} \\
+		0.4	& 2.61641 & \textbf{1.63390} & 2.33662 & 1.54989 & \textbf{1.16887} & 1.46534 & 1.14507 & 1.19631 & \textbf{1.13979} \\
+		0.5	& 2.08260 & \textbf{1.13827} & 1.77494 & 1.35101 & \textbf{1.04978} & 1.25567 & 1.09274 & 1.17069 & \textbf{1.08661} \\
+		0.6	& 1.65897 & \textbf{1.02027} & 1.36093 & 1.20040 & \textbf{1.03720} & 1.11964 & 1.06255 & 1.15766 & \textbf{1.05701} \\
+		0.7	& 1.32002 & \textbf{1.01350} & 1.11348 & 1.09659 & \textbf{1.03556} & 1.04569 & 1.04546 & 1.14416 & \textbf{1.04150} \\
+		0.8	& 1.10725 & \textbf{1.01384} & 1.02188 & 1.03577 & 1.03439 & \textbf{1.01696} & 1.03711 & 1.12951 & \textbf{1.03565} \\
+		0.9	& 1.02134 & 1.01315 & \textbf{1.00646} & 1.01364 & 1.03285 & \textbf{1.01029} & 1.03434 & 1.11631 & \textbf{1.03416} \\
+		1.0 & \textbf{1.00480} & 1.01302 & \textbf{1.00480} & \textbf{1.00919} & 1.03261 & \textbf{1.00919} & \textbf{1.03393} & 1.10807 & \textbf{1.03393} \\	
+		\hline
+	\end{tabular}
+	\label{table:n100}
+\end{table}
 
 \begin{table}[!htb]
 	\centering
