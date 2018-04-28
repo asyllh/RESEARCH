@@ -155,6 +155,24 @@ Clearly, if $|R'| < n+1$, there are not enough matching edges to form an alterna
 	\item thus list of edges should be $(v_1, v_{2n+2}), (v_2, v_{2n+1}), ..., (v_{n+1}, v_{n+2})$.
 \end{itemize}
 
+The edges in $R'$ are sorted into a list such that the lower-indexed vertices of each edge are in increasing order of indices, and the higher-indexed vertices are in decreasing order of indices, i.e. $(v_1, v_{2n+2}), (v_2, v_{2n+1}), ..., (v_{n+1}, v_{n+2})$. Any edges that cannot be placed in such an order are then removed from this list. For instance, in the example illustrated in Figure \ref{fig:matching/mps}, $(v_5, v_9)$ would be removed from the list, since the next edge in the list is $(v_6, v_{10})$, and so the higher-indexed vertices are not in decreasing order. This is due to $v_5$ not being matched with the highest-indexed vertex available, $v_{10}$, during MMCM, as $(v_5, v_{10}) \in B$.
+
+Starting from the first edge, BR searches through the list to find an edge that meets the following conditions: 
+\begin{enumerate*}[label={(\alph*)}]
+	\item The lower-indexed vertex of the current edge, and the higher-indexed vertex of the succeeding edge in the list are adjacent via an edge in $R$, and;
+	\item The current edge and the succeeding edge are members of different components on $G'$.
+\end{enumerate*}
+
+If these conditions are met, BR adds the edge from $R$ connecting the lower-indexed vertex of the current edge to the higher-indexed vertex of the succeeding edge to a set $R_i$ that records edges to be used as potential bridges. BR then continues to add 
+
+
+
+
+
+
+
+
+
 
 
 
