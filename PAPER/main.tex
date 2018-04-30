@@ -147,23 +147,37 @@ Then, $v_{i-1}$ is matched with $p(v_i)$, and $v_i$ is matched with the vertex t
 
 Clearly, if $|R'| < n+1$, there are not enough matching edges to form an alternating Hamiltonian cycle along with the edges in $B$, and hence no feasible solution can be found for the given instance $\mathcal{M}$ of the COP. Otherwise, if $R'$ is a perfect matching of cardinality $n+1$, the spanning subgraph $G'=(V, B \cup R')$ is a 2-regular graph, where each vertex is adjacent to its partner via an edge in $B$, and its match via an edge in $R'$ (see Figure \ref{fig:matching/mps}). $G'$ thus consists of a collection of alternating cycles $C_1, C_2, ..., C_q$. In the case where $G'$ comprises one component, i.e. $q = 1$, then this alternating cycle is in fact Hamiltonian, and therefore a feasible solution exists. However, if $q > 1$, the components of $G'$ must be combined to form an alternating Hamiltonian cycle. To do this, a Bridge Recognition (BR) algorithm can be executed that selects suitable edges from $R$ that will replace certain edges in $R'$ in order to function as bridges and connect the components of $G'$.
 
-\begin{itemize}
-	\item smaller vertices lexicographical increasing, $v_1,..., v_{n+1}$
-	\item larger vertices lexicographical decreasing, $v_{2n+2},..., v_{n+2}$
-	\item any edge that doesn't abide by this order should be removed
-	\item caused during MMCM, highest indexed vertex could not be matched with current vertex due to being partners, so current vertex is matched with next highest indexed vertex available.
-	\item thus list of edges should be $(v_1, v_{2n+2}), (v_2, v_{2n+1}), ..., (v_{n+1}, v_{n+2})$.
-\end{itemize}
-
 The edges in $R'$ are sorted into a list such that the lower-indexed vertices of each edge are in increasing order of indices, and the higher-indexed vertices are in decreasing order of indices, i.e. $(v_1, v_{2n+2}), (v_2, v_{2n+1}), ..., (v_{n+1}, v_{n+2})$. Any edges that cannot be placed in such an order are then removed from this list. For instance, in the example illustrated in Figure \ref{fig:matching/mps}, $(v_5, v_9)$ would be removed from the list, since the next edge in the list is $(v_6, v_{10})$, and so the higher-indexed vertices are not in decreasing order. This is due to $v_5$ not being matched with the highest-indexed vertex available, $v_{10}$, during MMCM, as $(v_5, v_{10}) \in B$.
 
 Starting from the first edge, BR searches through the list to find an edge that meets the following conditions: 
 \begin{enumerate*}[label={(\alph*)}]
-	\item The lower-indexed vertex of the current edge, and the higher-indexed vertex of the succeeding edge in the list are adjacent via an edge in $R$, and;
-	\item The current edge and the succeeding edge are members of different components on $G'$.
+	\item The lower-indexed vertex of the current edge, and the higher-indexed vertex of the next edge in the list are adjacent via an edge in $R$; and
+	\item The current edge and the next edge are members of different components on $G'$.
 \end{enumerate*}
 
-If these conditions are met, BR adds the edge from $R$ connecting the lower-indexed vertex of the current edge to the higher-indexed vertex of the succeeding edge to a set $R_i$ that records edges to be used as potential bridges. BR then continues to add 
+If the conditions are met, BR adds the current edge to a set $R_i$, and continues to add all succeeding edges in the list to $R_i$, provided that for each edge both conditions hold, and the succeeding edge is not a member of a component of $G'$ that has an edge in $R_i$. Once there are no more valid edges available to add to $R_i$, BR resumes its search through the remaining edges in the list to find a new edge that meets the conditions, and can begin a new set $R_{i+1}$. The procedure terminates once the penultimate edge in the list has been assessed.
+
+\begin{itemize}
+	\item sets $R_1, R_2, ..., R_k \in R'$ are produced during BR
+	\item Connecting procedure detects collection of sets that combine all components of $G'$ together
+	\item only overlap once
+	\item If $k = 0$, i.e. not a single set $R_i$ created during BR, then no edges exist that can combine the components together - infeasible, cannot create alt ham cycle (no solution)
+	\item If $\exists$ set $R_i$ such that $|R_i| = q$, i.e. number of edges in $R_i$ equals number of components, then solution exists, need to connect components using connecting method/procedure
+	\item this is because there is an edge in each component that can be removed, and replaced with a new edge that bridges the components together 
+	\item otherwise, more than one set $R_i$ needed
+	\item second method - find two sets $R_i, R_j$ such that there is one red edge from each component of $G'$ in EITHER $R_i$ OR $R_j$, and there is one component of $G'$ that has one red edge in $R_i$ and another (different) red edge in $R_j$
+	\item that is, $R_i$ and $R_j$ each have an edge from the same components, and all the other edges are from different components
+	\item Example of set $R_1$ BR procedure Figures
+	\item different edge from same component means components can be joined together to make single alt ham cycle
+	\item e.g. if $q = 4$, then $R_i$ has edges from $C_1, C_2$, and $R_j$ has edges from $C_2, C_3, C_4$, then there is an overlap (each set has an edge from $C_2$)
+	\item if there aren't two sets that cover all components and overlap only once, another method
+	\item third method - find set $R_i$ with largest cardinality, then run modified BR, where edges from the largest set $R_i$ are removed from the initial sorted list of edges, and then find a new set $R_j$ that contains an edge from a component that isn't covered by $R_i$, and an edge from a component that is covered by $R_i$ (the overlap)
+	\item continue to add succeeding edges as long as they aren't a member of a component already covered in $R_i$ or $R_j$
+	\item if end of list is reached, and not all components covered, delete edges that are in $R_j$ from the list of edges, and start again from the beginning
+	\item continue until no new sets can be made, then check to see if the sets cover all components, if not, infeasible, else feasible
+	\item connecting method/procedure - connect smaller-indexed vertex of each edge to higher-indexed vertex of next edge, except last edge, connect smallest of last edge to highest of first edge
+	\item then add these edges to $R'$ and remove the edges in $R_i$ from $R'$, so the cardinality of $R'$ should still be $n+1$ (perfect matching), and $R_i \cap R' = \emptyset$.
+\end{itemize}
 
 
 
@@ -178,25 +192,32 @@ If these conditions are met, BR adds the edge from $R$ connecting the lower-inde
 
 
 
-For each edge $(v_i, v_j) \in R'$, where $i < j$, $v_i$ is referred to as the ``smaller'' vertex, and $v_j$ as the ``larger'' vertex, since the value associated with $v_i$ is less than or equal to the value associated with $v_j$. The procedure initially sorts the edges in $R'$ into a list such that the smaller vertices of the edges are in lexicographical order, and therefore in non-decreasing order of values. Any edges whose smaller vertices, during MMCM, were unable to be matched with the largest possible vertex available due to being partners are then removed from this list. Any edges that do not connect the smaller vertex to the largest possible vertex, due to the largest vertex being its partner, are also removed. Then, starting from the first edge, BR searches through the list to find an edge that meets the following conditions:
-\begin{enumerate}
-	\item The smaller vertex of the current edge and the larger vertex of the succeeding edge are connected by an edge in $R$.
-	\item The current edge and the succeeding edge are members of different components on $G'$.
-\end{enumerate}
-
-If such an edge is found, the procedure adds this edge to a set $R_i$, and continues to add all succeeding edges in the list to $R_i$, provided that for each edge conditions 1 and 2 hold, and the succeeding edge is not a member of a component on $G'$ that already has an edge in $R_i$. Once there are no more valid edges to add to $R_i$, BR resumes its search through the remaining edges in the list to find a new edge that meets conditions 1 and 2, and can therefore start a new set $R_{i+1}$. The procedure ends when the penultimate edge in the list has been examined.
 
 
-The sets $R_1, R_2, ..., R_k \subseteq R$ created during this process are then analysed. In the event that BR has been unable to produce a single set $R_1$, the components $C_1,..., C_{\lambda}$ of $G'$ cannot be combined, and therefore no solution exists. If there exists a set $R_i$ such that $|R_i| = \lambda$, then all components on $G'$ can be combined using the following `
-`connecting method'':
-
-Starting from the first edge in $R_i$, add the edge from $R$ connecting the smaller vertex of each edge to the larger vertex of the succeeding edge to $R'$. For the final edge in $R_i$, add the edge from $R$ that connects its smaller vertex to the larger vertex of the first edge in $R_i$ to $R$. Finally, any edges that appear in both $R_i$ and $R'$ are removed from $R'$, such that $R_i \cap R' = \emptyset$, and $R'$ returns to being a perfect matching. $G'$ then comprises a single alternating Hamiltonian cycle, and thus the algorithm has found a solution to the problem instance.
 
 
-Else, if $k > 1$, it may be that multiple sets are required to combine the components of $G'$. Let $\mathcal{R}$ be a set that contains the sets $R_i$ needed to connect the components of $G'$ together, and let $\Lambda$ be a set that records the components covered by the sets in $\mathcal{R}$. Start by adding the components $C_i$ that each edge in $R_1$ is a member of to $\Lambda$, and then add $R_1$ to $\mathcal{R}$. At this stage, $|\Lambda| = |\mathcal{R}|$. Proceeding through the remaining sets $R_2, R_3, ..., R_k$, find a set $R_i$ that contains at least one edge that is a member of a component in $\Lambda$, and at least one edge that is a member of a component not yet recorded in $\Lambda$. Append the component that each edge in this set $R_i$ is a member of to $\Lambda$, provided the component is not already an element of $\Lambda$, then add $R_i$ to $\mathcal{R}$. Continue in this manner until the final set $R_k$ has been assessed. If $|\Lambda| = \lambda$, i.e. all components of $G'$ are elements of $\Lambda$, then the sets in $\mathcal{R}$ are able to combine the components of $G'$ to form a single alternating Hamiltonian cycle. This is achieved by repeating the connecting method described previously on every set $R_i \in \mathcal{R}$.
+
+
+
 
 
 This algorithm, which will be referred to as the Alternating Hamiltonian Construction Algorithm (AHCA) is able to deduce whether a feasible solution $\mathcal{T}$ exists for any given instance $\mathcal{M}$ of the COP. If a solution does indeed exist, AHCA can produce this solution in at most $O(n^2)$ time.
+
+\begin{figure}	
+	\centering
+	\begin{subfigure}[h]{0.7\textwidth}
+		\includestandalone[width=\textwidth]{figures/mpsconnect}
+		\caption{connect}	
+		\label{fig:mpsconnect}
+	\end{subfigure} \quad
+	\begin{subfigure}[h]{0.7\textwidth}
+		\includestandalone[width=\textwidth]{figures/mpscycle}
+		\caption{cycle}	
+		\label{fig:mpscycle}
+	\end{subfigure}
+	\caption{connect and cycle}
+	\label{fig:connect/cycle}
+\end{figure}
 
 
 \begin{theorem}
