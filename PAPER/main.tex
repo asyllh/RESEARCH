@@ -155,62 +155,28 @@ Starting from the first edge, BR searches through the list to find an edge that 
 	\item The current edge and the next edge are members of different components on $G'$.
 \end{enumerate*}
 
-If the conditions are met, BR adds the current edge to a set $R_i$, and continues to add all succeeding edges in the list to $R_i$, provided that for each edge both conditions hold, and the succeeding edge is not a member of a component of $G'$ that has an edge in $R_i$. Once there are no more valid edges available to add to $R_i$, BR resumes its search through the remaining edges in the list to find a new edge that meets the conditions, and can begin a new set $R_{i+1}$. The procedure terminates once the penultimate edge in the list has been assessed.
+If the conditions are met, BR adds the current edge to a set $R_i$, and continues to add all succeeding edges in the list to $R_i$, provided that for each edge both conditions hold, and the succeeding edge is not a member of a component of $G'$ that has an edge in $R_i$. Once there are no more valid edges available to add to $R_i$, BR resumes its search through the remaining edges in the list to find a new edge that meets the conditions, and can begin a new set $R_{i+1}$. The procedure terminates once the penultimate edge in the list has been assessed, having generated the sets $R_1, R_2, ..., R_k \subseteq R'$.
+
+In the event that BR has been unable to produce a single set, i.e. $k = 0$, there are no suitable edges that can combine the components $C_1, C_2, ..., C_k$ of $G'$, and therefore an alternating Hamiltonian cycle cannot be created. Thus, no feasible solution exists for the given instance of the COP.
+
+If there exists a set $R_i$ such that $|R_i| = q$, then the components of $G'$ can be merged together to form a single alternating Hamiltonian cycle. This is achieved by adding the red edge connecting the lower-indexed vertex of each edge in $R_i$ to the higher-indexed vertex of the next edge to $R'$ (for the final edge in $R_i$, add the red edge connecting its lower-indexed vertex to the higher-indexed vertex of the first edge). Any edges that appear in both $R_i$ and $R'$ are then removed from $R'$, so that $R'$ remains a perfect matching, and $R_i \cap R' = \emptyset$. $G'$ then consists of a single alternating Hamiltonian cycle, and hence a solution has been found.
+
+Otherwise, if $k > 1$, it may be that multiple sets are required to connect all components of $G'$. For two sets $R_i$ and $R_j$ to ``overlap'', each set must have one edge from the same component on $G'$, and the other edges in each set must be from different components. For example, if $R_1$ has two edges, one from component $C_1$ and one from component $C_2$, and $R_2$ has three edges that are members of $C_2$, $C_3$ and $C_4$, then $R_1$ and $R_2$ are said to overlap, since they each possess an edge $C_2$, and the other edges in the sets are from different components. Hence, a selection of sets from $R_1, R_2, ..., R_k$ need to be found such that each set overlaps with at least one other set, and each component has at least one edge in one of the selected sets. If such a collection of sets exists, then the components of $G$ can be merged to create an alternating Hamiltonian cycle by applying the connecting procedure above to every set in the collection.
 
 \begin{itemize}
-	\item sets $R_1, R_2, ..., R_k \in R'$ are produced during BR
-	\item Connecting procedure detects collection of sets that combine all components of $G'$ together
-	\item only overlap once
-	\item If $k = 0$, i.e. not a single set $R_i$ created during BR, then no edges exist that can combine the components together - infeasible, cannot create alt ham cycle (no solution)
-	\item If $\exists$ set $R_i$ such that $|R_i| = q$, i.e. number of edges in $R_i$ equals number of components, then solution exists, need to connect components using connecting method/procedure
-	\item this is because there is an edge in each component that can be removed, and replaced with a new edge that bridges the components together 
-	\item otherwise, more than one set $R_i$ needed
-	\item second method - find two sets $R_i, R_j$ such that there is one red edge from each component of $G'$ in EITHER $R_i$ OR $R_j$, and there is one component of $G'$ that has one red edge in $R_i$ and another (different) red edge in $R_j$
-	\item that is, $R_i$ and $R_j$ each have an edge from the same components, and all the other edges are from different components
-	\item Example of set $R_1$ BR procedure Figures
-	\item different edge from same component means components can be joined together to make single alt ham cycle
-	\item e.g. if $q = 4$, then $R_i$ has edges from $C_1, C_2$, and $R_j$ has edges from $C_2, C_3, C_4$, then there is an overlap (each set has an edge from $C_2$)
-	\item if there aren't two sets that cover all components and overlap only once, another method
-	\item third method - find set $R_i$ with largest cardinality, then run modified BR, where edges from the largest set $R_i$ are removed from the initial sorted list of edges, and then find a new set $R_j$ that contains an edge from a component that isn't covered by $R_i$, and an edge from a component that is covered by $R_i$ (the overlap)
-	\item continue to add succeeding edges as long as they aren't a member of a component already covered in $R_i$ or $R_j$
-	\item if end of list is reached, and not all components covered, delete edges that are in $R_j$ from the list of edges, and start again from the beginning
-	\item continue until no new sets can be made, then check to see if the sets cover all components, if not, infeasible, else feasible
-	\item connecting method/procedure - connect smaller-indexed vertex of each edge to higher-indexed vertex of next edge, except last edge, connect smallest of last edge to highest of first edge
-	\item then add these edges to $R'$ and remove the edges in $R_i$ from $R'$, so the cardinality of $R'$ should still be $n+1$ (perfect matching), and $R_i \cap R' = \emptyset$.
+	\item figures explain
 \end{itemize}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 This algorithm, which will be referred to as the Alternating Hamiltonian Construction Algorithm (AHCA) is able to deduce whether a feasible solution $\mathcal{T}$ exists for any given instance $\mathcal{M}$ of the COP. If a solution does indeed exist, AHCA can produce this solution in at most $O(n^2)$ time.
 
 \begin{figure}	
 	\centering
-	\begin{subfigure}[h]{0.7\textwidth}
+	\begin{subfigure}[H]{0.5\textwidth}
 		\includestandalone[width=\textwidth]{figures/mpsconnect}
 		\caption{connect}	
 		\label{fig:mpsconnect}
 	\end{subfigure} \quad
-	\begin{subfigure}[h]{0.7\textwidth}
+	\begin{subfigure}[H]{0.5\textwidth}
 		\includestandalone[width=\textwidth]{figures/mpscycle}
 		\caption{cycle}	
 		\label{fig:mpscycle}
@@ -234,18 +200,29 @@ This algorithm, which will be referred to as the Alternating Hamiltonian Constru
 
 \section{Solving the SCSPP/Heuristics}
 \label{sec:scsppsoln}
-%move this to beginning
-The SCSPP is a generalisation of the classical one-dimensional bin-packing problem (BPP), where in the latter problem, the minimum scoring distance $\tau$ can be said to be equal to zero. It follows that the SCSPP is at least as hard as the BPP, which is known to be NP-hard (\citealp{garey1979}), and so (under the assumption that $P \neq NP$) there is no known algorithm that is able to find an optimal solution for every instance of the SCSPP in polynomial time. Instead, heuristics can be used to find near-optimal solutions in a shorter amount of time. One example is the greedy heuristic known as first-fit (FF), an online algorithm that places each item (in some arbitrary order) onto the lowest-indexed strip such that the capacity of the strip is not exceeded. It has been shown that by arranging the items in decreasing order of size, a packing heuristic will produce a solution that is closer to the optimal than if the items are arranged in any other order (\citealp{johnson1974fast}). Applying FF onto items sorted in this manner yields the well-known first-fit decreasing (FFD) heuristic.
 
-
-An optimal solution of an instance of the SCSPP is a solution that consists of the fewest number of strips, $k$. A simple lower bound for $k$ that can be computed in $O(n)$ time is given by
-
-\begin{equation}
+\begin{itemize}
+	\item As mentioned in the introduction, SCSPP is an NP-hard problem, therefore heuristics used
+	\item Perhaps the simplest and most well-known heuristics for packing problems is First-Fit (FF), a greedy heuristic/online algorithm that places each item presented in some arbitrary order onto the lowest-indexed strip whose capacity will not be exceeded/such that the capacity of the strip is not exceeded.
+	\item It has been shown that there always exists at least one ordering of items such that FF produces an optimal solution (Lewis 2009, General-Purpose HC Method for OIMGP)
+	\item A simple modification yields the First-Fit Decreasing (FFD) heuristic, which sorts the items in non-increasing order of size prior to performing FF.
+	\item An optimal solution of an instance of the SCSPP is a solution that consists of the fewest number of strips, $k$. A simple lower bound for $k$ that can be computed in $O(n)$ time is given by
+	\begin{equation}
 	\label{eqn:lowerbound}
 	k \geq \ceil*{\frac{\sum_{i=1}^{n}w_i}{W}}
-\end{equation}
-
-where $n$ is the number of items in the set $\mathcal{I}$, $w_i$ the width of each item $i \in \mathcal{I}$, and $W$ is the width of the strips (\citealp{martello1990b}). In 1973, \citeauthor{johnson1973} showed that FFD is guaranteed to return a solution that uses no more than $\frac{11}{9}k + 4$ strips. More recently, \cite{dosa2007} has proven that the worst case for FFD is in fact $\frac{11}{9}k + \frac{6}{9}$, and that this bound is tight. Due to the initial sorting of the $n$ items in non-increasing order of sizes, the time complexity of FFD is $O(n\log n)$.
+	\end{equation}
+	where $n$ is the number of items in the set $\mathcal{I}$, $w_i$ the width of each item $i \in \mathcal{I}$, and $W$ is the width of the strips (\citealp{martello1990b}). In 1973, \citeauthor{johnson1973} showed that FFD is guaranteed to return a solution that uses no more than $\frac{11}{9}k + 4$ strips. More recently, \cite{dosa2007} has proven that the worst case for FFD is in fact $\frac{11}{9}k + \frac{6}{9}$, and that this bound is tight. Due to the initial sorting of the $n$ items in non-increasing order of sizes, the time complexity of FFD is $O(n\log n)$.
+	\item However, this bound does not hold for our current problem, as, for example, if $\tau = \infty$, we would require $n$ strips. The value of $\tau$ is not taken into account in the original time complexity.
+	\item Difference between BPP and SCSPP: In BPP, an item can be removed from a bin, and feasibility will be retained, however in SCSPP it may not, as the vicinal sum constraint may no longer hold.
+	\item Therefore modifications must be made to maintain feasibility.
+	\item comparing three heuristics, a basic ffd (basic modification of original FFD), smallest first (Lewis2011) and a heuristic combining FFD and AHCA.
+	\item lower bound is also inaccurate, doesn't take into account score widths or $\tau$, very basic lower bound.
+	\item feasible candidate solution $\mathcal{S} = \{S_1, S_2,...,S_k\}$ such that
+	\item (a) $\bigcup S_i = \mathcal{I}$ (all items in $\mathcal{I}$ packed onto strips)
+	\item (b) $S_i \cap S_j = \emptyset$ $\forall i\neq j$ (each item packed onto exactly one strip)
+	\item (c) $\forall S_i \in \mathcal{S}$ the items on $S_i$ can be feasibly packed onto a single strip (vicinal sum constraint holds on every strip)
+	\item Aim is to minimise $k$.
+\end{itemize}
 
 
 \subsection{FFD Approx}
@@ -412,4 +389,33 @@ $\delta$ & BasicFFD & PairSmallest & FFDincAHCA \\
 \end{tabular}
 %\label{table:100/5000}
 \end{table}	
+\end{comment}
+
+\begin{comment}
+\begin{itemize}
+	\item need to name this connecting algorithm/method/procedure
+	\item sets $R_1, R_2, ..., R_k \in R'$ are produced during BR
+	\item Connecting procedure detects collection of sets that combine all components of $G'$ together
+	\item only overlap once
+	\item If $k = 0$, i.e. not a single set $R_i$ created during BR, then no edges exist that can combine the components together - infeasible, cannot create alt ham cycle (no solution)
+	\item If $\exists$ set $R_i$ such that $|R_i| = q$, i.e. number of edges in $R_i$ equals number of components, then solution exists, need to connect components using connecting method/procedure
+	\item this is because there is an edge in each component that can be removed, and replaced with a new edge that bridges the components together 
+	\item otherwise, more than one set $R_i$ needed
+	\item second method - find two sets $R_i, R_j$ such that there is one red edge from each component of $G'$ in EITHER $R_i$ OR $R_j$, and there is one component of $G'$ that has one red edge in $R_i$ and another (different) red edge in $R_j$
+	\item that is, $R_i$ and $R_j$ each have an edge from the same components, and all the other edges are from different components
+	\item Example of set $R_1$ BR procedure Figures
+	\item different edge from same component means components can be joined together to make single alt ham cycle
+	\item e.g. if $q = 4$, then $R_i$ has edges from $C_1, C_2$, and $R_j$ has edges from $C_2, C_3, C_4$, then there is an overlap (each set has an edge from $C_2$)
+	\item if there aren't two sets that cover all components and overlap only once, another method
+	\item should have $|R_i| + |R_j| = q+1$, two edges from one component, one edge from all other components.
+	\item third method - find set $R_i$ with largest cardinality, then run modified BR, where edges from the largest set $R_i$ are removed from the initial sorted list of edges, and then find a new set $R_j$ that contains an edge from a component that isn't covered by $R_i$, and an edge from a component that is covered by $R_i$ (the overlap)
+	\item continue to add succeeding edges as long as they aren't a member of a component already covered in $R_i$ or $R_j$
+	\item if end of list is reached, and not all components covered, delete edges that are in $R_j$ from the list of edges, and start again from the beginning
+	\item continue until no new sets can be made, then check to see if the sets cover all components, if not, infeasible, else feasible
+	\item connecting method/procedure - connect smaller-indexed vertex of each edge to higher-indexed vertex of next edge, except last edge, connect smallest of last edge to highest of first edge
+	\item then add these edges to $R'$ and remove the edges in $R_i$ from $R'$, so the cardinality of $R'$ should still be $n+1$ (perfect matching), and $R_i \cap R' = \emptyset$.
+	\item multiple sets, cover all components, i.e. combining all edges from sets should mean that each component has at least one edge in the set
+	\item each set overlaps with at least one other set, and overlaps with that set only once (not all sets have to overlap with one another)
+	\item if such sets found, perform connecting method from above	
+\end{itemize}
 \end{comment}
