@@ -89,7 +89,7 @@ Consider the following definition describing a variant of the classical Hamilton
 
 An alternating Hamiltonian cycle on $G$ would correpsond to a feasible solution, as each ``blue'' edge from $B$ represents a pair of values in $\mathcal{M}$, and each ``red'' edge from $R$ shows values that can be placed alongside one another feasibly. Thus, by removing the dominating vertices and any incident edges, the remaining alternating Hamiltonian path illustrates the order in which the elements should be placed to produce a feasible solution $\mathcal{T}$.
 
-Since the values in each unordered pair in $\mathcal{M}$ cannot be altered, i.e. the values cannot be changed, and the values in each element cannot be separated, every edge in $B$ must be present in the alternating Hamiltonian cycle. Consequently, the task now involves finding a matching $R' \subseteq R$ of cardinality $n+1$ such that the edge sets $B$ and $R'$ form an alternating Hamiltonian cycle as described in Definition \ref{defn:althamcycle}. 
+Since the values in each unordered pair in $\mathcal{M}$ cannot be altered, i.e. the values cannot be changed and the values in each element cannot be separated, every edge in $B$ must be present in the alternating Hamiltonian cycle. Consequently, the task now involves finding a matching $R' \subseteq R$ of cardinality $n+1$ such that the edge sets $B$ and $R'$ form an alternating Hamiltonian cycle as described in Definition \ref{defn:althamcycle}. 
 
 To find a matching $R' \subseteq R$, the following \textsc{Maximum Cardinality Matching} (MCM) algorithm can be executed, as suggested by \cite{mahadev1994} and \cite{becker2010}: For each vertex $v_i, i=1,2,...,2n+2$, select the edge in $R$ connecting $v_i$ to the highest indexed vertex $v_j$ that is not already incident to an edge in $R'$. Add this edge $(v_i, v_j)$ to $R'$, and proceed to the next vertex until all the vertices have been assessed. The two vertices incident to each matching edge in $R'$ are now referred to as being ``matched''.
 
@@ -119,11 +119,11 @@ Then, $v_{i-1}$ is matched with $p(v_i)$, and $v_i$ is matched with the vertex t
 
 Clearly, if $|R'| < n+1$, there are not enough matching edges to form an alternating Hamiltonian cycle along with the edges in $B$, and hence no feasible solution can be found for the given instance $\mathcal{M}$ of the COP. Otherwise, if $R'$ is a perfect matching of cardinality $n+1$, the spanning subgraph $G'=(V, B \cup R')$ is a 2-regular graph, where each vertex is adjacent to its partner via an edge in $B$, and its match via an edge in $R'$ (see Figure \ref{fig:matching/mps}). $G'$ thus consists of a collection of alternating cycles $C_1, C_2, ..., C_q$. In the case where $G'$ comprises one component, i.e. $q = 1$, then this alternating cycle is in fact Hamiltonian, and therefore a feasible solution exists. However, if $q > 1$, the components of $G'$ must be combined to form an alternating Hamiltonian cycle. To do this, a \textsc{Bridge Recognition} (BR) algorithm can be executed that selects suitable edges from $R$ that will replace certain edges in $R'$ in order to function as bridges and connect the components of $G'$.
 
-The edges in $R'$ are sorted into a list such that the lower-indexed vertices of each edge are in increasing order of indices, and the higher-indexed vertices are in decreasing order of indices, i.e. $(v_1, v_{2n+2}), (v_2, v_{2n+1}), ..., (v_{n+1}, v_{n+2})$. Any edges that cannot be placed in such an order are then removed from this list. For instance, in the example illustrated in Figure \ref{fig:matching/mps}, $(v_5, v_9)$ would be removed from the list, since the next edge in the list is $(v_6, v_{10})$, and so the higher-indexed vertices are not in decreasing order. This is due to $v_5$ not being matched with the highest-indexed vertex available, $v_{10}$, during MCM, as $(v_5, v_{10}) \in B$.
+The edges in $R'$ are sorted into a list such that the lower-indexed vertices of each edge are in increasing order and the higher-indexed vertices are in decreasing order, i.e. $(v_1, v_{2n+2}), (v_2, v_{2n+1}), ..., (v_{n+1}, v_{n+2})$. Any edges that cannot be placed in such an order are then removed from this list. For instance, in the example illustrated in Figure \ref{fig:matching/mps}, $(v_5, v_9)$ would be removed from the list, since the next edge in the list is $(v_6, v_{10})$, and so the higher-indexed vertices are not in decreasing order. This is due to $v_5$ not being matched with the highest-indexed vertex available $v_{10}$ during MCM, as $(v_5, v_{10}) \in B$.
 
 Starting from the first edge, BR searches through the list to find an edge that meets the following conditions: 
 \begin{enumerate*}[label={(\alph*)}]
-	\item The lower-indexed vertex of the current edge, and the higher-indexed vertex of the next edge in the list are adjacent via an edge in $R$; and
+	\item The lower-indexed vertex of the current edge and the higher-indexed vertex of the next edge in the list are adjacent via an edge in $R$; and
 	\item The current edge and the next edge are members of different components on $G'$.
 \end{enumerate*}
 
@@ -151,7 +151,7 @@ This algorithm, which will be referred to as the \textsc{Alternating Hamiltonian
 		\caption{Replacing edges connects the components and forms an alternating Hamiltonian cycle.}	
 		\label{fig:mpscycle}
 	\end{subfigure}
-	\caption{Selected edges found using BR can be used to merge the components of $G'$ together, thus forming an alternating Hamiltonian cycle which corresponds to a feasible solution.}
+	\caption{Selected edges found using BR merge the components of $G'$ together, forming an alternating Hamiltonian cycle which corresponds to a feasible solution $\mathcal{T} = \langle(1,2), (6,3), (5,3), (4,4), (4,2), (7,1) \rangle$.}
 	\label{fig:connect/cycle}
 \end{figure}
 
@@ -200,7 +200,7 @@ Three heuristics for the SCSPP have been developed: a basic FFD heuristic with a
 
 \subsection{Modified First-Fit Decreasing Heuristic (MFFD)}
 \label{sec:mffd}
-The \textsc{Modified First-Fit Decreasing} (MFFD) heuristic performs in the same manner as the original FFD, attempting to place each item onto the end of the lowest-indexed strip. If an item is able to be packed onto a strip without exceeding the strip's capacity, MFFD then checks to see if the vicinal sum constraint is met between the right-most score on the strip and one of the score widths on the current item. If the constraint is met, MFFD places the item on the end of the strip in the appropriate orientation, else the heuristic attempts to pack the item onto the next lowest-indexed strip. For example, in Figure \ref{fig:comparestrips}, the strip is able to accommodate the current item, however the vicinal sum constraint is not fulfilled regardless of the orientation of the item, and therefore the item cannot be feasibly packed onto the strip.
+The \textsc{Modified First-Fit Decreasing} (MFFD) heuristic performs in the same manner as the original FFD, attempting to place each item onto the end of the lowest-indexed strip. If an item is able to be packed onto a strip without exceeding the strip's capacity, MFFD then checks to see if the vicinal sum constraint is met between the right-most score on the strip and one of the score widths on the current item. If the constraint is met, MFFD places the item on the end of the strip in the appropriate orientation, else the heuristic attempts to pack the item onto the next lowest-indexed strip. For example, in Figure \ref{fig:comparestrips}, the strip is able to accommodate the current item, however the vicinal sum constraint is not fulfilled in either orientation of the item, and therefore it cannot be feasibly packed onto the strip.
 
 Despite the additional step, MFFD is a very fast heuristic, as checking the vicinal sum constraint can be performed in constant time. The most prominent issue with this heuristic, however, is due to the items being placed on the end of the strips. Although an item may not meet the constraint when placed on the end of a strip, there may be another location on the strip where the item can be placed feasibly. MFFD is incapable of placing items anywhere other than on the end of the strips, and so an item that could potentially be packed must be placed on another strip, or perhaps even begin a new strip, thus increasing the number of strips in the final solution.
 
@@ -209,19 +209,9 @@ Despite the additional step, MFFD is a very fast heuristic, as checking the vici
 \subsection{Pair-Smallest Heuristic (PS)}
 \label{sec:ps}
 
-The \textsc{Pair-Smallest} (PS) heuristic is an extension of a procedure defined by \cite{lewis2011}. Unlike MFFD, which packs each item in turn, PS focusses on packing one strip at a time, only starting a new strip once the current strip is unable to accommodate any more items feasibly. Each strip is initialised by choosing the item from $\mathcal{I}$ with the smallest score width, and packing it in a regular orientation. PS then continues to fill the strip by selecting the item with the smallest score width that meets the vicinal sum constraint with the right-most score width on the strip, and whose width will not cause the strip to be overfilled. This heuristic aligns the smallest score widths with the largest ones, eliminating the possibility of placing larger score widths together unecessarily. Note that PS prioritises the vicinal sum constraint over the item widths, choosing to fulfil the constraint first before considering whether the item can be accommodated.
+The \textsc{Pair-Smallest} (PS) heuristic is an extension of a procedure defined by \cite{lewis2011}. Unlike MFFD, which packs each item in turn, PS focusses on packing one strip at a time, only starting a new strip once the current strip is unable to accommodate any more items feasibly. Each strip is initialised by choosing the item from $\mathcal{I}$ with the smallest score width, and packing it in a regular orientation. PS then continues to fill the strip by selecting the item with the smallest score width that meets the vicinal sum constraint with the right-most score width on the strip, and whose width will not cause the strip to be overfilled. This heuristic aligns the smallest score widths with the largest ones, eliminating the possibility of placing larger score widths together unecessarily. Note that PS prioritises the vicinal sum constraint over the item widths, choosing to fulfil the constraint first before considering whether the item can be accommodated. If there are multiple items with equal score widths, break ties by choosing the item whose second score width is the largest.
 % Break ties by choosing item whose second score width is larger.
-
-\begin{itemize}
-	\item \cite{lewis2011}
-	\item Pack each strip one by one
-	\item choose item with smallest score width that meets VSC with right-most score width on the strip, then check if the item can fit onto the strip
-	\item if not, then choose item with second smallest score width that meets VSC, etc.
-	\item when no more items can fit onto strip/no item can meet VSC with right-most score width on the strip, close the strip (no more items canbe placed on it) and start new strip
-	\item If two items have equal score width, break ties by choosing item whose second score width is larger
-	\item this method aligns smallest score widths with larger ones, eliminates possibility of aligning larger score widths together unecessarily.
-	\item Heuristic prioritises VSC over item widths, chooses item with smallest possible score width that meets VSC first before checking item width.
-\end{itemize}
+% If item with smallest feasible score width does not fit onto the strip, choose item with next smallest score width and repeat.
 
 
 \subsection{Modified First-Fit Decreasing with AHCA (MFFD$^+$)}
