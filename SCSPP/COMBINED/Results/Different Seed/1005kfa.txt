@@ -1,4 +1,4 @@
-100	5000	FFDincAHCA
+100	5000	MFFDPlus
 d	sum	lb	lbsoln	i/s	opt
 1	57134	12	100	1	8.33333
 1	56632	12	100	1	8.33333
