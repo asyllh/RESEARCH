@@ -46,9 +46,9 @@ void ProgramInfo(){
          << "       -n <int>    [Number of items. Default = 500.]\n"
          << "       -a <int>    [Minimum score width. Default = 1.]\n"
          << "       -b <int>    [Maximum score width. Default = 70.]\n"
-         << "       -w <int>    [Minimum item width. Default = 150.]\n"
-         << "       -W <int>    [Maximum item width. Default = 1000.]\n"
-         << "       -l <int>    [Length of strips. Default = 5000.]\n"
+         << "       -m <int>    [Minimum item width. Default = 150.]\n"
+         << "       -M <int>    [Maximum item width. Default = 1000.]\n"
+         << "       -W <int>    [Width of strips. Default = 5000.]\n"
          << "       -s <int>    [Random seed. Default = 1.]\n"
          << "---------------\n"
          << "ALGORITHM:\n"
@@ -63,7 +63,7 @@ void ProgramInfo(){
 }
 
 void ArgumentCheck(int numInstances, int tau, int numItem, int minWidth, int maxWidth, int minItemWidth, int maxItemWidth,
-                   int stripLength, int algType, int numPop, int xOver, int randomSeed){
+                   int stripWidth, int algType, int numPop, int xOver, int randomSeed){
 
     bool error = false;
 
@@ -73,8 +73,8 @@ void ArgumentCheck(int numInstances, int tau, int numItem, int minWidth, int max
         cout << "[WARNING]: Constraint value is zero, problem instances are equivalent to classical SPP without score constraints.\n";
         //error = true;
     }
-    if(stripLength == 0){
-        cout << "[ERROR]: Strip cannot have length zero.\n";
+    if(stripWidth == 0){
+        cout << "[ERROR]: Strip cannot have width zero.\n";
         error = true;
     }
     if(2*minWidth >= tau){
@@ -97,8 +97,8 @@ void ArgumentCheck(int numInstances, int tau, int numItem, int minWidth, int max
         cout << "[ERROR]: Minimum score width is greater than maximum score width.\n";
         error = true;
     }
-    if(maxItemWidth > stripLength){
-        cout << "[ERROR]: Maximum item width is larger than length of strip.\n";
+    if(maxItemWidth > stripWidth){
+        cout << "[ERROR]: Maximum item width is larger than width of strip.\n";
         error = true;
     }
     if(algType == 4 && numPop < 5){
@@ -125,15 +125,15 @@ void ArgumentCheck(int numInstances, int tau, int numItem, int minWidth, int max
          << std::left << setw(20) << "Maximum score width:" << std::right << setw(10) << maxWidth << endl
          << std::left << setw(20) << "Minimum item width:" << std::right << setw(10) << minItemWidth << endl
          << std::left << setw(20) << "Maxmimum item width:" << std::right << setw(10) << maxItemWidth << endl
-         << std::left << setw(20) << "Length of strips:" << std::right << setw(10) << stripLength << endl;
+         << std::left << setw(20) << "Width of strips:" << std::right << setw(10) << stripWidth << endl;
     if(algType == 1){
-        cout << std::left << setw(18) << "Algorithm:" << std::right << setw(13) << "BasicFFD\n";
+        cout << std::left << setw(18) << "Algorithm:" << std::right << setw(13) << "MFFD\n";
     }
     else if(algType == 2){
         cout << std::left << setw(18) << "Algorithm:" << std::right << setw(13) << "PairSmallest\n";
     }
     else if(algType == 3){
-        cout << std::left << setw(18) << "Algorithm:" << std::right << setw(13) << "FFDincAHCA\n";
+        cout << std::left << setw(18) << "Algorithm:" << std::right << setw(13) << "MFFD+\n";
     }
     else if(algType == 4  && xOver == 1){
         cout << std::left << setw(19) << "Algorithm: " << std::right << setw(6) << "EA with GGA" << endl;
@@ -161,7 +161,7 @@ int main(int argc, char **argv){
     int maxWidth = 70;
     int minItemWidth = 150;
     int maxItemWidth = 1000;
-    int stripLength = 5000;
+    int stripWidth = 5000;
     int algType = 0;
     int numPop = 0;
     int xOver = 1;
@@ -185,14 +185,14 @@ int main(int argc, char **argv){
         else if(strcmp("-b", argv[x]) == 0){
             maxWidth = atoi(argv[++x]);
         }
-        else if(strcmp("-w", argv[x]) == 0){
+        else if(strcmp("-m", argv[x]) == 0){
             minItemWidth = atoi(argv[++x]);
         }
-        else if(strcmp("-W", argv[x]) == 0){
+        else if(strcmp("-M", argv[x]) == 0){
             maxItemWidth = atoi(argv[++x]);
         }
-        else if(strcmp("-l", argv[x]) == 0){
-            stripLength = atoi(argv[++x]);
+        else if(strcmp("-W", argv[x]) == 0){
+            stripWidth = atoi(argv[++x]);
         }
         else if(strcmp("-x", argv[x]) == 0){
             algType = atoi(argv[++x]);
@@ -209,7 +209,7 @@ int main(int argc, char **argv){
     }
     //endregion
 
-    ArgumentCheck(numInstances, tau, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth, stripLength, algType, numPop, xOver, randomSeed);
+    ArgumentCheck(numInstances, tau, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth, stripWidth, algType, numPop, xOver, randomSeed);
 
     int a, i, j, k, instance, bestStart, bestEnd;
     int opt = 0, opt90 = 0, opt80= 0, opt70 = 0, opt60 = 0, opt50 = 0, optLow = 0;
@@ -237,7 +237,7 @@ int main(int argc, char **argv){
     switch(algType){
         case 1: {
             /*ofstream results("1k1kbf.txt");
-            results << numItem << "\t" << stripLength << "\tBasic" << endl;
+            results << numItem << "\t" << stripWidth << "\tBasic" << endl;
             results.close();*/
             for (a = 0; a < delta.size(); ++a) {
                 tau = delta[a];
@@ -247,10 +247,10 @@ int main(int argc, char **argv){
                     for (instance = 0; instance < numInstances; ++instance) {
                         CreateInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth,
                                        totalItemWidth, allScores, partners, adjMatrix, itemWidths);
-                        BasicFFD(opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem, maxItemWidth,
-                                 stripLength, totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum,
-                                 strip);
-                        /*int lb = LowerBound(totalItemWidth, stripLength);
+                        MFFD(opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem, maxItemWidth,
+                             stripWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum,
+                             strip);
+                        /*int lb = LowerBound(totalItemWidth, stripWidth);
                         double opt = static_cast<double>(strip.size()) / static_cast<double>(lb);
                         double itemPerStrip = static_cast<double>(numItem) / static_cast<double>(strip.size());
                         results.open("1k1kbf.txt", ios::app);
@@ -270,7 +270,7 @@ int main(int argc, char **argv){
 
         case 2: {
             /*ofstream results("1k1kps.txt");
-            results << numItem << "\t" << stripLength << "\tPair" << endl;
+            results << numItem << "\t" << stripWidth << "\tPair" << endl;
             results << "d\tsum\tlb\tlbsoln\ti/s\topt" << endl;
             results.close();*/
             for (a = 0; a < delta.size(); ++a) {
@@ -281,9 +281,9 @@ int main(int argc, char **argv){
                     for (instance = 0; instance < numInstances; ++instance) {
                         CreateInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth,
                                        totalItemWidth, allScores, partners, adjMatrix, itemWidths);
-                        PairSmallest(opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem, stripLength,
+                        PairSmallest(opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem, stripWidth,
                                      totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
-                        /*int lb = LowerBound(totalItemWidth, stripLength);
+                        /*int lb = LowerBound(totalItemWidth, stripWidth);
                         double opt = static_cast<double>(strip.size()) / static_cast<double>(lb);
                         double itemPerStrip = static_cast<double>(numItem) / static_cast<double>(strip.size());
                         results.open("1k1kps.txt", ios::app);
@@ -303,7 +303,7 @@ int main(int argc, char **argv){
 
         case 3: {
             /*ofstream results("5001kfa.txt");
-            results << numItem << "\t" << stripLength << "\tFFD+" << endl;
+            results << numItem << "\t" << stripWidth << "\tFFD+" << endl;
             results << "d\tsum\tlb\tlbsoln\ti/s\topt" << endl;
             results.close();*/
             for (a = 0; a < delta.size(); ++a) {
@@ -314,10 +314,10 @@ int main(int argc, char **argv){
                     for (instance = 0; instance < numInstances; ++instance) {
                         CreateInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth,
                                        totalItemWidth, allScores, partners, adjMatrix, itemWidths);
-                        FFDincAHCA(tau, opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem,
-                                   maxItemWidth, stripLength, totalItemWidth, allScores, partners, adjMatrix,
-                                   itemWidths, stripSum, strip);
-                        /*int lb = LowerBound(totalItemWidth, stripLength);
+                        MFFDPlus(tau, opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem,
+                                 maxItemWidth, stripWidth, totalItemWidth, allScores, partners, adjMatrix,
+                                 itemWidths, stripSum, strip);
+                        /*int lb = LowerBound(totalItemWidth, stripWidth);
                         double opt = static_cast<double>(strip.size()) / static_cast<double>(lb);
                         double itemPerStrip = static_cast<double>(numItem) / static_cast<double>(strip.size());
                         results.open("5001kfa.txt", ios::app);
@@ -337,13 +337,13 @@ int main(int argc, char **argv){
 
         case 4:
             CreateInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths);
-            int LB = LowerBound(totalItemWidth, stripLength);
+            int LB = LowerBound(totalItemWidth, stripWidth);
             cout << "Lower bound: " << LB << " strips." << endl << endl;
-            CreateInitPop(tau, numPop, numScores, numItem, maxItemWidth, stripLength, allScores, partners, adjMatrix, itemWidths, populationSum, population);
+            CreateInitPop(tau, numPop, numScores, numItem, maxItemWidth, stripWidth, allScores, partners, adjMatrix, itemWidths, populationSum, population);
 
             //Finding the solution in the population that has the best fitness value
             for(i = 0; i < population.size(); ++i){
-                tempFitness = Fitness(stripLength, populationSum[i], population[i]);
+                tempFitness = Fitness(stripWidth, populationSum[i], population[i]);
                 if(tempFitness > bestFitness){
                     bestFitness = tempFitness;
                     bestStart = i;
@@ -357,7 +357,7 @@ int main(int argc, char **argv){
                  << "Solution: " << bestStart << "\nFitness: " << bestFitness << "\nSize: " << bestSolnStart.size() << " strips." << endl << endl;
 
             for(instance = 0; instance < numInstances; ++instance) {
-                EA(tau, xOver, numScores, maxItemWidth, stripLength, bestEnd, bestFitness, allScores, partners, adjMatrix, itemWidths, populationSum, population);
+                EA(tau, xOver, numScores, maxItemWidth, stripWidth, bestEnd, bestFitness, allScores, partners, adjMatrix, itemWidths, populationSum, population);
             }
 
             cout << "END - Best solution in the population:\n"
