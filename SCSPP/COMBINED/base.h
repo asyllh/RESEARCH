@@ -12,9 +12,8 @@ Combined Program with Heuristics and EA
 #include <vector>
 using namespace std;
 
-void ResetVar(int numScores, int numItem, vector<int> &allScores, vector<int> &partners,
-              vector<vector<int> > &adjMatrix, vector<vector<int> > &itemWidths, vector<int> &stripSum,
-              vector<vector<int> > &strip);
+void ResetVar(int numScores, int numItem, vector<int> &allScores, vector<int> &partners, vector<vector<int> > &adjMatrix,
+              vector<vector<int> > &itemWidths, vector<int> &stripSum, vector<vector<int> > &strip);
 
 void Output(int opt, int opt90, int opt80, int opt70, int opt60, int opt50, int optLow, int numInstances);
 
