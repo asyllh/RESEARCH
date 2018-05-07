@@ -32,7 +32,7 @@ One prominent application of the COP is in a strip-packing problem brought to li
 \begin{figure}[h!]	
 	\centering
 	\includestandalone[width=0.8\textwidth]{figures/itemsknife}
-	\caption{Dimensions of an item $i \in \mathcal{I}$ in a regular orientation, and a feasible alignment of two items that can be scored simultaneously.}	
+	\caption{Dimensions of an item $i \in \mathcal{I}$ in a regular orientation $(a_i, b_i)$, and a feasible alignment of two items that can be scored simultaneously.}	
 	\label{fig:itemsknife}
 \end{figure}
 
@@ -48,7 +48,12 @@ Observe that, in this particular strip-packing problem, the widths of the indivi
 
 The SCSPP is a generalisation of the classical one-dimensional bin-packing problem (BPP), where in the latter problem the minimum scoring distance $\tau$ can be said to be equal to zero. It follows that the SCSPP is at least as hard as the BPP, which is known to be NP-hard (\citealp{garey1979}), and so (under the assumption that $P \neq NP$) there is no known algorithm that is able to find an optimal solution for every instance of the SCSPP in polynomial time. Instead, heuristics can be used to find near-optimal solutions in a shorter amount of time.
 
-The remainder of this article will firstly, in Section 2, detail a polynomial-time algorithm that is able to produce a solution to any instance of the COP, if a solution exists. Section 3 describes three heuristics that will be used to find feasible solutions to the SCSPP, and discusses the associated advantages and disadvantages. A comparison of these heuristics and an analysis of the results will be provided in Section 4, and finally Section 5 concludes the paper and proposes some potential directions for future work.
+\begin{definition}
+	\label{defn:subprob}
+	Let $\mathcal{I}' \subseteq \mathcal{I}$ be a set of items whose total width is less than or equal to the capacity of a strip, (i.e. $\sum_{i=1}^{|\mathcal{I}'|}w_i \leq W$). Given a minimum scoring distance $\tau$, the Score-Constrained Packing Sub-Problem (SCPSP) involves finding an arrangement of the items in $\mathcal{I}'$ such that the sum of every pair of adjacent score widths is greater than or equal to $\tau$.
+\end{definition}
+
+The remainder of this article will firstly, in Section 2, detail a polynomial-time algorithm that is able to produce a solution to any instance of the COP, if a solution exists. Section 3 describes three heuristics that can be used to find feasible solutions to the SCSPP, and discusses the associated advantages and disadvantages. A comparison of these heuristics and an analysis of the results will be provided in Section 4, and finally Section 5 concludes the paper and proposes some potential directions for future work.
 
 \section{Solving the COP}
 \label{sec:ahca}
@@ -57,13 +62,12 @@ We shall now present an algorithm for solving the COP in polynomial time. The or
 
 Let $\mathcal{M}$ be an instance of the COP of cardinality $n$. We model each of the values of all elements in $\mathcal{M}$ as a vertex on a graph $G$, and assign each vertex a value from $\mathcal{M}$ in non-decreasing order. A pair of vertices, called ``dominating vertices'' are then added to the graph, both of which are assigned values equal to $\tau$. These dominating vertices aid the solution process, and are removed at the end. Thus, the graph $G$ has $2n+2$ vertices.
 
-The values in $\mathcal{M}$, and thus the vertices on $G$, are arranged in pairs. This is represented on $G$ by adding a set of ``blue'' edges, $B$, that contains edges between vertices that are ``partners'', i.e. whose values make up a pair in $\mathcal{M}$. It can be seen that $B$ is a perfect matching, with $|B|= n+1$.
+The values in $\mathcal{M}$, and thus the vertices on $G$, are arranged in pairs. This is represented on $G$ by adding a set of ``blue'' edges, $B$, that contains edges between vertices that are ``partners'', i.e. whose values make up a pair in $\mathcal{M}$. It can be seen that $B$ is a perfect matching, with $|B|= n+1$. Let the bijective function $p: V \to V$ associate each vertex with its partner, $p(v_i) = v_j$. Hence $B = \{(v_i, p(v_i)) : v_i \in V\}$
 
 Next, a set of ``red'' edges $R$ is added to $G$ that consists of edges between vertices whose values equal or exceed $\tau$, provided they are not partners. This corresponds to the vicinal sum constraint in Defintion \ref{defn:cop}. 
 
-Thus, we have an undirected graph $G$ with vertex set $V = \{v_1, ..., v_{2n+2}\}$, and two distinct edge sets $B$ and $R$ such that $B \cap R = \emptyset$. Figure \ref{fig:partners/threshold} illustrates the construction of $G$ using the instance $\mathcal{M}$ from the example above.
+Thus, we have an undirected graph $G$ with vertex set $V = \{v_1, ..., v_{2n+2}\}$ and two distinct edge sets $B$ and $R$ such that $B \cap R = \emptyset$. Figure \ref{fig:partners/threshold} illustrates the construction of $G$ using the instance $\mathcal{M}$ from the example above.
 % Equation $v_i + v_j \geq \tau$ provided $p(v_i) \neq v_j$, i.e. not partners
-% Bijective function $p: V \to V$ assoc each vertex with its partner, $v_j = p(v_i)$
 % Values are assigned from $\mathcal{M}$ in non-decreasing order, i.e. value assoc with v_1 \leq value assoc with v_2 etc..
 
 \begin{figure}	
@@ -78,11 +82,11 @@ Thus, we have an undirected graph $G$ with vertex set $V = \{v_1, ..., v_{2n+2}\
 	\caption{$G=(V, B \cup R)$}	
 	\label{fig:threshold}
 \end{subfigure}
-\caption{Example construction of $G$ using instance $\mathcal{M} = \{\{1,2\}, \{1,7\}, \{2,4\}, \{3,5\}, \{3,6\}, \{4,4\}\}$ and $\tau = 7$.}
+\caption{Construction of $G$ using instance $\mathcal{M} = \{\{1,2\}, \{1,7\}, \{2,4\}, \{3,5\}, \{3,6\}, \{4,4\}\}$ and $\tau = 7$, where $v_{13}$ and $v_{14}$ are the dominating vertices.}
 \label{fig:partners/threshold}
 \end{figure}
 
-Consider the following definition describing a variant of the classical Hamiltonian cycle on a graph $G$.
+Recall that a Hamiltonian cycle on a graph $G$ is a cycle that visits every vertex exactly once. Now, consider the following definition describing a variant of the classical Hamiltonian cycle involving multiple edge sets.
 \begin{definition}
 	\label{defn:althamcycle}
 	Let $G(V, B\cup R)$ be an undirected graph, where each edge is a member of one of two sets, $B$ or $R$. $G$ contains an alternating Hamiltonian cycle if there exists a Hamiltonian cycle such that successive edges alternate between sets $B$ and $R$. For example, if $(v_{i-1}, v_i) \in B$, then $(v_i, v_{i+1}) \in R$, or vice versa.
@@ -92,15 +96,16 @@ An alternating Hamiltonian cycle on $G$ would correpsond to a feasible solution,
 
 Since the values in each unordered pair in $\mathcal{M}$ cannot be altered, i.e. the values cannot be changed and the values in each element cannot be separated, every edge in $B$ must be present in the alternating Hamiltonian cycle. Consequently, the task now involves finding a matching $R' \subseteq R$ of cardinality $n+1$ such that the edge sets $B$ and $R'$ form an alternating Hamiltonian cycle as described in Definition \ref{defn:althamcycle}. 
 
-To find a matching $R' \subseteq R$, the following \textsc{Maximum Cardinality Matching} (MCM) algorithm can be executed, as suggested by \cite{mahadev1994} and \cite{becker2010}: For each vertex $v_i, i=1,2,...,2n+2$, select the edge in $R$ connecting $v_i$ to the highest indexed vertex $v_j$ that is not already incident to an edge in $R'$. Add this edge $(v_i, v_j)$ to $R'$, and proceed to the next vertex until all the vertices have been assessed. The two vertices incident to each matching edge in $R'$ are now referred to as being ``matched''.
+To find a matching $R' \subseteq R$, the following \textsc{Maximum Cardinality Matching} (MCM) algorithm can be executed, as suggested by \cite{mahadev1994} and \cite{becker2010}: For each vertex $v_i, i=1,2,...,2n+2$, select the edge in $R$ connecting $v_i$ to the highest indexed vertex $v_j$ that is not already incident to an edge in $R'$. Add this edge $(v_i, v_j)$ to $R'$, and proceed to the next vertex until all the vertices have been assessed. The two vertices incident to each matching edge in $R'$ are now referred to as being ``matched''. Similarly to partners, let $m : V \to V$ be a bijective function that assigns each vertex with its match, $m(v_i) = v_j$. Then, $R' =\{(v_i, m(v_i)) : v_i \in V\}$. 
 
 During MCM, if a vertex $v_i$ is not adjacent to any other unmatched vertex except its partner $p(v_i)$, the preceeding vertex $v_{i-1}$ can be ``rematched'', provided that 
 \begin{enumerate*}[label={(\alph*)}]
 	\item $v_i$ is not the first vertex; 
-	\item $v_{i-1} \in R'$; and
+	%\item $v_{i-1} \in R'$; and
+	\item $(v_{i-1}, m(v_{i-1})) \in R'$; and
 	\item $(v_{i-1}, p(v_i)) \in R$.
 \end{enumerate*}
-Then, $v_{i-1}$ is matched with $p(v_i)$, and $v_i$ is matched with the vertex that was previously matched with $v_{i-1}$. It is guaranteed that MCM will produce a maximum cardinality matching $R' \subseteq R$, and is able to do so in at most $O(n \log n)$ time (\citealp{mahadev1994}).
+Then, $v_i$ is matched with the vertex that is currently matched with $v_{i-1}$, i.e $m(v_i) = m(v_{i-1})$, and $v_{i-1}$ is rematched with $p(v_i)$, i.e. $m(v_{i-1}) = p(v_i)$. It is guaranteed that MCM will produce a maximum cardinality matching $R' \subseteq R$, and is able to do so in at most $O(n \log n)$ time (\citealp{mahadev1994}).
 
 \begin{figure}	
 	\centering
@@ -169,11 +174,6 @@ This algorithm, which will be referred to as the \textsc{Alternating Hamiltonian
 \section{Heuristics for the SCSPP}
 \label{sec:scsppsoln}
 
-\begin{definition}
-	\label{defn:subprob}
-	Let $\mathcal{I}' \subseteq \mathcal{I}$ be a set of items whose total width is less than or equal to the capacity of a strip, (i.e. $\sum_{i=1}^{|\mathcal{I}'|}w_i \leq W$). Given a minimum scoring distance $\tau$, the Score-Constrained Packing Sub-Problem (SCPSP) involves finding an arrangement of the items in $\mathcal{I}'$ such that the sum of every pair of adjacent score widths is greater than or equal to $\tau$.
-\end{definition}
-
 (Why heuristics, using AHCA for SCSPP, explain) Perhaps the simplest and most well-known heuristic for packing problems is \textsc{First-Fit} (FF), a greedy online algorithm that places each item presented in some arbitrary order onto the lowest-indexed strip such that the capacity of the strip is not exceeded. It is known that there always exists at least one ordering of the items such that FF produces an optimal solution (\citealp{lewis2009}). A minor modification to FF yields the \textsc{First-Fit Decreasing} (FFD) heuristic, which sorts the items in non-increasing order of size prior to performing FF.
 
 For an instance of the SCSPP, a feasible solution is represented by the set $\mathcal{S} = \{S_1, S_2, ..., S_k\}$ such that
@@ -219,28 +219,7 @@ The \textsc{Pair-Smallest} (PS) heuristic is an extension of a procedure defined
 \subsection{Modified First-Fit Decreasing with AHCA (MFFD$^+$)}
 \label{sec:mffd+}
 
-The last heuristic incorporates AHCA as described in Section \ref{sec:ahca}. The \textsc{Modified First-Fit Decreasing with AHCA} (MFFD$^+$) heuristic operates in a similar fashion to the MFFD, placing items sorted in decreasing order onto the lowest-indexed strip. However, when the lowest-indexed strip is found that can accommodate the current item, MFFD$^+$ then executes AHCA on the sub-problem, where the items on the strip and the current item form the subset $\mathcal{I}' \subseteq \mathcal{I}$. If AHCA finds a feasible solution, the items are placed on the strip in the order of the solution, which includes the current item, else MFFD$^+$ attempts to pack the current item on the next lowest-indexed strip. 
-
-
-
-
-
-\begin{itemize}
-	\item Like original FFD, sort items in non-increasing order, and attempt to pack each item into first strip that can feasibly accommodate the item without exceeding capacity
-	\item if item can fit onto strip, apply AHCA on all items on the strip and the current item to find a feasible alignment of the items
-	\item if solution found, place the items on the strip in the order of the solution
-	\item if no solution found, no feasible alignment exists, attempt to place current item on next strip
-	\item Using AHCA means if a feasible alignment of items inc current items exists (i.e. VSC is met between all items on strip), it will be found (guaranteed)
-	\item Unlike in MFFD where an item cannot be placed on the end because VSC is not met, here we can find a solution
-	\item items may potentially be entirely rearranged, not in non-decreasing order on each strip as in MFFD (refer to Figure \ref{fig:comparestrips})
-	\item Slower as AHCA must be run for each item that can fit on a strip
-	\item see Figure \ref{fig:comparestrips}, item cannot be placed onto strip in MFFD heuristic as VSC is not met in either orientation of the item, whereas by using MFFD$^+$ a feasible solution can be found, item can be placed, no need to try another strip or start a new strip
-	\item each iteration when an item can fit onto the strip, we have an instance of the sub problem, where the items on the strip and the current items are in the subset $\mathcal{I}' \subseteq \mathcal{I}$ Refer to definition \ref{defn:subprob}.
-	\item Then run AHCA on the subproblem, ignore all other strips.
-	\item worst case is AHCA is performed for each item on every strip in $\mathcal{S}$ so far (except when new strip needs to be started, AHCA isn't performed, item is simply placed in regular orientation at beginning of the strip).
-	\item reduces chances of needing to start a new strip, therefore reducing possibility of increasing number of strips in final solution. 
-	
-\end{itemize}
+The last heuristic incorporates AHCA as described in Section \ref{sec:ahca}. The \textsc{Modified First-Fit Decreasing with AHCA} (MFFD$^+$) heuristic operates in a similar fashion to the MFFD, placing items sorted in decreasing order onto the lowest-indexed strip. However, when the lowest-indexed strip is found that can accommodate the current item, MFFD$^+$ then executes AHCA on the sub-problem, where the items on the strip and the current item form the subset $\mathcal{I}' \subseteq \mathcal{I}$ (see Definition \ref{defn:subprob}). If AHCA finds a feasible solution, the items are placed on the strip in the order of the solution, which includes the current item, else MFFD$^+$ attempts to pack the current item on the next lowest-indexed strip. Using AHCA means that if a feasible alignment of the items exists, there is a guarantee that it will be found. Unlike MFFD, where the current item can only be placed on the end of the strip, MFFD$^+$ allows the items to be entirely rearranged (see Figure \ref{fig:comparestrips}). This reduces the possibility of having to start a new strip for an item, thus preventing increasing the number of strips in the final solution.
 
 
 \begin{figure}[h!]	
@@ -355,25 +334,51 @@ The last heuristic incorporates AHCA as described in Section \ref{sec:ahca}. The
 \textbf{$n$ = 100}
 \begin{itemize}
 	\item Average total item width = 57466.776, $\sigma$ = 2499.06092
-	\item $W = 5000$, Average LB = 11.993, $\sigma$ = 0.56829, Average speed = 38.88504ms/instance
-	\item $W = 2500$, Average LB = 23.478, $\sigma$ = 1.05618, Average speed = 38.55795ms/instance
-	\item $W = 1250$, Average LB = 46.466, $\sigma$ = 2.02703, Average speed = 37.98091ms/instance
+	\item $W = 5000$, Average LB = 11.993, $\sigma$ = 0.56829
+	\item $W = 2500$, Average LB = 23.478, $\sigma$ = 1.05618
+	\item $W = 1250$, Average LB = 46.466, $\sigma$ = 2.02703
 \end{itemize}
 
 \textbf{$n$ = 500}
 \begin{itemize}
 	\item Average total item width = 287683.855, $\sigma$ = 5434.63046
-	\item $W = 5000$, Average LB = 58.039, $\sigma$ = 1.12227, Average speed = 42.11938ms/instance
-	\item $W = 2500$, Average LB = 115.571, $\sigma$ = 2.18150, Average speed = 44.24521ms/instance
-	\item $W = 1250$, Average LB = 230.648, $\sigma$ = 4.35041, Average speed = 49.66614ms/instance
+	\item $W = 5000$, Average LB = 58.039, $\sigma$ = 1.12227
+	\item $W = 2500$, Average LB = 115.571, $\sigma$ = 2.18150
+	\item $W = 1250$, Average LB = 230.648, $\sigma$ = 4.35041
 \end{itemize}
 
 \textbf{$n$ = 1000}
 \begin{itemize}
 	\item Average total item width = 575163.174, $\sigma$ = 7880.93401
-	\item $W = 5000$, Average LB = 115.534, $\sigma$ = 1.59463, Average speed = 214.04479ms/instance
-	\item $W = 2500$, Average LB = 230.563, $\sigma$ = 3.16734, Average speed = 190.36579ms/instance
-	\item $W = 1250$, Average LB = 460.623, $\sigma$ = 6.30895, Average speed = 214.78729ms/instance
+	\item $W = 5000$, Average LB = 115.534, $\sigma$ = 1.59463
+	\item $W = 2500$, Average LB = 230.563, $\sigma$ = 3.16734
+	\item $W = 1250$, Average LB = 460.623, $\sigma$ = 6.30895
+\end{itemize}
+
+\textbf{Speed $n$ = 500}
+\begin{itemize}
+	\item MFFD $W = 5000$ Average speed = 38.88504ms/instance
+	\item MFFD $W = 2500$ Average speed = 38.55795ms/instance
+	\item MFFD $W = 1250$ Average speed = 37.98091ms/instance
+	\item PS $W = 5000$ Average speed = 42.11938ms/instance
+	\item PS $W = 2500$ Average speed = 44.24521ms/instance
+	\item PS $W = 1250$ Average speed = 49.66614ms/instance
+	\item MFFD$^+$ $W = 5000$ Average speed = 214.04479ms/instance
+	\item MFFD$^+$ $W = 2500$ Average speed = 190.36579ms/instance
+	\item MFFD$^+$ $W = 1250$ Average speed = 214.78729ms/instance
+\end{itemize}
+
+\textbf{Speed $n$ = 1000}
+\begin{itemize}
+	\item MFFD $W = 5000$ Average speed = 159.68755ms/instance
+	\item MFFD $W = 2500$ Average speed = 
+	\item MFFD $W = 1250$ Average speed = 
+	\item PS $W = 5000$ Average speed = 
+	\item PS $W = 2500$ Average speed = 
+	\item PS $W = 1250$ Average speed = 
+	\item MFFD$^+$ $W = 5000$ Average speed = 
+	\item MFFD$^+$ $W = 2500$ Average speed = 
+	\item MFFD$^+$ $W = 1250$ Average speed = 
 \end{itemize}
 
 
