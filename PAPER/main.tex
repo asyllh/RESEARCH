@@ -259,19 +259,19 @@ The last heuristic incorporates AHC as described in Section \ref{sec:ahca}. The 
 	\begin{algorithmic}[1]
 		\State Sort items in $\mathcal{I}$ in order of non-increasing widths $w_i$.
 		\For{$i \gets 1 \To |\mathcal{I}|$}
-			\State $j \gets 1$, packed $\gets \False$
-			\While{not packed}
+			\State $j \gets 1$, $packed \gets \False$
+			\While{$packed = \False$}
 				\If{$S_j \in \mathcal{S}$ and $\sum_{i=1}^{|S_j|}w_i + w_i \leq W$}
 					\State Run AHC
 					\If{AHC returns feasible solution}
 						\State $S_j \gets S_j \cup i$ in order of feasible solution
-						\State packed $\gets \True$
+						\State $packed \gets \True$
 					\Else \hspace{0.2mm} $j \gets j + 1$					 
 					\EndIf
 				\ElsIf{$S_j \notin \mathcal{S}$}
 					\State $S_j \gets S_j \cup i$ in regular orientation
 					\State $\mathcal{S} \gets \mathcal{S} \cup S_j$	
-					\State packed $\gets \True$
+					\State $packed \gets \True$
 				\EndIf
 			\EndWhile	
 		\EndFor
