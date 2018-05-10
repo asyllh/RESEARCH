@@ -188,10 +188,10 @@ This algorithm, which will be referred to as the \textsc{Alternating Hamiltonian
 
 \begin{theorem}
 	\label{thm:copsoln}
-	There exists a feasible solution $\mathcal{T}$ to an instance $\mathcal{M}$ of the COP if and only if its corresponding graph $G=(V, B\cup R)$ contains an alternating Hamiltonian cycle.
+	If there exists an alternating Hamiltonian cycle on a graph $G$ created from an instance $\mathcal{M}$ of the COP, then AHC is able to find the cycle in $O(n^2)$ time.
 \end{theorem}
 \begin{proof}
-	Let $\mathcal{A} = \{v_1, v_2, ..., v_{2n+1}, v_{2n+2}\}$ be an alternating Hamiltonian cycle on $G$, where $v_{2n+1}$ and $v_{2n+2}$ are the dominating vertices. By definition, $\mathcal{A}$ contains all vertices on $G$, and all $n+1$ edgs in $B$. Thus, there exists a set of $n+1$ edges from $R$ that, together with the edges in $B$, form the alternating Hamiltonian cycle. Now, removing the dominating vertices and any incident edges gives rise to an alternating Hamiltonian path $\mathcal{A}' = \{v_1, v_2, ..., v_{2n-1}, v_{2n}\}$, whose first edge $(v_1, v_2)$ and last edge $(v_{2n-1}, v_{2n})$ are in $B$. The order of the values corresponding to each vertex of this path form a feasible solution $\mathcal{T}$, where values that are partners make up a tuple.\qed
+	\qed
 \end{proof}
 
 
@@ -254,34 +254,77 @@ The last heuristic incorporates AHC as described in Section \ref{sec:ahca}. The 
 \end{figure}
 
 \begin{algorithm}[H]
-	\caption{MFFD$^+$}
-	\label{alg:mffd+}
-	\begin{algorithmic}[1]
-		\State Sort items in $\mathcal{I}$ in order of non-increasing widths $w_i$.
+\caption{MFFD}
+\label{alg:mffd}
+\begin{algorithmic}[1]
+	\State Sort items in $\mathcal{I}$ in order of non-increasing widths $w_i$.
+	\State Let $r_j$ denote the right-most score width on strip $S_j$.
 		\For{$i \gets 1 \To |\mathcal{I}|$}
-			\State $j \gets 1$, $packed \gets \False$
-			\While{$packed = \False$}
+			\State $j \gets 1$, packed $\gets \False$
+			\While{\textbf{not} packed}
 				\If{$S_j \in \mathcal{S}$ and $\sum_{i=1}^{|S_j|}w_i + w_i \leq W$}
-					\State Run AHC
-					\If{AHC returns feasible solution}
-						\State $S_j \gets S_j \cup i$ in order of feasible solution
-						\State $packed \gets \True$
-					\Else \hspace{0.2mm} $j \gets j + 1$					 
+					\If{$r_j + a_i \geq \tau$}
+						\State $S_j \gets S_j \cup (a_i, b_i)$
+						\State packed $\gets \True$
+					\ElsIf{$r_j + b_i \geq \tau$}
+						\State $S_j \gets S_j \cup (b_i, a_i)$
+						\State packed $\gets \True$
+					\Else \hspace{0.2mm} $j \gets j + 1$		
 					\EndIf
 				\ElsIf{$S_j \notin \mathcal{S}$}
-					\State $S_j \gets S_j \cup i$ in regular orientation
-					\State $\mathcal{S} \gets \mathcal{S} \cup S_j$	
-					\State $packed \gets \True$
+					\State $S_j \gets S_j \cup (a_i, b_i)$
+					\State $\mathcal{S} \gets \mathcal{S} \cup S_j$
+					\State packed $\gets \True$	
 				\EndIf
 			\EndWhile	
 		\EndFor
-		\Return $\mathcal{S}$
-	\end{algorithmic}	
+	\Return $\mathcal{S}$
+\end{algorithmic}	
+\end{algorithm}
+
+\begin{algorithm}[H]
+\caption{MFFD$^+$}
+\label{alg:mffd+}
+\begin{algorithmic}[1]
+	\State Sort items in $\mathcal{I}$ in order of non-increasing widths $w_i$.
+	\For{$i \gets 1 \To |\mathcal{I}|$}
+		\State $j \gets 1$, packed $\gets \False$
+		\While{\textbf{not} packed}
+			\If{$S_j \in \mathcal{S}$ and $\sum_{i=1}^{|S_j|}w_i + w_i \leq W$}
+				\State Run AHC
+				\If{AHC returns feasible solution}
+					\State $S_j \gets S_j \cup i$ in order of feasible solution
+					\State packed $\gets \True$
+				\Else \hspace{0.2mm} $j \gets j + 1$					 
+				\EndIf
+			\ElsIf{$S_j \notin \mathcal{S}$}
+				\State $S_j \gets S_j \cup i$ in regular orientation
+				\State $\mathcal{S} \gets \mathcal{S} \cup S_j$	
+				\State packed $\gets \True$
+			\EndIf
+		\EndWhile	
+	\EndFor
+	\Return $\mathcal{S}$
+\end{algorithmic}	
 \end{algorithm}
 
 
 
 \section{Comparison}
+\subsection{Problem Instances}
+\begin{itemize}
+	\item sets of items $\mathcal{I}$ of sizes 100, 500, and 100
+	\item 1000 different problem instances for each size, so 1000 problem instances for $|\mathcal{I}| = 100$, $|\mathcal{I}| = 500$, and $|\mathcal{I}| = 1000$
+	\item use the same 1000 instances in every run for each size, fair
+	\item For all problem instances, the items have equal height $H = 1$.
+	\item For each problem instance, the items have varying widths randomly selected from a uniform distribution between 150 and 1000, and score widths also randomly selected from a uniform distribution between 1 and 70, preventing the score widths from overlapping, and ensuring that each item has exactly two score widths.
+	\item The strips also have equal height $H = 1$, and three different widths, $W = 5000$, $W = 2500$, and $W = 1250$. 
+	\item As the strip width decreases, the number of items per strip decreases, making the problem more difficult.
+	\item We introduce a parameter $\delta$ that gives the proportion of pairs of score widths whose total sum is greater than or equal to $\tau$. 
+	\item Values for $\delta$ from 0.0 to 1.0 in increments of 0.1 are calculated by changing the value of $\tau$. 
+	\item Thus, if $\delta  = 0.0$, then there are no score widths that can feasibly be aligned together, and hence $|\mathcal{I}|$ strips are required (one for each item), whereas if $\delta = 1.0$, then all pairs of score widths meet the vicinal sum constraint (i.e. sum of all pairs of score widths $\geq \tau$), and the problem is therefore analogous to the BPP. 
+\end{itemize}
+
 \begin{itemize}
 	\item Heuristics implemented in C++ and executed on a computer equipped with an Intel Core i3-2120 processor with a frequency of 3.30GHz.
 	\item $n$ = 100, 500, and 1000, number of items in $\mathcal{I}$, $W$ = 5000, 2500, 1250, item widths uniform dist [150, 1000], score widths uniform dist [1,70] (ensures each item has two score widths that do not overlap), all items and strips have height H ( = 1)
