@@ -47,7 +47,7 @@ It can be seen that this problem is in fact equal to the COP, where each unorder
 	\centering
 	\begin{subfigure}[h]{0.44\textwidth}
 		\includestandalone[width=\textwidth]{figures/items}
-		\label{fig:items}\vspace{10pt}
+		\label{fig:items} \vspace{5pt}
 	\end{subfigure} 
 	\begin{subfigure}[h]{0.7\textwidth}
 		\includestandalone[width=\textwidth]{figures/itemsaligned}
@@ -253,62 +253,6 @@ The last heuristic incorporates AHC as described in Section \ref{sec:ahca}. The 
 	\label{fig:comparestrips}
 \end{figure}
 
-\begin{algorithm}[H]
-\caption{MFFD}
-\label{alg:mffd}
-\begin{algorithmic}[1]
-	\State Sort items in $\mathcal{I}$ in order of non-increasing widths $w_i$.
-	\State Let $r_j$ denote the right-most score width on strip $S_j$.
-		\For{$i \gets 1 \To |\mathcal{I}|$}
-			\State $j \gets 1$, packed $\gets \False$
-			\While{\textbf{not} packed}
-				\If{$S_j \in \mathcal{S}$ and $\sum_{i=1}^{|S_j|}w_i + w_i \leq W$}
-					\If{$r_j + a_i \geq \tau$}
-						\State $S_j \gets S_j \cup (a_i, b_i)$
-						\State packed $\gets \True$
-					\ElsIf{$r_j + b_i \geq \tau$}
-						\State $S_j \gets S_j \cup (b_i, a_i)$
-						\State packed $\gets \True$
-					\Else \hspace{0.2mm} $j \gets j + 1$		
-					\EndIf
-				\ElsIf{$S_j \notin \mathcal{S}$}
-					\State $S_j \gets S_j \cup (a_i, b_i)$
-					\State $\mathcal{S} \gets \mathcal{S} \cup S_j$
-					\State packed $\gets \True$	
-				\EndIf
-			\EndWhile	
-		\EndFor
-	\Return $\mathcal{S}$
-\end{algorithmic}	
-\end{algorithm}
-
-\begin{algorithm}[H]
-\caption{MFFD$^+$}
-\label{alg:mffd+}
-\begin{algorithmic}[1]
-	\State Sort items in $\mathcal{I}$ in order of non-increasing widths $w_i$.
-	\For{$i \gets 1 \To |\mathcal{I}|$}
-		\State $j \gets 1$, packed $\gets \False$
-		\While{\textbf{not} packed}
-			\If{$S_j \in \mathcal{S}$ and $\sum_{i=1}^{|S_j|}w_i + w_i \leq W$}
-				\State Run AHC
-				\If{AHC returns feasible solution}
-					\State $S_j \gets S_j \cup i$ in order of feasible solution
-					\State packed $\gets \True$
-				\Else \hspace{0.2mm} $j \gets j + 1$					 
-				\EndIf
-			\ElsIf{$S_j \notin \mathcal{S}$}
-				\State $S_j \gets S_j \cup i$ in regular orientation
-				\State $\mathcal{S} \gets \mathcal{S} \cup S_j$	
-				\State packed $\gets \True$
-			\EndIf
-		\EndWhile	
-	\EndFor
-	\Return $\mathcal{S}$
-\end{algorithmic}	
-\end{algorithm}
-
-
 
 \section{Comparison}
 \subsection{Problem Instances}
@@ -473,6 +417,19 @@ The last heuristic incorporates AHC as described in Section \ref{sec:ahca}. The 
 	\item MFFD$^+$ $W = 5000$ Average speed = 825.59964ms/instance
 	\item MFFD$^+$ $W = 2500$ Average speed = 744.73509ms/instance
 	\item MFFD$^+$ $W = 1250$ Average speed = 434.67655ms/instance
+\end{itemize}
+
+\section{Further Work}
+\begin{itemize}
+	\item mffd+ items are packed one by one, could be a case where an items fits onto a strip but ahc cannot find a feasible solution, so item must be packed elsewhere, but if two new items could fit on the strip, ahc might be able to find a solution. 
+	\item include item width in ahc, so add values to the blue edges of the graph, weighted edges, red edges have value = 0.
+	\item Then the problem would be: find the minimum number of alternating cycles on $G$ such that the length of the cycle is less than or equal to some value $W$ (which is the strip width). The length of the cycle would be the sum of all the weighted edges, so the sum of all the blue edges, since red = 0. 
+	\item then could break and form edges to create new components of different sizes if some are too large, or join together if some are small, thus decreasing the number of cycles
+	\item or if possible, find a single alt Ham cycle, and break up into as few smaller cycles as possible such that the length of each cycle is less than or equal to $W$
+	\item another way, create as few feasible subsets $\mathcal{I}' \subseteq \mathcal{I}$ such that the total width of the items in each subset $\mathcal{I}$ is less than $W$, i.e. perform usual FFD alg, ignore score widths
+	\item then perform ahc on each set, try to find feasible solution.
+	\item if sets dont have feasible solution, try swapping items between sets
+	\item initial tests, Becker theorem 6 2015 paper 
 \end{itemize}
 
 
