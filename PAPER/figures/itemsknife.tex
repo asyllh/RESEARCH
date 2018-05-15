@@ -4,43 +4,40 @@
 \begin{document}
 	
 \begin{tikzpicture}
-%\draw [help lines] (-7,-2) grid (9,5);
+%\draw [help lines] (-2,-2) grid (15,5);
 
-%\node at (-6.45, 1) {(a)};
-%\node at (-0.45, 1) {(b)};
+\draw [thick] (0,0) rectangle (4,1.5);
+\draw [thick, dashed] (0.5,0) -- (0.5, 1.5);
+\draw [thick, dashed] (3,0) -- (3, 1.5);
 
-\draw [thick] (-6,0) rectangle (-2,2);
-\draw [dashed] (-5.5,0) -- (-5.5, 2);
-\draw [dashed] (-3.0,0) -- (-3.0, 2);
+\draw [<->] (0,-.2) -- (4,-.2);
+\node at (2, -.4) {$w_i$};
 
-\draw [<->] (-6,-.2) -- (-2,-.2);
-\node at (-4, -.4) {$w_i$};
+\draw [<->] (0, 1.7) -- (0.5, 1.7);
+\node at (0.25, 1.85) {$a_i$};
 
-\draw [<->] (-6, 2.2) -- (-5.5, 2.2);
-\node at (-5.75, 2.35) {$a_i$};
+\draw [<->] (3, 1.7) -- (4, 1.7);
+\node at (3.5, 1.875) {$b_i$};
 
-\draw [<->] (-2, 2.2) -- (-3.0, 2.2);
-\node at (-2.5, 2.375) {$b_i$};
+\draw [<->] (4.2,0) -- (4.2,1.5);
+\node at (4.45,0.75) {$H$};
 
-\draw [<->] (-1.8,0) -- (-1.8,2);
-\node at (-1.55,1) {$H$};
-
-\node at (-4,1) {\Large{$i$}};
+\node at (2,0.75) {\Large{$i$}};
 
 
-\draw [thick] (0,3) -- (8,3);
-\draw [thick] (3.25,3.4) -- (3.25,2.6);
-\draw [thick] (4.75,3.4) -- (4.75,2.6);
-\draw [thick, <->] (3.25, 3.5) -- (4.75, 3.5);
-\node [above] at (4,3.6) {$\geq \tau$};
+\draw [thick] (6,2.5) -- (14,2.5);
+\draw [thick] (9.25,2.9) -- (9.25,2.1);
+\draw [thick] (10.75,2.9) -- (10.75,2.1);
+\draw [thick, <->] (9.25, 3) -- (10.75, 3);
+\node [above] at (10,3.1) {$\geq \tau$};
 
 
-\draw [thick] (0,0) rectangle (8,2);
-\draw [thick] (4,2) -- (4,0);
-\draw [dashed] (0.3,0) -- (0.3,2);
-\draw [dashed] (3.25,0) -- (3.25,2);
-\draw [dashed] (4.75,0) -- (4.75,2);
-\draw [dashed] (7.4,0) -- (7.4,2);
+\draw [thick] (6,0) rectangle (14,1.5);
+\draw [thick] (10,1.5) -- (10,0);
+\draw [thick, dashed] (6.3,0) -- (6.3,1.5);
+\draw [thick, dashed] (9.25,0) -- (9.25,1.5);
+\draw [thick, dashed] (10.75,0) -- (10.75,1.5);
+\draw [thick, dashed] (13.4,0) -- (13.4,1.5);
 
 %\draw [<->] (3.5,2.2) -- (4.5,2.2);
 %\node at (4, -.4) {\scriptsize $\geq \tau$};
