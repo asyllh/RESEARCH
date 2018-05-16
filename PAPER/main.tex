@@ -38,8 +38,7 @@ A prominent application of the COP is in a strip-packing problem brought to ligh
 
 Clearly, for two items to be placed alongside one another feasibly, the sum of the adjacent score widths must equal or exceed the minimum scoring distance, else the knives will not be able to score the items in the correct locations. Thus, the problem consists of finding a suitable ordering and orientation of the items such that the sum of every pair of adjacent score widths is greater than or equal to the minimum scoring distance. The left-hand score width of the first item and the right-hand score width of the last item on the strip are not adjacent to any other item, and are therefore ignored. 
 
-It can be seen that this problem is in fact equal to the COP, where each unordered pair in an instance $\mathcal{M}$ contains values corresponding to the score widths of an item, and $\tau$ is the minimum scoring distance. Figure \ref{fig:items/aligned} shows the example instance $\mathcal{M}$ of the COP from above as a packing problem.
-% vsc = sum of every adj pair of score widths \geq \tau.
+It can be seen that this problem is in fact equal to the COP, where each unordered pair in an instance $\mathcal{M}$ contains the score widths of an item, and $\tau$ is the minimum scoring distance. It then follows that the vicinal sum constraint corresponds to the requirement for the sum of adjacent score widths to exceed $\tau$. Figure \ref{fig:items/aligned} shows the example instance $\mathcal{M}$ of the COP from above depicted as a packing problem.
 
 
 
@@ -60,14 +59,14 @@ It can be seen that this problem is in fact equal to the COP, where each unorder
 Observe that in this particular strip-packing problem the widths of the individual items are disregarded, since the aim is to arrange the items onto a strip of seemingly infinite width. However, in industrial applications, strips of material are often provided in fixed widths. Given a large problem instance, multiple strips may therefore be required to feasibly accommodate all of the items. For this reason, a more generalised problem can also be formulated.
 
 \begin{definition}
-	Let $\mathcal{I}$ be a set of rectangular items of height $H$ with varying widths $w_i \in \mathbb{Z}^+$ and score widths $a_i, b_i \in \mathbb{Z}^+$ for each item $i \in \mathcal{I}$. Given a minimum scoring distance $\tau \in \mathbb{Z}^+$, the Score-Constrained Strip-Packing Problem (SCSPP) consist of finding the minimum number of strips of height $H$ and width $W$ required to pack all items in $\mathcal{I}$ such that the sum of every pair of adjacent score widths is greater than or equal to $\tau$. %and that no strip is overfilled.
+	Let $\mathcal{I}$ be a set of rectangular items of height $H$ with varying widths $w_i \in \mathbb{Z}^+$ and score widths $a_i, b_i \in \mathbb{Z}^+$ for each item $i \in \mathcal{I}$. Given a minimum scoring distance $\tau \in \mathbb{Z}^+$, the Score-Constrained Strip-Packing Problem (SCSPP) consist of finding the minimum number of strips of height $H$ and width $W$ required to pack all items in $\mathcal{I}$ such that the sum of every pair of adjacent score widths is greater than or equal to $\tau$, and that no strip is overfilled.
 \end{definition}
 
 Note that in the special case of $\tau = 0$, the SCSPP is equivalent to the classical one-dimensional bin-packing problem (BPP). It follows that the SCSPP is at least as hard as the BPP, which is known to be NP-hard (\citealp{garey1979}), and so (under the assumption that $P \neq NP$) there is no known algorithm that is able to find an optimal solution for every instance of the SCSPP in polynomial time. Instead, heuristics can be used to find near-optimal solutions in a shorter amount of time.
 
 \begin{definition}
 	\label{defn:subprob}
-	Let $\mathcal{I}' \subseteq \mathcal{I}$ be a set of items whose total width is less than or equal to the capacity of a strip, (i.e. $\sum_{i=1}^{|\mathcal{I}'|}w_i \leq W$). Given a minimum scoring distance $\tau$, the Score-Constrained Packing Sub-Problem (SCPSP) involves finding an arrangement of the items in $\mathcal{I}'$ such that the sum of every pair of adjacent score widths is greater than or equal to $\tau$.
+	Let $\mathcal{I}' \subseteq \mathcal{I}$ be a set of items whose total width is less than or equal to the capacity of a strip, (i.e. $\sum_{i\in \mathcal{I}'}w_i \leq W$). Given a minimum scoring distance $\tau$, the Score-Constrained Packing Sub-Problem (SCPSP) involves finding an arrangement of the items in $\mathcal{I}'$ such that the sum of every pair of adjacent score widths is greater than or equal to $\tau$.
 \end{definition}
 
 
@@ -130,7 +129,7 @@ Then, $v_i$ is matched with the vertex that is currently matched with $v_{i-1}$,
 		\caption{$G' = (V, B \cup R')$}	
 		\label{fig:matching}
 	\end{subfigure} \quad
-	\begin{subfigure}[h]{0.5\textwidth}
+	\begin{subfigure}[h]{0.55\textwidth}
 		\includestandalone[width=\textwidth]{figures/mps}
 		\caption{Planar representation of $G' =(V, B \cup R')$}	
 		\label{fig:mps}
@@ -171,12 +170,12 @@ This algorithm, which will be referred to as the \textsc{Alternating Hamiltonian
 
 \begin{figure}	
 	\centering
-	\begin{subfigure}[H]{0.5\textwidth}
+	\begin{subfigure}[H]{0.7\textwidth}
 		\includestandalone[width=\textwidth]{figures/mpsconnect}
 		\caption{Edges from $R\backslash R'$ can connect vertices from different cycles.}	
-		\label{fig:mpsconnect}
+		\label{fig:mpsconnect} \vspace{5mm}
 	\end{subfigure}
-	\begin{subfigure}[H]{0.5\textwidth}
+	\begin{subfigure}[H]{0.7\textwidth}
 		\includestandalone[width=\textwidth]{figures/mpscycle}
 		\caption{Replacing edges connects the components and forms an alternating Hamiltonian cycle.}	
 		\label{fig:mpscycle}
@@ -198,7 +197,7 @@ This algorithm, which will be referred to as the \textsc{Alternating Hamiltonian
 \section{Heuristics for the SCSPP}
 \label{sec:scsppsoln}
 
-In this section, we now turn our attention to the multi-strip version of the problem. As mentioned in the introduction, this problem is a generalisation of the BPP in that we also require the sum of every pair of adjacent score widths to be greater than or equal to a minimum scoring distance $\tau$.
+In this section, we now turn our attention to the multi-strip version of the problem. As mentioned in the introduction, this problem is a generalisation of the BPP in that we also require the sum of every pair of adjacent score widths to be greater than or equal to a minimum scoring distance $\tau$. It follows that the SCSPP is at least as hard as the BPP, which is known to be NP-hard (\citealp{garey1979}), and so (under the assumption that $P \neq NP$) there is no known algorithm that is able to find an optimal solution for every instance of the SCSPP in polynomial time. Instead, heuristics can be used to find near-optimal solutions in a shorter amount of time.
 
 For an instance of the SCSPP, a feasible solution is represented by the set $\mathcal{S} = \{S_1, S_2, ..., S_k\}$ such that
 \begin{subequations}
@@ -210,7 +209,7 @@ For an instance of the SCSPP, a feasible solution is represented by the set $\ma
 \end{align}
 \end{subequations}
 
-That is, all items must be packed onto a strip (\ref{eqn:packall}), each item can only be placed on one strip (\ref{eqn:nooverlap}), the strips cannot be overfilled (\ref{eqn:capacity}), and the items on each strip $S_j$ in the solution must be arranged such that the sum of two adjacent score widths is greater than or equal to the minimum scoring distance $\tau$ (\ref{eqn:vscstrip}).
+That is, all items must be packed onto a strip (\ref{eqn:packall}), each item can only be placed on one strip (\ref{eqn:nooverlap}), the strips cannot be overfilled (\ref{eqn:capacity}), and the items on each strip $S_j$ in the solution must be arranged such that the vicinal sum constraint is fulfilled, that is, the sum of every pair of adjacent score widths is greater than or equal to the minimum scoring distance $\tau$ (\ref{eqn:vscstrip}).
 
 An optimal solution $\mathcal{S}$ of an instance of the SCSPP is a solution that consists of the fewest number of strips $k$. A simple lower bound for $k$ that can be computed in $O(n)$ time is given by 
 \begin{equation}
@@ -255,27 +254,12 @@ The last heuristic incorporates AHC as described in Section \ref{sec:ahca}. The 
 
 
 \section{Comparison}
-For our experiments, we generated 1000 problem instances for three different sizes of $\mathcal{I}$, containing 100, 500, and 1000 items. For each problem instance, the items have varying widths $w_i$ between 150 and 1000, and score widths $a_i, b_i$ between 1 and 70, all selected randomly from a uniform distribution. Three different strip widths $W$ were used, 5000, 2500, and 1250. As the width of the strips decrease, the average number of items per strip also decreases, making the problem more difficult. Both the items and the strips have equal height of $H = 1$.  
+For our experiments, we generated 1000 problem instances for three different sizes of $\mathcal{I}$, containing 100, 500, and 1000 items. For each problem instance, the items have varying widths $w_i$ between 150 and 1000, and score widths $a_i, b_i$ between 1 and 70, all selected randomly from a uniform distribution. Three strip widths $W$ were used, 5000, 2500, and 1250. As the width of the strips decrease, the average number of items per strip also decreases, making the problem more difficult. Both the items and the strips have equal height of $H = 1$. Similarly to experiments performed by \cite{lewis2011}, we also introduced a parameter $\delta$ to denote the proportion of pairs of score widths from different items that meet the vicinal sum constraint, i.e. whose sum is greater than or equal to $\tau$. Values of $\delta$ from 0.0 to 1.0 were created by changing the value of the minimum scoring distance $\tau$. Clearly, when $\delta = 0.0$, there are no score widths that can be packed together feasibly, and so $|\mathcal{I}|$ strips will be required (one for each item), whereas if $\delta = 1.0$ then all pairs of score widths meet the constraint, and the problem is analogous to the BPP.
 
-\begin{itemize}
-	\item sets of items $\mathcal{I}$ of sizes 100, 500, and 100
-	\item 1000 different problem instances for each size, so 1000 problem instances for $|\mathcal{I}| = 100$, $|\mathcal{I}| = 500$, and $|\mathcal{I}| = 1000$, same 1000 instances for each run
-	\item For each problem instance, the items have varying widths randomly selected from a uniform distribution between 150 and 1000, and score widths also randomly selected from a uniform distribution between 1 and 70, preventing the score widths from overlapping, and ensuring that each item has exactly two score widths.
-	\item items and strips have equal height $H = 1$, strips have three different widths, $W = 5000$, $W = 2500$, and $W = 1250$. 
-	\item As the strip width decreases, the number of items/strip decreases, making the problem more difficult, changes the average number of items per strip (why is this important?)
-	\item We introduce a parameter $\delta$ that gives the proportion of pairs of score widths whose total sum is greater than or equal to $\tau$. 
-	\item Values for $\delta$ from 0.0 to 1.0 in increments of 0.1 are calculated by changing the value of $\tau$. 
-	\item Thus, if $\delta  = 0.0$, then there are no score widths that can feasibly be aligned together, and hence $|\mathcal{I}|$ strips are required (one for each item), whereas if $\delta = 1.0$, then all pairs of score widths meet the vicinal sum constraint (i.e. sum of all pairs of score widths $\geq \tau$), and the problem is therefore analogous to the BPP. 
-	\item Heuristics implemented in C++ and executed on a computer equipped with an Intel Core i3-2120 processor with a frequency of 3.30GHz.
-	\item run each instance 1000 times (per value of $\delta$), same instances each time.
-	\item table shows optimality, which is the number of strips in the final solution generated by the heuristic divided by the number of strips in the optimal solution (which is calculated using the lower bound for $k$ above), =1 then optimal
-	\item Goulimis stated n= 10, this is able to find solutions for n=1000
-	\item graph showing time or optimality of all three heuristics
-	\item As the strip length is decreased, MFFD+ improves, number of items/strip decreases
-	\item PS does not reach highest optimality at $\delta = 0.8$ onwards in any strip length
-	\item as avg number of items per strip decreases, PS is less efficient, MFFD+ is better
-	\item note anomaly in $n = 1000, W = 1250, \delta = 0.3$, MFFD performs the best.
-\end{itemize}
+The heuristics were implemented in C++ and executed on a computer equipped with an Intel Core i3-2120 processor with a frequency of 3.30GHz. The tables below show the average optimality of the heuristics for each value of $\delta$ from 1000 instances, where the optimality of each instance is the ratio of the number of strips in the final solution obtained by the heuristic to the number of strips $k$ in the optimal solution, which was calculated using Equation \ref{eqn:lowerbound}. 
+
+Firstly, it is apparent that the heuristics perform comparitively in the same manner regardless of the input size. 
+
 
 \begin{table}[!htb]
 	\centering
