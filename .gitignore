@@ -26,4 +26,4 @@ cmake-build-release/
 *.snm
 *.vrb
 *.spl
-
+.DS_Store
