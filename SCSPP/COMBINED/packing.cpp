@@ -282,6 +282,54 @@ void MFFDPlus(int tau, int &opt, int &opt90, int &opt80, int &opt70, int &opt60,
         }
     }
 
+    /*
+    for(j = 1; j < itemDecrease.size(); ++j){
+        for(i = 0; i < strip.size(); ++i){
+            if(!strip[i].empty()){
+                if(stripSum[i] + itemWidths[itemDecrease[j]][partners[itemDecrease[j]]] <= stripWidth){
+                    if(strip[i].size() == 2){ //If the strip only contains one item, don't run AHCA, just do checks instead
+                        if(adjMatrix[strip[i].back()][itemDecrease[j]] == 1){
+                            strip[i].push_back(itemDecrease[j]);
+                            strip[i].push_back(partners[itemDecrease[j]]);
+                            stripSum[i] += itemWidths[itemDecrease[j]][partners[itemDecrease[j]]];
+                            break;
+                        }
+                        else if (adjMatrix[strip[i].back()][partners[itemDecrease[j]]] == 1){
+                            strip[i].push_back(partners[itemDecrease[j]]);
+                            strip[i].push_back(itemDecrease[j]);
+                            stripSum[i] += itemWidths[itemDecrease[j]][partners[itemDecrease[j]]];
+                            break;
+                        }
+                        else if(adjMatrix[strip[i].front()][itemDecrease[j]] == 1){
+                            strip[i].insert(strip[i].begin(), itemDecrease[j]);
+                            strip[i].insert(strip[i].begin(), partners[itemDecrease[j]]);
+                            stripSum[i] += itemWidths[itemDecrease[j]][partners[itemDecrease[j]]];
+                        }
+                        else if(adjMatrix[strip[i].front()][partners[itemDecrease[j]]] == 1){
+                            strip[i].insert(strip[i].begin(), partners[itemDecrease[j]]);
+                            strip[i].insert(strip[i].begin(), itemDecrease[j]);
+                            stripSum[i] += itemWidths[itemDecrease[j]][partners[itemDecrease[j]]];
+                        }
+                    }
+                    else {
+                        feasible = 0;
+                        AHCAH(tau, i, j, feasible, allScores, partners, adjMatrix, itemWidths, itemDecrease, stripSum,
+                              strip);
+                        if (feasible == 1) {
+                            break;
+                        }
+                    }
+                }
+            }
+            else if (strip[i].empty()){
+                strip[i].push_back(itemDecrease[j]);
+                strip[i].push_back(partners[itemDecrease[j]]);
+                stripSum[i] += itemWidths[itemDecrease[j]][partners[itemDecrease[j]]];
+                break;
+            }
+        }
+    }*/
+
     while(stripSum.back() == 0){
         stripSum.pop_back();
         strip.pop_back();
