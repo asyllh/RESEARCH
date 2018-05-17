@@ -244,6 +244,32 @@ The \textsc{Pair-Smallest} (PS) heuristic is an extension of a procedure defined
 
 The last heuristic incorporates AHC as described in Section \ref{sec:ahca}. The \textsc{Modified First-Fit Decreasing with AHC} (MFFD$^+$) heuristic operates in a similar fashion to the MFFD, placing items sorted in decreasing order onto the lowest-indexed strip. However, when the lowest-indexed strip is found that can accommodate the current item, MFFD$^+$ then executes AHC on the sub-problem, where the items on the strip and the current item form the subset $\mathcal{I}' \subseteq \mathcal{I}$ (see Definition \ref{defn:subprob}). If AHC finds a feasible solution, the items are placed on the strip in the order of the solution, which includes the current item, else MFFD$^+$ attempts to pack the current item on the next lowest-indexed strip. Using AHC means that if a feasible alignment of the items exists, there is a guarantee that it will be found. Unlike MFFD, where the current item can only be placed on the end of the strip, MFFD$^+$ allows the items to be entirely rearranged (see Figure \ref{fig:comparestrips}). This reduces the possibility of having to start a new strip for an item, thus preventing increasing the number of strips in the final solution. Since AHC is executed every time an item can fit onto a strip that already contains items, (up to $|\mathcal{S}|$ times per item, where $|\mathcal{S}|$ is the number of strips containing at least one item so far in the procedure) MFFD$^+$ is slower in comparison to the previous heuristics.  
 
+\begin{algorithm}
+\caption{MFFD$^+$}
+\label{alg:mffd+}
+\begin{algorithmic}[1]
+	\State Sort items in $\mathcal{I}$ in non-increasing order of widths $w_i$
+	\For{$i \gets 1 \To |\mathcal{I}|$}	
+		\State $j \gets 1$, packed $\gets \False$
+		\While{\textbf{not} packed}
+			\If{$S_j \in \mathcal{S}$ and $\sum_{i = 1}^{|S_j|}w_i + w_i \leq W$}
+				\State Run AHC
+				\If{AHC returns solution $\mathcal{F}$}
+					\State $S_j \gets \mathcal{F}$
+					\State packed $\gets \True$
+				\Else \hspace{0.5mm} $j \gets j + 1$	
+				\EndIf
+			\ElsIf{$S_j \notin \mathcal{S}$}
+				\State{$S_j \gets S_j \cup i$ in regular orientation}
+				\State $\mathcal{S} \gets \mathcal{S} \cup S_j$	
+				\State packed $\gets \True$
+			\EndIf
+		\EndWhile
+	\EndFor
+	\Return $\mathcal{S}$
+\end{algorithmic}	
+\end{algorithm}
+
 
 \begin{figure}[h!]	
 	\centering
@@ -256,9 +282,15 @@ The last heuristic incorporates AHC as described in Section \ref{sec:ahca}. The 
 \section{Comparison}
 For our experiments, we generated 1000 problem instances for three different sizes of $\mathcal{I}$, containing 100, 500, and 1000 items. For each problem instance, the items have varying widths $w_i$ between 150 and 1000, and score widths $a_i, b_i$ between 1 and 70, all selected randomly from a uniform distribution. Three strip widths $W$ were used, 5000, 2500, and 1250. As the width of the strips decrease, the average number of items per strip also decreases, making the problem more difficult. Both the items and the strips have equal height of $H = 1$. Similarly to experiments performed by \cite{lewis2011}, we also introduced a parameter $\delta$ to denote the proportion of pairs of score widths from different items that meet the vicinal sum constraint, i.e. whose sum is greater than or equal to $\tau$. Values of $\delta$ from 0.0 to 1.0 were created by changing the value of the minimum scoring distance $\tau$. Clearly, when $\delta = 0.0$, there are no score widths that can be packed together feasibly, and so $|\mathcal{I}|$ strips will be required (one for each item), whereas if $\delta = 1.0$ then all pairs of score widths meet the constraint, and the problem is analogous to the BPP.
 
-The heuristics were implemented in C++ and executed on a computer equipped with an Intel Core i3-2120 processor with a frequency of 3.30GHz. The tables below show the average optimality of the heuristics for each value of $\delta$ from 1000 instances, where the optimality of each instance is the ratio of the number of strips in the final solution obtained by the heuristic to the number of strips $k$ in the optimal solution, which was calculated using Equation \ref{eqn:lowerbound}. 
+The heuristics were implemented in C++ and executed on a computer equipped with an Intel Core i3-2120 processor with a frequency of 3.30GHz. The tables below show the average optimality of the heuristics for each value of $\delta$ from 1000 instances, where the optimality of each instance is the ratio of the number of strips in the final solution obtained by the heuristic to the lower bound for number of strips $k$, which was calculated using Equation \ref{eqn:lowerbound}. 
 
 Firstly, it is apparent that the heuristics perform comparitively in the same manner regardless of the input size. 
+
+\begin{itemize}
+	\item ``BPP becomes easier to solve when the number of items per bin increases, and problems with two or less items per bin are trivial to solve. Triplers are proposed to be `the most difficult bin packing instances''' \cite{falkenauer1996}.
+	\item Fair comparison, running over 1000 instances (average of 1000 instances)
+	\item Note that MFFD and MFFD$^+$ perform identically when $\delta = 1.0$, as they both perform in exactly the same manner as the original FFD heuristic  
+\end{itemize}
 
 
 \begin{table}[!htb]
