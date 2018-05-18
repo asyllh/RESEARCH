@@ -212,7 +212,6 @@ int main(int argc, char **argv){
     ArgumentCheck(numInstances, tau, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth, stripWidth, algType, numPop, xOver, randomSeed);
 
     int a, i, j, k, instance, bestStart, bestEnd;
-    int opt = 0, opt90 = 0, opt80= 0, opt70 = 0, opt60 = 0, opt50 = 0, optLow = 0;
     int numScores = numItem * 2;
     double totalItemWidth = 0.0;
     vector<int> allScores;
@@ -229,111 +228,50 @@ int main(int argc, char **argv){
     double tempFitness;
     vector<int> delta = { 145, 109, 97, 87, 79, 72, 65, 57, 47, 34, 0 };
     //double Delta = 0.0;
-
     //srand(randomSeed);
 
-    //Timer timer;
+    Timer timer;
 
     switch(algType){
-        case 1: {
-            /*ofstream results("1k1kbf.txt");
-            results << numItem << "\t" << stripWidth << "\tBasic" << endl;
-            results.close();*/
+        case 1:
             for (a = 0; a < delta.size(); ++a) {
                 tau = delta[a];
                 srand(randomSeed);
-                {
-                    Timer timer;
-                    for (instance = 0; instance < numInstances; ++instance) {
-                        CreateInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth,
-                                       totalItemWidth, allScores, partners, adjMatrix, itemWidths);
-                        MFFD(opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem, maxItemWidth,
-                             stripWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum,
-                             strip);
-                        /*int lb = LowerBound(totalItemWidth, stripWidth);
-                        double opt = static_cast<double>(strip.size()) / static_cast<double>(lb);
-                        double itemPerStrip = static_cast<double>(numItem) / static_cast<double>(strip.size());
-                        results.open("1k1kbf.txt", ios::app);
-                        results << Delta << "\t" << totalItemWidth << "\t" << lb << "\t" << strip.size() << "\t" << itemPerStrip << "\t" << opt << endl;
-                        results.close();*/
-                        ResetVar(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
-                    }
+                for (instance = 0; instance < numInstances; ++instance) {
+                    CreateInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth,
+                                   totalItemWidth, allScores, partners, adjMatrix, itemWidths);
+                    MFFD(numScores, numItem, maxItemWidth, stripWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
+                    ResetVar(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
                 }
-                /*results.open("1k1kbf.txt", ios::app);
-                results << endl << endl << endl;
-                results.close();
-                Delta += 0.1;*/
-                //Output(opt, opt90, opt80, opt70, opt60, opt50, optLow, numInstances);
             }
-        }
-            break;
+        break;
 
-        case 2: {
-            /*ofstream results("1k1kps.txt");
-            results << numItem << "\t" << stripWidth << "\tPair" << endl;
-            results << "d\tsum\tlb\tlbsoln\ti/s\topt" << endl;
-            results.close();*/
+        case 2:
             for (a = 0; a < delta.size(); ++a) {
                 tau = delta[a];
                 srand(randomSeed);
-                {
-                    Timer timer;
-                    for (instance = 0; instance < numInstances; ++instance) {
-                        CreateInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth,
-                                       totalItemWidth, allScores, partners, adjMatrix, itemWidths);
-                        PairSmallest(opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem, stripWidth,
-                                     totalItemWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
-                        /*int lb = LowerBound(totalItemWidth, stripWidth);
-                        double opt = static_cast<double>(strip.size()) / static_cast<double>(lb);
-                        double itemPerStrip = static_cast<double>(numItem) / static_cast<double>(strip.size());
-                        results.open("1k1kps.txt", ios::app);
-                        results << Delta << "\t" << totalItemWidth << "\t" << lb << "\t" << strip.size() << "\t" << itemPerStrip << "\t" << opt << endl;
-                        results.close();*/
-                        ResetVar(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
-                    }
+                for (instance = 0; instance < numInstances; ++instance) {
+                    CreateInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth,
+                                   totalItemWidth, allScores, partners, adjMatrix, itemWidths);
+                    PairSmallest(numScores, stripWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
+                    ResetVar(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
                 }
-                /*results.open("1k1kps.txt", ios::app);
-                results << endl << endl << endl;
-                results.close();
-                Delta += 0.1;*/
-                //Output(opt, opt90, opt80, opt70, opt60, opt50, optLow, numInstances);
             }
-        }
-            break;
 
-        case 3: {
-            /*ofstream results("5001kfa.txt");
-            results << numItem << "\t" << stripWidth << "\tFFD+" << endl;
-            results << "d\tsum\tlb\tlbsoln\ti/s\topt" << endl;
-            results.close();*/
+        break;
+
+        case 3:
             for (a = 0; a < delta.size(); ++a) {
                 tau = delta[a];
                 srand(randomSeed);
-                {
-                    Timer timer;
-                    for (instance = 0; instance < numInstances; ++instance) {
-                        CreateInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth,
-                                       totalItemWidth, allScores, partners, adjMatrix, itemWidths);
-                        MFFDPlus(tau, opt, opt90, opt80, opt70, opt60, opt50, optLow, numScores, numItem,
-                                 maxItemWidth, stripWidth, totalItemWidth, allScores, partners, adjMatrix,
-                                 itemWidths, stripSum, strip);
-                        /*int lb = LowerBound(totalItemWidth, stripWidth);
-                        double opt = static_cast<double>(strip.size()) / static_cast<double>(lb);
-                        double itemPerStrip = static_cast<double>(numItem) / static_cast<double>(strip.size());
-                        results.open("5001kfa.txt", ios::app);
-                        results << Delta << "\t" << totalItemWidth << "\t" << lb << "\t" << strip.size() << "\t" << itemPerStrip << "\t" << opt << endl;
-                        results.close();*/
-                        ResetVar(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
-                    }
+                for (instance = 0; instance < numInstances; ++instance) {
+                    CreateInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth,
+                                   totalItemWidth, allScores, partners, adjMatrix, itemWidths);
+                    MFFDPlus(tau, numScores, numItem, maxItemWidth, stripWidth, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
+                    ResetVar(numScores, numItem, allScores, partners, adjMatrix, itemWidths, stripSum, strip);
                 }
-                /*results.open("5001kfa.txt", ios::app);
-                results << endl << endl << endl;
-                results.close();
-                Delta += 0.1;*/
-                //Output(opt, opt90, opt80, opt70, opt60, opt50, optLow, numInstances);
             }
-        }
-            break;
+        break;
 
         case 4:
             CreateInstance(tau, numScores, numItem, minWidth, maxWidth, minItemWidth, maxItemWidth, totalItemWidth, allScores, partners, adjMatrix, itemWidths);
