@@ -40,35 +40,8 @@ double Fitness(int stripWidth, vector<int> &stripSum, vector<vector<int> > &stri
 
 }
 
-void Optimality(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int stripSize, int LB){
-
-    double c = static_cast<double>(LB) / stripSize;
-    if(stripSize == LB){
-        ++opt;
-    }
-    else if(c >= 0.9){
-        ++opt90;
-    }
-    else if(c >= 0.8){
-        ++opt80;
-    }
-    else if(c >= 0.7){
-        ++opt70;
-    }
-    else if(c >= 0.6){
-        ++opt60;
-    }
-    else if(c >= 0.5){
-        ++opt50;
-    }
-    else{
-        ++optLow;
-    }
-} //End Optimality
-
 // FFD checking vicinal sum constraint for both sides of each item.
-void MFFD(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int numScores, int numItem,
-          int maxItemWidth, int stripWidth, double totalItemWidth, vector<int> &allScores, vector<int> &partners,
+void MFFD(int numScores, int numItem, int maxItemWidth, int stripWidth, vector<int> &allScores, vector<int> &partners,
           vector<vector<int> > &adjMatrix, vector<vector<int> > &itemWidths, vector<int> &stripSum, vector<vector<int> > &strip){
     int i, j, mini;
     int min = 0;
@@ -129,27 +102,12 @@ void MFFD(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, 
         strip.pop_back();
     }
 
-    //int stripSize = strip.size();
-    //int LB = LowerBound(totalItemWidth, stripWidth);
-
-    //double avg = static_cast<double>(numItem) / static_cast<double>(stripSize);
-
-    //cout << "Lower Bound: " << LB << endl;
-    //cout << "# strips MFFD: " << stripSize << endl;
-    //cout << "Avg # items per strip: " << avg << endl << endl;
-    //cout << endl;
-
-    //cout << stripSize << endl;
-    //cout << avg << endl;
-
-    //Optimality(opt, opt90, opt80, opt70, opt60, opt50, optLow, stripSize, LB);
 
 } //End MFFD
 
 
 // Packing each strip in turn, choosing smallest score width that meets vicinal sum constraint.
-void PairSmallest(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int numScores, int numItem, int stripWidth,
-                  double totalItemWidth, vector<int> &allScores, vector<int> &partners, vector<vector<int> > &adjMatrix,
+void PairSmallest(int numScores, int stripWidth, vector<int> &allScores, vector<int> &partners, vector<vector<int> > &adjMatrix,
                   vector<vector<int> > &itemWidths, vector<int> &stripSum, vector<vector<int> > &strip){
     int i, j;
     int count = 0;
@@ -209,27 +167,12 @@ void PairSmallest(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int 
         strip.pop_back();
     }
 
-    //int stripSize = strip.size();
-    //int LB = LowerBound(totalItemWidth, stripWidth);
-
-    //double avg = static_cast<double>(numItem) / static_cast<double>(stripSize);
-
-    //cout << "Lower Bound: " << LB << endl;
-    //cout << "# strips PairSmallest: " << stripSize << endl;
-    //cout << "Avg # items per strip: " << avg << endl << endl;
-    //cout << endl;
-
-    //cout << stripSize << endl;
-    //cout << avg << endl;
-
-    //Optimality(opt, opt90, opt80, opt70, opt60, opt50, optLow, stripSize, LB);
 
 } //End PairSmallest
 
 
 // FFD including AHCA, instead of attempting to place item on end of strip, run AHCA to find feasible solution.
-void MFFDPlus(int tau, int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int numScores,
-              int numItem, int maxItemWidth, int stripWidth, double totalItemWidth, vector<int> &allScores, vector<int> &partners,
+void MFFDPlus(int tau,int numScores, int numItem, int maxItemWidth, int stripWidth, vector<int> &allScores, vector<int> &partners,
               vector<vector<int> > &adjMatrix, vector<vector<int> > &itemWidths, vector<int> &stripSum, vector<vector<int> > &strip){
 
     int i, j, mini;
@@ -265,28 +208,6 @@ void MFFDPlus(int tau, int &opt, int &opt90, int &opt80, int &opt70, int &opt60,
         for(i = 0; i < strip.size(); ++i){
             if(!strip[i].empty()){
                 if(stripSum[i] + itemWidths[itemDecrease[j]][partners[itemDecrease[j]]] <= stripWidth){
-                    feasible = 0;
-                    AHCAH(tau, i, j, feasible, allScores, partners, adjMatrix, itemWidths, itemDecrease, stripSum,
-                          strip);
-                    if(feasible == 1){
-                        break;
-                    }
-                }
-            }
-            else if (strip[i].empty()){
-                strip[i].push_back(itemDecrease[j]);
-                strip[i].push_back(partners[itemDecrease[j]]);
-                stripSum[i] += itemWidths[itemDecrease[j]][partners[itemDecrease[j]]];
-                break;
-            }
-        }
-    }
-
-    /*
-    for(j = 1; j < itemDecrease.size(); ++j){
-        for(i = 0; i < strip.size(); ++i){
-            if(!strip[i].empty()){
-                if(stripSum[i] + itemWidths[itemDecrease[j]][partners[itemDecrease[j]]] <= stripWidth){
                     if(strip[i].size() == 2){ //If the strip only contains one item, don't run AHCA, just do checks instead
                         if(adjMatrix[strip[i].back()][itemDecrease[j]] == 1){
                             strip[i].push_back(itemDecrease[j]);
@@ -311,7 +232,7 @@ void MFFDPlus(int tau, int &opt, int &opt90, int &opt80, int &opt70, int &opt60,
                             stripSum[i] += itemWidths[itemDecrease[j]][partners[itemDecrease[j]]];
                         }
                     }
-                    else {
+                    else { //Otherwise if more than 1 item on strip, run AHCA
                         feasible = 0;
                         AHCAH(tau, i, j, feasible, allScores, partners, adjMatrix, itemWidths, itemDecrease, stripSum,
                               strip);
@@ -328,27 +249,13 @@ void MFFDPlus(int tau, int &opt, int &opt90, int &opt80, int &opt70, int &opt60,
                 break;
             }
         }
-    }*/
+    }
 
     while(stripSum.back() == 0){
         stripSum.pop_back();
         strip.pop_back();
     }
 
-    //int stripSize = strip.size();
-    //int LB = LowerBound(totalItemWidth, stripWidth);
-
-    //double avg = static_cast<double>(numItem) / static_cast<double>(stripSize);
-
-    //cout << "Lower Bound: " << LB << endl;
-    //cout << "# strips MFFDPlus: " << stripSize << endl;
-    //cout << "Avg # items per strip: " << avg << endl << endl;
-    //cout << endl;
-
-    //cout << stripSize << endl;
-    //cout << avg << endl;
-
-    //Optimality(opt, opt90, opt80, opt70, opt60, opt50, optLow, stripSize, LB);
 
 } //End MFFDPlus
 
