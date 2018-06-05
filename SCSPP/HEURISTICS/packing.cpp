@@ -7,42 +7,15 @@ packing.cpp
 #include "packing.h"
 using namespace std;
 
-int lowerBound(int maxStripWidth, double totalItemWidth){
+int LowerBound(double totalItemWidth, int stripWidth){
     int lBound;
-    lBound = ceil(totalItemWidth/maxStripWidth);
+
+    lBound = ceil(totalItemWidth/stripWidth);
     return lBound;
-} //End lowerBound
+}
 
-void optimality(int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int stripSize, int LB){
-
-    double c = static_cast<double>(LB) / stripSize;
-    if(stripSize == LB){
-        ++opt;
-    }
-    else if(c >= 0.9){
-        ++opt90;
-    }
-    else if(c >= 0.8){
-        ++opt80;
-    }
-    else if(c >= 0.7){
-        ++opt70;
-    }
-    else if(c >= 0.6){
-        ++opt60;
-    }
-    else if(c >= 0.5){
-        ++opt50;
-    }
-    else{
-        ++optLow;
-    }
-} //End optimality
-
-// FFD checking vicinal sum constraint for both sides of each item.
-void basicFFD(int instance, int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int numScores, int numItem, int maxItemWidth,
-              int maxStripWidth, double totalItemWidth, vector<int> &allScores, vector<int> &partners, vector<vector<int> > &adjMatrix,
-              vector<vector<int> > &itemWidths, vector<int> &stripSum, vector<vector<int> > &strip){
+void MFFD(int numScores, int numItem, int maxItemWidth, int stripWidth, vector<int> &allScores, vector<int> &partners,
+          vector<vector<int> > &adjMatrix, vector<vector<int> > &itemWidths, vector<int> &stripSum, vector<vector<int> > &strip){
     int i, j, mini;
     int min = 0;
     int max = maxItemWidth;
@@ -73,7 +46,7 @@ void basicFFD(int instance, int &opt, int &opt90, int &opt80, int &opt70, int &o
     for(j = 1; j < itemDecrease.size(); ++j){
         for(i = 0; i < strip.size(); ++i){
             if(!strip[i].empty()){
-                if(stripSum[i] + itemWidths[itemDecrease[j]][partners[itemDecrease[j]]] <= maxStripWidth){
+                if(stripSum[i] + itemWidths[itemDecrease[j]][partners[itemDecrease[j]]] <= stripWidth){
                     if(adjMatrix[strip[i].back()][itemDecrease[j]] == 1){
                         strip[i].push_back(itemDecrease[j]);
                         strip[i].push_back(partners[itemDecrease[j]]);
@@ -97,64 +70,18 @@ void basicFFD(int instance, int &opt, int &opt90, int &opt80, int &opt70, int &o
         }
     }
 
-    int k = strip.size() - 1;
-    while(strip[k].empty()){
-        strip.pop_back();
-        --k;
-    }
-
-    int l = stripSum.size() -1;
-    while(stripSum[l] == 0){
+    while(stripSum.back() == 0){
         stripSum.pop_back();
-        --l;
+        strip.pop_back();
     }
 
-    int stripSize = strip.size();
-    int LB = lowerBound(maxStripWidth, totalItemWidth);
-    double c = static_cast<double>(LB) / stripSize;
 
-    if(instance == 0){
-        cout << "\nscores on strips:\n";
-        for(i = 0; i < strip.size(); ++i){
-            cout << "strip " << i << ":\t";
-            for(j = 0; j < strip[i].size(); ++j){
-                cout << strip[i][j] << " ";
-            }
-            cout << endl;
-        }
-        cout << endl;
-
-        cout << "item widths on strips:\n";
-        for(i = 0; i < strip.size(); ++i){
-            cout << "strip " << i << ":\t";
-            for(j = 0; j < strip[i].size() - 1; j+=2){
-                cout << itemWidths[strip[i][j]][strip[i][j+1]] << " ";
-            }
-            cout << endl;
-        }
-        cout << endl;
-
-        cout << "stripSum:\n";
-        for(i = 0; i < stripSum.size(); ++i){
-            cout << stripSum[i] << " ";
-        }
-        cout << endl;
-
-
-        cout << "LB = " << LB << "\tstripSize = " << stripSize << "\tOPT = " << c << endl;
-        cout << "END INSTANCE = " << instance << endl << endl;
-
-    }
-
-    optimality(opt, opt90, opt80, opt70,opt60, opt50, optLow, stripSize, LB);
-
-} //End basicFFD
+} //End MFFD
 
 
 // Packing each strip in turn, choosing smallest score width that meets vicinal sum constraint.
-void pairSmallest(int instance, int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int numScores, int maxStripWidth,
-                  double totalItemWidth, vector<int> &allScores, vector<int> &partners, vector<vector<int> > &adjMatrix, vector<vector<int> > &itemWidths,
-                  vector<int> &stripSum, vector<vector<int> > &strip){
+void PairSmallest(int numScores, int stripWidth, vector<int> &allScores, vector<int> &partners, vector<vector<int> > &adjMatrix,
+                  vector<vector<int> > &itemWidths, vector<int> &stripSum, vector<vector<int> > &strip){
     int i, j;
     int count = 0;
     vector<int> scoreIncrease;
@@ -176,14 +103,6 @@ void pairSmallest(int instance, int &opt, int &opt90, int &opt80, int &opt70, in
         }
     }
 
-    /*if(instance == 1){
-        cout << "\nScore increase:\n";
-        for(i = 0; i < scoreIncrease.size(); ++i){
-            cout << scoreIncrease[i] << " ";
-        }
-        cout << endl << endl;
-    }*/
-
     j = 0;
     while (count < numScores){
         for(i = 0; i < scoreIncrease.size(); ++i){
@@ -201,7 +120,7 @@ void pairSmallest(int instance, int &opt, int &opt90, int &opt80, int &opt70, in
                 continue;
             }
             else if(!strip[j].empty()){
-                if(adjMatrix[strip[j].back()][scoreIncrease[i]] == 1 && stripSum[j] + itemWidths[scoreIncrease[i]][partners[scoreIncrease[i]]] <= maxStripWidth){
+                if(adjMatrix[strip[j].back()][scoreIncrease[i]] == 1 && stripSum[j] + itemWidths[scoreIncrease[i]][partners[scoreIncrease[i]]] <= stripWidth){
                     strip[j].push_back(scoreIncrease[i]);
                     strip[j].push_back(partners[scoreIncrease[i]]);
                     stripSum[j] += itemWidths[scoreIncrease[i]][partners[scoreIncrease[i]]];
@@ -216,54 +135,23 @@ void pairSmallest(int instance, int &opt, int &opt90, int &opt80, int &opt70, in
         ++j;
     }
 
-    int k = strip.size() - 1;
-    while(strip[k].empty()){
-        strip.pop_back();
-        --k;
-    }
-
-    int l = stripSum.size() -1;
-    while(stripSum[l] == 0){
+    while(stripSum.back() == 0){
         stripSum.pop_back();
-        --l;
+        strip.pop_back();
     }
 
-    int stripSize = strip.size();
-    int LB = lowerBound(maxStripWidth, totalItemWidth);
-    //double c = static_cast<double>(LB) / stripSize;
 
-    /*if(instance == 2){
-        cout << "\nstrips:\n";
-        for(i = 0; i < strip.size(); ++i){
-            cout << "strip " << i << ":\t";
-            for(j = 0; j < strip[i].size(); ++j){
-                cout << strip[i][j] << " ";
-            }
-            cout << endl;
-        }
-        cout << endl;
-    }
-
-    if(instance < 5){
-        //cout << "INSTANCE = " << instance << endl;
-        cout << "LB = " << LB << "\tstripSize = " << stripSize << "\tOPT = " << c << endl;
-        cout << "END INSTANCE = " << instance << endl << endl;
-    }*/
-
-    optimality(opt, opt90, opt80, opt70, opt60, opt50, optLow, stripSize, LB);
-
-} //End pairSmallest
+} //End PairSmallest
 
 
 // FFD including AHCA, instead of attempting to place item on end of strip, run AHCA to find feasible solution.
-void FFDincAHCA(int instance, int tau, int &opt, int &opt90, int &opt80, int &opt70, int &opt60, int &opt50, int &optLow, int numScores, int numItem, int maxItemWidth,
-                int maxStripWidth, double totalItemWidth, vector<int> &allScores, vector<int> &partners, vector<vector<int> > &adjMatrix,
-                vector<vector<int> > &itemWidths, vector<int> &stripSum, vector<vector<int> > &strip){
+void MFFDPlus(int tau,int numScores, int numItem, int maxItemWidth, int stripWidth, vector<int> &allScores, vector<int> &partners,
+              vector<vector<int> > &adjMatrix, vector<vector<int> > &itemWidths, vector<int> &stripSum, vector<vector<int> > &strip){
 
     int i, j, mini;
     int min = 0;
     int max = maxItemWidth;
-    bool feasible;
+    int feasible = 0;
     vector<int> itemDecrease;
     vector<int> checked(numScores, 0);
 
@@ -292,11 +180,38 @@ void FFDincAHCA(int instance, int tau, int &opt, int &opt90, int &opt80, int &op
     for(j = 1; j < itemDecrease.size(); ++j){
         for(i = 0; i < strip.size(); ++i){
             if(!strip[i].empty()){
-                if(stripSum[i] + itemWidths[itemDecrease[j]][partners[itemDecrease[j]]] <= maxStripWidth){
-                    feasible = false;
-                    AHCA(tau, i, j, feasible, allScores, partners, adjMatrix, itemWidths, itemDecrease, stripSum, strip);
-                    if(feasible){
-                        break;
+                if(stripSum[i] + itemWidths[itemDecrease[j]][partners[itemDecrease[j]]] <= stripWidth){
+                    if(strip[i].size() == 2){ //If the strip only contains one item, don't run AHCA, just do checks instead
+                        if(adjMatrix[strip[i].back()][itemDecrease[j]] == 1){
+                            strip[i].push_back(itemDecrease[j]);
+                            strip[i].push_back(partners[itemDecrease[j]]);
+                            stripSum[i] += itemWidths[itemDecrease[j]][partners[itemDecrease[j]]];
+                            break;
+                        }
+                        else if (adjMatrix[strip[i].back()][partners[itemDecrease[j]]] == 1){
+                            strip[i].push_back(partners[itemDecrease[j]]);
+                            strip[i].push_back(itemDecrease[j]);
+                            stripSum[i] += itemWidths[itemDecrease[j]][partners[itemDecrease[j]]];
+                            break;
+                        }
+                        else if(adjMatrix[strip[i].front()][itemDecrease[j]] == 1){
+                            strip[i].insert(strip[i].begin(), itemDecrease[j]);
+                            strip[i].insert(strip[i].begin(), partners[itemDecrease[j]]);
+                            stripSum[i] += itemWidths[itemDecrease[j]][partners[itemDecrease[j]]];
+                        }
+                        else if(adjMatrix[strip[i].front()][partners[itemDecrease[j]]] == 1){
+                            strip[i].insert(strip[i].begin(), partners[itemDecrease[j]]);
+                            strip[i].insert(strip[i].begin(), itemDecrease[j]);
+                            stripSum[i] += itemWidths[itemDecrease[j]][partners[itemDecrease[j]]];
+                        }
+                    }
+                    else { //Otherwise if more than 1 item on strip, run AHCA
+                        feasible = 0;
+                        AHCA(tau, i, j, feasible, allScores, partners, adjMatrix, itemWidths, itemDecrease, stripSum,
+                              strip);
+                        if (feasible == 1) {
+                            break;
+                        }
                     }
                 }
             }
@@ -309,73 +224,107 @@ void FFDincAHCA(int instance, int tau, int &opt, int &opt90, int &opt80, int &op
         }
     }
 
-    int k = strip.size() - 1;
-    while(strip[k].empty()){
-        strip.pop_back();
-        --k;
-    }
-
-    int l = stripSum.size() -1;
-    while(stripSum[l] == 0){
+    while(stripSum.back() == 0){
         stripSum.pop_back();
-        --l;
-    }
-
-    int stripSize = strip.size();
-    int LB = lowerBound(maxStripWidth, totalItemWidth);
-    double c = static_cast<double>(LB) / stripSize;
-
-    if(instance == 2){
-        cout << "\nscores on strips:\n";
-        for(i = 0; i < strip.size(); ++i){
-            cout << "strip " << i << ":\t";
-            for(j = 0; j < strip[i].size(); ++j){
-                cout << strip[i][j] << " ";
-            }
-            cout << endl;
-        }
-        cout << endl;
-
-        cout << "item widths on strips:\n";
-        for(i = 0; i < strip.size(); ++i){
-            cout << "strip " << i << ":\t";
-            for(j = 0; j < strip[i].size() - 1; j+=2){
-                cout << itemWidths[strip[i][j]][strip[i][j+1]] << " ";
-            }
-            cout << endl;
-        }
-        cout << endl;
-
-        cout << "stripSum:\n";
-        for(i = 0; i < stripSum.size(); ++i){
-            cout << stripSum[i] << " ";
-        }
-        cout << endl;
-
-
-        cout << "LB = " << LB << "\tstripSize = " << stripSize << "\tOPT = " << c << endl;
-        cout << "END INSTANCE = " << instance << endl << endl;
-
+        strip.pop_back();
     }
 
 
-    /*if(instance < 5){
-        //cout << "INSTANCE = " << instance << endl;
-        cout << "LB = " << LB << "\tstripSize = " << stripSize << "\tOPT = " << c << endl;
-        cout << "END INSTANCE = " << instance << endl << endl;
-    }*/
+} //End MFFDPlus
 
 
-    optimality(opt, opt90, opt80, opt70,opt60, opt50, optLow, stripSize, LB);
+void AHCA(int tau, int i1, int j1, int &feasible, vector<int> &allScores, vector<int> &partners, vector<vector<int> > &adjMatrix,
+           vector<vector<int> > &itemWidths, vector<int> &itemDecrease, vector<int> &stripSum, vector<vector<int> > &strip){
 
-} //End FFDincAHCA
+    int k;
+    vector<int> scores;
+    vector<int> original;
+    feasible = 0;
 
+    int dom = 150; /****/ //dominating score widths
 
-// Initializing instance for AHCA using items on the strip from FFDincAHCA and the item to be packed.
-void initializeInstance(int tau, int nScores, vector<vector<int> > &adjMat, vector<int> &scores, vector<int> &order, vector<int> &partnersX){
+    //Creating scores vector
+    for(k = 0; k < strip[i1].size(); ++k){
+        scores.push_back(allScores[strip[i1][k]]);
+        original.push_back(strip[i1][k]);
+    }
+    scores.push_back(allScores[itemDecrease[j1]]);
+    original.push_back(itemDecrease[j1]);
+    scores.push_back(allScores[partners[itemDecrease[j1]]]);
+    original.push_back(partners[itemDecrease[j1]]);
+    scores.push_back(dom); /****/
+    scores.push_back(dom); /****/
+
+    //Variables
+    int i, j, qstar;
+    int once = 0;
+    int vacant = 999;
+    int matchSize = 0;
+    int nCycles = 0;
+    int nScores = scores.size();
+    int nItem = scores.size() / 2;
+    int nComp = (nItem + (nItem % 2)) / 2;
+    vector<int> order;
+    vector<int> altHam;
+    vector<int> final;
+    vector<int> cycleVertex(nScores, 1);
+    vector<int> partnersX(nScores, vacant);
+    vector<int> matchList(nScores, vacant);
+    vector<int> edge;
+    vector<vector<int> > C;
+    vector<vector<int> > mpStructure;
+    vector<vector<int> > S(nComp, vector<int>(nComp, 0));
+    vector<vector<int> > adjMat(nScores, vector<int>(nScores, 0));
+
+    do {
+        once = 1;
+        InitInstance(tau, nScores, adjMat, scores, order, partnersX);
+
+        MCM(nScores, matchSize, adjMat, partnersX, matchList, cycleVertex);
+        if (matchSize < nItem) {
+            feasible = 0;
+            break;
+        }
+
+        MPS(nScores, nCycles, partnersX, matchList, mpStructure);
+        if (mpStructure[0].size() == nScores) {
+            for (j = 2; j < mpStructure[0].size(); ++j) {
+                altHam.push_back(mpStructure[0][j]);
+            }
+
+            for (i = 0; i < altHam.size(); ++i) {
+                final.push_back(original[order[altHam[i]]]);
+            }
+            feasible = 1;
+            break;
+        }
+
+        BR(qstar, matchSize, adjMat, matchList, cycleVertex, edge, mpStructure, C, S);
+        if (qstar == -1) {
+            feasible = 0;
+            break;
+        }
+
+        CP(nScores, nComp, feasible, qstar, nCycles, partnersX, matchList, cycleVertex, edge, adjMat, C, S, altHam);
+        if (feasible == 1) {
+            for (i = 0; i < altHam.size(); ++i) {
+                final.push_back(original[order[altHam[i]]]);
+            }
+            break;
+        }
+
+    } while (once == 0);
+
+    if(feasible == 1){
+        stripSum[i1] += itemWidths[itemDecrease[j1]][partners[itemDecrease[j1]]];
+        strip[i1].swap(final);
+    }
+
+} //End AHCA
+
+void InitInstance(int tau, int nScores, vector<vector<int> > &adjMat, vector<int> &scores, vector<int> &order, vector<int> &partnersX){
 
     int i, j;
-    int vacant = 999;
     vector<int> invOrder(nScores);
 
     for (i = 0; i < nScores; ++i) {
@@ -413,22 +362,21 @@ void initializeInstance(int tau, int nScores, vector<vector<int> > &adjMat, vect
     }
 
     for (i = 0; i < nScores; ++i) {
-        if(partnersX[i] == vacant) {
-            for (j = 0; j < nScores; ++j) {
-                if (adjMat[i][j] == 2) {
-                    partnersX[i] = j;
-                    partnersX[j] = i;
-                    break;
-                }
+        for (j = 0; j < nScores; ++j) {
+            if (adjMat[i][j] == 2) {
+                partnersX[i] = j;
             }
         }
+
     }
 
-} //End initializeInstance
 
 
-// Modified Maximum Cardinality Matching (MMCM) Algorithm.
-void MMCM(int nScores, int &matchSize, vector<vector<int> > &adjMat, vector<int> &partnersX, vector<int> &matchList, vector<int> &cycleVertex){
+}
+
+
+void MCM(int nScores, int &matchSize, vector<vector<int> > &adjMat, vector<int> &partnersX, vector<int> &matchList,
+         vector<int> &cycleVertex){
 
     int i, j;
     int vacant = 999;
@@ -470,10 +418,9 @@ void MMCM(int nScores, int &matchSize, vector<vector<int> > &adjMat, vector<int>
         }
     }
 
-} //End MMCM
+}
 
 
-// Matching-Partner Structure (MPS).
 void MPS(int nScores, int &nCycles, vector<int> &partnersX, vector<int> &matchList, vector<vector<int> > &mpStructure){
 
     int i, current;
@@ -483,6 +430,7 @@ void MPS(int nScores, int &nCycles, vector<int> &partnersX, vector<int> &matchLi
 
     do {
         current = smallest;
+        temp.clear();
         do {
             temp.push_back(current);
             checked[current] = 1;
@@ -504,12 +452,11 @@ void MPS(int nScores, int &nCycles, vector<int> &partnersX, vector<int> &matchLi
 
     nCycles = mpStructure.size();
 
-} //End MPS
+}
 
 
-// Bridge Recognition (BR) Algorithm.
-void BR(int &qstar, int matchSize, vector<vector<int> > &adjMat, vector<int> &matchList, vector<int> &cycleVertex, vector<int> &edge, vector<vector<int> > &mpStructure,
-        vector<vector<int> > &C, vector<vector<int> > &S){
+void BR(int &qstar, int matchSize, vector<vector<int> > &adjMat, vector<int> &matchList, vector<int> &cycleVertex, vector<int> &edge,
+        vector<vector<int> > &mpStructure, vector<vector<int> > &C, vector<vector<int> > &S){
 
     int i, j, k, nEdges;
     int vacant = 999;
@@ -552,11 +499,10 @@ void BR(int &qstar, int matchSize, vector<vector<int> > &adjMat, vector<int> &ma
         ++k;
     } while (k < nEdges - 1);
 
-} //End BR
+}
 
 
-// Connecting Procedure (CP).
-void CP(int nScores, int nComp, bool &feasible, int qstar, int nCycles, vector<int> &partnersX, vector<int> &matchList,
+void CP(int nScores, int nComp, int &feasible, int qstar, int nCycles, vector<int> &partnersX, vector<int> &matchList,
         vector<int> &cycleVertex, vector<int> &edge, vector<vector<int> > &adjMat, vector<vector<int> > &C, vector<vector<int> > &S, vector<int> &altHam){
 
     int a, i, j, k, l, q, u, v, SSum, SqIntS;
@@ -568,12 +514,11 @@ void CP(int nScores, int nComp, bool &feasible, int qstar, int nCycles, vector<i
     int maxRowSize = 0;
     int maxRow;
     int type;
-    //int nEdges = edge.size();
     vector<int> temp;
     vector<int> SSet2;
     vector<int> SSet3;
     vector<int> edgeCopy;
-    vector<int> connectML; //was patchML;
+    vector<int> connectML;
     vector<int> QSet(nComp, 0);
     vector<int> inCycle(nScores, 0);
     vector<int> connectCycle(nComp, vacant); //was patchCycleX
@@ -588,10 +533,9 @@ void CP(int nScores, int nComp, bool &feasible, int qstar, int nCycles, vector<i
         }
     }
 
-
     if (full != vacant) {
 
-        copy(matchList.begin(), matchList.end(), back_inserter(connectML));
+        connectML = matchList;
 
         for (v = 0; v < C[full].size() - 1; ++v) {
             connectML[C[full][v]] = matchList[C[full][v + 1]];
@@ -607,7 +551,7 @@ void CP(int nScores, int nComp, bool &feasible, int qstar, int nCycles, vector<i
         } while (altHam.size() < nScores);
 
         altHam.erase(altHam.begin(), altHam.begin() + 2);
-        feasible = true;
+        feasible = 1;
 
     }
 
@@ -649,7 +593,7 @@ void CP(int nScores, int nComp, bool &feasible, int qstar, int nCycles, vector<i
         if(type == 0){
             temp.clear();
             SSum = 0;
-            copy(edge.begin(), edge.end(), back_inserter(edgeCopy));
+            edgeCopy = edge;
             for(i = 0; i < C.size(); ++i){
                 if(C[i].size() > maxRowSize){
                     maxRowSize = C[i].size();
@@ -682,18 +626,15 @@ void CP(int nScores, int nComp, bool &feasible, int qstar, int nCycles, vector<i
             int nEdgesC = edgeCopy.size();
             bool added = false;
             int lastRow = Cconnect.size();
-            //k = 0;
 
             while (!added) {
                 k = 0;
                 do {
-                    while (k < nEdgesC - 2 && (adjMat[edgeCopy[k]][matchList[edgeCopy[k + 1]]] != 1 ||
-                                               cycleVertex[edgeCopy[k]] == cycleVertex[edgeCopy[k + 1]])) {
+                    while (k < nEdgesC - 2 && (adjMat[edgeCopy[k]][matchList[edgeCopy[k + 1]]] != 1 || cycleVertex[edgeCopy[k]] == cycleVertex[edgeCopy[k + 1]])) {
                         ++k;
                     }
 
-                    if (adjMat[edgeCopy[k]][matchList[edgeCopy[k + 1]]] == 1 &&
-                        cycleVertex[edgeCopy[k]] != cycleVertex[edgeCopy[k + 1]]
+                    if (adjMat[edgeCopy[k]][matchList[edgeCopy[k + 1]]] == 1 && cycleVertex[edgeCopy[k]] != cycleVertex[edgeCopy[k + 1]]
                         && ((SSet2[cycleVertex[edgeCopy[k]]] == 0 && SSet2[cycleVertex[edgeCopy[k + 1]]] == 1)
                             || (SSet2[cycleVertex[edgeCopy[k]]] == 1 && SSet2[cycleVertex[edgeCopy[k + 1]]] == 0))) {
                         temp.push_back(edgeCopy[k]);
@@ -703,8 +644,7 @@ void CP(int nScores, int nComp, bool &feasible, int qstar, int nCycles, vector<i
                         ++SSum;
                         if (SSum < nCycles) {
                             ++k;
-                            while (k < nEdgesC - 1 && SSet2[cycleVertex[edgeCopy[k + 1]]] == 0 &&
-                                   adjMat[edgeCopy[k]][matchList[edgeCopy[k + 1]]] == 1) {
+                            while (k < nEdgesC - 1 && SSet2[cycleVertex[edgeCopy[k + 1]]] == 0 && adjMat[edgeCopy[k]][matchList[edgeCopy[k + 1]]] == 1) {
                                 ++k;
                                 temp.push_back(edgeCopy[k]);
                                 SSet2[cycleVertex[edgeCopy[k]]] = 1;
@@ -736,7 +676,6 @@ void CP(int nScores, int nComp, bool &feasible, int qstar, int nCycles, vector<i
                     lastRow = Cconnect.size();
                     added = false;
                     nEdgesC = edgeCopy.size();
-                    //k = 0;
                 }
                 else if(added == false){
                     break;
@@ -828,7 +767,7 @@ void CP(int nScores, int nComp, bool &feasible, int qstar, int nCycles, vector<i
                 exit(1);
             }
 
-            copy(matchList.begin(), matchList.end(), back_inserter(connectML));
+            connectML = matchList;
 
             for (u = 0; u < Cconnect.size(); ++u) {
                 for (v = 0; v < Cconnect[u].size() - 1; ++v) {
@@ -847,109 +786,15 @@ void CP(int nScores, int nComp, bool &feasible, int qstar, int nCycles, vector<i
             } while (altHam.size() < nScores);
 
             altHam.erase(altHam.begin(), altHam.begin() + 2);
-            feasible = true;
+            feasible = 1;
         }
 
         else {
-            feasible = false;
+            feasible = 0;
         }
     }
 
-} //End CP
-
-
-// Alternating Hamiltonian Construction Algorithm (AHCA).
-void AHCA(int tau, int i1, int j1, bool &feasible, vector<int> &allScores, vector<int> &partners, vector<vector<int> > &adjMatrix,
-          vector<vector<int> > &itemWidths, vector<int> &itemDecrease, vector<int> &stripSum, vector<vector<int> > &strip){
-
-    int k;
-    vector<int> scores;
-    vector<int> original;
-    feasible = false;
-
-    //Creating scores vector
-    for(k = 0; k < strip[i1].size(); ++k){
-        scores.push_back(allScores[strip[i1][k]]);
-        original.push_back(strip[i1][k]);
-    }
-    scores.push_back(allScores[itemDecrease[j1]]);
-    original.push_back(itemDecrease[j1]);
-    scores.push_back(allScores[partners[itemDecrease[j1]]]);
-    original.push_back(partners[itemDecrease[j1]]);
-    scores.push_back(tau);
-    scores.push_back(tau);
-
-    //Variables
-    int i, j, qstar;
-    int once = 0;
-    int vacant = 999;
-    int matchSize = 0;
-    int nCycles = 0;
-    int nScores = scores.size();
-    int nItem = scores.size() / 2;
-    int nComp = (nItem + (nItem % 2)) / 2;
-    vector<int> order;
-    vector<int> altHam;
-    vector<int> final;
-    vector<int> cycleVertex(nScores, 1);
-    vector<int> partnersX(nScores, vacant);
-    vector<int> matchList(nScores, vacant);
-    vector<int> edge;
-    vector<vector<int> > C;
-    vector<vector<int> > mpStructure;
-    vector<vector<int> > S(nComp, vector<int>(nComp, 0));
-    vector<vector<int> > adjMat(nScores, vector<int>(nScores, 0));
-
-    do {
-        once = 1;
-        initializeInstance(tau, nScores, adjMat, scores, order, partnersX);
-
-        MMCM(nScores, matchSize, adjMat, partnersX, matchList, cycleVertex);
-        if (matchSize < nItem) {
-            feasible = false;
-            break;
-        }
-
-        MPS(nScores, nCycles, partnersX, matchList, mpStructure);
-        if (mpStructure[0].size() == nScores) {
-            for (j = 2; j < mpStructure[0].size(); ++j) {
-                altHam.push_back(mpStructure[0][j]);
-            }
-
-            //altHam.erase(altHam.begin(), altHam.begin() + 2);
-
-            for (i = 0; i < altHam.size(); ++i) {
-                final.push_back(original[order[altHam[i]]]);
-            }
-            feasible = true;
-            break;
-        }
-
-        BR(qstar, matchSize, adjMat, matchList, cycleVertex, edge, mpStructure, C, S);
-        if (qstar == -1) {
-            feasible = false;
-            break;
-        }
-
-        CP(nScores, nComp, feasible, qstar, nCycles, partnersX, matchList, cycleVertex, edge, adjMat, C, S, altHam);
-        if (feasible) {
-            for (i = 0; i < altHam.size(); ++i) {
-                final.push_back(original[order[altHam[i]]]);
-            }
-            break;
-        }
-
-    } while (once == 0);
-
-    if(feasible){
-        stripSum[i1] += itemWidths[itemDecrease[j1]][partners[itemDecrease[j1]]];
-        strip[i1].swap(final);
-    }
-
-} //End AHCA
-
-
-
+}
 
 
 
