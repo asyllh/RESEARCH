@@ -20,9 +20,9 @@ Firstly, let us introduce the Constrained Ordering Problem (COP):
 	Let $\mathcal{M}$ be a multiset of unordered pairs of positive integers $\mathcal{M} = \{\{a_1, b_1\}, \{a_2,b_2\},...,\{a_n,b_n\}\}$, and let $\mathcal{T}$ be an ordering of the elements of $\mathcal{M}$ such that each element is a tuple. The Constrained Ordering Problem (COP) consists of finding a solution $\mathcal{T}$ such that, given a fixed value $\tau \in \mathbb{Z}^{+},$
 	\begin{equation}
 		\label{eqn:vsc}
-		\textup{\textbf{rhs}}(i) + \textup{\textbf{lhs}}(i+1) \geq \tau \hspace{5mm} \forall \hspace{1mm} i \in \{1,2,..., n-1\},
+		\emph{\textbf{rhs}}(i) + \emph{\textbf{lhs}}(i+1) \geq \tau \hspace{5mm} \forall \hspace{1mm} i \in \{1,2,..., n-1\},
 	\end{equation}
-	where \textup{\textbf{lhs}($i$)} and \textup{\textbf{rhs}($i$)} denote the left- and right-hand values of the $i$th tuple. The inequality is referred to as the \textup{vicinal sum constraint}.
+	where \emph{\textbf{lhs}($i$)} and \emph{\textbf{rhs}($i$)} denote the left- and right-hand values of the $i$th tuple. The inequality is referred to as the \emph{vicinal sum constraint}.
 \end{definition}
 
 For example, given the multiset $\mathcal{M} = \{\{1,2\}, \{1,7\}, \{2,4\}, \{3,5\}, \{3,6\}, \{4,4\}\}$ and $\tau = 7$, one possible solution is $\mathcal{T} = \langle(1,2), (6,3), (5,3), (4,4), (4,2), (7,1) \rangle$.
@@ -211,14 +211,14 @@ For an instance of the SCSPP, a feasible solution is represented by the set $\ma
 
 That is, all items must be packed onto a strip (\ref{eqn:packall}), each item can only be placed on one strip (\ref{eqn:nooverlap}), the strips cannot be overfilled (\ref{eqn:capacity}), and the items on each strip $S_j$ in the solution must be arranged such that the vicinal sum constraint is fulfilled, that is, the sum of every pair of adjacent score widths is greater than or equal to the minimum scoring distance $\tau$ (\ref{eqn:vscstrip}).
 
-An optimal solution $\mathcal{S}$ of an instance of the SCSPP is a solution that consists of the fewest number of strips $k$. A simple lower bound for $k$ that can be computed in $O(n)$ time is given by 
+An optimal solution $\mathcal{S}$ for the SCSPP is a solution that consists of the fewest number of strips $k$ needed to feasibly contain the $|\mathcal{I}|$ items in the given problem instance. A simple lower bound for $k$ is the theoretical minimum
 \begin{equation}
 \label{eqn:lowerbound}
-k \geq \ceil*{\frac{\sum_{i=1}^{n}w_i}{W}},
+t = \ceil*{\frac{\sum_{i=1}^{|\mathcal{I}|}w_i}{W}},
 \end{equation}
-where $n = |\mathcal{I}|$ is the number of items (\citealp{martello1990b}). Perhaps the simplest and most well-known heuristic for packing problems is \textsc{First-Fit} (FF), a greedy online algorithm that places each item presented in some arbitrary order onto the lowest-indexed strip such that the capacity of the strip is not exceeded. It is known that there always exists at least one ordering of the items such that FF produces an optimal solution (\citealp{lewis2009}). A minor modification to FF yields the \textsc{First-Fit Decreasing} (FFD) heuristic, which sorts the items in non-increasing order of size prior to performing FF. In 1973, \citeauthor{johnson1973} showed that FFD is guaranteed to return a solution that uses no more than $\frac{11}{9}k + 4$ strips. More recently, \cite{dosa2007} has proven that the worst case for FFD is in fact $\frac{11}{9}k + \frac{6}{9}$, and that this bound is tight. Due to the initial sorting of the $n$ items in non-increasing order of sizes, the time complexity of FFD is $O(n\log n)$.
+which can be computed in linear time (\citealp{martello1990b}). Perhaps the simplest and most well-known heuristic for packing problems is \textsc{First-Fit} (FF), a greedy online algorithm that places each item presented in some arbitrary order onto the lowest-indexed strip such that the capacity of the strip is not exceeded. It is known that there always exists at least one ordering of the items such that FF produces an optimal solution (\citealp{lewis2009}). A minor modification to FF yields the \textsc{First-Fit Decreasing} (FFD) heuristic, which sorts the items in non-increasing order of size prior to performing FF. In 1973, \citeauthor{johnson1973} showed that FFD is guaranteed to return a solution that uses no more than $\frac{11}{9}k + 4$ strips. More recently, \cite{dosa2007} has proven that the worst case for FFD is in fact $\frac{11}{9}k + \frac{6}{9}$, and that this bound is tight. Due to the initial sorting of the items in non-increasing order of sizes, the time complexity of FFD is $O(n\log n)$, where $n = |\mathcal{I}|$ is the input size.
 
-As mentioned in the introduction, the SCSPP shares many similarities with the BPP, however the addition of constraint (\ref{eqn:vscstrip}) induces complications that must be taken into consideration. One obvious difference is the order in which the items must appear on the strips. The order of the items in the BPP is unimportant, as there are no conditions regarding which items can be placed together, however in the SCSPP the items must be ordered in a way that meets the vicinal sum constraint. In addition, removing an item in the BPP retains feasibility, whereas in the SCSPP this is not guaranteed, as it may leave a subset of items for which the vicinal sum constraint is not satisfied. Furthermore, the lower bound for $k$ (Equation (\ref{eqn:lowerbound})) has the potential to be less accurate for the SCSPP, as the minimum scoring distance $\tau$ is not considered. For example, if the minimum scoring distance is greater than twice the largest score width, then it is clear that $n$ strips will be required, regardless of the items' widths.
+As mentioned in the introduction, the SCSPP shares many similarities with the BPP, however the addition of constraint (\ref{eqn:vscstrip}) induces complications that must be taken into consideration. One obvious difference is the order in which the items must appear on the strips. The order of the items in the BPP is unimportant, as there are no conditions regarding which items can be placed together, however in the SCSPP the items must be ordered in a way that meets the vicinal sum constraint. In addition, removing an item in the BPP retains feasibility, whereas in the SCSPP this is not guaranteed, as it may leave a subset of items for which the vicinal sum constraint is not satisfied. Furthermore, the theoretical minimum $t$ (Equation (\ref{eqn:lowerbound})) has the potential to be less accurate for the SCSPP, as the minimum scoring distance $\tau$ is not considered. For example, if the minimum scoring distance is greater than twice the largest score width, then it is clear that $|\mathcal{I}|$ strips will be required, regardless of the items' widths.
 % Time complexity for FFD also inaccurate
 
 Three heuristics for the SCSPP have been developed: a basic FFD heuristic with a simple modification; a heuristic that packs strips individually and prioritises score widths; and a powerful version of FFD that incorporates the polynomial-time AHC algorithm.
@@ -255,101 +255,152 @@ The last heuristic incorporates AHC as described in Section \ref{sec:ahca}. The 
 \section{Comparison}
 For our experiments, we generated 1000 problem instances for three different sizes of $\mathcal{I}$, containing 100, 500, and 1000 items. For each problem instance, the items have varying widths $w_i$ between 150 and 1000, and score widths $a_i, b_i$ between 1 and 70, all selected randomly from a uniform distribution. Three strip widths $W$ were used, 5000, 2500, and 1250. As the width of the strips decrease, the average number of items per strip also decreases, making the problem more difficult. Both the items and the strips have equal height of $H = 1$. Similarly to experiments performed by \cite{lewis2011}, we also introduced a parameter $\delta$ to denote the proportion of pairs of score widths from different items that meet the vicinal sum constraint, i.e. whose sum is greater than or equal to $\tau$. Values of $\delta$ from 0.0 to 1.0 were created by changing the value of the minimum scoring distance $\tau$. Clearly, when $\delta = 0.0$, there are no score widths that can be packed together feasibly, and so $|\mathcal{I}|$ strips will be required (one for each item), whereas if $\delta = 1.0$ then all pairs of score widths meet the constraint, and the problem is analogous to the BPP.
 
-The heuristics were implemented in C++ and executed on a computer equipped with an Intel Core i3-2120 processor with a frequency of 3.30GHz. The tables below show the average optimality of the heuristics for each value of $\delta$ from 1000 instances, where the optimality of each instance is the ratio of the number of strips in the final solution obtained by the heuristic to the lower bound for the optimal number of strips $k$, which was calculated using Equation \ref{eqn:lowerbound}. 
+The heuristics were implemented in C++ and executed on a computer equipped with an Intel Core i3-2120 processor with a frequency of 3.30GHz. The tables below show the average optimality of the heuristics for each value of $\delta$ from 1000 instances, where the optimality of each instance is the ratio of the number of strips in the final solution obtained by the heuristic to the theoretical minimum $t$, which was calculated using Equation \ref{eqn:lowerbound}. 
 
 Firstly, it is apparent that the heuristics perform comparitively in the same manner regardless of the input size. 
 
 \begin{itemize}
-	\item ``BPP becomes easier to solve when the number of items per bin increases, and problems with two or less items per bin are trivial to solve. Triplers are proposed to be `the most difficult bin packing instances''' \cite{falkenauer1996}.
-	\item Fair comparison, running over 1000 instances (average of 1000 instances)
-	\item Note that MFFD and MFFD$^+$ perform identically when $\delta = 1.0$, as they both perform in exactly the same manner as the original FFD heuristic  
-	\item All instances completed in less than 160ms
-	\item PS is not able to reach highest optimality in any case from $\delta = 0.8$ onwards.
+	\item \textbf{PairSmallest:}
+	\item Best average optimality over all three set sizes for $W = 5000$ and $W = 2500$ for $\delta = 0.1 - 0.6$, in some cases up to $\delta = 0.8$.
+	\item However, when $W = 1250$, PS only has best average optimality for $\delta = 0.1$ and $\delta = 0.2$. 
+	\item PS is able to obtain solution that are on average within 10\% of the lower bound for the optimal solution for $\delta = 0.6$ onwards when $W=5000$ and $W = 2500$.
+	\item When $W = 1250$, PS only obtains solutions within 10\% of the lowerbound for $\delta = 0.8$ onwards with set sizes 500 and 1000. For $|\mathcal{I}| = 100$, PS is not able to (on average) obtain solutions within 10\% of the lower bound for any value of $\delta$.
+	\item Clear pattern across all three set sizes, PS performs better when the strip widths are wider, however PS is still the best of the three heuristics for smaller strip widths and harder problems, i.e. when $\delta$ is smaller. 
+	\item PS never obtains avg solution within 1\% of lower bound.
+\end{itemize}
+
+
+
+
+\begin{itemize}
+	\item optimality converge toward 1 as $\delta$ increases, i.e. as the problem instances become less difficult.
+	\item When $\delta = 1.0$. MFFD and MFFD$^+$ perform identically, as the problems are equivalent to the original BPP, and so they behave like the original FFD heuristic.
+	\item When $\delta = 0.0$, all optimalities are equal, as each item requires its own strip, and so $|\mathcal{I}|$ strips are needed for all 1000 instances.
+	\item Values in bold represent the best avg optimality of the three heuristics for the given level of $\delta$. 
+	\item Clear pattern across both set sizes, PS performs the best out of the three for $\delta = 0.1$ to 0.7 when $W = 5000$, and for $\delta = 0.1$ to 0.6 when $W = 2500$.
+	\item However, when $W = 1250$, PS is only superior when $\delta = 0.1$ and 0.2. 
+	\item On further inspection, we can see that the difference between the average optimalities for PS and MFFD$^+$ is negligible.
+	\item Using Table 1 as an example, when $\delta = 0.2$, the solutions generated by PS are on average within 31.781\% of $t$, and for MFFD$^+$ within 32.61\%, a difference of 0.829\%. 
+	\item In practical terms, PS produces solutions using 303.95 strips on average, where $t = 230.648$. MFFD$^+$ produces solutions using 305.862 strips, a difference of less than two strips. 
+	\item Another trend is that PS produces average solutions within 10\% of $t$ for $\delta = 0.5$ onwards when $W = 5000$ and 2500, however when $W = 1250$, PS only produces solutions within 10\% of $t$ for $\delta = 0.8$ onwards.
+	\item In contrast, MFFD and MFFD$^+$ can produce solution within 10\% of $t$ when $W = 1250$ for $\delta = 0.5$ onwards for $n = 500$, and $\delta = 0.4$ for $n = 1000$.
+	\item MFFD$^+$ can also find solutions within 1\% of $t$ for $\delta = 0.8$ onwards for all strip widths in both set sizes.
+	\item Number of items per strip smaller, problem is harder, falkenauer 1996, martello and toth 1990b
 	\item 
 \end{itemize}
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 \begin{table}[!htb]
 	\centering
-	\caption{$n = 100$}
-	\begin{tabular}{c@{\hspace{15pt}}c@{\hspace{10pt}}c@{\hspace{10pt}}c@{\hspace{7pt}}| @{\hspace{7pt}}c@{\hspace{10pt}}c@{\hspace{10pt}}c@{\hspace{7pt}}| @{\hspace{7pt}} c@{\hspace{10pt}}c@{\hspace{10pt}}c}
-		\noalign{\smallskip}
-		& \multicolumn{3}{c}{$W = 5000$} & \multicolumn{3}{c}{$W = 2500$} & \multicolumn{3}{c}{$W = 1250$} \\
-		\hline\noalign{\smallskip}
-		$\delta$ & MFFD & PS & MFFD$^+$ & MFFD & PS & MFFD$^+$ & MFFD & PS & MFFD$^+$ \\
-		\noalign{\smallskip}
-		\hline 
-		\noalign{\smallskip}
-		0.0	& 8.35709 & 8.35709 & 8.35709 & 4.26800 & 4.26800 & 4.26800 & 2.15624 & 2.15624 & 2.15624 \\
-		0.1	& 5.27284 & \textbf{4.89963} & 5.14404 & 2.72299 & \textbf{2.48800} & 2.69191 & 1.53147 & \textbf{1.51049} & 1.52968 \\
-		0.2	& 4.16155 & \textbf{3.46467} & 3.98645 & 2.21096 & \textbf{1.87449} & 2.16338 & 1.34812 & \textbf{1.34499} & 1.34593 \\
-		0.3	& 3.27805 & \textbf{2.40153} & 3.05546 & 1.82199 & \textbf{1.43724} & 1.75610 & 1.22453 & 1.24810 & \textbf{1.21994} \\
-		0.4	& 2.61641 & \textbf{1.63390} & 2.33662 & 1.54989 & \textbf{1.16887} & 1.46534 & 1.14507 & 1.19631 & \textbf{1.13979} \\
-		0.5	& 2.08260 & \textbf{1.13827} & 1.77494 & 1.35101 & \textbf{1.04978} & 1.25567 & 1.09274 & 1.17069 & \textbf{1.08661} \\
-		0.6	& 1.65897 & \textbf{1.02027} & 1.36093 & 1.20040 & \textbf{1.03720} & 1.11964 & 1.06255 & 1.15766 & \textbf{1.05701} \\
-		0.7	& 1.32002 & \textbf{1.01350} & 1.11348 & 1.09659 & \textbf{1.03556} & 1.04569 & 1.04546 & 1.14416 & \textbf{1.04150} \\
-		0.8	& 1.10725 & \textbf{1.01384} & 1.02188 & 1.03577 & 1.03439 & \textbf{1.01696} & 1.03711 & 1.12951 & \textbf{1.03565} \\
-		0.9	& 1.02134 & 1.01315 & \textbf{1.00646} & 1.01364 & 1.03285 & \textbf{1.01029} & 1.03434 & 1.11631 & \textbf{1.03416} \\
-		1.0 & \textbf{1.00480} & 1.01302 & \textbf{1.00480} & \textbf{1.00919} & 1.03261 & \textbf{1.00919} & \textbf{1.03393} & 1.10807 & \textbf{1.03393} \\	
-		\hline
-	\end{tabular}
-	\label{table:n100}
+	\ra{1.3}
+	\caption{Average optimality ratios for $|\mathcal{I}| = 500$.}
+	\begin{tabular}{@{}c@{\hspace{25pt}}c@{\hspace{8pt}}c@{\hspace{8pt}}ccc@{\hspace{8pt}}c@{\hspace{8pt}}ccc@{\hspace{8pt}}c@{\hspace{8pt}}c@{}}\toprule
+		& \multicolumn{3}{c}{$W = 5000$, $t = 58.039$} & \phantom{abcd} & \multicolumn{3}{c}{$W = 2500$, $t = 115.571$} & \phantom{abcd} & \multicolumn{3}{c}{$W = 1250$, $t = 230.648$} \\
+		\cmidrule{2-4} \cmidrule{6-8} \cmidrule{10-12}
+		$\delta$ & MFFD & PS & MFFD$^+$ && MFFD & PS & MFFD$^+$ && MFFD & PS & MFFD$^+$\\ \midrule
+		0.0 & 8.61813 & 8.61813 & 8.61813 && 4.32789 & 4.32789 & 4.32789 && 2.16858 & 2.16858 & 2.16858 \\
+		0.1 & 5.21367 & \textbf{4.84177} & 5.16085 && 2.65934 & \textbf{2.47735} & 2.65679 && 1.51486 & \textbf{1.47896} & 1.51486 \\
+		0.2 & 4.03055 & \textbf{3.45946} & 3.97645 && 2.12099 & \textbf{1.84737} & 2.11788 && 1.32613 & \textbf{1.31781} & 1.32610 \\
+		0.3 & 3.11091 & \textbf{2.34803} & 3.03816 && 1.72955 & \textbf{1.39676} & 1.70772 && 1.19451 & 1.22922 & \textbf{1.19381} \\
+		0.4 & 2.43605 & \textbf{1.52907} & 2.29713 && 1.45976 & \textbf{1.12798} & 1.40951 && 1.11037 & 1.18065 & \textbf{1.10819} \\
+		0.5 & 1.91057 & \textbf{1.04130} & 1.69129 && 1.26343 & \textbf{1.03341} & 1.19575 && 1.05771 & 1.15415 & \textbf{1.05319} \\
+		0.6 & 1.49086 & \textbf{1.01263} & 1.24645 && 1.12448 & \textbf{1.02957} & 1.06874 && 1.02932 & 1.13470 & \textbf{1.02398} \\
+		0.7 & 1.19571 & \textbf{1.01257} & 1.04468 && 1.04933 & 1.02774 & \textbf{1.01918} && 1.01741 & 1.11368 & \textbf{1.01444} \\
+		0.8 & 1.04977 & 1.01203 & \textbf{1.00815} && 1.01595 & 1.02661 & \textbf{1.00790} && 1.01297 & 1.09136 & \textbf{1.01197} \\
+		0.9 & 1.00929 & 1.01197 & \textbf{1.00463} && 1.00734 & 1.02586 & \textbf{1.00641} && 1.01159 & 1.07283 & \textbf{1.01139} \\
+		1.0 & \textbf{1.00423} & 1.01171 & \textbf{1.00423} && \textbf{1.00626} & 1.02561 & \textbf{1.00626} && \textbf{1.01130} & 1.06549 & \textbf{1.01130} \\
+		\bottomrule
+	\end{tabular}	
+	\label{table:n=500}
 \end{table}
 
 \begin{table}[!htb]
 	\centering
-	\caption{$n = 500$}
-	\begin{tabular}{c@{\hspace{15pt}}c@{\hspace{10pt}}c@{\hspace{10pt}}c@{\hspace{7pt}}| @{\hspace{7pt}}c@{\hspace{10pt}}c@{\hspace{10pt}}c@{\hspace{7pt}}| @{\hspace{7pt}} c@{\hspace{10pt}}c@{\hspace{10pt}}c}
-		\noalign{\smallskip}
-		& \multicolumn{3}{c}{$W = 5000$} & \multicolumn{3}{c}{$W = 2500$} & \multicolumn{3}{c}{$W = 1250$} \\
-		\hline\noalign{\smallskip}
-		$\delta$ & MFFD & PS & MFFD$^+$ & MFFD & PS & MFFD$^+$ & MFFD & PS & MFFD$^+$ \\
-		\noalign{\smallskip}
-		\hline
-		\noalign{\smallskip}
-		0.0 & 8.61813 & 8.61813 & 8.61813 & 4.32789 & 4.32789 & 4.32789 & 2.16858 & 2.16858 & 2.16858 \\
-		0.1 & 5.21367 & \textbf{4.84177} & 5.16085 & 2.65934 & \textbf{2.47735} & 2.65679 & 1.51486 & \textbf{1.47896} & 1.51486 \\
-		0.2 & 4.03055 & \textbf{3.45946} & 3.97645 & 2.12099 & \textbf{1.84737} & 2.11788 & 1.32613 & \textbf{1.31781} & 1.32610 \\
-		0.3 & 3.11091 & \textbf{2.34803} & 3.03816 & 1.72955 & \textbf{1.39676} & 1.70772 & 1.19451 & 1.22922 & \textbf{1.19381} \\
-		0.4 & 2.43605 & \textbf{1.52907} & 2.29713 & 1.45976 & \textbf{1.12798} & 1.40951 & 1.11037 & 1.18065 & \textbf{1.10819} \\
-		0.5 & 1.91057 & \textbf{1.04130} & 1.69129 & 1.26343 & \textbf{1.03341} & 1.19575 & 1.05771 & 1.15415 & \textbf{1.05319} \\
-		0.6 & 1.49086 & \textbf{1.01263} & 1.24645 & 1.12448 & \textbf{1.02957} & 1.06874 & 1.02932 & 1.13470 & \textbf{1.02398} \\
-		0.7 & 1.19571 & \textbf{1.01257} & 1.04468 & 1.04933 & 1.02774 & \textbf{1.01918} & 1.01741 & 1.11368 & \textbf{1.01444} \\
-		0.8 & 1.04977 & 1.01203 & \textbf{1.00815} & 1.01595 & 1.02661 & \textbf{1.00790} & 1.01297 & 1.09136 & \textbf{1.01197} \\
-		0.9 & 1.00929 & 1.01197 & \textbf{1.00463} & 1.00734 & 1.02586 & \textbf{1.00641} & 1.01159 & 1.07283 & \textbf{1.01139} \\
-		1.0 & \textbf{1.00423} & 1.01171 & \textbf{1.00423} & \textbf{1.00626} & 1.02561 & \textbf{1.00626} & \textbf{1.01130} & 1.06549 & \textbf{1.01130} \\		
-		\hline
+	\ra{1.3}
+	\caption{Average optimality ratios for $|\mathcal{I}| = 1000$.}
+	\begin{tabular}{@{}c@{\hspace{25pt}}c@{\hspace{8pt}}c@{\hspace{8pt}}ccc@{\hspace{8pt}}c@{\hspace{8pt}}ccc@{\hspace{8pt}}c@{\hspace{8pt}}c@{}}\toprule
+		& \multicolumn{3}{c}{$W = 5000$, $t = 115.534$} & \phantom{abcd} & \multicolumn{3}{c}{$W = 2500$, $t = 230.563$} & \phantom{abcd} & \multicolumn{3}{c}{$W = 1250$, $t = 460.623$} \\
+		\cmidrule{2-4} \cmidrule{6-8} \cmidrule{10-12}
+		$\delta$ & MFFD & PS & MFFD$^+$ && MFFD & PS & MFFD$^+$ && MFFD & PS & MFFD$^+$\\ \midrule
+		0.0 & 8.65711 & 8.65711 & 8.65711 && 4.33803 & 4.33803 & 4.33803 && 2.17138 & 2.17138 & 2.17138 \\
+		0.1 & 5.17263 & \textbf{4.84248} & 5.14027 && 2.63606 & \textbf{2.48111} & 2.64271 && 1.51056 & \textbf{1.46744} & 1.51121 \\
+		0.2 & 3.97565 & \textbf{3.46163} & 3.95164 && 2.09301 & \textbf{1.85824} & 2.10161 && 1.31785 & \textbf{1.31090} & 1.31876 \\
+		0.3 & 3.04866 & \textbf{2.35023} & 3.01260 && 1.69777 & \textbf{1.40862} & 1.68776 && \textbf{1.18304} & 1.22111 & 1.18344 \\
+		0.4 & 2.37436 & \textbf{1.52046} & 2.26560 && 1.42646 & \textbf{1.13101} & 1.38430 && 1.09722 & 1.17063 & \textbf{1.09614} \\
+		0.5 & 1.84748 & \textbf{1.02600} & 1.64169 && 1.22960 & \textbf{1.03017} & 1.16950 && 1.04411 & 1.14430 & \textbf{1.03986} \\
+		0.6 & 1.43331 & \textbf{1.01212} & 1.20264 && 1.09935 & \textbf{1.02738} & 1.05010 && 1.01971 & 1.12392 & \textbf{1.01480} \\
+		0.7 & 1.15500 & \textbf{1.01198} & 1.02574 && 1.03421 & 1.02569 & \textbf{1.01224} && 1.01150 & 1.10164 & \textbf{1.00926} \\
+		0.8 & 1.03182 & 1.01182 & \textbf{1.00587} && 1.01111 & 1.02454 & \textbf{1.00682} && 1.00861 & 1.07791 & \textbf{1.00804} \\
+		0.9 & 1.00707 & 1.01165 & \textbf{1.00419} && 1.00663 & 1.02406 & \textbf{1.00608} && 1.00784 & 1.05885 & \textbf{1.00774} \\
+		1.0 & \textbf{1.00399} & 1.01169 & \textbf{1.00399} && \textbf{1.00603} & 1.02400 & \textbf{1.00603} && \textbf{1.00770} & 1.05406 & \textbf{1.00770} \\
+		\bottomrule
 	\end{tabular}
-	\label{table:n500}
-\end{table}	
+	\label{table:n=1000}	
+\end{table}
 
 
+\begin{comment}
+\begin{itemize}
+	\item ``BPP becomes easier to solve when the number of items per bin increases, and problems with two or less items per bin are trivial to solve. Triplets are proposed to be `the most difficult bin packing instances''' \cite{falkenauer1996}.
+	\item Fair comparison, running over 1000 instances (average of 1000 instances)
+	\item Note that MFFD and MFFD$^+$ perform identically when $\delta = 1.0$, as they both perform in exactly the same manner as the original FFD heuristic  
+	\item All instances completed in less than 160ms
+	\item PS is not able to reach highest optimality in any case from $\delta = 0.8$ onwards.
+	\item If optimality = 1 then lower bound reached
+	\item state that bold is best optimality
+	\item PS never obtains best avg optimality at  $\delta = 1.0$ in any case
+	\item As W decreases, i.e. items/strip decreases, PS becomes less efficient, mffd+ better
+	\item n = 1000 W = 1250 PS doesnt obtain soln $<$ 10\% for any value of $\delta$
+	\item mffd+ $<$ 10\% for $\delta = 0.8$ onwards in all cases
+	\item mffd+ and mffd+ able to get $<$ 10\% for W = 1250 for n = 100 and 500 $\delta = 0.5$, and n = 1000 $\delta = 0.4$ onwards
+	\item PS never obtains avg solns $<$ 1\% in any case
+	\item In a few cases, mffd+ able to get avg opt $<$ 1\% for smaller values of $\delta$ than mffd.
+	\item PS able to get $<$ 10\% for $\delta = 0.6$ onwards in n= 100, 500, 1000, and W=5000,2500, but reduces significantly when W = 1250.
+	\item First row is avg number of items per strip.
+\end{itemize}
+\end{comment}
+
+\begin{comment}
 \begin{table}[!htb]
 	\centering
-	\caption{$n = 1000$}
-	\begin{tabular}{c@{\hspace{15pt}}c@{\hspace{10pt}}c@{\hspace{10pt}}c@{\hspace{7pt}}| @{\hspace{7pt}}c@{\hspace{10pt}}c@{\hspace{10pt}}c@{\hspace{7pt}}| @{\hspace{7pt}} c@{\hspace{10pt}}c@{\hspace{10pt}}c}
-		\noalign{\smallskip}
-		& \multicolumn{3}{c}{$W = 5000$} & \multicolumn{3}{c}{$W = 2500$} & \multicolumn{3}{c}{$W = 1250$} \\
-		\hline\noalign{\smallskip}
-		$\delta$ & MFFD & PS & MFFD$^+$ & MFFD & PS & MFFD$^+$ & MFFD & PS & MFFD$^+$ \\
-		\noalign{\smallskip}
-		\hline
-		\noalign{\smallskip}
-		0.0 & 8.65711 & 8.65711 & 8.65711 & 4.33803 & 4.33803 & 4.33803 & 2.17138 & 2.17138 & 2.17138 \\
-		0.1 & 5.17263 & \textbf{4.84248} & 5.14027 & 2.63606 & \textbf{2.48111} & 2.64271 & 1.51056 & \textbf{1.46744} & 1.51121 \\
-		0.2 & 3.97565 & \textbf{3.46163} & 3.95164 & 2.09301 & \textbf{1.85824} & 2.10161 & 1.31785 & \textbf{1.31090} & 1.31876 \\
-		0.3 & 3.04866 & \textbf{2.35023} & 3.01260 & 1.69777 & \textbf{1.40862} & 1.68776 & \textbf{1.18304} & 1.22111 & 1.18344 \\
-		0.4 & 2.37436 & \textbf{1.52046} & 2.26560 & 1.42646 & \textbf{1.13101} & 1.38430 & 1.09722 & 1.17063 & \textbf{1.09614} \\
-		0.5 & 1.84748 & \textbf{1.02600} & 1.64169 & 1.22960 & \textbf{1.03017} & 1.16950 & 1.04411 & 1.14430 & \textbf{1.03986} \\
-		0.6 & 1.43331 & \textbf{1.01212} & 1.20264 & 1.09935 & \textbf{1.02738} & 1.05010 & 1.01971 & 1.12392 & \textbf{1.01480} \\
-		0.7 & 1.15500 & \textbf{1.01198} & 1.02574 & 1.03421 & 1.02569 & \textbf{1.01224} & 1.01150 & 1.10164 & \textbf{1.00926} \\
-		0.8 & 1.03182 & 1.01182 & \textbf{1.00587} & 1.01111 & 1.02454 & \textbf{1.00682} & 1.00861 & 1.07791 & \textbf{1.00804} \\
-		0.9 & 1.00707 & 1.01165 & \textbf{1.00419} & 1.00663 & 1.02406 & \textbf{1.00608} & 1.00784 & 1.05885 & \textbf{1.00774} \\
-		1.0 & \textbf{1.00399} & 1.01169 & \textbf{1.00399} & \textbf{1.00603} & 1.02400 & \textbf{1.00603} & \textbf{1.00770} & 1.05406 & \textbf{1.00770} \\
-		\hline
-	\end{tabular}
-	\label{table:n1000}
-\end{table}	
+	\ra{1.2}
+	\caption{Average optimality ratios for $|\mathcal{I}| = 100$. Average $t$ for $W = 5000$, 2500 and 1250 are 11.993, 23.478, and 46.466 respectively.}
+	\begin{tabular}{@{}c@{\hspace{25pt}}c@{\hspace{8pt}}c@{\hspace{8pt}}ccc@{\hspace{8pt}}c@{\hspace{8pt}}ccc@{\hspace{8pt}}c@{\hspace{8pt}}c@{}}\toprule
+		& \multicolumn{3}{c}{$W = 5000$} & \phantom{abcd} & \multicolumn{3}{c}{$W = 2500$} & \phantom{abcd} & \multicolumn{3}{c}{$W = 1250$} \\
+		\cmidrule{2-4} \cmidrule{6-8} \cmidrule{10-12}
+		$\delta$ & MFFD & PS & MFFD$^+$ && MFFD & PS & MFFD$^+$ && MFFD & PS & MFFD$^+$\\ \midrule
+		0.0	& 8.35709 & 8.35709 & 8.35709 && 4.26800 & 4.26800 & 4.26800 && 2.15624 & 2.15624 & 2.15624 \\
+		0.1	& 5.27284 & \textbf{4.89963} & 5.14404 && 2.72299 & \textbf{2.48800} & 2.69191 && 1.53147 & \textbf{1.51049} & 1.52968 \\
+		0.2	& 4.16155 & \textbf{3.46467} & 3.98645 && 2.21096 & \textbf{1.87449} & 2.16338 && 1.34812 & \textbf{1.34499} & 1.34593 \\
+		0.3	& 3.27805 & \textbf{2.40153} & 3.05546 && 1.82199 & \textbf{1.43724} & 1.75610 && 1.22453 & 1.24810 & \textbf{1.21994} \\
+		0.4	& 2.61641 & \textbf{1.63390} & 2.33662 && 1.54989 & \textbf{1.16887} & 1.46534 && 1.14507 & 1.19631 & \textbf{1.13979} \\
+		0.5	& 2.08260 & \textbf{1.13827} & 1.77494 && 1.35101 & \textbf{1.04978} & 1.25567 && 1.09274 & 1.17069 & \textbf{1.08661} \\
+		0.6 & 1.65897 & \textbf{1.02027} & 1.36093 && 1.20040 & \textbf{1.03720} & 1.11964 && 1.06255 & 1.15766 & \textbf{1.05701} \\
+		0.7	& 1.32002 & \textbf{1.01350} & 1.11348 && 1.09659 & \textbf{1.03556} & 1.04569 && 1.04546 & 1.14416 & \textbf{1.04150} \\
+		0.8	& 1.10725 & \textbf{1.01384} & 1.02188 && 1.03577 & 1.03439 & \textbf{1.01696} && 1.03711 & 1.12951 & \textbf{1.03565} \\
+		0.9	& 1.02134 & 1.01315 & \textbf{1.00646} && 1.01364 & 1.03285 & \textbf{1.01029} && 1.03434 & 1.11631 & \textbf{1.03416} \\
+		1.0 & \textbf{1.00480} & 1.01302 & \textbf{1.00480} && \textbf{1.00919} & 1.03261 & \textbf{1.00919} && \textbf{1.03393} & 1.10807 & \textbf{1.03393} \\
+		\bottomrule
+	\end{tabular}	
+	\label{table:n=100}
+\end{table}
+\end{comment}
 
 \begin{comment}
 \textbf{$n$ = 100}
