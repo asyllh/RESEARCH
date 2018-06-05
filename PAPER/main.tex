@@ -270,8 +270,6 @@ Firstly, it is apparent that the heuristics perform comparitively in the same ma
 \end{itemize}
 
 
-
-
 \begin{itemize}
 	\item optimality converge toward 1 as $\delta$ increases, i.e. as the problem instances become less difficult.
 	\item When $\delta = 1.0$. MFFD and MFFD$^+$ perform identically, as the problems are equivalent to the original BPP, and so they behave like the original FFD heuristic.
@@ -285,24 +283,11 @@ Firstly, it is apparent that the heuristics perform comparitively in the same ma
 	\item Another trend is that PS produces average solutions within 10\% of $t$ for $\delta = 0.5$ onwards when $W = 5000$ and 2500, however when $W = 1250$, PS only produces solutions within 10\% of $t$ for $\delta = 0.8$ onwards.
 	\item In contrast, MFFD and MFFD$^+$ can produce solution within 10\% of $t$ when $W = 1250$ for $\delta = 0.5$ onwards for $n = 500$, and $\delta = 0.4$ for $n = 1000$.
 	\item MFFD$^+$ can also find solutions within 1\% of $t$ for $\delta = 0.8$ onwards for all strip widths in both set sizes.
-	\item Number of items per strip smaller, problem is harder, falkenauer 1996, martello and toth 1990b
-	\item 
+	\item Number of items per strip smaller, problem is harder, falkenauer 1996, martello and toth 1990b items per strip roughly 2
+	\item all instances run in less than 160ms
+	\item For each instance where opt $>1$, two cases: either $t$ is incorrect, and there does not exist a solution with $k = t$ strips, and the solution found is actually an optimal solution, or $t$ is correct, and the heuristic cannot find a solution with $t$ strips, not an optimal solution.
+	\item since this is a relatively new problem, no problem instances solved to optimality, and so we have no way of knowing if in fact the heuristics are finding optimal solutions. Only able to compare with the theoretical minimum. 
 \end{itemize}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
