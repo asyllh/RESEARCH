@@ -9,6 +9,7 @@ mainexact.cpp
 #include <ctime>
 #include <chrono>
 #include <iomanip>
+#include <cmath>
 using namespace std;
 
 #include "base.h"
@@ -28,9 +29,7 @@ struct Timer{
         totalTime = endTime - startTime;
 
         float totalTimems = totalTime.count() * 1000.0f;
-        //cout << "\nCPU Time: " << totalTimems << "ms (" << totalTime.count() << "s)" << endl;
-        cout << totalTime.count() << endl;
-        //cout << totalTimems << endl;
+        cout << "\nCPU Time: " << totalTimems << "ms (" << totalTime.count() << "s)" << endl;
     }
 };
 
@@ -193,7 +192,6 @@ int main(int argc, char **argv){
     vector<vector<vector<int> > > population;
     vector<vector<int> > populationSum;
     vector<int> delta = { 145, 109, 97, 87, 79, 72, 65, 57, 47, 34, 0 };
-    //double Delta = 0.0;
 
     Timer timer;
 

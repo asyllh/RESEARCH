@@ -45,20 +45,15 @@ void CreateInstance(int tau, int numScores, int numItem, int minWidth, int maxWi
 
     sort(allScores.begin(), allScores.end());
 
-    //int ones = 0;
     for (i = 0; i < allScores.size() - 1; ++i) {
         for (j = i + 1; j < allScores.size(); ++j) {
             if (allScores[i] + allScores[j] >= tau) {
                 adjMatrix[i][j] = 1;
                 adjMatrix[j][i] = 1;
-                //ones += 2;
             }
         }
 
     }
-
-    //ones -= numScores;
-    //cout << tau << ": " << ones << endl;
 
     for (i = 0; i < numScores; ++i) {
         randOrder.push_back(i);
@@ -92,12 +87,10 @@ void CreateInstance(int tau, int numScores, int numItem, int minWidth, int maxWi
     }
 
 
-    //cout << "Box#" << setw(10) << "Mates" << setw(10) << "Scores" << setw(10) << "Width\n";
     for(i = 0; i < numScores; ++i){
         if(checkItem[i] == 1){
             continue;
         }
-        //cout << count << setw(10)  << i << "-" << mates[i] << setw(10) << allScores[i] << "-" << allScores[mates[i]] << setw(8) << itemWidths[i][mates[i]] << endl;
         totalItemWidth += itemWidths[i][partners[i]];
         checkItem[i] = 1;
         checkItem[partners[i]] = 1;
