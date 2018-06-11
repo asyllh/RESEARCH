@@ -184,6 +184,31 @@ This algorithm, which will be referred to as the \textsc{Alternating Hamiltonian
 	\label{fig:connect/cycle}
 \end{figure}
 
+\begin{algorithm}[h]
+\caption{\textsc{Alternating Hamiltonian Construction} (AHC) algorithm}
+\label{alg:ahca}
+\begin{algorithmic}[1]
+	\State Create the graph $G = (V, B \cup R)$ from instance $\mathcal{M}$
+	\State Execute \textsc{Maximum Cardinality Matching}
+	\If{$|R'| < n + 1$}
+		\State Infeasible, end
+	\EndIf
+	\State Produce the subgraph $G' = (V, B \cup R')$
+	\If{$q = 1$}
+		\State Remove dominating vertices and incident edges
+		\Return $G'$
+	\Else
+		\State Execute \textsc{Bridge Recognition}
+		\If{$q = 1$}
+			\State Remove dominating vertices and incident edges
+			\Return $G'$
+		\Else
+			\State Infeasible, end	
+		\EndIf	
+	\EndIf
+\end{algorithmic}	
+\end{algorithm}
+
 
 \begin{theorem}
 	\label{thm:copsoln}
@@ -267,17 +292,15 @@ Looking at results for both $n = 500$ and $n = 1000$, there is a clear pattern w
 
 One interesting feature is the reduction of $r$ between $\delta = 0.4$ and $\delta = 0.5$, which is much more significant for $W = 5000$ as opposed to $W = 1250$. The reduction occurs due to an increase in the number of feasible alignments of the items, as every score width is able to be paired with $n-1$ other score widths when $\delta = 0.5$. Thus, when $W = 5000$, more items can be packed onto a strip feasibly, resulting in fewer strips in the final solution. However, the difference in $r$ is less noticeable for $W = 1250$, as regardless of the increased proportion in possible pairings, the capacity of the strips is much smaller, preventing the collection of items from multiple strips onto one.
 
-
+Although using the average optmality from 1000 instances provides a useful overview of the efficiency of a heuristic, there are other characteristics that we can consider. Take, for example, the results obtained with parameters $\delta = 0.7$ and $W = 5000$ in Table \ref{table:n=1000}. Clearly PS obtains solutions with the fewest strips on average, however, we noted that out of the 1000 instances, PS did not produce a single solution containing $t$ strips. On the other hand, there were 152 instances in which MFFD$^+$ was able to generate a solution $S$ such that $|\mathcal{S}| = t$, thus implying that there are at least 152 solutions that can be solved to optimality. Despite this, MFFD$^+$ has a higher average optimality than PS, suggesting that the variance in the number of strips required is higher.
 
 
 \begin{enumerate}
 	\item MFFD and MFFD$^+$ able to obtain opts $\leq 1\%$ of $t$, PS is not.
 	\item PS never best $\delta \geq 0.8$.
-	\item $n = 1000$, $W = 5000$, $\delta = 0.7$, PS is best opt, however PS does not produce a single solution containing $t$ strips, whereas there are 152 instances in which MFFD$^+$ produces solutions containing $t$ strips, i.e. there are at least 152 instances out of the 1000 where $k = t$, and PS cannot obtain any. Therefore, MFFD$^+$ solutions must vary significantly (i.e. some solns that are much worse than optimal), as PS is best opt.
 	\item Significant difference in opt, $n = 1000$, $W = 1250$, $\delta = 0.6$, difference between MFFD$^+$ and PS opts is 0.10912 (MFFD$^+$ better), which amounts to an average difference of over 50 strips in solns produced.
-	\item Noticable drop in opts between $\delta = 0.4$ and $\delta = 0.5$ when $W$ high, as capacity not main concern, more items can now be placed next to one another, so number of strips reduces dramatically, however when $W = 1250$ there is still a capacity issue, regardless of the increased proportion of possible pairings.
 	\item anomaly MFFD $n = 1000$, $W = 1250$, $\delta = 0.3$
-	\item harder problems, \cite{falkenauer1996}, triplets, fewer items per strip.
+	\item harder problems, \cite{falkenauer1996}, triplets, fewer items per strip, further from 1 when shorter strips.
 	\item cases when opt $\neq 1$: $t$ incorrect, solution produced is not optimal, or both.
 	\item less than 10\% past $\delta = 0.8$
 \end{enumerate}
