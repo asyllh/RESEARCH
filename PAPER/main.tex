@@ -28,15 +28,14 @@ Firstly, let us introduce the Constrained Ordering Problem (COP):
 For example, given the multiset $\mathcal{M} = \{\{1,2\}, \{1,7\}, \{2,4\}, \{3,5\}, \{3,6\}, \{4,4\}\}$ and $\tau = 7$, one possible solution is $\mathcal{T} = \langle(1,2), (6,3), (5,3), (4,4), (4,2), (7,1) \rangle$.
 
 A prominent application of the COP is in a strip-packing problem brought to light as an open-combinatorial problem by \cite{goulimis2004}. Here, a set $\mathcal{I}$ of rectangular items (where $|\mathcal{I}| = n$) of equal height $H$ made from cardboard are to be packed onto a strip of height $H$ from left to right. Each item $i \in \mathcal{I}$ has width $w_i \in \mathbb{Z}^{+}$, and possesses two vertical score lines, marked in predetermined places. A pair of knives mounted onto a bar cuts along the score lines of two adjacent items simultaneously, which allows the items to be folded with ease (see Figure \ref{fig:itemsknife}). However, by design, the scoring knives cannot be placed too close to one another, and as such have a ``minimum scoring distance'' (around 70mm in industry). The distances between each score line and the nearest edge on an item $i \in \mathcal{I}$ are the score widths, $a_i, b_i \in \mathbb{Z}^{+}$ where $a_i + b_i < w_i$, assigned such that $a_i \leq b_i$. Since these score widths are not necessarily equal, an item $i$ can be positioned in one of two orientations: ``regular'', denoted $(a_i, b_i)$, or ``rotated'', denoted $(b_i, a_i)$, where the smaller of the two score widths $a_i$ is on the left- and right- hand side of the item respectively. 
-
 \begin{figure}[H]	
 	\centering
-	\includestandalone[width=0.8\textwidth]{figures/itemsknife}
+	\includestandalone[width=0.9\textwidth]{figures/itemsknife}
 	\caption{Dimensions of an item $i \in \mathcal{I}$ in a regular orientation $(a_i, b_i)$, and a feasible alignment of two items that can be scored simultaneously.}	
 	\label{fig:itemsknife}
 \end{figure}
 
-Clearly, for two items to be placed alongside one another feasibly, the sum of the adjacent score widths must equal or exceed the minimum scoring distance, else the knives will not be able to score the items in the correct locations. Thus, the problem consists of finding a suitable ordering and orientation of the items such that the sum of every pair of adjacent score widths is greater than or equal to the minimum scoring distance. The left-hand score width of the first item and the right-hand score width of the last item on the strip are not adjacent to any other item, and are therefore ignored. 
+Clearly, for two items to be placed alongside one another feasibly, the distance between the two score lines from adjacent items must equal or exceed the minimum scoring distance, else the knives will not be able to score the items in the correct locations. Thus, the problem consists of finding a suitable ordering and orientation of the items such that the sum of every pair of adjacent score widths is greater than or equal to the minimum scoring distance. Note that the left-hand score width of the first item and the right-hand score width of the last item on the strip are not adjacent to any other item, and are therefore ignored. 
 
 It can be seen that this problem is in fact equal to the COP, where each unordered pair in an instance $\mathcal{M}$ contains the score widths of an item, and $\tau$ is the minimum scoring distance. It then follows that the vicinal sum constraint corresponds to the requirement for the sum of adjacent score widths to exceed $\tau$. Figure \ref{fig:items/aligned} shows the example instance $\mathcal{M}$ of the COP from above depicted as a packing problem.
 
@@ -52,17 +51,17 @@ It can be seen that this problem is in fact equal to the COP, where each unorder
 		\includestandalone[width=\textwidth]{figures/itemsaligned}
 		\label{fig:itemsaligned}
 	\end{subfigure}
-	\caption{Example of the strip-packing problem, where the sum of each pair of adjacent score widths is greater than or equal to $\tau = 7$. From instance $\mathcal{M}$ above.}
+	\caption{Example of the strip-packing problem modelled using the instance $\mathcal{M}$ above. The vicinal sum constraint has been met between all items in the alignment, which corresponds to a solution $\mathcal{T}$.}
 	\label{fig:items/aligned}
 \end{figure}
 
 Observe that in this particular strip-packing problem the widths of the individual items are disregarded, since the aim is to arrange the items onto a strip of seemingly infinite width. However, in industrial applications, strips of material are often provided in fixed widths. Given a large problem instance, multiple strips may therefore be required to feasibly accommodate all of the items. For this reason, a more generalised problem can also be formulated.
 
 \begin{definition}
-	Let $\mathcal{I}$ be a set of rectangular items of height $H$ with varying widths $w_i \in \mathbb{Z}^+$ and score widths $a_i, b_i \in \mathbb{Z}^+$ for each item $i \in \mathcal{I}$. Given a minimum scoring distance $\tau \in \mathbb{Z}^+$, the Score-Constrained Strip-Packing Problem (SCSPP) consists of finding the minimum number of strips of height $H$ and width $W$ required to pack all $n$ items in $\mathcal{I}$ such that the sum of every pair of adjacent score widths is greater than or equal to $\tau$, and that no strip is overfilled.
+	Let $\mathcal{I}$ be a set of $n$ rectangular items of height $H$ with varying widths $w_i \in \mathbb{Z}^+$ and score widths $a_i, b_i \in \mathbb{Z}^+$ for each item $i \in \mathcal{I}$. Given a minimum scoring distance $\tau \in \mathbb{Z}^+$, the Score-Constrained Strip-Packing Problem (SCSPP) consists of finding the minimum number of strips of height $H$ and width $W$ required to pack all items in $\mathcal{I}$ such that the sum of every pair of adjacent score widths is greater than or equal to $\tau$, and that no strip is overfilled.
 \end{definition}
 
-Note that in the special case of $\tau = 0$, the SCSPP is equivalent to the classical one-dimensional bin-packing problem (BPP). It follows that the SCSPP is at least as hard as the BPP, which is known to be NP-hard (\citealp{garey1979}), and so (under the assumption that $P \neq NP$) there is no known algorithm that is able to find an optimal solution for every instance of the SCSPP in polynomial time. Instead, heuristics can be used to find near-optimal solutions in a shorter amount of time.
+Note that in the special case of $\tau = 0$, the SCSPP is equivalent to the classical one-dimensional bin-packing problem (BPP). Due to the vicinal sum constraint, the SCSPP not only allocates the items to a strip, but must also determine how to pack the items on each strip. This involves deciding the order in which the items are packed from left to right, and whether each item should be placed in a regular or rotated orientation. Thus, we define the following sub-problem associated with the SCSPP.
 
 \begin{definition}
 	\label{defn:subprob}
@@ -70,7 +69,7 @@ Note that in the special case of $\tau = 0$, the SCSPP is equivalent to the clas
 \end{definition}
 
 
-The remainder of this article is structured as follows: In Section 2, we will detail an exact polynomial-time algorithm for the COP, if a solution exists. Section 3 then describes three heuristics that can be used to find feasible solutions to the SCSPP and the associated advantages and disadvantages. A comparison of these heuristics and an analysis of the results will be provided in Section 4, and finally Section 5 concludes the paper and proposes some potential directions for future work.
+The remainder of this article is structured as follows: In Section 2, we will detail an exact polynomial-time algorithm for the COP, and thus the SCPSP. Section 3 then describes three heuristics that can be used to find feasible solutions to the SCSPP and the associated advantages and disadvantages. A comparison of these heuristics and an analysis of the results will be provided in Section 4, and finally Section 5 concludes the paper and proposes some potential directions for future work.
 
 \section{Solving the COP}
 \label{sec:ahca}
@@ -193,7 +192,7 @@ This algorithm, which will be referred to as the \textsc{Alternating Hamiltonian
 	\If{$|R'| < n + 1$}
 		\State Infeasible, end
 	\EndIf
-	\State Produce the subgraph $G' = (V, B \cup R')$
+	\State Produce the subgraph $G' = (V, B \cup R')$ consisting of $q$ cycles
 	\If{$q = 1$}
 		\State Remove dominating vertices and incident edges
 		\Return $G'$
@@ -354,6 +353,20 @@ Although using the average optmality from 1000 instances provides a useful overv
 	\label{table:n=1000}	
 \end{table}
 
+\section{Further Work}
+\begin{itemize}
+	\item \cite{miller1960}
+	\item mffd+ items are packed one by one, could be a case where an items fits onto a strip but ahc cannot find a feasible solution, so item must be packed elsewhere, but if two new items could fit on the strip, ahc might be able to find a solution. 
+	\item include item width in ahc, so add values to the blue edges of the graph, weighted edges, red edges have value = 0.
+	\item Then the problem would be: find the minimum number of alternating cycles on $G$ such that the length of the cycle is less than or equal to some value $W$ (which is the strip width). The length of the cycle would be the sum of all the weighted edges, so the sum of all the blue edges, since red = 0. 
+	\item then could break and form edges to create new components of different sizes if some are too large, or join together if some are small, thus decreasing the number of cycles
+	\item or if possible, find a single alt Ham cycle, and break up into as few smaller cycles as possible such that the length of each cycle is less than or equal to $W$
+	\item another way, create as few feasible subsets $\mathcal{I}' \subseteq \mathcal{I}$ such that the total width of the items in each subset $\mathcal{I}$ is less than $W$, i.e. perform usual FFD alg, ignore score widths
+	\item then perform ahc on each set, try to find feasible solution.
+	\item if sets dont have feasible solution, try swapping items between sets
+	\item initial tests, Becker theorem 6 2015 paper 
+\end{itemize}
+
 
 \begin{comment}
 \begin{itemize}
@@ -428,20 +441,9 @@ Although using the average optmality from 1000 instances provides a useful overv
 \end{itemize}
 
 \end{comment}
-\begin{comment}
-\section{Further Work}
-\begin{itemize}
-	\item mffd+ items are packed one by one, could be a case where an items fits onto a strip but ahc cannot find a feasible solution, so item must be packed elsewhere, but if two new items could fit on the strip, ahc might be able to find a solution. 
-	\item include item width in ahc, so add values to the blue edges of the graph, weighted edges, red edges have value = 0.
-	\item Then the problem would be: find the minimum number of alternating cycles on $G$ such that the length of the cycle is less than or equal to some value $W$ (which is the strip width). The length of the cycle would be the sum of all the weighted edges, so the sum of all the blue edges, since red = 0. 
-	\item then could break and form edges to create new components of different sizes if some are too large, or join together if some are small, thus decreasing the number of cycles
-	\item or if possible, find a single alt Ham cycle, and break up into as few smaller cycles as possible such that the length of each cycle is less than or equal to $W$
-	\item another way, create as few feasible subsets $\mathcal{I}' \subseteq \mathcal{I}$ such that the total width of the items in each subset $\mathcal{I}$ is less than $W$, i.e. perform usual FFD alg, ignore score widths
-	\item then perform ahc on each set, try to find feasible solution.
-	\item if sets dont have feasible solution, try swapping items between sets
-	\item initial tests, Becker theorem 6 2015 paper 
-\end{itemize}
-\end{comment}
+
+
+
 
 \begin{comment}
 	\begin{enumerate}
