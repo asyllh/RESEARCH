@@ -9,6 +9,7 @@
 \maketitle
 
 \begin{abstract}
+	
 \end{abstract}
 
 \section{Introduction}
@@ -77,13 +78,7 @@ We shall now present an exact polynomial-time algorithm for the COP. The underly
 
 Let $\mathcal{M}$ be an instance of the COP of cardinality $n$. It is now useful to model $\mathcal{M}$ a a graph $G$ in which each vertex is associated with a single value in $\mathcal{M}$ in non-decreasing order. A pair of vertices, called ``dominating vertices'' are also added to the graph, both of which are assigned values equal to $\tau$. These dominating vertices aid the solution process, and are removed at the end. Thus, the graph $G$ has $2n+2$ vertices.
 
-As we have seen, the values in $\mathcal{M}$ are arranged in pairs. This is represented in $G$ by adding a set of ``blue'' edges, $B$, that contains edges between vertices that are ``partners'', i.e. whose values make up a pair in $\mathcal{M}$, as shown in Figure \ref{fig:partners}. By introducing a bijective function $p: V \to V$ that associates each vertex with its partner, $p(v_i) = v_j$, we can denote this set of edges as $B = \{(v_i, p(v_i)) : v_i \in V\}$. It can be seen that $B$ is a perfect matching in $G$, with $|B| = n+1$.
-
-Next, a set of ``red'' edges $R$ is added to $G$ that consists of edges between vertices whose sum equal or exceed $\tau$, provided they are not partners. This corresponds to the vicinal sum constraint in Defintion \ref{defn:cop}. Thus, we have an undirected graph $G$ with vertex set $V = \{v_1, ..., v_{2n+2}\}$ and two distinct edge sets $B$ and $R$ such that $B \cap R = \emptyset$. Figure \ref{fig:partners/threshold} illustrates and example construction of $G$.
-% Equation $v_i + v_j \geq \tau$ provided $p(v_i) \neq v_j$, i.e. not partners
-% Values are assigned from $\mathcal{M}$ in non-decreasing order, i.e. value assoc with v_1 \leq value assoc with v_2 etc..
-% "This corresponds to the vsc in Defn 1" - values that can be aligned alongside one another that are not part of the same unordered pair in M, hence why they cannot be partners on the graph G, must be from different unordered pairs.
-
+As we have seen, the values in $\mathcal{M}$ are arranged in pairs. This is represented in $G$ by adding a set of ``blue'' edges, $B$, that contains edges between vertices that are ``partners'', i.e. whose values make up a pair in $\mathcal{M}$, as shown in Figure \ref{fig:partners}. By introducing a bijective function $p: V \to V$ that associates each vertex with its partner, $p(v_i) = v_j$, we can denote this set of edges as $B = \{(v_i, p(v_i)) : v_i \in V\}$. It can be seen that $B$ is a perfect matching in $G$, with $|B| = n+1$. Next, a set of ``red'' edges $R$ is added to $G$ that consists of edges between vertices whose sum equal or exceed $\tau$, provided they are not partners. It can be seen that the edges in $R$ represent all possible orderings of values from different pairs in an instance $\mathcal{M}$ that fulfil the vicinal sum constraint in Definition \ref{defn:cop}. Thus, we have an undirected graph $G$ with vertex set $V = \{v_1, ..., v_{2n+2}\}$ and two distinct edge sets $B$ and $R$ such that $B \cap R = \emptyset$. Figure \ref{fig:partners/threshold} illustrates an example construction of $G$.
 \begin{figure}	
 \centering
 \begin{subfigure}[h]{0.45\textwidth}
@@ -106,9 +101,9 @@ Recall that a Hamiltonian cycle on a graph $G$ is a cycle that visits every vert
 	Let $G(V, B\cup R)$ be an undirected graph, where each edge is a member of one of two sets, $B$ or $R$. $G$ contains an alternating Hamiltonian cycle if there exists a Hamiltonian cycle such that successive edges alternate between sets $B$ and $R$.
 \end{definition}
 
-An alternating Hamiltonian cycle on $G$ correpsonds to a feasible solution, as each ``blue'' edge from $B$ represents a pair of values in $\mathcal{M}$, and each ``red'' edge from $R$ shows values that can be placed alongside one another feasibly. Thus, by removing the dominating vertices and any incident edges, the remaining alternating Hamiltonian path gives the order in which the elements should be placed to produce a feasible solution $\mathcal{T}$, if indeed one exists.
+An alternating Hamiltonian cycle on $G$ correpsonds to a feasible solution, as each ``blue'' edge from $B$ represents a pair of values in $\mathcal{M}$, and each ``red'' edge from $R$ shows values that can be placed alongside one another feasibly. Thus, by removing the dominating vertices and any incident edges, the remaining alternating Hamiltonian path gives the order in which the elements should be placed to produce a feasible solution $\mathcal{T}$, if indeed one exists. Also, note that every edge in $B$ must be present in the alternating Hamiltonian cycle. Consequently, the task can be seen as finding a matching $R' \subseteq R$ of cardinality $n+1$ such that the edge sets $B$ and $R'$ form an alternating Hamiltonian cycle as described in Definition \ref{defn:althamcycle}. 
 
-Also, note that every edge in $B$ must be present in the alternating Hamiltonian cycle. Consequently, the task can be seen as finding a matching $R' \subseteq R$ of cardinality $n+1$ such that the edge sets $B$ and $R'$ form an alternating Hamiltonian cycle as described in Definition \ref{defn:althamcycle}. 
+The problem of finding an alternating Hamiltonian cycle on general graphs is NP-hard as it generalises the classical Hamiltonian cycle problem, as stated in a proposition by \cite{haggkvist1977}. However, the special structure of graphs derived from instances of the COP allows them to be solved using the following method.
 
 To find a matching $R' \subseteq R$, the following \textsc{Maximum Cardinality Matching} (MCM) algorithm can be executed, as suggested by \cite{mahadev1994} and \cite{becker2010}. Take each vertex $v_1, v_2,..., v_{2n+2}$ in turn, and select the edge in $R$ connecting $v_i$ to the highest-indexed vertex $v_j$ that is not already incident to an edge in $R'$. Now add this edge $(v_i, v_j)$ to $R'$, and proceed to the next vertex until all the vertices have been assessed. The two vertices incident to each matching edge in $R'$ are now referred to as being ``matched''. Similarly to partners, let $m : V \to V$ be a bijective function that assigns each vertex with its match, $m(v_i) = v_j$. Then, we can denote this matching set as $R' =\{(v_i, m(v_i)) : v_i \in V\}$. 
 
@@ -366,6 +361,18 @@ Although using the average optmality from 1000 instances provides a useful overv
 	\item if sets dont have feasible solution, try swapping items between sets
 	\item initial tests, Becker theorem 6 2015 paper 
 \end{itemize}
+
+\begin{comment}
+\begin{abstract}
+\begin{itemize}
+\item ``first, alg for COP and show how used for single strip feasible arrangement''
+\item ``then go on to examine how alg can combine to tackle multi-strip version of problem - closely related to 1DBPP''
+\item discuss problems that arise
+\item variant/generalisation of the 1DBPP ``in which both the ordering and orientation of items in a container influences the validity and quality of a solution''
+\item ``problem that requires the cutting and socring of rectangular pieces of cardboard in the construction of boxes''
+\end{itemize}	
+\end{abstract}
+\end{comment}
 
 
 \begin{comment}
