@@ -12,6 +12,18 @@
 	
 \end{abstract}
 
+\begin{comment}
+\begin{abstract}
+	\begin{itemize}
+	\item ``first, alg for COP and show how used for single strip feasible arrangement''
+	\item ``then go on to examine how alg can combine to tackle multi-strip version of problem - closely related to 1DBPP''
+	\item discuss problems that arise
+	\item variant/generalisation of the 1DBPP ``in which both the ordering and orientation of items in a container influences the validity and quality of a solution''
+	\item ``problem that requires the cutting and socring of rectangular pieces of cardboard in the construction of boxes''
+	\end{itemize}	
+\end{abstract}
+\end{comment}
+
 \section{Introduction}
 \label{sec:intro}
 Firstly, let us introduce the Constrained Ordering Problem (COP):
@@ -242,26 +254,16 @@ As mentioned in the introduction, the SCSPP shares many similarities with the BP
 
 Three heuristics for the SCSPP have been developed: a basic FFD heuristic with a simple modification; a heuristic that packs strips individually and prioritises score widths; and a powerful version of FFD that incorporates the polynomial-time AHC algorithm.
 
-\subsection{Modified First-Fit Decreasing Heuristic (MFFD)}
-\label{sec:mffd}
-The \textsc{Modified First-Fit Decreasing} (MFFD) heuristic performs in the same manner as the original FFD, attempting to place each item onto the end of the lowest-indexed strip. If an item is able to be packed onto a strip without exceeding the strip's capacity, MFFD then checks to see if the vicinal sum constraint is met between the right-most score on the strip and one of the score widths on the current item. If the constraint is met, MFFD places the item on the end of the strip in the appropriate orientation, else the heuristic attempts to pack the item onto the next lowest-indexed strip. For example, in Figure \ref{fig:comparestrips}, the strip is able to accommodate the current item, however the vicinal sum constraint is not fulfilled in either orientation of the item, and therefore it cannot be feasibly packed onto the strip.
+The first heuristic we developed is the \textsc{Modified First-Fit Decreasing} (MFFD) heuristic which performs in the same manner as the original FFD, attempting to place each item onto the end of the lowest-indexed strip. If an item is able to be packed onto a strip without exceeding the strip's capacity, MFFD then checks to see if the vicinal sum constraint is met between the right-most score on the strip and one of the score widths on the current item. If the constraint is met, MFFD places the item on the end of the strip in the appropriate orientation, else the heuristic attempts to pack the item onto the next lowest-indexed strip. For example, in Figure \ref{fig:comparestrips}, the strip is able to accommodate the current item, however the vicinal sum constraint is not fulfilled in either orientation of the item, and therefore it cannot be feasibly packed onto the strip.
 
 Despite the additional step, MFFD is a very fast heuristic, as checking the vicinal sum constraint can be performed in constant time. The most prominent issue with this heuristic, however, is due to the items being placed on the end of the strips. Although an item may not meet the constraint when placed on the end of a strip, there may be another location on the strip where the item can be placed feasibly. MFFD is incapable of placing items anywhere other than on the end of the strips, and so an item that could potentially be packed must be placed on another strip, or perhaps even begin a new strip, thus increasing the number of strips in the final solution.
 
-
-\subsection{Pair-Smallest Heuristic (PS)}
-\label{sec:ps}
-
-The \textsc{Pair-Smallest} (PS) heuristic is an extension of a procedure defined by \cite{lewis2011}. Unlike MFFD, which packs each item in turn, PS focusses on packing one strip at a time, only starting a new strip once the current strip is unable to accommodate any more items feasibly. Each strip is initialised by choosing the item from $\mathcal{I}$ with the smallest score width, and packing it in a regular orientation. PS then continues to fill the strip by selecting the item with the smallest score width that meets the vicinal sum constraint with the right-most score width on the strip, and whose width will not cause the strip to be overfilled. This heuristic aligns the smallest score widths with the largest ones, eliminating the possibility of placing larger score widths together unecessarily. Note that PS prioritises the vicinal sum constraint over the item widths, choosing to fulfil the constraint first before considering whether the item can be accommodated. If there are multiple items with equal score widths, break ties by choosing the item whose second score width is the largest.
-% Break ties by choosing item whose second score width is larger.
+The next heuristic is the \textsc{Pair-Smallest} (PS) heuristic, an extension of a procedure defined by \cite{lewis2011}. Unlike MFFD, which packs each item in turn, PS focusses on packing one strip at a time, only starting a new strip once the current strip is unable to accommodate any more items feasibly. Each strip is initialised by choosing the item from $\mathcal{I}$ with the smallest score width, and packing it in a regular orientation. PS then continues to fill the strip by selecting the item with the smallest score width that meets the vicinal sum constraint with the right-most score width on the strip, and whose width will not cause the strip to be overfilled. This heuristic aligns the smallest score widths with the largest ones, eliminating the possibility of placing larger score widths together unecessarily. Note that PS prioritises the vicinal sum constraint over the item widths, choosing to fulfil the constraint first before considering whether the item can be accommodated.
+%If there are multiple items with equal score widths, break ties by choosing the item whose second score width is the largest.
 % If item with smallest feasible score width does not fit onto the strip, choose item with next smallest score width and repeat.
 
-
-
-\subsection{Modified First-Fit Decreasing with AHC (MFFD$^+$)}
-\label{sec:mffd+}
-
-The last heuristic incorporates AHC as described in Section \ref{sec:ahca}. The \textsc{Modified First-Fit Decreasing with AHC} (MFFD$^+$) heuristic operates in a similar fashion to the MFFD, placing items sorted in decreasing order onto the lowest-indexed strip. However, when the lowest-indexed strip is found that can accommodate the current item, MFFD$^+$ then executes AHC on the sub-problem, where the items on the strip and the current item form the subset $\mathcal{I}' \subseteq \mathcal{I}$ (see Definition \ref{defn:subprob}). If AHC finds a feasible solution, the items are placed on the strip in the order of the solution, which includes the current item, else MFFD$^+$ attempts to pack the current item on the next lowest-indexed strip. Using AHC means that if a feasible alignment of the items exists, there is a guarantee that it will be found. Unlike MFFD, where the current item can only be placed on the end of the strip, MFFD$^+$ allows the items to be entirely rearranged (see Figure \ref{fig:comparestrips}). This reduces the possibility of having to start a new strip for an item, thus preventing increasing the number of strips in the final solution. Since AHC is executed every time an item can fit onto a strip that already contains items, (up to $|\mathcal{S}|$ times per item, where $|\mathcal{S}|$ is the number of strips containing at least one item so far in the procedure) MFFD$^+$ is slower in comparison to the previous heuristics.  
+The last heuristic, \textsc{Modified First-Fit Decreasing with AHC} (MFFD$^+$), incorporates AHC as described in Section \ref{sec:ahca}. MFFD$^+$ operates in a similar fashion to the MFFD, placing items sorted in decreasing order onto the lowest-indexed strip. However, when the lowest-indexed strip is found that can accommodate the current item, MFFD$^+$ executes AHC on the sub-problem, where the items on the strip and the current item form the subset $\mathcal{I}' \subseteq \mathcal{I}$ (see Definition \ref{defn:subprob}). If AHC finds a feasible solution, the items are placed on the strip in the order of the solution, which includes the current item, else MFFD$^+$ attempts to pack the current item on the next lowest-indexed strip. Using AHC means that if a feasible alignment of the items exists, there is a guarantee that it will be found. Unlike MFFD, where the current item can only be placed on the end of the strip, MFFD$^+$ allows the items to be entirely rearranged (see Figure \ref{fig:comparestrips}). This reduces the possibility of having to start a new strip for an item, thus preventing increasing the number of strips in the final solution. 
+%Since AHC is executed every time an item can fit onto a strip that already contains items, (up to $|\mathcal{S}|$ times per item, where $|\mathcal{S}|$ is the number of strips containing at least one item so far in the procedure) MFFD$^+$ is slower in comparison to the previous heuristics.  
 
 \begin{figure}[h!]	
 	\centering
@@ -361,18 +363,6 @@ Although using the average optmality from 1000 instances provides a useful overv
 	\item if sets dont have feasible solution, try swapping items between sets
 	\item initial tests, Becker theorem 6 2015 paper 
 \end{itemize}
-
-\begin{comment}
-\begin{abstract}
-\begin{itemize}
-\item ``first, alg for COP and show how used for single strip feasible arrangement''
-\item ``then go on to examine how alg can combine to tackle multi-strip version of problem - closely related to 1DBPP''
-\item discuss problems that arise
-\item variant/generalisation of the 1DBPP ``in which both the ordering and orientation of items in a container influences the validity and quality of a solution''
-\item ``problem that requires the cutting and socring of rectangular pieces of cardboard in the construction of boxes''
-\end{itemize}	
-\end{abstract}
-\end{comment}
 
 
 \begin{comment}
