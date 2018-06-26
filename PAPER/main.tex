@@ -8,21 +8,23 @@
 \institute{School of Mathematics, Cardiff University, Senghennydd Road, Cardiff, UK, CF24 4AG}
 \maketitle
 
+
 \begin{abstract}
 	
 \end{abstract}
 
-\begin{comment}
-\begin{abstract}
-	\begin{itemize}
+\begin{itemize}
+	\item This paper addresses a generalisation of the one-dimensional bin-packing problem
+	\item rectangular items scored to create/construct cardboard boxes
+	\item items packed onto strips in order to be scored to aid construction of boxes
+	\item 
 	\item ``first, alg for COP and show how used for single strip feasible arrangement''
 	\item ``then go on to examine how alg can combine to tackle multi-strip version of problem - closely related to 1DBPP''
 	\item discuss problems that arise
 	\item variant/generalisation of the 1DBPP ``in which both the ordering and orientation of items in a container influences the validity and quality of a solution''
 	\item ``problem that requires the cutting and socring of rectangular pieces of cardboard in the construction of boxes''
-	\end{itemize}	
-\end{abstract}
-\end{comment}
+\end{itemize}	
+
 
 \section{Introduction}
 \label{sec:intro}
@@ -361,7 +363,9 @@ Although using the average optmality from 1000 instances provides a useful overv
 	\item another way, create as few feasible subsets $\mathcal{I}' \subseteq \mathcal{I}$ such that the total width of the items in each subset $\mathcal{I}$ is less than $W$, i.e. perform usual FFD alg, ignore score widths
 	\item then perform ahc on each set, try to find feasible solution.
 	\item if sets dont have feasible solution, try swapping items between sets
-	\item initial tests, Becker theorem 6 2015 paper 
+	\item initial tests, Becker theorem 6 2015 paper \cite{garraffa2016}
+	\item minimise waste on each strip, not just number of strips
+	\item tsp return to base
 \end{itemize}
 
 
