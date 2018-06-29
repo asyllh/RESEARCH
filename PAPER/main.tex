@@ -10,20 +10,8 @@
 
 
 \begin{abstract}
-	
+	This paper investigates the Score-Constrained Strip-Packing Problem (SCSPP), a combinatorial optimisation problem that generalises the one-dimensional bin-packing problem. In the construction of cardboard boxes, rectangular items are packed onto strips to be scored by knives prior to being folded. The order and orientation of the items on the strips determine whether the knives are able to score the items correctly. Initially, we detail an exact polynomial-time algorithm for the Constrained Ordering Problem (COP), and illustrate how it can find a feasible alignment of items on a single strip. We then integrate this algorithm with a packing heuristic to address the SCSPP and compare with two other greedy heuristics, showing the cases in which each heuristic is superior.
 \end{abstract}
-
-\begin{itemize}
-	\item This paper addresses a generalisation of the one-dimensional bin-packing problem
-	\item rectangular items scored to create/construct cardboard boxes
-	\item items packed onto strips in order to be scored to aid construction of boxes
-	\item 
-	\item ``first, alg for COP and show how used for single strip feasible arrangement''
-	\item ``then go on to examine how alg can combine to tackle multi-strip version of problem - closely related to 1DBPP''
-	\item discuss problems that arise
-	\item variant/generalisation of the 1DBPP ``in which both the ordering and orientation of items in a container influences the validity and quality of a solution''
-	\item ``problem that requires the cutting and socring of rectangular pieces of cardboard in the construction of boxes''
-\end{itemize}	
 
 
 \section{Introduction}
@@ -54,8 +42,6 @@ Clearly, for two items to be placed alongside one another feasibly, the distance
 
 It can be seen that this problem is in fact equal to the COP, where each unordered pair in an instance $\mathcal{M}$ contains the score widths of an item, and $\tau$ is the minimum scoring distance. It then follows that the vicinal sum constraint corresponds to the requirement for the sum of adjacent score widths to exceed $\tau$. Figure \ref{fig:items/aligned} shows the example instance $\mathcal{M}$ of the COP from above depicted as a packing problem.
 
-
-
 \begin{figure}	
 	\centering
 	\begin{subfigure}[h]{0.44\textwidth}
@@ -84,7 +70,7 @@ Note that in the special case of $\tau = 0$, the SCSPP is equivalent to the clas
 \end{definition}
 
 
-The remainder of this article is structured as follows: In Section 2, we will detail an exact polynomial-time algorithm for the COP, and thus the SCPSP. Section 3 then describes three heuristics that can be used to find feasible solutions to the SCSPP and the associated advantages and disadvantages. A comparison of these heuristics and an analysis of the results will be provided in Section 4, and finally Section 5 concludes the paper and proposes some potential directions for future work.
+The remainder of this article is structured as follows: In Section 2, we will detail an exact polynomial-time algorithm for the COP, and show how it is applicable to the subproblem. Section 3 then introduces three heuristics that can be used to find feasible solutions to the SCSPP, one of which makes particular use of the exact algorithm from the previous section, and their associated advantages and disadvantages. An analysis of results gained from extensive experiments and a comparison of the heuristics is provided in Section 4, and finally Section 5 concludes the paper and proposes some potential directions for future work.
 
 \section{Solving the COP}
 \label{sec:ahca}
@@ -264,7 +250,7 @@ The next heuristic is the \textsc{Pair-Smallest} (PS) heuristic, an extension of
 %If there are multiple items with equal score widths, break ties by choosing the item whose second score width is the largest.
 % If item with smallest feasible score width does not fit onto the strip, choose item with next smallest score width and repeat.
 
-The last heuristic, \textsc{Modified First-Fit Decreasing with AHC} (MFFD$^+$), incorporates AHC as described in Section \ref{sec:ahca}. MFFD$^+$ operates in a similar fashion to the MFFD, placing items sorted in decreasing order onto the lowest-indexed strip. However, when the lowest-indexed strip is found that can accommodate the current item, MFFD$^+$ executes AHC on the sub-problem, where the items on the strip and the current item form the subset $\mathcal{I}' \subseteq \mathcal{I}$ (see Definition \ref{defn:subprob}). If AHC finds a feasible solution, the items are placed on the strip in the order of the solution, which includes the current item, else MFFD$^+$ attempts to pack the current item on the next lowest-indexed strip. Using AHC means that if a feasible alignment of the items exists, there is a guarantee that it will be found. Unlike MFFD, where the current item can only be placed on the end of the strip, MFFD$^+$ allows the items to be entirely rearranged (see Figure \ref{fig:comparestrips}). This reduces the possibility of having to start a new strip for an item, thus preventing increasing the number of strips in the final solution. 
+The last heuristic, \textsc{Modified First-Fit Decreasing with AHC} (MFFD$^+$), incorporates AHC as described in Section \ref{sec:ahca}. MFFD$^+$ operates in a similar fashion to the MFFD, placing items sorted in decreasing order onto the lowest-indexed strip. However, rather than attempting to place the item onto the right-most side of the strip, MFFD$^+$ executes AHC on the sub-problem, where the items on the strip and the current item form the subset $\mathcal{I}' \subseteq \mathcal{I}$ (see Definition \ref{defn:subprob}). If AHC finds a feasible solution, the items are placed on the strip in the order of the solution, which includes the current item, else MFFD$^+$ attempts to pack the current item on the next lowest-indexed strip. Using AHC means that if a feasible alignment of the items exists, there is a guarantee that it will be found. Unlike MFFD, where the current item can only be placed on the end of the strip, MFFD$^+$ allows the items to be entirely rearranged (see Figure \ref{fig:comparestrips}). This reduces the possibility of having to start a new strip for an item, thus preventing increasing the number of strips in the final solution. 
 %Since AHC is executed every time an item can fit onto a strip that already contains items, (up to $|\mathcal{S}|$ times per item, where $|\mathcal{S}|$ is the number of strips containing at least one item so far in the procedure) MFFD$^+$ is slower in comparison to the previous heuristics.  
 
 \begin{figure}[h!]	
@@ -368,6 +354,30 @@ Although using the average optmality from 1000 instances provides a useful overv
 	\item tsp return to base
 \end{itemize}
 
+\begin{comment}
+\begin{itemize}
+\item This paper addresses a generalisation of the one-dimensional bin-packing problem
+\item Paper investigates the SCSPP, a combinatorial optimisation problem that generalises 1dbpp/ problem related to the 1dbpp/with applications in the cutting and packing industries/assoc with the csp.
+\item Rectangular items scored to create/construct cardboard boxes
+\item Items packed onto strips in order to be scored to aid construction of boxes
+\item Feasible alignment/order and orientation of items
+\item Graph theory/networks/hamiltonian cycles
+\item Scored prior to being folded
+\item Feasible alignment prior to being scored
+\item Initially, detail exact p-time alg for COP, illustrate how to use for single strip problem/finding alignment of items on a single strip
+\item Multistrip version, integrate with well known heuristic, compare with other greedy heuristics, show effectiveness/cases in which superior
+\item Related to 1DBPP
+
+\item ``during the process of producing boxes, flat papers are prepared for folding by being scored with knives''
+\item ``min distance between knives can be kept''
+\item ``first, alg for COP and show how used for single strip feasible arrangement''
+\item ``then go on to examine how alg can combine to tackle multi-strip version of problem - closely related to 1DBPP''
+\item discuss problems that arise
+\item variant/generalisation of the 1DBPP ``in which both the ordering and orientation of items in a container influences the validity and quality of a solution''
+\item ``problem that requires the cutting and scoring of rectangular pieces of cardboard in the construction of boxes''
+\item ``highlight the circumstances under which each scheme is advantageous''
+\end{itemize}
+\end{comment}
 
 \begin{comment}
 \begin{itemize}
