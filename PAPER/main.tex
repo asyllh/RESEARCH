@@ -10,7 +10,7 @@
 
 
 \begin{abstract}
-	This paper investigates the Score-Constrained Strip-Packing Problem (SCSPP), a combinatorial optimisation problem that generalises the one-dimensional bin-packing problem. In the construction of cardboard boxes, rectangular items are packed onto strips to be scored by knives prior to being folded. The order and orientation of the items on the strips determine whether the knives are able to score the items correctly. Initially, we detail an exact polynomial-time algorithm for the Constrained Ordering Problem (COP), and illustrate how it can find a feasible alignment of items on a single strip. We then integrate this algorithm with a packing heuristic to address the SCSPP and compare with two other greedy heuristics, showing the cases in which each heuristic is superior.
+	This paper investigates the Score-Constrained Strip-Packing Problem (SCSPP), a combinatorial optimisation problem that generalises the one-dimensional bin-packing problem. In the construction of cardboard boxes rectangular items are packed onto strips to be scored by knives prior to being folded. The order and orientation of the items on the strips determine whether the knives are able to score the items correctly. Initially, we detail an exact polynomial-time algorithm for the Constrained Ordering Problem and illustrate how it can find a feasible alignment of items on a single strip. We then integrate this algorithm with a packing heuristic to address the SCSPP and compare with two other greedy heuristics, discussing the circumstances in which each heuristic is superior.
 \end{abstract}
 
 
@@ -33,12 +33,12 @@ For example, given the multiset $\mathcal{M} = \{\{1,2\}, \{1,7\}, \{2,4\}, \{3,
 A prominent application of the COP is in a strip-packing problem brought to light as an open-combinatorial problem by \cite{goulimis2004}. Here, a set $\mathcal{I}$ of rectangular items (where $|\mathcal{I}| = n$) of equal height $H$ made from cardboard are to be packed onto a strip of height $H$ from left to right. Each item $i \in \mathcal{I}$ has width $w_i \in \mathbb{Z}^{+}$, and possesses two vertical score lines, marked in predetermined places. A pair of knives mounted onto a bar cuts along the score lines of two adjacent items simultaneously, which allows the items to be folded with ease (see Figure \ref{fig:itemsknife}). However, by design, the scoring knives cannot be placed too close to one another, and as such have a ``minimum scoring distance'' (around 70mm in industry). The distances between each score line and the nearest edge on an item $i \in \mathcal{I}$ are the score widths, $a_i, b_i \in \mathbb{Z}^{+}$ where $a_i + b_i < w_i$, assigned such that $a_i \leq b_i$. Since these score widths are not necessarily equal, an item $i$ can be positioned in one of two orientations: ``regular'', denoted $(a_i, b_i)$, or ``rotated'', denoted $(b_i, a_i)$, where the smaller of the two score widths $a_i$ is on the left- and right- hand side of the item respectively. 
 \begin{figure}[H]	
 	\centering
-	\includestandalone[width=0.9\textwidth]{figures/itemsknife}
+	\includestandalone[width=0.8\textwidth]{figures/itemsknife}
 	\caption{Dimensions of an item $i \in \mathcal{I}$ in a regular orientation $(a_i, b_i)$, and a feasible alignment of two items that can be scored simultaneously.}	
 	\label{fig:itemsknife}
 \end{figure}
 
-Clearly, for two items to be placed alongside one another feasibly, the distance between the two score lines from adjacent items must equal or exceed the minimum scoring distance, else the knives will not be able to score the items in the correct locations. Thus, the problem consists of finding a suitable ordering and orientation of the items such that the sum of every pair of adjacent score widths is greater than or equal to the minimum scoring distance. Note that the left-hand score width of the first item and the right-hand score width of the last item on the strip are not adjacent to any other item, and are therefore ignored. 
+Clearly, for two items to be placed alongside one another feasibly, the distance between the two score lines from adjacent items must equal or exceed the minimum scoring distance, else the knives will not be able to score the items in the correct locations. Thus, the problem consists of finding a suitable ordering and orientation of the items such that the sum of every pair of adjacent score widths is greater than or equal to the minimum scoring distance\footnote{Note that the left-hand score width of the first item and the right-hand score width of the last item on the strip are not adjacent to any other item, and are therefore ignored.}. It follows that there are $\frac{n!}{2}$ $2^n$ distinct arrangements of items, and so as $n$ increases,
 
 It can be seen that this problem is in fact equal to the COP, where each unordered pair in an instance $\mathcal{M}$ contains the score widths of an item, and $\tau$ is the minimum scoring distance. It then follows that the vicinal sum constraint corresponds to the requirement for the sum of adjacent score widths to exceed $\tau$. Figure \ref{fig:items/aligned} shows the example instance $\mathcal{M}$ of the COP from above depicted as a packing problem.
 
@@ -172,7 +172,12 @@ This algorithm, which will be referred to as the \textsc{Alternating Hamiltonian
 	\begin{subfigure}[H]{0.7\textwidth}
 		\includestandalone[width=\textwidth]{figures/mpscycle}
 		\caption{Replacing edges connects the components and forms an alternating Hamiltonian cycle.}	
-		\label{fig:mpscycle}
+		\label{fig:mpscycle} \vspace{5mm}
+	\end{subfigure}
+	\begin{subfigure}[H]{0.8\textwidth}
+		\includestandalone[width=\textwidth]{figures/mpspath}
+		\caption{Alternating Hamiltonian Path corresponding to feasible solution $\mathcal{T}$.}	
+		\label{fig:mpspath}
 	\end{subfigure}
 	\caption{Selected edges found using BR merge the components of $G'$ together, forming an alternating Hamiltonian cycle which corresponds to a feasible solution $\mathcal{T} = \langle(1,2), (6,3), (5,3), (4,4), (4,2), (7,1) \rangle$.}
 	\label{fig:connect/cycle}
@@ -185,19 +190,19 @@ This algorithm, which will be referred to as the \textsc{Alternating Hamiltonian
 	\State Create the graph $G = (V, B \cup R)$ from instance $\mathcal{M}$
 	\State Execute \textsc{Maximum Cardinality Matching}
 	\If{$|R'| < n + 1$}
-		\State Infeasible, end
+		\State infeasible, end
 	\EndIf
 	\State Produce the subgraph $G' = (V, B \cup R')$ consisting of $q$ cycles
 	\If{$q = 1$}
-		\State Remove dominating vertices and incident edges
+		\State remove dominating vertices and incident edges
 		\Return $G'$
 	\Else
-		\State Execute \textsc{Bridge Recognition}
+		\State execute \textsc{Bridge Recognition}
 		\If{$q = 1$}
-			\State Remove dominating vertices and incident edges
+			\State remove dominating vertices and incident edges
 			\Return $G'$
 		\Else
-			\State Infeasible, end	
+			\State infeasible, end	
 		\EndIf	
 	\EndIf
 \end{algorithmic}	
@@ -209,6 +214,19 @@ This algorithm, which will be referred to as the \textsc{Alternating Hamiltonian
 	If there exists an alternating Hamiltonian cycle on a graph $G$ created from an instance $\mathcal{M}$ of the COP, then AHC is able to find the cycle in $O(n^2)$ time.
 \end{theorem}
 \begin{proof}
+	\begin{itemize}
+		\item Initial creation of $G = (V, B \cup R)$ - $O(n^2)$.
+		\item \textsc{Maximum Cardinality Matching} - $O(n\log n)$ due to initial sorting of vertices.
+		\item \textsc{Bridge Recognition}:
+		\begin{itemize}
+			\item sort edges into list and remove invalid egdes - $O(n \log n)$.
+			\item go through list to put into sets $R_i$, each edge assessed exactly once - $O(n)$.
+			\item check every set $R_i$ to see if $|R_i| = q$, since there must be a minimum of two red/matching edges in a set $R_i$, there can be at most $\frac{n}{2}$ $R_i$ sets created - $O(n)$.
+			\item check overlapping/multiple sets - ?
+		\end{itemize}	
+		\item Connecting Procedure - $n+1$ red edges on $G'$, so maximum every red edge in $R'$ needs to be replaced, $n+1$ edges to replace with edges from sets $R_i$. so at most $n+1$ edges need to be added to $G'$ and $n+1$ edges removed (edges added to $R'$ and removed from $R'$) - $O(n)$.
+	\end{itemize}
+	Hence complexity of AHC is $O(n^2)$ time.
 	\qed
 \end{proof}
 
@@ -228,7 +246,7 @@ For an instance of the SCSPP, a feasible solution is represented by the set $\ma
 \end{align}
 \end{subequations}
 
-That is, all items must be packed onto a strip (\ref{eqn:packall}), each item can only be placed on one strip (\ref{eqn:nooverlap}), the strips cannot be overfilled (\ref{eqn:capacity}), and the items on each strip $S_j$ in the solution must be arranged such that the vicinal sum constraint is fulfilled, that is, the sum of every pair of adjacent score widths is greater than or equal to the minimum scoring distance $\tau$ (\ref{eqn:vscstrip}).
+That is, all items must be packed onto a strip (\ref{eqn:packall}), each item can only be placed on one strip (\ref{eqn:nooverlap}), the strips cannot be overfilled (\ref{eqn:capacity}), and the items on each strip $S_j$ in the solution must be arranged such that the vicinal sum constraint is fulfilled, that is, the sum of every pair of adjacent score widths is greater than or equal to the minimum scoring distance $\tau$ (\ref{eqn:vscstrip}). Note that equations \ref{eqn:packall} - \ref{eqn:capacity} are the necessary conditions for the BPP.
 
 An optimal solution $\mathcal{S}$ for the SCSPP is a solution that consists of the fewest number of strips $k$ needed to feasibly contain the $n$ items in the given problem instance. A simple lower bound for $k$ is the theoretical minimum
 \begin{equation}
@@ -338,9 +356,21 @@ Although using the average optmality from 1000 instances provides a useful overv
 	\label{table:n=1000}	
 \end{table}
 
-\section{Further Work}
+\section{Conclusions and Further Work}
 \begin{itemize}
-	\item \cite{miller1960}
+	\item This paper introduced a SPP with score constraints, where the order and orientation of the items is crucial to the feasibility of the solution (for example).
+	\item We showed that a solution can be found for the single strip version of the problem (subproblem) in p-time/ we showed an exact p-time alg for the single strip version of the problem. 
+	\item exact p-time alg for COP used to solve subproblem
+	\item Thus the main problem was finding solutions for the multistrip version
+	\item Created 3 heuristics, one which included the p-time alg. 
+	\item shown how AHC can be combined with well known heuristic to produce a method for tackling multistrip version of the problem, the SCSPP.
+	\item Experimental results show that ...
+	\item Further work.
+	\item items closer to practical applications, multiple items having same width and score widths
+	\item Genetic algorithm/EA
+	\item Operating theatre cleaning/scheduling
+	\item lower bound for the optimal number of strips SCSPP
+	\item \cite{miller1960} TSP returning to base
 	\item mffd+ items are packed one by one, could be a case where an items fits onto a strip but ahc cannot find a feasible solution, so item must be packed elsewhere, but if two new items could fit on the strip, ahc might be able to find a solution. 
 	\item include item width in ahc, so add values to the blue edges of the graph, weighted edges, red edges have value = 0.
 	\item Then the problem would be: find the minimum number of alternating cycles on $G$ such that the length of the cycle is less than or equal to some value $W$ (which is the strip width). The length of the cycle would be the sum of all the weighted edges, so the sum of all the blue edges, since red = 0. 
