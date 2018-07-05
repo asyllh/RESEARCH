@@ -14,7 +14,7 @@
 
 \section{Introduction}
 \label{sec:intro}
-Firstly, let us introduce the Constrained Ordering Problem (COP):
+The Constrained Ordering Problem (COP) is defined as follows:
 
 \begin{definition}
 	\label{defn:cop}
@@ -31,7 +31,7 @@ For example, given the multiset $\mathcal{M} = \{\{1,2\}, \{1,7\}, \{2,4\}, \{3,
 A prominent application of the COP is in a strip-packing problem brought to light as an open-combinatorial problem by \cite{goulimis2004}. Here, a set $\mathcal{I}$ of rectangular items (where $|\mathcal{I}| = n$) of equal height $H$ made from cardboard are to be packed onto a strip of height $H$ from left to right. Each item $i \in \mathcal{I}$ has width $w_i \in \mathbb{Z}^{+}$, and possesses two vertical score lines, marked in predetermined places. A pair of knives mounted onto a bar cuts along the score lines of two adjacent items simultaneously, which allows the items to be folded with ease (see Figure \ref{fig:itemsknife}). However, by design, the scoring knives cannot be placed too close to one another, and as such have a ``minimum scoring distance'' (around 70mm in industry). The distances between each score line and the nearest edge on an item $i \in \mathcal{I}$ are the score widths, $a_i, b_i \in \mathbb{Z}^{+}$ where $a_i + b_i < w_i$, assigned such that $a_i \leq b_i$. Since these score widths are not necessarily equal, an item $i$ can be positioned in one of two orientations: ``regular'', denoted $(a_i, b_i)$, or ``rotated'', denoted $(b_i, a_i)$, where the smaller of the two score widths $a_i$ is on the left- and right- hand side of the item respectively. 
 \begin{figure}[H]	
 	\centering
-	\includestandalone[width=0.8\textwidth]{figures/itemsknife}
+	\includestandalone[width=0.7\textwidth]{figures/itemsknife}
 	\caption{Dimensions of an item $i \in \mathcal{I}$ in a regular orientation $(a_i, b_i)$, and a feasible alignment of two items that can be scored simultaneously.}	
 	\label{fig:itemsknife}
 \end{figure}
@@ -76,7 +76,7 @@ We shall now present an exact polynomial-time algorithm for the COP. The underly
 
 Let $\mathcal{M}$ be an instance of the COP of cardinality $n$. It is now useful to model $\mathcal{M}$ a a graph $G$ in which each vertex is associated with a single value in $\mathcal{M}$ in non-decreasing order. A pair of vertices, called ``dominating vertices'' are also added to the graph, both of which are assigned values equal to $\tau$. These dominating vertices aid the solution process, and are removed at the end. Thus, the graph $G$ has $2n+2$ vertices.
 
-As we have seen, the values in $\mathcal{M}$ are arranged in pairs. This is represented in $G$ by adding a set of ``blue'' edges, $B$, that contains edges between vertices that are ``partners'', i.e. whose values make up a pair in $\mathcal{M}$, as shown in Figure \ref{fig:partners}. By introducing a bijective function $p: V \to V$ that associates each vertex with its partner, $p(v_i) = v_j$, we can denote this set of edges as $B = \{(v_i, p(v_i)) : v_i \in V\}$. It can be seen that $B$ is a perfect matching in $G$, with $|B| = n+1$. Next, a set of ``red'' edges $R$ is added to $G$ that consists of edges between vertices whose sum equal or exceed $\tau$, provided they are not partners. It can be seen that the edges in $R$ represent all possible orderings of values from different pairs in an instance $\mathcal{M}$ that fulfil the vicinal sum constraint in Definition \ref{defn:cop}. Thus, we have an undirected graph $G$ with vertex set $V = \{v_1, ..., v_{2n+2}\}$ and two distinct edge sets $B$ and $R$ such that $B \cap R = \emptyset$. Figure \ref{fig:partners/threshold} illustrates an example construction of $G$.
+As we have seen, the values in $\mathcal{M}$ are arranged in pairs. This is represented in $G$ by adding a set of ``blue'' edges, $B$, that contains edges between vertices that are ``partners'', i.e. whose values make up a pair in $\mathcal{M}$, as shown in Figure \ref{fig:partners}. By introducing a bijective function $p: V \to V$ that associates each vertex with its partner, $p(v_i) = v_j$, we can denote this set of edges as $B = \{(v_i, p(v_i)) : v_i \in V\}$. It can be seen that $B$ is a perfect matching in $G$, with $|B| = n+1$. Next, a set of ``red'' edges $R$ is added to $G$ that consists of edges between vertices whose sum equal or exceed $\tau$, provided they are not partners. It can be seen that the edges in $R$ represent all possible orderings of values from different pairs in $\mathcal{M}$ that fulfil the vicinal sum constraint in Definition \ref{defn:cop}. Thus, we have an undirected graph $G$ with vertex set $V = \{v_1, ..., v_{2n+2}\}$ and two distinct edge sets $B$ and $R$ such that $B \cap R = \emptyset$. Figure \ref{fig:partners/threshold} illustrates an example construction of $G$.
 \begin{figure}	
 \centering
 \begin{subfigure}[h]{0.45\textwidth}
@@ -89,7 +89,7 @@ As we have seen, the values in $\mathcal{M}$ are arranged in pairs. This is repr
 	\caption{$G=(V, B \cup R)$}	
 	\label{fig:threshold}
 \end{subfigure}
-\caption{Construction of $G$ using instance $\mathcal{M} = \{\{1,2\}, \{1,7\}, \{2,4\}, \{3,5\}, \{3,6\}, \{4,4\}\}$ and $\tau = 7$, where $v_{13}$ and $v_{14}$ are the dominating vertices.}
+\caption{Construction of $G$ using instance $\mathcal{M} = \{\{1,2\}, \{1,7\}, \{2,4\}, \{3,5\}, \{3,6\}, \{4,4\}\}$ and $\tau = 7$.}
 \label{fig:partners/threshold}
 \end{figure}
 
@@ -99,20 +99,22 @@ Recall that a Hamiltonian cycle on a graph $G$ is a cycle that visits every vert
 	Let $G(V, B\cup R)$ be an undirected graph, where each edge is a member of one of two sets, $B$ or $R$. $G$ contains an alternating Hamiltonian cycle if there exists a Hamiltonian cycle such that successive edges alternate between sets $B$ and $R$.
 \end{definition}
 
-An alternating Hamiltonian cycle on $G$ correpsonds to a feasible solution, as each ``blue'' edge from $B$ represents a pair of values in $\mathcal{M}$, and each ``red'' edge from $R$ shows values that can be placed alongside one another feasibly. Thus, by removing the dominating vertices and any incident edges, the remaining alternating Hamiltonian path gives the order in which the elements should be placed to produce a feasible solution $\mathcal{T}$, if indeed one exists. Also, note that every edge in $B$ must be present in the alternating Hamiltonian cycle. Consequently, the task can be seen as finding a matching $R' \subseteq R$ of cardinality $n+1$ such that the edge sets $B$ and $R'$ form an alternating Hamiltonian cycle as described in Definition \ref{defn:althamcycle}. 
+An alternating Hamiltonian cycle on $G$ correpsonds to a feasible solution, as each ``blue'' edge from $B$ represents a pair of values in $\mathcal{M}$, and each ``red'' edge from $R$ indicates the values that can be placed alongside one another feasibly. Thus, by removing the dominating vertices and any incident edges, the remaining alternating Hamiltonian path gives the order in which the elements should be placed to produce a feasible solution $\mathcal{T}$, if indeed one exists. Also, note that every edge in $B$ must be present in the alternating Hamiltonian cycle. Consequently, the task can be seen as finding a matching $R' \subseteq R$ of cardinality $n+1$ such that the edge sets $B$ and $R'$ form an alternating Hamiltonian cycle as described in Definition \ref{defn:althamcycle}. 
 
 The problem of finding an alternating Hamiltonian cycle on general graphs is NP-hard as it generalises the classical Hamiltonian cycle problem, as stated in a proposition by \cite{haggkvist1977}. However, the special structure of graphs derived from instances of the COP allows them to be solved using the following method.
 
 To find a matching $R' \subseteq R$, the following \textsc{Maximum Cardinality Matching} (MCM) algorithm can be executed, as suggested by \cite{mahadev1994} and \cite{becker2010}. Take each vertex $v_1, v_2,..., v_{2n+2}$ in turn, and select the edge in $R$ connecting $v_i$ to the highest-indexed vertex $v_j$ that is not already incident to an edge in $R'$. Now add this edge $(v_i, v_j)$ to $R'$, and proceed to the next vertex until all the vertices have been assessed. The two vertices incident to each matching edge in $R'$ are now referred to as being ``matched''. Similarly to partners, let $m : V \to V$ be a bijective function that assigns each vertex with its match, $m(v_i) = v_j$. Then, we can denote this matching set as $R' =\{(v_i, m(v_i)) : v_i \in V\}$. 
 
-During MCM, if a vertex $v_i$ is not adjacent to any other unmatched vertex except its partner $p(v_i)$, the preceeding vertex $v_{i-1}$ can be ``rematched'', provided that 
+During MCM, if a vertex $v_i$ is not adjacent to any other unmatched vertex except its partner $p(v_i)$ via a blue edge, the preceeding vertex $v_{i-1}$ can be ``rematched'', provided that 
 \begin{enumerate*}[label={(\alph*)}]
 	\item $v_i$ is not the first vertex; 
 	%\item $v_{i-1} \in R'$; and
-	\item $(v_{i-1}, m(v_{i-1})) \in R'$; and
-	\item $(v_{i-1}, p(v_i)) \in R$.
+	%\item $(v_{i-1}, m(v_{i-1})) \in R'$; and
+	\item the previous vertex $v_{i-1}$ has been matched; and
+	%\item $(v_{i-1}, p(v_i)) \in R$.
+	\item $v_{i-1}$ and $p(v_i)$ are adjacent via a red edge in $R$.
 \end{enumerate*}
-Then, $v_i$ is matched with the vertex that is currently matched with $v_{i-1}$, i.e $m(v_i) = m(v_{i-1})$, and $v_{i-1}$ is rematched with $p(v_i)$, i.e. $m(v_{i-1}) = p(v_i)$. It is guaranteed that MCM will produce a maximum cardinality matching $R' \subseteq R$, and is able to do so in at most $O(n \log n)$ time (\citealp{mahadev1994}).
+Then, $v_i$ is matched with the vertex that is currently matched with $v_{i-1}$, and $v_{i-1}$ is rematched with $p(v_i)$. It is guaranteed that MCM will produce a maximum cardinality matching $R' \subseteq R$, and is able to do so in at most $O(n \log n)$ time (\citealp{mahadev1994}).
 
 \begin{figure}	
 	\centering
@@ -126,19 +128,19 @@ Then, $v_i$ is matched with the vertex that is currently matched with $v_{i-1}$,
 		\caption{Planar representation of $G' =(V, B \cup R')$}	
 		\label{fig:mps}
 	\end{subfigure}
-	\caption{Spanning subgraph $G'$ consisting of a matching set $R' \subseteq R$ derived using MCM. The same solution is shown in planar form in (b).}
+	\caption{Spanning subgraph $G'$ consisting of a matching set $R' \subseteq R$ derived using MCM. When in planar form, it is clear that $q = 2$.}
 	\label{fig:matching/mps}
 \end{figure}
 
-Clearly, if $|R'| < n+1$ after MCM has completed, there are insufficient red edges to form an alternating Hamiltonian cycle, and hence no feasible solution exists for the given instance $\mathcal{M}$ of the COP. Otherwise, $R'$ is a perfect matching of cardinality $n+1$ and the spanning subgraph $G'=(V, B \cup R')$ is a 2-regular graph, where each vertex $v_i \in V$ is adjacent to its partner $p(v_i)$ via a blue edge in $B$, and its match $m(v_i)$ via a red edge in $R'$ (see Figure \ref{fig:matching/mps}). $G'$ therefore consists of a collection of cyclic components $C_1, C_2, ..., C_q$. In the case where $G'$ comprises one component, i.e. $q = 1$, then this alternating cycle is in fact Hamiltonian, and therefore specifies a solution to the COP. However, if $q > 1$, the components of $G'$ must be combined to form a single alternating Hamiltonian cycle. To do this, a \textsc{Bridge Recognition} (BR) algorithm can be executed that selects suitable edges from $R$ that will replace certain edges in $R'$ in order to function as bridges and connect the components of $G'$.
+Clearly, if $|R'| < n+1$ after MCM has completed, there are insufficient red edges to form an alternating Hamiltonian cycle, and hence no feasible solution exists for the given instance $\mathcal{M}$ of the COP. Otherwise, $R'$ is a perfect matching of cardinality $n+1$ and the spanning subgraph $G'=(V, B \cup R')$ is a 2-regular graph, where each vertex $v_i \in V$ is adjacent to its partner $p(v_i)$ via a blue edge in $B$, and its match $m(v_i)$ via a red edge in $R'$ (see Figure \ref{fig:matching/mps}). $G'$ therefore consists of a collection of cyclic components $C_1, C_2, ..., C_q$. In the case where $G'$ comprises one component, i.e. $q = 1$, then this alternating cycle is in fact Hamiltonian, and therefore specifies a solution to the COP. However, if $q > 1$, the components of $G'$ must be combined to form a single alternating Hamiltonian cycle. To do this, a \textsc{Bridge Recognition} (BR) algorithm can be executed that selects suitable edges from $R\backslash R'$ that will replace certain edges in $R'$ in order to function as bridges and connect the components of $G'$.
 
-BR operates by first ordering the edges in $R'$ such that the lower-indexed vertices of each edge are in increasing order and the higher-indexed vertices are in decreasing order, i.e. $(v_1, v_{2n+2}), (v_2, v_{2n+1}), ..., (v_{n+1}, v_{n+2})$. Any edges that cannot be placed in such an order are then removed from this list. For instance, in the example illustrated in Figure \ref{fig:matching/mps}, the edges would be sorted as follows: $(v_1, v_{14}), (v_2, v_{13}),(v_3, v_{12}),(v_4, v_{11}),(v_6, v_{10}),(v_7, v_8)$.
+BR operates by first ordering the edges in $R'$ such that the lower-indexed vertices of each edge are in increasing order and the higher-indexed vertices are in decreasing order, i.e. $(v_1, v_{2n+2}), (v_2, v_{2n+1}), ..., (v_{n+1}, v_{n+2})$. Any edges that cannot be placed in such an order are then removed from this list. For instance, in the example illustrated in Figure \ref{fig:matching/mps}, the edges would be sorted as follows: $(v_1, v_{14}), (v_2, v_{13}),(v_3, v_{12}),(v_4, v_{11}),(v_6, v_{10}),(v_7, v_8)$. Note that, since $v_5$ was not matched with the highest-indexed vertex possible during MCM, the edge $(v_5, v_9)$ does not adhere to the required structure of the list and is therefore omitted.
 % (v5, v9) removed from list, not matched with highest-indexed vertex in MCM since it was v10 and v10 is v5's partner.
 
 Starting from the first edge in the list, BR then searches through the list to find an edge that meets the following conditions: 
 \begin{enumerate*}[label={(\alph*)}]
-	\item The lower-indexed vertex of the current edge and the higher-indexed vertex of the next edge in the list are adjacent via an edge in $R$; and
-	\item The current edge and the next edge are members of different components on $G'$.
+	\item the lower-indexed vertex of the current edge and the higher-indexed vertex of the next edge in the list are adjacent via an edge in $R$; and
+	\item the current edge and the next edge are members of different components on $G'$.
 \end{enumerate*}
 If these conditions are met, BR adds the current edge to a set $R_i$, and continues to add all succeeding edges in the list to $R_i$ provided that, for each edge, both conditions hold and the succeeding edge is not a member of a component of $G'$ that has an edge in $R_i$. Once there are no more valid edges available to add to $R_i$, BR resumes its search through the remaining edges in the list to find a new edge that meets the conditions, and can begin a new set $R_{i+1}$. The procedure terminates once the penultimate edge in the list has been assessed.
 % (a) (v_i,m(v_{i+1})) \in R
@@ -148,31 +150,35 @@ Now, one of the following three conditions holds.
 \begin{enumerate}
 \item In the event that BR has been unable to produce a single set, there are no suitable edges that can combine the components $C_1, C_2, ..., C_q$ of $G'$, and therefore an alternating Hamiltonian cycle for $G$ cannot be created. Thus, no feasible solution exists for the corresponding COP.
 
-\item On the other hand, if there exists a set $R_i$ such that $|R_i| = q$, then the components of $G'$ can be merged together to form a single alternating Hamiltonian cycle. This is achieved by adding the red edge connecting the lower-indexed vertex of each edge in $R_i$ to the higher-indexed vertex of the next edge to $R'$ (for the final edge in $R_i$, add the red edge connecting its lower-indexed vertex to the higher-indexed vertex of the first edge). Any edges that appear in both $R_i$ and $R'$ are then removed from $R'$, so that $R'$ remains a perfect matching and $R_i \cap R' = \emptyset$. $G'$ then consists of a single alternating Hamiltonian cycle, and hence a solution has been found.
+\item On the other hand, if there exists a set $R_i$ such that $|R_i| = q$, then the components of $G'$ can be merged together to form a single alternating Hamiltonian cycle. This is achieved by adding the red edge from $R\backslash R'$ connecting the lower-indexed vertex of each edge in $R_i$ to the higher-indexed vertex of the next edge to $R'$ (for the final edge in $R_i$, add the red edge connecting its lower-indexed vertex to the higher-indexed vertex of the first edge). Any edges that appear in both $R_i$ and $R'$ are then removed from $R'$, so that $R'$ remains a perfect matching and $R_i \cap R' = \emptyset$. $G'$ then consists of a single alternating Hamiltonian cycle.
 % add edges (v_i, m(v_{i+1})) for i \in {1, 2, ..., |R_i| -1} from R to R', and then the edge (v_{|R_i|}, m(v_1)) from R to R' 
 
 
 \item Otherwise, it may be that multiple sets are required to connect the components of $G'$. For two sets $R_i$ and $R_j$ to ``overlap'', each set must have one edge from the same component in $G'$, with the other edges in each set being from different components. For example, if $R_1$ has two edges, one from component $C_1$ and one from component $C_2$, and $R_2$ has three edges that are members of components $C_2$, $C_3$ and $C_4$, then $R_1$ and $R_2$ are said to overlap, since they each possess an edge $C_2$, but the other edges in the sets are from different components. Hence, a selection of sets need to be found such that each set overlaps with at least one other set, and each component has at least one edge in one of the selected sets. If such a collection of sets exists, then the components of $G$ can be merged to create an alternating Hamiltonian cycle by applying the connecting procedure above to every set in the collection.
 % Refer to figures
 \end{enumerate}
-Using the instance illustrated in the figures as an example, the edges $(v_3, v_{12})$ and $(v_4, v_{11})$ are in the set $R_1$ formed by BR, as they are members of different components ($(v_3, v_{12}) \in C_1$ and $(v_4, v_{11}) \in C_2$ as seen in Figure \ref{fig:mps}), and $(v_3, v_{11}) \in R$. Note that since $v_4$ and $v_{11}$ are adjacent, $v_4$ must also be adjacent to $v_{12}$, i.e. $(v_4, v_{12}) \in R$, since the value associated with $v_{12}$ is greater than or equal to the value associated with $v_{11}$. Then, as $|R_1| = q$, the edges $(v_3, v_{12})$ and $(v_4, v_{11})$ are removed from $R'$ and replaced by the edges $(v_3, v_{11})$ and $(v_4, v_{12})$ from $R$, as shown in Figure \ref{fig:connect/cycle}. Removing the dominating vertices and any incident edges results in an alternating Hamiltonian path, which corresponds to a feasible solution $\mathcal{T}$. 
+Using the instance illustrated in the figures as an example, the edges $(v_3, v_{12})$ and $(v_4, v_{11})$ are in the set $R_1$ formed by BR, as \begin{enumerate*}[label={(\alph*)}]
+	\item $(v_3, v_{11}) \in R$, i.e. the lower-indexed vertex of the first edge is adjacent to the higher-indexed vertex of the next edge; and
+	\item the edges are members of different components ($(v_3, v_{12}) \in C_1$ and $(v_4, v_{11}) \in C_2$ as seen in Figure \ref{fig:mps}).
+\end{enumerate*}
+Note that since $v_4$ and $v_{11}$ are adjacent, $v_4$ must also be adjacent to $v_{12}$, i.e. $(v_4, v_{12}) \in R$, since the value associated with $v_{12}$ is greater than or equal to the value associated with $v_{11}$. Then, as $|R_1| = q$, the edges $(v_3, v_{12})$ and $(v_4, v_{11})$ are removed from $R'$ and replaced by the edges $(v_3, v_{11})$ and $(v_4, v_{12})$ from $R$, as shown in Figure \ref{fig:connect/cycle}. Removing the dominating vertices and any incident edges results in an alternating Hamiltonian path, which corresponds to a feasible solution $\mathcal{T}$. 
 
 This algorithm, which will be referred to as the \textsc{Alternating Hamiltonian Construction} (AHC) algorithm is able to deduce whether a feasible solution $\mathcal{T}$ exists for any given instance $\mathcal{M}$ of the COP. If a solution does indeed exist, AHC can produce this solution in at most $O(n^2)$ time.
 % Cite Becker
 
 \begin{figure}	
 	\centering
-	\begin{subfigure}[H]{0.7\textwidth}
+	\begin{subfigure}[H]{0.57\textwidth}
 		\includestandalone[width=\textwidth]{figures/mpsconnect}
 		\caption{Edges from $R\backslash R'$ can connect vertices from different cycles.}	
 		\label{fig:mpsconnect} \vspace{5mm}
 	\end{subfigure}
-	\begin{subfigure}[H]{0.7\textwidth}
+	\begin{subfigure}[H]{0.57\textwidth}
 		\includestandalone[width=\textwidth]{figures/mpscycle}
 		\caption{Replacing edges connects the components and forms an alternating Hamiltonian cycle.}	
 		\label{fig:mpscycle} \vspace{5mm}
 	\end{subfigure}
-	\begin{subfigure}[H]{0.8\textwidth}
+	\begin{subfigure}[H]{0.7\textwidth}
 		\includestandalone[width=\textwidth]{figures/mpspath}
 		\caption{Alternating Hamiltonian Path corresponding to feasible solution $\mathcal{T}$.}	
 		\label{fig:mpspath}
@@ -181,6 +187,7 @@ This algorithm, which will be referred to as the \textsc{Alternating Hamiltonian
 	\label{fig:connect/cycle}
 \end{figure}
 
+\begin{comment}
 \begin{algorithm}[h]
 \caption{\textsc{Alternating Hamiltonian Construction} (AHC) algorithm}
 \label{alg:ahca}
@@ -205,11 +212,12 @@ This algorithm, which will be referred to as the \textsc{Alternating Hamiltonian
 	\EndIf
 \end{algorithmic}	
 \end{algorithm}
+\end{comment}
 
 
 \begin{theorem}
 	\label{thm:copsoln}
-	If there exists an alternating Hamiltonian cycle on a graph $G$ created from an instance $\mathcal{M}$ of the COP, then AHC is able to find the cycle in at most $O(n^2)$ time.
+	If there exists an alternating Hamiltonian cycle on a graph $G$ created from an instance $\mathcal{M}$ of the COP, AHC is able to find the cycle in at most $O(n^2)$ time.
 \end{theorem}
 \begin{proof}
 	\begin{itemize}
