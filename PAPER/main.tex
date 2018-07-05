@@ -8,11 +8,9 @@
 \institute{School of Mathematics, Cardiff University, Senghennydd Road, Cardiff, UK, CF24 4AG}
 \maketitle
 
-
 \begin{abstract}
 	This paper investigates the Score-Constrained Strip-Packing Problem (SCSPP), a combinatorial optimisation problem that generalises the one-dimensional bin-packing problem. In the construction of cardboard boxes rectangular items are packed onto strips to be scored by knives prior to being folded. The order and orientation of the items on the strips determine whether the knives are able to score the items correctly. Initially, we detail an exact polynomial-time algorithm for the Constrained Ordering Problem and illustrate how it can find a feasible alignment of items on a single strip. We then integrate this algorithm with a packing heuristic to address the SCSPP and compare with two other greedy heuristics, discussing the circumstances in which each heuristic is superior.
 \end{abstract}
-
 
 \section{Introduction}
 \label{sec:intro}
@@ -38,7 +36,7 @@ A prominent application of the COP is in a strip-packing problem brought to ligh
 	\label{fig:itemsknife}
 \end{figure}
 
-Clearly, for two items to be placed alongside one another feasibly, the distance between the two score lines from adjacent items must equal or exceed the minimum scoring distance, else the knives will not be able to score the items in the correct locations. Thus, the problem consists of finding a suitable ordering and orientation of the items such that the sum of every pair of adjacent score widths is greater than or equal to the minimum scoring distance\footnote{Note that the left-hand score width of the first item and the right-hand score width of the last item on the strip are not adjacent to any other item, and are therefore ignored.}. It follows that there are $\frac{n!}{2}$ $2^n$ distinct arrangements of items, and so as $n$ increases,
+Clearly, for two items to be placed alongside one another feasibly, the distance between the two score lines from adjacent items must equal or exceed the minimum scoring distance, else the knives will not be able to score the items in the correct locations. Thus, the problem consists of finding a suitable ordering and orientation of the items such that the sum of every pair of adjacent score widths is greater than or equal to the minimum scoring distance\footnote{Note that the left-hand score width of the first item and the right-hand score width of the last item on the strip are not adjacent to any other item, and are therefore ignored.}. It follows that there are $\frac{n!}{2}2^n$ distinct arrangements of items, and so complete enumeration can cause a combinatorial explosion.
 
 It can be seen that this problem is in fact equal to the COP, where each unordered pair in an instance $\mathcal{M}$ contains the score widths of an item, and $\tau$ is the minimum scoring distance. It then follows that the vicinal sum constraint corresponds to the requirement for the sum of adjacent score widths to exceed $\tau$. Figure \ref{fig:items/aligned} shows the example instance $\mathcal{M}$ of the COP from above depicted as a packing problem.
 
@@ -123,7 +121,7 @@ Then, $v_i$ is matched with the vertex that is currently matched with $v_{i-1}$,
 		\caption{$G' = (V, B \cup R')$}	
 		\label{fig:matching}
 	\end{subfigure} \quad
-	\begin{subfigure}[t]{0.55\textwidth}
+	\begin{subfigure}[t]{0.57\textwidth}
 		\includestandalone[width=\textwidth]{figures/mps}
 		\caption{Planar representation of $G' =(V, B \cup R')$}	
 		\label{fig:mps}
@@ -211,7 +209,7 @@ This algorithm, which will be referred to as the \textsc{Alternating Hamiltonian
 
 \begin{theorem}
 	\label{thm:copsoln}
-	If there exists an alternating Hamiltonian cycle on a graph $G$ created from an instance $\mathcal{M}$ of the COP, then AHC is able to find the cycle in $O(n^2)$ time.
+	If there exists an alternating Hamiltonian cycle on a graph $G$ created from an instance $\mathcal{M}$ of the COP, then AHC is able to find the cycle in at most $O(n^2)$ time.
 \end{theorem}
 \begin{proof}
 	\begin{itemize}
@@ -246,7 +244,7 @@ For an instance of the SCSPP, a feasible solution is represented by the set $\ma
 \end{align}
 \end{subequations}
 
-That is, all items must be packed onto a strip (\ref{eqn:packall}), each item can only be placed on one strip (\ref{eqn:nooverlap}), the strips cannot be overfilled (\ref{eqn:capacity}), and the items on each strip $S_j$ in the solution must be arranged such that the vicinal sum constraint is fulfilled, that is, the sum of every pair of adjacent score widths is greater than or equal to the minimum scoring distance $\tau$ (\ref{eqn:vscstrip}). Note that equations \ref{eqn:packall} - \ref{eqn:capacity} are the necessary conditions for the BPP.
+That is, all items must be packed onto a strip (\ref{eqn:packall}), each item can only be placed on one strip (\ref{eqn:nooverlap}), the strips cannot be overfilled (\ref{eqn:capacity}), and the items on each strip $S_j$ in the solution must be arranged such that the vicinal sum constraint is fulfilled, that is, the sum of every pair of adjacent score widths is greater than or equal to the minimum scoring distance $\tau$ (\ref{eqn:vscstrip}). Note that equations (\ref{eqn:packall}) - (\ref{eqn:capacity}) are the necessary conditions for the BPP. 
 
 An optimal solution $\mathcal{S}$ for the SCSPP is a solution that consists of the fewest number of strips $k$ needed to feasibly contain the $n$ items in the given problem instance. A simple lower bound for $k$ is the theoretical minimum
 \begin{equation}
@@ -381,7 +379,6 @@ Although using the average optmality from 1000 instances provides a useful overv
 	\item if sets dont have feasible solution, try swapping items between sets
 	\item initial tests, Becker theorem 6 2015 paper \cite{garraffa2016}
 	\item minimise waste on each strip, not just number of strips
-	\item tsp return to base
 \end{itemize}
 
 \begin{comment}
