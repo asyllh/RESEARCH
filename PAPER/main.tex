@@ -108,10 +108,7 @@ To find a matching $R' \subseteq R$, the following \textsc{Maximum Cardinality M
 During MCM, if a vertex $v_i$ is not adjacent to any other unmatched vertex except its partner $p(v_i)$ via a blue edge, the preceeding vertex $v_{i-1}$ can be ``rematched'', provided that 
 \begin{enumerate*}[label={(\alph*)}]
 	\item $v_i$ is not the first vertex; 
-	%\item $v_{i-1} \in R'$; and
-	%\item $(v_{i-1}, m(v_{i-1})) \in R'$; and
 	\item the previous vertex $v_{i-1}$ has been matched; and
-	%\item $(v_{i-1}, p(v_i)) \in R$.
 	\item $v_{i-1}$ and $p(v_i)$ are adjacent via a red edge in $R$.
 \end{enumerate*}
 Then, $v_i$ is matched with the vertex that is currently matched with $v_{i-1}$, and $v_{i-1}$ is rematched with $p(v_i)$. It is guaranteed that MCM will produce a maximum cardinality matching $R' \subseteq R$, and is able to do so in at most $O(n \log n)$ time (\citealp{mahadev1994}).
@@ -135,7 +132,6 @@ Then, $v_i$ is matched with the vertex that is currently matched with $v_{i-1}$,
 Clearly, if $|R'| < n+1$ after MCM has completed, there are insufficient red edges to form an alternating Hamiltonian cycle, and hence no feasible solution exists for the given instance $\mathcal{M}$ of the COP. Otherwise, $R'$ is a perfect matching of cardinality $n+1$ and the spanning subgraph $G'=(V, B \cup R')$ is a 2-regular graph, where each vertex $v_i \in V$ is adjacent to its partner $p(v_i)$ via a blue edge in $B$, and its match $m(v_i)$ via a red edge in $R'$ (see Figure \ref{fig:matching/mps}). $G'$ therefore consists of a collection of cyclic components $C_1, C_2, ..., C_q$. In the case where $G'$ comprises one component, i.e. $q = 1$, then this alternating cycle is in fact Hamiltonian, and therefore specifies a solution to the COP. However, if $q > 1$, the components of $G'$ must be combined to form a single alternating Hamiltonian cycle. To do this, a \textsc{Bridge Recognition} (BR) algorithm can be executed that selects suitable edges from $R\backslash R'$ that will replace certain edges in $R'$ in order to function as bridges and connect the components of $G'$.
 
 BR operates by first ordering the edges in $R'$ such that the lower-indexed vertices of each edge are in increasing order and the higher-indexed vertices are in decreasing order, i.e. $(v_1, v_{2n+2}), (v_2, v_{2n+1}), ..., (v_{n+1}, v_{n+2})$. Any edges that cannot be placed in such an order are then removed from this list. For instance, in the example illustrated in Figure \ref{fig:matching/mps}, the edges would be sorted as follows: $(v_1, v_{14}), (v_2, v_{13}),(v_3, v_{12}),(v_4, v_{11}),(v_6, v_{10}),(v_7, v_8)$. Note that, since $v_5$ was not matched with the highest-indexed vertex possible during MCM, the edge $(v_5, v_9)$ does not adhere to the required structure of the list and is therefore omitted.
-% (v5, v9) removed from list, not matched with highest-indexed vertex in MCM since it was v10 and v10 is v5's partner.
 
 Starting from the first edge in the list, BR then searches through the list to find an edge that meets the following conditions: 
 \begin{enumerate*}[label={(\alph*)}]
@@ -143,8 +139,6 @@ Starting from the first edge in the list, BR then searches through the list to f
 	\item the current edge and the next edge are members of different components on $G'$.
 \end{enumerate*}
 If these conditions are met, BR adds the current edge to a set $R_i$, and continues to add all succeeding edges in the list to $R_i$ provided that, for each edge, both conditions hold and the succeeding edge is not a member of a component of $G'$ that has an edge in $R_i$. Once there are no more valid edges available to add to $R_i$, BR resumes its search through the remaining edges in the list to find a new edge that meets the conditions, and can begin a new set $R_{i+1}$. The procedure terminates once the penultimate edge in the list has been assessed.
-% (a) (v_i,m(v_{i+1})) \in R
-% (b) (v_i, m(v_i)) \in C_k, (v_{i+1}, m(v_{i+1})) \in C_l, k \neq l
 
 Now, one of the following three conditions holds.
 \begin{enumerate}
@@ -155,65 +149,37 @@ Now, one of the following three conditions holds.
 
 
 \item Otherwise, it may be that multiple sets are required to connect the components of $G'$. For two sets $R_i$ and $R_j$ to ``overlap'', each set must have one edge from the same component in $G'$, with the other edges in each set being from different components. For example, if $R_1$ has two edges, one from component $C_1$ and one from component $C_2$, and $R_2$ has three edges that are members of components $C_2$, $C_3$ and $C_4$, then $R_1$ and $R_2$ are said to overlap, since they each possess an edge $C_2$, but the other edges in the sets are from different components. Hence, a selection of sets need to be found such that each set overlaps with at least one other set, and each component has at least one edge in one of the selected sets. If such a collection of sets exists, then the components of $G$ can be merged to create an alternating Hamiltonian cycle by applying the connecting procedure above to every set in the collection.
-% Refer to figures
 \end{enumerate}
+
 Using the instance illustrated in the figures as an example, the edges $(v_3, v_{12})$ and $(v_4, v_{11})$ are in the set $R_1$ formed by BR, as \begin{enumerate*}[label={(\alph*)}]
 	\item $(v_3, v_{11}) \in R$, i.e. the lower-indexed vertex of the first edge is adjacent to the higher-indexed vertex of the next edge; and
 	\item the edges are members of different components ($(v_3, v_{12}) \in C_1$ and $(v_4, v_{11}) \in C_2$ as seen in Figure \ref{fig:mps}).
 \end{enumerate*}
 Note that since $v_4$ and $v_{11}$ are adjacent, $v_4$ must also be adjacent to $v_{12}$, i.e. $(v_4, v_{12}) \in R$, since the value associated with $v_{12}$ is greater than or equal to the value associated with $v_{11}$. Then, as $|R_1| = q$, the edges $(v_3, v_{12})$ and $(v_4, v_{11})$ are removed from $R'$ and replaced by the edges $(v_3, v_{11})$ and $(v_4, v_{12})$ from $R$, as shown in Figure \ref{fig:connect/cycle}. Removing the dominating vertices and any incident edges results in an alternating Hamiltonian path, which corresponds to a feasible solution $\mathcal{T}$. 
 
-This algorithm, which will be referred to as the \textsc{Alternating Hamiltonian Construction} (AHC) algorithm is able to deduce whether a feasible solution $\mathcal{T}$ exists for any given instance $\mathcal{M}$ of the COP. If a solution does indeed exist, AHC can produce this solution in at most $O(n^2)$ time.
-% Cite Becker
-
 \begin{figure}	
 	\centering
 	\begin{subfigure}[H]{0.57\textwidth}
 		\includestandalone[width=\textwidth]{figures/mpsconnect}
-		\caption{Edges from $R\backslash R'$ can connect vertices from different cycles.}	
-		\label{fig:mpsconnect} \vspace{5mm}
+		%\caption{Edges from $R\backslash R'$ can connect vertices from different cycles.}	
+		\label{fig:mpsconnect}
 	\end{subfigure}
 	\begin{subfigure}[H]{0.57\textwidth}
 		\includestandalone[width=\textwidth]{figures/mpscycle}
-		\caption{Replacing edges connects the components and forms an alternating Hamiltonian cycle.}	
-		\label{fig:mpscycle} \vspace{5mm}
+		%\caption{Replacing edges connects the components and forms an alternating Hamiltonian cycle.}	
+		\label{fig:mpscycle}
 	\end{subfigure}
-	\begin{subfigure}[H]{0.7\textwidth}
+	\begin{subfigure}[H]{0.6\textwidth}
 		\includestandalone[width=\textwidth]{figures/mpspath}
-		\caption{Alternating Hamiltonian Path corresponding to feasible solution $\mathcal{T}$.}	
+		%\caption{Alternating Hamiltonian Path corresponding to feasible solution $\mathcal{T}$.}	
 		\label{fig:mpspath}
 	\end{subfigure}
 	\caption{Selected edges found using BR merge the components of $G'$ together, forming an alternating Hamiltonian cycle which corresponds to a feasible solution $\mathcal{T} = \langle(1,2), (6,3), (5,3), (4,4), (4,2), (7,1) \rangle$.}
 	\label{fig:connect/cycle}
 \end{figure}
 
-\begin{comment}
-\begin{algorithm}[h]
-\caption{\textsc{Alternating Hamiltonian Construction} (AHC) algorithm}
-\label{alg:ahca}
-\begin{algorithmic}[1]
-	\State Create the graph $G = (V, B \cup R)$ from instance $\mathcal{M}$
-	\State Execute \textsc{Maximum Cardinality Matching}
-	\If{$|R'| < n + 1$}
-		\State infeasible, end
-	\EndIf
-	\State Produce the subgraph $G' = (V, B \cup R')$ consisting of $q$ cycles
-	\If{$q = 1$}
-		\State remove dominating vertices and incident edges
-		\Return $G'$
-	\Else
-		\State execute \textsc{Bridge Recognition}
-		\If{$q = 1$}
-			\State remove dominating vertices and incident edges
-			\Return $G'$
-		\Else
-			\State infeasible, end	
-		\EndIf	
-	\EndIf
-\end{algorithmic}	
-\end{algorithm}
-\end{comment}
-
+This algorithm, which will be referred to as the \textsc{Alternating Hamiltonian Construction} (AHC) algorithm is able to deduce whether a feasible solution $\mathcal{T}$ exists for any given instance $\mathcal{M}$ of the COP. If a solution does indeed exist, AHC can produce this solution in at most $O(n^2)$ time.
+% Cite Becker
 
 \begin{theorem}
 	\label{thm:copsoln}
@@ -240,7 +206,7 @@ This algorithm, which will be referred to as the \textsc{Alternating Hamiltonian
 \section{Heuristics for the SCSPP}
 \label{sec:scsppsoln}
 
-In this section, we now turn our attention to the multi-strip version of the problem. As mentioned in the introduction, this problem is a generalisation of the BPP in that we also require the sum of every pair of adjacent score widths to be greater than or equal to a minimum scoring distance $\tau$. It follows that the SCSPP is at least as hard as the BPP, which is known to be NP-hard (\citealp{garey1979}), and so (under the assumption that $P \neq NP$) there is no known algorithm that is able to find an optimal solution for every instance of the SCSPP in polynomial time. Instead, heuristics can be used to find near-optimal solutions in a shorter amount of time.
+In this section, we now turn our attention to the multi-strip version of the problem. As mentioned in the introduction, the SCSPP is a generalisation of the BPP in that we also require the sum of every pair of adjacent score widths to be greater than or equal to a minimum scoring distance $\tau$. It follows that the SCSPP is at least as hard as the BPP, which is known to be NP-hard (\citealp{garey1979}), and so (under the assumption that $P \neq NP$) there is no known algorithm that is able to find an optimal solution for every instance of the SCSPP in polynomial time. Instead, heuristics can be used to find near-optimal solutions in a shorter amount of time.
 
 For an instance of the SCSPP, a feasible solution is represented by the set $\mathcal{S} = \{S_1, S_2, ..., S_k\}$ such that
 \begin{subequations}
@@ -277,7 +243,7 @@ The next heuristic is the \textsc{Pair-Smallest} (PS) heuristic, an extension of
 The last heuristic, \textsc{Modified First-Fit Decreasing with AHC} (MFFD$^+$), incorporates AHC as described in Section \ref{sec:ahca}. MFFD$^+$ operates in a similar fashion to the MFFD, placing items sorted in decreasing order onto the lowest-indexed strip. However, rather than attempting to place the item onto the right-most side of the strip, MFFD$^+$ executes AHC on the sub-problem, where the items on the strip and the current item form the subset $\mathcal{I}' \subseteq \mathcal{I}$ (see Definition \ref{defn:subprob}). If AHC finds a feasible solution, the items are placed on the strip in the order of the solution, which includes the current item, else MFFD$^+$ attempts to pack the current item on the next lowest-indexed strip. Using AHC means that if a feasible alignment of the items exists, there is a guarantee that it will be found. Unlike MFFD, where the current item can only be placed on the end of the strip, MFFD$^+$ allows the items to be entirely rearranged (see Figure \ref{fig:comparestrips}). This reduces the possibility of having to start a new strip for an item, thus preventing increasing the number of strips in the final solution. 
 %Since AHC is executed every time an item can fit onto a strip that already contains items, (up to $|\mathcal{S}|$ times per item, where $|\mathcal{S}|$ is the number of strips containing at least one item so far in the procedure) MFFD$^+$ is slower in comparison to the previous heuristics.  
 
-\begin{figure}[h!]	
+\begin{figure}[H]	
 	\centering
 	\includestandalone[width=\textwidth]{figures/strips}
 	\caption{Example instance of the sub-problem, with $W = 20$ and $\tau = 70$. In MFFD the constraint is not fulfilled in either orientation, however MFFD$^+$ is able find a feasible arrangement.}	
@@ -293,26 +259,6 @@ The heuristics were implemented in C++ and executed on a computer equipped with 
 	r = \frac{|\mathcal{S}|}{t},
 \end{equation}
 i.e. the ratio of the number of strips in the final solution $\mathcal{S}$ generated by the heuristic to the theoretical minimum $t$, which was calculated using Equation \ref{eqn:lowerbound}. All individual trials were executed in under 160ms.
-
-Tables \ref{table:n=500} and \ref{table:n=1000} compare the results obtained from the three heuristics using different values of $\delta$ and $W$ for $n = 500$ and 1000 respectively. Figures in bold indicate the best average optimality for the given combination of parameters. Initially, we can see that $r$ tends toward 1 as $\delta$ increases, since the proportion of score widths meet the vicinal sum constraint increases and more items can be packed onto one strip, reducing the number of strips required. Note that when $\delta = 1.0$ MFFD and MFFD$^+$ have identical optimality ratios, as the instances are equivalent to the original BPP ($\tau = 0$) and so they operate in the same fashion as the original FFD heuristic.
-
-Looking at results for both $n = 500$ and $n = 1000$, there is a clear pattern with respect to $r$ across all widths and proportion levels. PS has the best optimality ratio for a wider range of $\delta$ when the strips are wider, and a much smaller range when the strip width decreases. Conversely, MFFD$^+$ obtains better optimality ratios for a wider range of $\delta$ when $W = 1250$. Although PS does have the best optimality of the three heuristics for $\delta = 0.1$ and 0.2 using the smallest strip width, we can see that it only marginally superior to MFFD$^+$. For example, take $\delta = 0.2$ in Table \ref{table:n=500} for $W = 1250$. The difference between $r$ for PS and MFFD$^+$ is 0.00829, which translates to less than 2 strips difference between the average number of strips generated by each heuristic.
-
-One interesting feature is the reduction of $r$ between $\delta = 0.4$ and $\delta = 0.5$, which is much more significant for $W = 5000$ as opposed to $W = 1250$. The reduction occurs due to an increase in the number of feasible alignments of the items, as every score width is able to be paired with $n-1$ other score widths when $\delta = 0.5$. Thus, when $W = 5000$, more items can be packed onto a strip feasibly, resulting in fewer strips in the final solution. However, the difference in $r$ is less noticeable for $W = 1250$, as regardless of the increased proportion in possible pairings, the capacity of the strips is much smaller, preventing the collection of items from multiple strips onto one.
-
-Although using the average optmality from 1000 instances provides a useful overview of the efficiency of a heuristic, there are other characteristics that we can consider. Take, for example, the results obtained with parameters $\delta = 0.7$ and $W = 5000$ in Table \ref{table:n=1000}. Clearly PS obtains solutions with the fewest strips on average, however, we noted that out of the 1000 instances, PS did not produce a single solution containing $t$ strips. On the other hand, there were 152 instances in which MFFD$^+$ was able to generate a solution $S$ such that $|\mathcal{S}| = t$, thus implying that there are at least 152 solutions that can be solved to optimality. Despite this, MFFD$^+$ has a higher average optimality than PS, suggesting that the variance in the number of strips required is higher.
-
-
-\begin{enumerate}
-	\item MFFD and MFFD$^+$ able to obtain opts $\leq 1\%$ of $t$, PS is not.
-	\item PS never best $\delta \geq 0.8$.
-	\item Significant difference in opt, $n = 1000$, $W = 1250$, $\delta = 0.6$, difference between MFFD$^+$ and PS opts is 0.10912 (MFFD$^+$ better), which amounts to an average difference of over 50 strips in solns produced.
-	\item anomaly MFFD $n = 1000$, $W = 1250$, $\delta = 0.3$
-	\item harder problems, \cite{falkenauer1996}, triplets, fewer items per strip, further from 1 when shorter strips.
-	\item cases when opt $\neq 1$: $t$ incorrect, solution produced is not optimal, or both.
-	\item less than 10\% past $\delta = 0.8$
-\end{enumerate}
-
 
 \begin{table}[!htb]
 	\centering
@@ -361,6 +307,27 @@ Although using the average optmality from 1000 instances provides a useful overv
 	\end{tabular}
 	\label{table:n=1000}	
 \end{table}
+
+Tables \ref{table:n=500} and \ref{table:n=1000} compare the results obtained from the three heuristics using different values of $\delta$ and $W$ for $n = 500$ and 1000 respectively. Figures in bold indicate the best average optimality for the given combination of parameters. Initially, we can see that $r$ tends toward 1 as $\delta$ increases, since the proportion of score widths meet the vicinal sum constraint increases and more items can be packed onto one strip, reducing the number of strips required. Note that when $\delta = 1.0$ MFFD and MFFD$^+$ have identical optimality ratios, as the instances are equivalent to the original BPP ($\tau = 0$) and so they operate in the same fashion as the original FFD heuristic.
+
+Looking at results for both $n = 500$ and $n = 1000$, there is a clear pattern with respect to $r$ across all widths and proportion levels. PS has the best optimality ratio for a wider range of $\delta$ when the strips are wider, and a much smaller range when the strip width decreases. Conversely, MFFD$^+$ obtains better optimality ratios for a wider range of $\delta$ when $W = 1250$. Although PS does have the best optimality of the three heuristics for $\delta = 0.1$ and 0.2 using the smallest strip width, we can see that it only marginally superior to MFFD$^+$. For example, take $\delta = 0.2$ in Table \ref{table:n=500} for $W = 1250$. The difference between $r$ for PS and MFFD$^+$ is 0.00829, which translates to less than 2 strips difference between the average number of strips generated by each heuristic.
+
+One interesting feature is the reduction of $r$ between $\delta = 0.4$ and $\delta = 0.5$, which is much more significant for $W = 5000$ as opposed to $W = 1250$. The reduction occurs due to an increase in the number of feasible alignments of the items, as every score width is able to be paired with $n-1$ other score widths when $\delta = 0.5$. Thus, when $W = 5000$, more items can be packed onto a strip feasibly, resulting in fewer strips in the final solution. However, the difference in $r$ is less noticeable for $W = 1250$, as regardless of the increased proportion in possible pairings, the capacity of the strips is much smaller, preventing the collection of items from multiple strips onto one.
+
+Although using the average optmality from 1000 instances provides a useful overview of the efficiency of a heuristic, there are other characteristics that we can consider. Take, for example, the results obtained with parameters $\delta = 0.7$ and $W = 5000$ in Table \ref{table:n=1000}. Clearly PS obtains solutions with the fewest strips on average, however, we noted that out of the 1000 instances, PS did not produce a single solution containing $t$ strips. On the other hand, there were 152 instances in which MFFD$^+$ was able to generate a solution $S$ such that $|\mathcal{S}| = t$, thus implying that there are at least 152 solutions that can be solved to optimality. Despite this, MFFD$^+$ has a higher average optimality than PS, suggesting that the variance in the number of strips required is higher.
+
+
+\begin{enumerate}
+	\item MFFD and MFFD$^+$ able to obtain opts $\leq 1\%$ of $t$, PS is not.
+	\item PS never best $\delta \geq 0.8$.
+	\item Significant difference in opt, $n = 1000$, $W = 1250$, $\delta = 0.6$, difference between MFFD$^+$ and PS opts is 0.10912 (MFFD$^+$ better), which amounts to an average difference of over 50 strips in solns produced.
+	\item anomaly MFFD $n = 1000$, $W = 1250$, $\delta = 0.3$
+	\item harder problems, \cite{falkenauer1996}, triplets, fewer items per strip, further from 1 when shorter strips.
+	\item cases when opt $\neq 1$: $t$ incorrect, solution produced is not optimal, or both.
+	\item less than 10\% past $\delta = 0.8$
+\end{enumerate}
+
+
 
 \section{Conclusions and Further Work}
 \begin{itemize}
