@@ -4,13 +4,14 @@
 \begin{document}
 	
 \title{Heuristics for the Score-Constrained Strip-Packing Problem}
-\author{Asyl L. Hawa \and Rhyd M. R. Lewis \and Jonathan M. Thompson}
+\author{Asyl L. Hawa\orcidID{0000-0002-2270-1057} \and Rhyd M. R. Lewis \and Jonathan M. Thompson}
 \authorrunning{A. L. Hawa et al.}
-\institute{School of Mathematics, Cardiff University, Senghennydd Road, Cardiff, UK, CF24 4AG}
+\institute{School of Mathematics, Cardiff University, Senghennydd Road, Cardiff, UK
+\email{hawaa@cardiff.ac.uk}}
 \maketitle
 
 \begin{abstract}
-	This paper investigates the Score-Constrained Strip-Packing Problem (SCSPP), a combinatorial optimisation problem that generalises the one-dimensional bin-packing problem. In the construction of cardboard boxes rectangular items are packed onto strips to be scored by knives prior to being folded. The order and orientation of the items on the strips determine whether the knives are able to score the items correctly. Initially, we detail an exact polynomial-time algorithm for the Constrained Ordering Problem and illustrate how it can find a feasible alignment of items on a single strip. We then integrate this algorithm with a packing heuristic to address the SCSPP and compare with two other greedy heuristics, discussing the circumstances in which each heuristic is superior.
+	This paper investigates the Score-Constrained Strip-Packing Problem (SCSPP), a combinatorial optimisation problem that generalises the one-dimensional bin-packing problem. In the construction of cardboard boxes rectangular items are packed onto strips to be scored by knives prior to being folded. The order and orientation of the items on the strips determine whether the knives are able to score the items correctly. Initially, we detail an exact polynomial-time algorithm for finding a feasible alignment of items on a single strip. We then integrate this algorithm with a packing heuristic to address the multi-strip problem and compare with two other greedy heuristics, discussing the circumstances in which each method is superior.
 \end{abstract}
 
 \section{Introduction}
@@ -19,7 +20,7 @@ The Constrained Ordering Problem (COP) is defined as follows:
 
 \begin{definition}
 	\label{defn:cop}
-	Let $\mathcal{M}$ be a multiset of unordered pairs of positive integers $\mathcal{M} = \{\{a_1, b_1\}, \{a_2,b_2\},...,\{a_n,b_n\}\}$, and let $\mathcal{T}$ be an ordering of the elements of $\mathcal{M}$ such that each element is a tuple. The Constrained Ordering Problem (COP) consists of finding a solution $\mathcal{T}$ such that, given a fixed value $\tau \in \mathbb{Z}^{+},$
+	Let $\mathcal{M}$ be a multiset of unordered pairs of positive integers $\mathcal{M} = \{\{a_1, b_1\}, \{a_2,b_2\},...,\{a_n,b_n\}\}$, and let $\mathcal{T}$ be an ordering of the elements of $\mathcal{M}$ such that each element is a tuple. The \emph{Constrained Ordering Problem (COP)} consists of finding a solution $\mathcal{T}$ such that, given a fixed value $\tau \in \mathbb{Z}^{+},$
 	\begin{equation}
 		\label{eqn:vsc}
 		\emph{\textbf{rhs}}(i) + \emph{\textbf{lhs}}(i+1) \geq \tau \hspace{5mm} \forall \hspace{1mm} i \in \{1,2,..., n-1\},
@@ -27,35 +28,34 @@ The Constrained Ordering Problem (COP) is defined as follows:
 	where \emph{\textbf{lhs}($i$)} and \emph{\textbf{rhs}($i$)} denote the left- and right-hand values of the $i$th tuple. The inequality is referred to as the \emph{vicinal sum constraint}.
 \end{definition}
 
-For example, given the multiset $\mathcal{M} = \{\{1,2\}, \{1,7\}, \{2,4\}, \{3,5\}, \{3,6\}, \{4,4\}\}$ and $\tau = 7$, one possible solution is $\mathcal{T} = \langle(1,2), (6,3), (5,3), (4,4), (4,2), (7,1) \rangle$.
+For example, given $\mathcal{M} = \{\{1,2\}, \{1,7\}, \{2,4\}, \{3,5\}, \{3,6\}, \{4,4\}\}$ and $\tau = 7$, one possible solution is $\mathcal{T} = \langle(1,2), (6,3), (5,3), (4,4), (4,2), (7,1) \rangle$.
 
-A prominent application of the COP is in a strip-packing problem brought to light as an open-combinatorial problem by \cite{goulimis2004}. Here, a set $\mathcal{I}$ of rectangular items (where $|\mathcal{I}| = n$) of equal height $H$ made from cardboard are to be packed onto a strip of height $H$ from left to right. Each item $i \in \mathcal{I}$ has width $w_i \in \mathbb{Z}^{+}$, and possesses two vertical score lines, marked in predetermined places. A pair of knives mounted onto a bar cuts along the score lines of two adjacent items simultaneously, which allows the items to be folded with ease (see Figure \ref{fig:itemsknife}). However, by design, the scoring knives cannot be placed too close to one another, and as such have a ``minimum scoring distance'' (around 70mm in industry). The distances between each score line and the nearest edge on an item $i \in \mathcal{I}$ are the score widths, $a_i, b_i \in \mathbb{Z}^{+}$ where $a_i + b_i < w_i$, assigned such that $a_i \leq b_i$. Since these score widths are not necessarily equal, an item $i$ can be positioned in one of two orientations: ``regular'', denoted $(a_i, b_i)$, or ``rotated'', denoted $(b_i, a_i)$, where the smaller of the two score widths $a_i$ is on the left- and right- hand side of the item respectively. 
+A prominent application of the COP is in a strip-packing problem brought to light as an open-combinatorial problem by Goulimis \cite{goulimis2004}. Here, a set $\mathcal{I}$ of rectangular items (where $|\mathcal{I}| = n$) of equal height $H$ made from cardboard are to be packed onto a strip of height $H$ from left to right. Each item $i \in \mathcal{I}$ has width $w_i \in \mathbb{Z}^{+}$, and possesses two vertical score lines, marked in predetermined places. A pair of knives mounted onto a bar cuts along the score lines of two adjacent items simultaneously, which allows the items to be folded with ease (see Figure \ref{fig:itemsknife}). However, by design, the scoring knives cannot be placed too close to one another and, as such, have a ``minimum scoring distance'' (around 70mm in industry). The distances between each score line and the nearest edge on an item $i \in \mathcal{I}$ are the score widths, $a_i, b_i \in \mathbb{Z}^{+}$ where $a_i + b_i < w_i$, assigned such that $a_i \leq b_i$. Since these score widths are not necessarily equal, an item $i$ can be positioned in one of two orientations: ``regular'', denoted $(a_i, b_i)$, or ``rotated'', denoted $(b_i, a_i)$, where the smaller of the two score widths $a_i$ is on the left- and right- hand side of the item respectively. 
 \begin{figure}[H]	
 	\centering
 	\includestandalone[width=0.7\textwidth]{figures/itemsknife}
 	\caption{Dimensions of an item $i \in \mathcal{I}$ in a regular orientation $(a_i, b_i)$, and a feasible alignment of two items that can be scored simultaneously.}	
 	\label{fig:itemsknife}
 \end{figure}
+Clearly, for two items to be feasibly placed alongside one another on a strip, the distance between the two score lines must be equal to or exceed the minimum scoring distance, else the knives will not be able to score the items in the correct locations. Thus, the problem consists of finding a suitable ordering and orientation of the items such that the sum of every pair of adjacent score widths is greater than or equal to the minimum scoring distance.\footnote{Note that the left-hand score width of the first item and the right-hand score width of the last item on the strip are not adjacent to any other item, and can therefore be ignored.} It follows that there are $\frac{n!}{2}2^n$ distinct arrangements, making complete enumeration infeasible for non-trivial values of $n$.
 
-Clearly, for two items to be placed alongside one another feasibly, the distance between the two score lines from adjacent items must equal or exceed the minimum scoring distance, else the knives will not be able to score the items in the correct locations. Thus, the problem consists of finding a suitable ordering and orientation of the items such that the sum of every pair of adjacent score widths is greater than or equal to the minimum scoring distance.\footnote{Note that the left-hand score width of the first item and the right-hand score width of the last item on the strip are not adjacent to any other item, and are therefore ignored.} It follows that there are $\frac{n!}{2}2^n$ distinct arrangements of items, and so complete enumeration can cause a combinatorial explosion.
-
-It can be seen that this problem is in fact equal to the COP, where each unordered pair in an instance $\mathcal{M}$ contains the score widths of an item, and $\tau$ is the minimum scoring distance. It then follows that the vicinal sum constraint corresponds to the requirement for the sum of adjacent score widths to exceed $\tau$. Figure \ref{fig:items/aligned} shows the example instance $\mathcal{M}$ of the COP from above depicted as a packing problem.
+It can be seen that, when using just one strip, this strip-packing problem is equivalent to the COP, where each unordered pair in an instance $\mathcal{M}$ contains the score widths of an item, and $\tau$ is the minimum scoring distance. It then follows that the vicinal sum constraint corresponds to the requirement for the sum of adjacent score widths to exceed $\tau$. Figure \ref{fig:items/aligned} shows the same instance $\mathcal{M}$ used above depicted as a packing problem.
 
 \begin{figure}	
 	\centering
 	\begin{subfigure}[h]{0.44\textwidth}
 		\includestandalone[width=\textwidth]{figures/items}
-		\label{fig:items} \vspace{5pt}
+		\label{fig:items}
 	\end{subfigure} 
 	\begin{subfigure}[h]{0.7\textwidth}
 		\includestandalone[width=\textwidth]{figures/itemsaligned}
 		\label{fig:itemsaligned}
 	\end{subfigure}
-	\caption{Example of the strip-packing problem modelled using the instance $\mathcal{M}$ above. The vicinal sum constraint has been met between all items in the alignment, which corresponds to a solution $\mathcal{T}$.}
+	\caption{Example of the strip-packing problem and a corresponding solution using $\tau = 7$.}
 	\label{fig:items/aligned}
 \end{figure}
 
-Observe that in this particular strip-packing problem the widths of the individual items are disregarded, since the aim is to arrange the items onto a strip of seemingly infinite width. However, in industrial applications, strips of material are often provided in fixed widths. Given a large problem instance, multiple strips may therefore be required to feasibly accommodate all of the items. For this reason, a more generalised problem can also be formulated.
+Observe that in this particular strip-packing problem the widths of the individual items are disregarded, since the aim is to arrange the items onto a single strip of seemingly infinite width. However, in industrial applications, strips of material will often be provided in fixed widths. Given a large problem instance, multiple strips may therefore be required to feasibly accommodate all of the items. For this reason, a more generalised problem can also be formulated:
 
 \begin{definition}
 	Let $\mathcal{I}$ be a set of $n$ rectangular items of height $H$ with varying widths $w_i \in \mathbb{Z}^+$ and score widths $a_i, b_i \in \mathbb{Z}^+$ for each item $i \in \mathcal{I}$. Given a minimum scoring distance $\tau \in \mathbb{Z}^+$, the Score-Constrained Strip-Packing Problem (SCSPP) consists of finding the minimum number of strips of height $H$ and width $W$ required to pack all items in $\mathcal{I}$ such that the sum of every pair of adjacent score widths is greater than or equal to $\tau$, and that no strip is overfilled.
@@ -73,38 +73,27 @@ The remainder of this article is structured as follows: In Section 2, we will de
 
 \section{Solving the COP}
 \label{sec:ahca}
-We shall now present an exact polynomial-time algorithm for the COP. The underlying algorithm was originally created by \cite{becker2010}, and is used to determine whether or not a solution exists for a given instance. In our case, we have extended this algorithm so that, if a solution does indeed exist, the algorithm is able to formulate and present us with this final solution. This is especially useful for problems such as the previously mentioned strip-packing problem, where a solution is required in order to place the items in the correct order and orientation.
+We shall now present an exact polynomial-time algorithm for the COP. The underlying algorithm was originally proposed by \cite{becker2010}, and is used to determine whether or not a solution exists for a given instance. Here, we extend this algorithm so that, if a solution does indeed exist, it is also able to formulate and present us with this final solution. This is especially useful for problems such as the strip-packing problem, where a solution is required in order to show how the items should be arranged on a strip.
 
-Let $\mathcal{M}$ be an instance of the COP of cardinality $n$. It is now useful to model $\mathcal{M}$ a a graph $G$ in which each vertex is associated with a single value in $\mathcal{M}$ in non-decreasing order. A pair of vertices, called ``dominating vertices'' are also added to the graph, both of which are assigned values equal to $\tau$. These dominating vertices aid the solution process, and are removed at the end. Thus, the graph $G$ has $2n+2$ vertices.
+Let $\mathcal{M}$ be an instance of the COP with cardinality $n$. It is now useful to model $\mathcal{M}$ as a graph $G$ in which each vertex is associated with a single value in $\mathcal{M}$ in non-decreasing order. A pair of vertices, called ``dominating vertices'' are also added to the graph, both of which are assigned values equal to $\tau$. These dominating vertices aid the solution process, and are removed at the end. Thus, the graph $G$ has $2n+2$ vertices.
 
-As we have seen, the values in $\mathcal{M}$ are arranged in pairs. This is represented in $G$ by adding a set of ``blue'' edges, $B$, that contains edges between vertices that are ``partners'', i.e. whose values make up a pair in $\mathcal{M}$, as shown in Figure \ref{fig:partners}. By introducing a bijective function $p: V \to V$ that associates each vertex with its partner, $p(v_i) = v_j$, we can denote this set of edges as $B = \{(v_i, p(v_i)) : v_i \in V\}$. It can be seen that $B$ is a perfect matching in $G$, with $|B| = n+1$. Next, a set of ``red'' edges $R$ is added to $G$ that consists of edges between vertices whose sum equal or exceed $\tau$, provided they are not partners. It can be seen that the edges in $R$ represent all possible orderings of values from different pairs in $\mathcal{M}$ that fulfil the vicinal sum constraint in Definition \ref{defn:cop}. Thus, we have an undirected graph $G$ with vertex set $V = \{v_1, ..., v_{2n+2}\}$ and two distinct edge sets $B$ and $R$ such that $B \cap R = \emptyset$. Figure \ref{fig:partners/threshold} illustrates an example construction of $G$.
-\begin{figure}	
+As we have seen, the values in $\mathcal{M}$ are arranged in pairs. This is represented in $G$ by adding a set of ``blue'' edges, $B$, that contains edges between vertices that are ``partners'', i.e. whose values make up a pair in $\mathcal{M}$. By introducing a bijective function $p: V \to V$ that associates each vertex with its partner, $p(v_i) = v_j$, we can denote this set of edges as $B = \{(v_i, p(v_i)) : v_i \in V\}$. It can be seen that $B$ is a perfect matching in $G$, with $|B| = n+1$. Next, a set of ``red'' edges $R$ is added to $G$ that consists of edges between vertices whose sum equals or exceeds $\tau$, provided they are not partners. It can be seen that the edges in $R$ represent all possible orderings of values from different pairs in $\mathcal{M}$ that fulfil the vicinal sum constraint in Definition \ref{defn:cop}. Thus, we have an undirected graph $G$ with vertex set $V = \{v_1, ..., v_{2n+2}\}$ and two distinct edge sets $B$ and $R$ such that $B \cap R = \emptyset$. Figure \ref{fig:threshold} illustrates an example construction of $G$.
+\begin{figure}[h!]	
 \centering
-\begin{subfigure}[h]{0.45\textwidth}
-	\includestandalone[width=\textwidth]{figures/partners}
-	\caption{$G = (V, B)$}	
-	\label{fig:partners}
-\end{subfigure} \hspace{40pt}
-\begin{subfigure}[h]{0.45\textwidth}
-	\includestandalone[width=\textwidth]{figures/threshold}
-	\caption{$G=(V, B \cup R)$}	
+	\includestandalone[width=0.6\textwidth]{figures/threshold}
+	\caption{$G = (V, B \cup R)$ using $\mathcal{M} = \{\{1,2\}, \{1,7\}, \{2,4\}, \{3,5\}, \{3,6\}, \{4,4\}\}$ and $\tau = 7$. The corresponding values of each vertex are show in parentheses.}
 	\label{fig:threshold}
-\end{subfigure}
-\caption{Construction of $G$ using instance $\mathcal{M} = \{\{1,2\}, \{1,7\}, \{2,4\}, \{3,5\}, \{3,6\}, \{4,4\}\}$ and $\tau = 7$.}
-\label{fig:partners/threshold}
 \end{figure}
 
-Recall that a Hamiltonian cycle on a graph $G$ is a cycle that visits every vertex exactly once. Now, consider the following definition describing a variant of the classical Hamiltonian cycle involving multiple edge sets.
+Recall that a Hamiltonian cycle on a graph $G$ is a cycle that visits every vertex exactly once. Now, consider the following definition describing a variant of the Hamiltonian cycle problem involving multiple edge sets.
 \begin{definition}
 	\label{defn:althamcycle}
 	Let $G(V, B\cup R)$ be an undirected graph, where each edge is a member of one of two sets, $B$ or $R$. $G$ contains an alternating Hamiltonian cycle if there exists a Hamiltonian cycle such that successive edges alternate between sets $B$ and $R$.
 \end{definition}
 
-An alternating Hamiltonian cycle on $G$ correpsonds to a feasible solution, as each ``blue'' edge from $B$ represents a pair of values in $\mathcal{M}$, and each ``red'' edge from $R$ indicates the values that can be placed alongside one another feasibly. Thus, by removing the dominating vertices and any incident edges, the remaining alternating Hamiltonian path gives the order in which the elements should be placed to produce a feasible solution $\mathcal{T}$, if indeed one exists. Also, note that every edge in $B$ must be present in the alternating Hamiltonian cycle. Consequently, the task can be seen as finding a matching $R' \subseteq R$ of cardinality $n+1$ such that the edge sets $B$ and $R'$ form an alternating Hamiltonian cycle as described in Definition \ref{defn:althamcycle}. 
+It is clear than an alternating Hamiltonian cycle on $G$, if one exists, correpsonds to a feasible solution, as each ``blue'' edge from $B$ represents a pair of values in $\mathcal{M}$, and each ``red'' edge from $R$ indicates the values that can be placed alongside one another feasibly. Also, note that every edge in $B$ must be present in the alternating Hamiltonian cycle. Consequently, the task can also be seen as finding a matching $R' \subseteq R$ of cardinality $n+1$ such that the edge sets $B$ and $R'$ form an alternating Hamiltonian cycle as described in Definition \ref{defn:althamcycle}. The problem of finding an alternating Hamiltonian cycle on general graphs is NP-hard as it generalises the classical Hamiltonian cycle problem \cite{haggkvist1977}. However, the special structure of graphs derived from instances of the COP allows them to be solved in polynomial-time using the following method.
 
-The problem of finding an alternating Hamiltonian cycle on general graphs is NP-hard as it generalises the classical Hamiltonian cycle problem, as stated in a proposition by \cite{haggkvist1977}. However, the special structure of graphs derived from instances of the COP allows them to be solved using the following method.
-
-To find a matching $R' \subseteq R$, the following \textsc{Maximum Cardinality Matching} (MCM) algorithm can be executed, as suggested by \cite{mahadev1994} and \cite{becker2010}. Take each vertex $v_1, v_2,..., v_{2n+2}$ in turn, and select the edge in $R$ connecting $v_i$ to the highest-indexed vertex $v_j$ that is not already incident to an edge in $R'$. Now add this edge $(v_i, v_j)$ to $R'$, and proceed to the next vertex until all the vertices have been assessed. The two vertices incident to each matching edge in $R'$ are now referred to as being ``matched''. Similarly to partners, let $m : V \to V$ be a bijective function that assigns each vertex with its match, $m(v_i) = v_j$. Then, we can denote this matching set as $R' =\{(v_i, m(v_i)) : v_i \in V\}$. 
+To find a matching $R' \subseteq R$, the \textsc{Maximum Cardinality Matching} (MCM) algorithm is executed \cite{mahadev1994, becker2010}. First, take each vertex $v_1, v_2,..., v_{2n+2}$ in turn, and select the edge in $R$ connecting $v_i$ to the highest-indexed vertex $v_j$ that is not already incident to an edge in $R'$. Now add this edge $(v_i, v_j)$ to $R'$, and proceed to the next vertex until all the vertices have been assessed. The two vertices incident to each matching edge in $R'$ are now referred to as being ``matched''. Similarly to partners, let $m : V \to V$ be a bijective function that assigns each vertex with its match, $m(v_i) = v_j$. Then, we can denote this matching set as $R' =\{(v_i, m(v_i)) : v_i \in V\}$. 
 
 During MCM, if a vertex $v_i$ is not adjacent to any other unmatched vertex except its partner $p(v_i)$ via a blue edge, the preceeding vertex $v_{i-1}$ can be ``rematched'', provided that 
 \begin{enumerate*}[label={(\alph*)}]
@@ -112,51 +101,60 @@ During MCM, if a vertex $v_i$ is not adjacent to any other unmatched vertex exce
 	\item the previous vertex $v_{i-1}$ has been matched; and
 	\item $v_{i-1}$ and $p(v_i)$ are adjacent via a red edge in $R$.
 \end{enumerate*}
-Then, $v_i$ is matched with the vertex that is currently matched with $v_{i-1}$, and $v_{i-1}$ is rematched with $p(v_i)$. It is guaranteed that MCM will produce a maximum cardinality matching $R' \subseteq R$, and is able to do so in at most $O(n \log n)$ time (\citealp{mahadev1994}).
+Then, $v_i$ is matched with the vertex that is currently matched with $v_{i-1}$, and $v_{i-1}$ is rematched with $p(v_i)$. The complexity of MCM is $O(n \lg n)$ time \cite{mahadev1994}.
 
 \begin{figure}	
 	\centering
-	\begin{subfigure}[t]{0.4\textwidth}
+	\begin{subfigure}[h]{0.4\textwidth}
 		\includestandalone[width=\textwidth]{figures/matching}
-		\caption{$G' = (V, B \cup R')$}	
-		\label{fig:matching}
 	\end{subfigure} \quad
-	\begin{subfigure}[t]{0.57\textwidth}
+	\begin{subfigure}[h]{0.56\textwidth}
 		\includestandalone[width=\textwidth]{figures/mps}
-		\caption{Planar representation of $G' =(V, B \cup R')$}	
-		\label{fig:mps}
 	\end{subfigure}
-	\caption{Spanning subgraph $G'$ consisting of a matching set $R' \subseteq R$ derived using MCM. When in planar form, it is clear that $q = 2$.}
-	\label{fig:matching/mps}
+	\caption{Subgraph $G'= (V, B \cup R')$. When in planar form, it is clear that $l = 2$.}
+	\label{fig:mps}
 \end{figure}
 
-Clearly, if $|R'| < n+1$ after MCM has completed, there are insufficient red edges to form an alternating Hamiltonian cycle, and hence no feasible solution exists for the given instance $\mathcal{M}$ of the COP. Otherwise, $R'$ is a perfect matching of cardinality $n+1$ and the spanning subgraph $G'=(V, B \cup R')$ is a 2-regular graph, where each vertex $v_i \in V$ is adjacent to its partner $p(v_i)$ via a blue edge in $B$, and its match $m(v_i)$ via a red edge in $R'$ (see Figure \ref{fig:matching/mps}). $G'$ therefore consists of a collection of cyclic components $C_1, C_2, ..., C_q$. In the case where $G'$ comprises one component, i.e. $q = 1$, then this alternating cycle is in fact Hamiltonian, and therefore specifies a solution to the COP. However, if $q > 1$, the components of $G'$ must be combined to form a single alternating Hamiltonian cycle. To do this, a \textsc{Bridge Recognition} (BR) algorithm can be executed that selects suitable edges from $R\backslash R'$ that will replace certain edges in $R'$ in order to function as bridges and connect the components of $G'$.
+Clearly, if $|R'| < n+1$ after MCM has completed, there are insufficient red edges to form an alternating Hamiltonian cycle, and so no feasible solution exists for the given instance $\mathcal{M}$ of the COP. Otherwise, $R'$ is a perfect matching of cardinality $n+1$ and the spanning subgraph $G'=(V, B \cup R')$ is a 2-regular graph, where each vertex $v_i \in V$ is incident to one blue edge and one red edge (see Figure \ref{fig:mps}). $G'$ therefore consists of a collection of cyclic components $C_1, C_2, ..., C_l$. In the case where $G'$ comprises one component, i.e. $l = 1$, then this alternating cycle is in fact Hamiltonian, and therefore specifies a solution to the COP. However, if $l > 1$, the components of $G'$ must be combined to form a single alternating Hamiltonian cycle. To do this, a \textsc{Bridge Recognition} (BR) algorithm can now be executed. This operates by selecting suitable edges in $R\backslash R'$ that replace edges in $R'$ in order to connect the components of $G'$.
 
-BR operates by first ordering the edges in $R'$ such that the lower-indexed vertices of each edge are in increasing order and the higher-indexed vertices are in decreasing order, i.e. $(v_1, v_{2n+2}), (v_2, v_{2n+1}), ..., (v_{n+1}, v_{n+2})$. Any edges that cannot be placed in such an order are then removed from this list. For instance, in the example illustrated in Figure \ref{fig:matching/mps}, the edges would be sorted as follows: $(v_1, v_{14}), (v_2, v_{13}),(v_3, v_{12}),(v_4, v_{11}),(v_6, v_{10}),(v_7, v_8)$. Note that, since $v_5$ was not matched with the highest-indexed vertex possible during MCM, the edge $(v_5, v_9)$ does not adhere to the required structure of the list and is therefore omitted.
+BR operates by first ordering the edges in $R'$ such that the lower-indexed vertices of each edge are in increasing order and the higher-indexed vertices are in decreasing order. Any edges that cannot be placed in such an order are then removed from this list. For instance, in the example illustrated in Figure \ref{fig:mps}, the edges would be sorted as follows: $(v_1, v_{14}), (v_2, v_{13}),(v_3, v_{12}),(v_4, v_{11}),(v_6, v_{10}),(v_7, v_8)$. Note that, since $v_5$ was not matched with the highest-indexed vertex possible during MCM, the edge $(v_5, v_9)$ does not adhere to the required structure of the list and is therefore omitted.
 
 Starting from the first edge in the list, BR then searches through the list to find an edge that meets the following conditions: 
 \begin{enumerate*}[label={(\alph*)}]
-	\item the lower-indexed vertex of the current edge and the higher-indexed vertex of the next edge in the list are adjacent via an edge in $R$; and
+	\item The lower-indexed vertex of the current edge and the higher-indexed vertex of the next edge in the list are adjacent via an edge in $R$; and
 	\item the current edge and the next edge are members of different components on $G'$.
 \end{enumerate*}
-If these conditions are met, BR adds the current edge to a set $R_i$, and continues to add all succeeding edges in the list to $R_i$ provided that, for each edge, both conditions hold and the succeeding edge is not a member of a component of $G'$ that has an edge in $R_i$. Once there are no more valid edges available to add to $R_i$, BR resumes its search through the remaining edges in the list to find a new edge that meets the conditions, and can begin a new set $R_{i+1}$. The procedure terminates once the penultimate edge in the list has been assessed.
+If these conditions are met, BR adds the current edge to a set $R_1$, and continues to add all succeeding edges in the list to $R_1$ provided that, for each edge, both conditions hold and the succeeding edge is not a member of a component of $G'$ that has an edge in $R_1$. Once there are no more valid edges available to add to $R_1$, BR resumes its search through the remaining edges in the list to find a new edge that meets the conditions, and can begin a new set $R_2$. The procedure terminates once the penultimate edge in the list has been assessed.
 
 Now, one of the following three conditions holds.
 \begin{enumerate}
-\item In the event that BR has been unable to produce a single set, there are no suitable edges that can combine the components $C_1, C_2, ..., C_q$ of $G'$, and therefore an alternating Hamiltonian cycle for $G$ cannot be created. Thus, no feasible solution exists for the corresponding COP.
+\item In the event that BR has produced no sets, there are no suitable edges that can combine the components $C_1, C_2, ..., C_l$ of $G'$, and therefore an alternating Hamiltonian cycle for $G$ cannot be created. Thus, no feasible solution exists for the corresponding COP.
 
-\item On the other hand, if there exists a set $R_i$ such that $|R_i| = q$, then the components of $G'$ can be merged together to form a single alternating Hamiltonian cycle. This is achieved by adding the red edge from $R\backslash R'$ connecting the lower-indexed vertex of each edge in $R_i$ to the higher-indexed vertex of the next edge to $R'$ (for the final edge in $R_i$, add the red edge connecting its lower-indexed vertex to the higher-indexed vertex of the first edge). Any edges that appear in both $R_i$ and $R'$ are then removed from $R'$, so that $R'$ remains a perfect matching and $R_i \cap R' = \emptyset$. $G'$ then consists of a single alternating Hamiltonian cycle.
+\item On the other hand, if there exists a set $R_i$ such that $|R_i| = l$, then all the components of $G'$ can be merged together to form a single alternating Hamiltonian cycle. This is achieved by adding the red edge from $R\backslash R'$ connecting the lower-indexed vertex of each edge in $R_i$ to the higher-indexed vertex of the next edge to $R'$ (for the final edge in $R_i$, add the red edge connecting its lower-indexed vertex to the higher-indexed vertex of the first edge). Any edges that appear in both $R_i$ and $R'$ are then removed from $R'$, so that $R'$ remains a perfect matching and $R_i \cap R' = \emptyset$. $G'$ then consists of a single alternating Hamiltonian cycle; hence a solution has been found.
 % add edges (v_i, m(v_{i+1})) for i \in {1, 2, ..., |R_i| -1} from R to R', and then the edge (v_{|R_i|}, m(v_1)) from R to R' 
 
-
-\item Otherwise, it may be that multiple sets are required to connect the components of $G'$. For two sets $R_i$ and $R_j$ to ``overlap'', each set must have one edge from the same component in $G'$, with the other edges in each set being from different components. For example, if $R_1$ has two edges, one from component $C_1$ and one from component $C_2$, and $R_2$ has three edges that are members of components $C_2$, $C_3$ and $C_4$, then $R_1$ and $R_2$ are said to overlap, since they each possess an edge $C_2$, but the other edges in the sets are from different components. Hence, a selection of sets need to be found such that each set overlaps with at least one other set, and each component has at least one edge in one of the selected sets. If such a collection of sets exists, then the components of $G$ can be merged to create an alternating Hamiltonian cycle by applying the connecting procedure above to every set in the collection.
+\item Otherwise, it may be that multiple sets need to be used to connect the components of $G'$. For two sets $R_i$ and $R_j$ to ``overlap'', each set must have exactly one edge from the same component in $G'$, with the other edges in each set being from different components. For example, if $R_1$ has two edges, one from component $C_1$ and one from component $C_2$, and $R_2$ has three edges that are members of components $C_2$, $C_3$ and $C_4$, then $R_1$ and $R_2$ are said to overlap, since they each possess an edge $C_2$ but the other edges in the sets are from different components. Therefore, a selection of sets need to be found such that each set overlaps with at least one other set, and each component has at least one edge in one of the selected sets. If such a collection of sets exists, then the components of $G'$ can be merged to create an alternating Hamiltonian cycle by applying the connecting procedure above to every set in the collection.
 \end{enumerate}
 
-Using the instance illustrated in the figures as an example, the edges $(v_3, v_{12})$ and $(v_4, v_{11})$ are in the set $R_1$ formed by BR, as \begin{enumerate*}[label={(\alph*)}]
+\begin{itemize}
+	\item Choose set $R_i$ with the highest cardinality. Call this set $R^{*}_1$. Add this set to $\mathcal{R}$.
+	\item Take original sorted list from beginning of BR, remove edges from list that are in $\mathcal{R}$.
+	\item Go through list again, perform modified BR:
+	\begin{itemize}
+		\item (a) lower-indexed vertex of current edge and higher-indexed vertex of next edge in list are adj via red edge;
+		\item (b) The current edge and an edge in $\mathcal{R}$ are members of the same component, and the next edge is in a component that does not have an edge in $\mathcal{R}$, or vice versa.
+	\end{itemize}	
+	\item If found, add these two edges to set $R^{*}_2$ and add this set to $\mathcal{R}$. Continue to add succeeding edges in list to $R^{*}_2$, provided condition (a) holds, and the succeeding edge is a member of a component that does not have an edge in $\mathcal{R}$.
+	\item If no more valid edges, check to see if at least one edge from every component of $G'$ is in $\mathcal{R}$.
+	\item If not, remove edges from $R^{*}_2$ from sorted list, and start again. Continue until $\mathcal{R}$ contains sets that overlap and have an edge from every component, or until every edge in the list is assessed and no new set has been created. 
+	\item If not all components covered, infeasible, else apply connecting procedure to every individual set in $\mathcal{R}$.
+\end{itemize}
+
+Using the instance illustrated in Figure \ref{fig:connect/cycle} as an example, the edges $(v_3, v_{12})$ and $(v_4, v_{11})$ are in the set $R_1$ formed by BR, as \begin{enumerate*}[label={(\alph*)}]
 	\item $(v_3, v_{11}) \in R$, i.e. the lower-indexed vertex of the first edge is adjacent to the higher-indexed vertex of the next edge; and
 	\item the edges are members of different components ($(v_3, v_{12}) \in C_1$ and $(v_4, v_{11}) \in C_2$ as seen in Figure \ref{fig:mps}).
 \end{enumerate*}
-Note that since $v_4$ and $v_{11}$ are adjacent, $v_4$ must also be adjacent to $v_{12}$, i.e. $(v_4, v_{12}) \in R$, since the value associated with $v_{12}$ is greater than or equal to the value associated with $v_{11}$. Then, as $|R_1| = q$, the edges $(v_3, v_{12})$ and $(v_4, v_{11})$ are removed from $R'$ and replaced by the edges $(v_3, v_{11})$ and $(v_4, v_{12})$ from $R$, as shown in Figure \ref{fig:connect/cycle}. Removing the dominating vertices and any incident edges results in an alternating Hamiltonian path, which corresponds to a feasible solution $\mathcal{T}$. 
+Note that since $v_4$ and $v_{11}$ are adjacent, $v_4$ must also be adjacent to $v_{12}$, i.e. $(v_4, v_{12}) \in R$, since the value associated with $v_{12}$ is greater than or equal to the value associated with $v_{11}$. Then, because $|R_1| = l$, the edges $(v_3, v_{12})$ and $(v_4, v_{11})$ are removed from $R'$ and replaced by the edges $(v_3, v_{11})$ and $(v_4, v_{12})$ from $R_1$, as shown in Figure \ref{fig:connect/cycle}. Removing the dominating vertices and any incident edges results in an alternating Hamiltonian path, which corresponds to a feasible solution $\mathcal{T}$. 
 
 \begin{figure}	
 	\centering
@@ -188,13 +186,12 @@ This algorithm, which will be referred to as the \textsc{Alternating Hamiltonian
 \end{theorem}
 \begin{proof}
 	\begin{itemize}
-		\item Initial creation of $G = (V, B \cup R)$ - $O(n^2)$.
 		\item \textsc{Maximum Cardinality Matching} - $O(n\log n)$ due to initial sorting of vertices.
 		\item \textsc{Bridge Recognition}:
 		\begin{itemize}
 			\item sort edges into list and remove invalid egdes - $O(n \log n)$.
 			\item go through list to put into sets $R_i$, each edge assessed exactly once - $O(n)$.
-			\item check every set $R_i$ to see if $|R_i| = q$, since there must be a minimum of two red/matching edges in a set $R_i$, there can be at most $\frac{n}{2}$ $R_i$ sets created - $O(n)$.
+			\item check every set $R_i$ to see if $|R_i| = l$, since there must be a minimum of two red/matching edges in a set $R_i$, there can be at most $\frac{n}{2}$ $R_i$ sets created - $O(n)$.
 			\item check overlapping/multiple sets - ?
 		\end{itemize}	
 		\item Connecting Procedure - $n+1$ red edges on $G'$, so maximum every red edge in $R'$ needs to be replaced, $n+1$ edges to replace with edges from sets $R_i$. so at most $n+1$ edges need to be added to $G'$ and $n+1$ edges removed (edges added to $R'$ and removed from $R'$) - $O(n)$.
@@ -207,41 +204,35 @@ This algorithm, which will be referred to as the \textsc{Alternating Hamiltonian
 \section{Heuristics for the SCSPP}
 \label{sec:scsppsoln}
 
-In this section, we now turn our attention to the multi-strip version of the problem. As mentioned in the introduction, the SCSPP is a generalisation of the BPP in that we also require the sum of every pair of adjacent score widths to be greater than or equal to a minimum scoring distance $\tau$. It follows that the SCSPP is at least as hard as the BPP, which is known to be NP-hard (\citealp{garey1979}), and so (under the assumption that $P \neq NP$) there is no known algorithm that is able to find an optimal solution for every instance of the SCSPP in polynomial time. Instead, heuristics can be used to find near-optimal solutions in a shorter amount of time.
+In this section, we now turn our attention to the multi-strip version of the problem. As mentioned in the introduction, the SCSPP is a generalisation of the BPP in that we also require the sum of every pair of adjacent score widths to be greater than or equal to a minimum scoring distance $\tau$. It follows that the SCSPP is at least as hard as the BPP, which is known to be NP-hard \cite{garey1979}, and so (under the assumption that $P \neq NP$) there is no known algorithm that is able to find an optimal solution for every instance of the SCSPP in polynomial time. Instead, heuristics can be used to find near-optimal solutions in a shorter amount of time.
 
 For an instance of the SCSPP, a feasible solution is represented by the set $\mathcal{S} = \{S_1, S_2, ..., S_k\}$ such that
 \begin{subequations}
 	\begin{align}
-		\bigcup\nolimits_{j=1}^{|\mathcal{S}|} S_j &= \mathcal{I}, \label{eqn:packall}\\[3pt]
-		S_j \cap S_l &= \emptyset \hspace{5mm} \forall \hspace{1mm} j, l \in \{1, 2, ..., |\mathcal{S}|\}, \hspace{2mm} j \neq l, \label{eqn:nooverlap} \\[3pt]
+		\bigcup\nolimits_{i=1}^{|\mathcal{S}|} S_i &= \mathcal{I}, \label{eqn:packall}\\[3pt]
+		S_i \cap S_j &= \emptyset \hspace{5mm} \forall \hspace{1mm} i, j \in \{1, 2, ..., |\mathcal{S}|\}, \hspace{2mm} i \neq j, \label{eqn:nooverlap} \\[3pt]
 		\sum\nolimits_{i=1}^{|S_j|}w_i & \leq W \hspace{3mm} \forall \hspace{1mm} S_j \in \mathcal{S}, \label{eqn:capacity} \\[3pt]
 		\textup{\textbf{rhs}}(i) + \textup{\textbf{lhs}}(i+1) &\geq \tau \hspace {5mm} \forall \hspace{1mm} i \in \{1, 2, ..., |S_j|-1\}, \hspace{2mm} \forall \hspace{1mm} S_j \in \mathcal{S}. \label{eqn:vscstrip}
 \end{align}
 \end{subequations}
 
-That is, all items must be packed onto a strip (\ref{eqn:packall}), each item can only be placed on one strip (\ref{eqn:nooverlap}), the strips cannot be overfilled (\ref{eqn:capacity}), and the items on each strip $S_j$ in the solution must be arranged such that the vicinal sum constraint is fulfilled, that is, the sum of every pair of adjacent score widths is greater than or equal to the minimum scoring distance $\tau$ (\ref{eqn:vscstrip}). Note that equations (\ref{eqn:packall}) - (\ref{eqn:capacity}) are the necessary conditions for the BPP. 
+That is, all items must be packed onto a strip (\ref{eqn:packall}), each item can only be placed on one strip (\ref{eqn:nooverlap}), the strips cannot be overfilled (\ref{eqn:capacity}), and the items on each strip $S_j$ in the solution must be arranged such that the vicinal sum constraint is fulfilled (\ref{eqn:vscstrip}). Note that constraints (\ref{eqn:packall}) - (\ref{eqn:capacity}) are the necessary conditions for the BPP. An optimal solution $\mathcal{S}$ for the SCSPP is a solution that consists of the fewest number of strips $k$ needed to feasibly contain the $n$ items in the given problem instance. A simple lower bound for $k$ is the theoretical minimum
+$t = \ceil*{\sum_{i=1}^{n}w_i / W}$ which can be computed in $O(n)$ time \cite{martello1990b}. Perhaps the simplest and most well-known heuristic for packing problems is \textsc{First-Fit} (FF), a greedy online algorithm that places each item presented in some arbitrary order onto the lowest-indexed strip such that the capacity of the strip is not exceeded. It is known that there always exists at least one ordering of the items such that FF produces an optimal solution \cite{lewis2009}. A minor modification to FF yields the \textsc{First-Fit Decreasing} (FFD) heuristic, which sorts the items in non-increasing order of size prior to performing FF. In 1973, Johnson \cite{johnson1973} showed that FFD is guaranteed to return a solution that uses no more than $\frac{11}{9}k + 4$ strips. More recently, Dosa \cite{dosa2007} has proven that the worst case for FFD is in fact $\frac{11}{9}k + \frac{6}{9}$, and that this bound is tight. Due to the initial sorting of the items in non-increasing order of sizes, the time complexity of FFD is $O(n\log n)$.
 
-An optimal solution $\mathcal{S}$ for the SCSPP is a solution that consists of the fewest number of strips $k$ needed to feasibly contain the $n$ items in the given problem instance. A simple lower bound for $k$ is the theoretical minimum
-\begin{equation}
-\label{eqn:lowerbound}
-t = \ceil*{\frac{\sum_{i=1}^{n}w_i}{W}},
-\end{equation}
-which can be computed in $O(n)$ time (\citealp{martello1990b}). Perhaps the simplest and most well-known heuristic for packing problems is \textsc{First-Fit} (FF), a greedy online algorithm that places each item presented in some arbitrary order onto the lowest-indexed strip such that the capacity of the strip is not exceeded. It is known that there always exists at least one ordering of the items such that FF produces an optimal solution (\citealp{lewis2009}). A minor modification to FF yields the \textsc{First-Fit Decreasing} (FFD) heuristic, which sorts the items in non-increasing order of size prior to performing FF. In 1973, \citeauthor{johnson1973} showed that FFD is guaranteed to return a solution that uses no more than $\frac{11}{9}k + 4$ strips. More recently, \cite{dosa2007} has proven that the worst case for FFD is in fact $\frac{11}{9}k + \frac{6}{9}$, and that this bound is tight. Due to the initial sorting of the items in non-increasing order of sizes, the time complexity of FFD is $O(n\log n)$.
-
-As mentioned in the introduction, the SCSPP shares many similarities with the BPP, however the addition of constraint (\ref{eqn:vscstrip}) induces complications that must be taken into consideration. One obvious difference is the order in which the items must appear on the strips. The order of the items in the BPP is unimportant, as there are no conditions regarding which items can be placed together, however in the SCSPP the items must be ordered in a way that meets the vicinal sum constraint. In addition, removing an item in the BPP retains feasibility, whereas in the SCSPP this is not guaranteed, as it may leave a subset of items for which the vicinal sum constraint is not satisfied. Furthermore, the theoretical minimum $t$ (Equation (\ref{eqn:lowerbound})) has the potential to be less accurate for the SCSPP, as the minimum scoring distance $\tau$ is not considered. For example, if the minimum scoring distance is greater than twice the largest score width, then it is clear that $n$ strips will be required, regardless of the items' widths.
+As mentioned in the introduction, the SCSPP shares many similarities with the BPP, however the addition of constraint (\ref{eqn:vscstrip}) brings complications. One obvious difference is the order in which the items appear on the strips. The order of the items in the BPP is unimportant, however in the SCSPP the items must be ordered in a way that meets the vicinal sum constraint. In addition, removing an item from a binin the BPP retains the feasibility of the bin, whereas in the SCSPP this is not guaranteed, as it may leave a subset of items for which the vicinal sum constraint is not satisfied. Furthermore, the theoretical minimum $t$ has the potential to be less accurate for the SCSPP, as the minimum scoring distance $\tau$ is not considered. For example, if the minimum scoring distance is greater than twice the largest score width, then it is clear that $n$ strips will be required, regardless of the items' widths.
 % Time complexity for FFD also inaccurate
 
-Three heuristics for the SCSPP have been developed: a basic FFD heuristic with a simple modification; a heuristic that packs strips individually and prioritises score widths; and a powerful version of FFD that incorporates the polynomial-time AHC algorithm.
+To gain an understanding of this problem, three heuristics for the SCSPP have been developed for our tests: a basic FFD heuristic with a simple modification; a heuristic that packs strips individually and prioritises score widths; and a powerful version of FFD that incorporates the polynomial-time AHC algorithm.
 
-The first heuristic we developed is the \textsc{Modified First-Fit Decreasing} (MFFD) heuristic which performs in the same manner as the original FFD, attempting to place each item onto the end of the lowest-indexed strip. If an item is able to be packed onto a strip without exceeding the strip's capacity, MFFD then checks to see if the vicinal sum constraint is met between the right-most score on the strip and one of the score widths on the current item. If the constraint is met, MFFD places the item on the end of the strip in the appropriate orientation, else the heuristic attempts to pack the item onto the next lowest-indexed strip. For example, in Figure \ref{fig:comparestrips}, the strip is able to accommodate the current item, however the vicinal sum constraint is not fulfilled in either orientation of the item, and therefore it cannot be feasibly packed onto the strip.
+The first heuristic is the \textsc{Modified First-Fit Decreasing} (MFFD) heuristic which acts in the same manner as the original FFD, attempting to place each item onto the end of the lowest-indexed strip. If an item is able to be packed onto a strip without exceeding the strip's capacity, MFFD then checks to see if the vicinal sum constraint is met between the right-most score on the strip and one of the score widths on the current item. If the constraint is met, MFFD places the item on the end of the strip in the appropriate orientation, otherwise the next strip is considered. 
 
-Despite the additional step, MFFD is a very fast heuristic, as checking the vicinal sum constraint can be performed in constant time. The most prominent issue with this heuristic, however, is due to the items being placed on the end of the strips. Although an item may not meet the constraint when placed on the end of a strip, there may be another location on the strip where the item can be placed feasibly. MFFD is incapable of placing items anywhere other than on the end of the strips, and so an item that could potentially be packed must be placed on another strip, or perhaps even begin a new strip, thus increasing the number of strips in the final solution.
+Despite the additional step, MFFD is a very fast heuristic, as checking the vicinal sum constraint in this way can be performed in constant time. The most prominent issue with this heuristic, however, is due to the items being placed on the end of the strips. Although an item may not meet the constraint when placed on the end of a strip, there may be another location on the strip where the item can be placed feasibly. MFFD is incapable of placing items anywhere other than on the end of the strips, and so an item that could potentially be packed must be placed on another strip, or perhaps even begin a new strip, thus increasing the number of strips in the final solution.
 
-The next heuristic is the \textsc{Pair-Smallest} (PS) heuristic, an extension of a procedure defined by \cite{lewis2011}. Unlike MFFD, which packs each item in turn, PS focusses on packing one strip at a time, only starting a new strip once the current strip is unable to accommodate any more items feasibly. Each strip is initialised by choosing the item from $\mathcal{I}$ with the smallest score width, and packing it in a regular orientation. PS then continues to fill the strip by selecting the item with the smallest score width that meets the vicinal sum constraint with the right-most score width on the strip, and whose width will not cause the strip to be overfilled. This heuristic aligns the smallest score widths with the largest ones, eliminating the possibility of placing larger score widths together unecessarily. Note that PS prioritises the vicinal sum constraint over the item widths, choosing to fulfil the constraint first before considering whether the item can be accommodated.
+The next heuristic is the \textsc{Pair-Smallest} (PS) heuristic, which is an extension of an inexact procedure defined by \cite{lewis2011}. Unlike MFFD, which packs each item in turn, PS focusses on packing one strip at a time, only starting a new strip once the current strip is unable to accommodate any further items. Each strip is initialised by choosing the item from $\mathcal{I}$ with the smallest score width, and packing it in a regular orientation. PS then continues to fill the strip by selecting the item with the smallest score width that meets the vicinal sum constraint with the right-most score width on the strip, and whose width will not cause the strip to be overfilled. This heuristic aligns the smallest score widths with the largest ones, eliminating the possibility of placing larger score widths together unecessarily. Note that PS prioritises the vicinal sum constraint over the item widths, choosing to fulfil the constraint first before considering whether the item can be accommodated.
 %If there are multiple items with equal score widths, break ties by choosing the item whose second score width is the largest.
 % If item with smallest feasible score width does not fit onto the strip, choose item with next smallest score width and repeat.
 
-The last heuristic, \textsc{Modified First-Fit Decreasing with AHC} (MFFD$^+$), incorporates AHC as described in Section \ref{sec:ahca}. MFFD$^+$ operates in a similar fashion to the MFFD, placing items sorted in decreasing order onto the lowest-indexed strip. However, rather than attempting to place the item onto the right-most side of the strip, MFFD$^+$ executes AHC on the sub-problem, where the items on the strip and the current item form the subset $\mathcal{I}' \subseteq \mathcal{I}$ (see Definition \ref{defn:subprob}). If AHC finds a feasible solution, the items are placed on the strip in the order of the solution, which includes the current item, else MFFD$^+$ attempts to pack the current item on the next lowest-indexed strip. Using AHC means that if a feasible alignment of the items exists, there is a guarantee that it will be found. Unlike MFFD, where the current item can only be placed on the end of the strip, MFFD$^+$ allows the items to be entirely rearranged (see Figure \ref{fig:comparestrips}). This reduces the possibility of having to start a new strip for an item, thus preventing increasing the number of strips in the final solution. 
+The last heuristic, \textsc{Modified First-Fit Decreasing with AHC} (MFFD$^+$), incorporates the AHC algorithm from Section \ref{sec:ahca}. It operates in a similar fashion to the MFFD, placing items sorted in decreasing order onto the lowest-indexed strip. However, rather than attempting to place the item onto the right-most side of the strip, MFFD$^+$ executes AHC on the items. If AHC finds a feasible solution, the items are placed on the strip in the order of the solution, which includes the current item, else MFFD$^+$ attempts to pack the current item on the next strip. Using AHC means that if a feasible alignment of the items exists, there is a guarantee that it will be found. Unlike MFFD, where the current item can only be placed on the end of the strip, MFFD$^+$ allows the items to be entirely rearranged (see Figure \ref{fig:comparestrips}). This reduces the possibility of having to start a new strip for an item, thus preventing increasing the number of strips in the final solution. 
 %Since AHC is executed every time an item can fit onto a strip that already contains items, (up to $|\mathcal{S}|$ times per item, where $|\mathcal{S}|$ is the number of strips containing at least one item so far in the procedure) MFFD$^+$ is slower in comparison to the previous heuristics.  
 
 \begin{figure}[H]	
@@ -252,34 +243,29 @@ The last heuristic, \textsc{Modified First-Fit Decreasing with AHC} (MFFD$^+$), 
 \end{figure}
 
 
-\section{Comparison}
-For our experiments, we generated 1000 problem instances for two different sizes of $\mathcal{I}$ containing 500 and 1000 items. For each problem instance the items have varying widths $w_i$ between 150 and 1000 and score widths $a_i, b_i$ between 1 and 70 to ensure that each item has exactly two score lines, all selected randomly from a uniform distribution. Strips of widths $W = 5000$, 2500 and 1250 were used to alter the number of items per strip. Both the items and the strips have equal height of $H = 1$. Similarly to experiments performed by \cite{lewis2011}, we also introduced a parameter $\delta$ to denote the proportion of pairs of score widths from different items that meet the vicinal sum constraint, i.e. whose sum is greater than or equal to $\tau$. Values of $\delta$ from 0.0 to 1.0 were created by changing the value of the minimum scoring distance $\tau$. Clearly, when $\delta = 0.0$, there are no score widths that can be packed together feasibly, and so $n$ strips will be required (one for each item), whereas if $\delta = 1.0$ all pairs of score widths meet the constraint, and the problem is analogous to the BPP. (As the width of the strips decrease, the average number of items per strip also decreases, making the problem more difficult.)
+\section{Experimental Results}
+For our experiments, we generated 1000 problem instances for $|\mathcal{I}| \in \{500, 100\}$. For each problem instance the items have varying widths $w_i$ between 150 and 1000 and score widths $a_i, b_i$ between 1 and 70 to ensure that each item has exactly two score lines, all selected randomly from a uniform distribution. Strips of widths $W = 5000$, 2500 and 1250 were used to influence the number of items per strip. Both the items and the strips have equal height of $H = 1$. Similarly to experiments performed by \cite{lewis2011}, we also introduced a parameter $\delta$ to denote the proportion of pairs of score widths from different items that meet the vicinal sum constraint, i.e. whose sum is greater than or equal to $\tau$. Values of $\delta$ from 0.0 to 1.0 were created by changing the value of the minimum scoring distance $\tau$. Clearly, when $\delta = 0.0$, there are no score widths that can be packed together feasibly, and so $n$ strips will be required (one for each item), whereas if $\delta = 1.0$ all pairs of score widths meet the constraint, and the problem is equivalent to the BPP. (As the width of the strips decrease, the average number of items per strip also decreases, making the problem more constrained.)
 
-The heuristics were implemented in C++ and executed on a computer equipped with an Intel Core i3-2120 processor with a frequency of 3.30GHz. The source code for these procedures used for our computational experiments is available at \cite{hawa2018}. We calculated the average optimality of each heuristic for every combination of $n$, $\delta$, and $W$ from 1000 instances, where the optimality $r$ of each instance is
-\begin{equation}
-	r = \frac{|\mathcal{S}|}{t},
-\end{equation}
-i.e. the ratio of the number of strips in the final solution $\mathcal{S}$ generated by the heuristic to the theoretical minimum $t$, which was calculated using Equation \ref{eqn:lowerbound}. All individual trials were executed in under 160ms.
+The heuristics were implemented in C++ and executed on a computer equipped with an Intel Core i3-2120 3.30GHz processor. Our source code and all data is available at \cite{hawa2018}. Since optimal solutions are not available, the solution quality $q$ is estimated by comparing to the theoretical minimum $t$, i.e. $q = |\mathcal{S}| / t$. We calculated the average solution quality of each heuristic for every combination of $n$, $\delta$, and $W$ from 1000 instances. All individual trials were executed in under 160ms.
 
 \begin{table}[!htb]
 	\centering
-	\ra{1.3}
-	\caption{Average optimality ratios for $n = 500$. The average number of items per strip for $W = 5000$, 2500 and 1250 are 8.4746, 4.3103, and 2.1645 respectively.}
-	\begin{tabular}{@{}c@{\hspace{25pt}}c@{\hspace{8pt}}c@{\hspace{8pt}}ccc@{\hspace{8pt}}c@{\hspace{8pt}}ccc@{\hspace{8pt}}c@{\hspace{8pt}}c@{}}\toprule
-		& \multicolumn{3}{c}{$W = 5000$, $t = 58.039$} & \phantom{abcd} & \multicolumn{3}{c}{$W = 2500$, $t = 115.571$} & \phantom{abcd} & \multicolumn{3}{c}{$W = 1250$, $t = 230.648$} \\
+	\caption{Average solution quality for $n = 500$. The average number of items per strip for $W = 5000$, 2500 and 1250 are 8.475, 4.310, and 2.165 respectively.}
+	\begin{tabular}{@{}c@{\hspace{15pt}}c@{\hspace{7pt}}c@{\hspace{5pt}}ccc@{\hspace{7pt}}c@{\hspace{5pt}}ccc@{\hspace{7pt}}c@{\hspace{5pt}}c@{}}\toprule
+		& \multicolumn{3}{c}{$W = 5000$, $t = 58.039$} && \multicolumn{3}{c}{$W = 2500$, $t = 115.571$} && \multicolumn{3}{c}{$W = 1250$, $t = 230.648$} \\
 		\cmidrule{2-4} \cmidrule{6-8} \cmidrule{10-12}
 		$\delta$ & MFFD & PS & MFFD$^+$ && MFFD & PS & MFFD$^+$ && MFFD & PS & MFFD$^+$\\ \midrule
-		0.0 & 8.61813 & 8.61813 & 8.61813 && 4.32789 & 4.32789 & 4.32789 && 2.16858 & 2.16858 & 2.16858 \\
-		0.1 & 5.21367 & \textbf{4.84177} & 5.16085 && 2.65934 & \textbf{2.47735} & 2.65679 && 1.51486 & \textbf{1.47896} & 1.51486 \\
-		0.2 & 4.03055 & \textbf{3.45946} & 3.97645 && 2.12099 & \textbf{1.84737} & 2.11788 && 1.32613 & \textbf{1.31781} & 1.32610 \\
-		0.3 & 3.11091 & \textbf{2.34803} & 3.03816 && 1.72955 & \textbf{1.39676} & 1.70772 && 1.19451 & 1.22922 & \textbf{1.19381} \\
-		0.4 & 2.43605 & \textbf{1.52907} & 2.29713 && 1.45976 & \textbf{1.12798} & 1.40951 && 1.11037 & 1.18065 & \textbf{1.10819} \\
-		0.5 & 1.91057 & \textbf{1.04130} & 1.69129 && 1.26343 & \textbf{1.03341} & 1.19575 && 1.05771 & 1.15415 & \textbf{1.05319} \\
-		0.6 & 1.49086 & \textbf{1.01263} & 1.24645 && 1.12448 & \textbf{1.02957} & 1.06874 && 1.02932 & 1.13470 & \textbf{1.02398} \\
-		0.7 & 1.19571 & \textbf{1.01257} & 1.04468 && 1.04933 & 1.02774 & \textbf{1.01918} && 1.01741 & 1.11368 & \textbf{1.01444} \\
-		0.8 & 1.04977 & 1.01203 & \textbf{1.00815} && 1.01595 & 1.02661 & \textbf{1.00790} && 1.01297 & 1.09136 & \textbf{1.01197} \\
-		0.9 & 1.00929 & 1.01197 & \textbf{1.00463} && 1.00734 & 1.02586 & \textbf{1.00641} && 1.01159 & 1.07283 & \textbf{1.01139} \\
-		1.0 & \textbf{1.00423} & 1.01171 & \textbf{1.00423} && \textbf{1.00626} & 1.02561 & \textbf{1.00626} && \textbf{1.01130} & 1.06549 & \textbf{1.01130} \\
+		0.0 & 8.618 & 8.618 & 8.618 && 4.328 & 4.328 & 4.327 && 2.169 & 2.169 & 2.169 \\
+		0.1 & 5.214 & \textbf{4.842} & 5.161 && 2.659 & \textbf{2.477} & 2.657 && 1.515 & \textbf{1.479} & 1.515 \\
+		0.2 & 4.031 & \textbf{3.459} & 3.976 && 2.121 & \textbf{1.847} & 2.118 && 1.326 & \textbf{1.318} & 1.326 \\
+		0.3 & 3.111 & \textbf{2.348} & 3.038 && 1.730 & \textbf{1.397} & 1.708 && 1.195 & 1.229 & \textbf{1.194} \\
+		0.4 & 2.436 & \textbf{1.529} & 2.297 && 1.460 & \textbf{1.128} & 1.410 && 1.110 & 1.181 & \textbf{1.108} \\
+		0.5 & 1.911 & \textbf{1.041} & 1.691 && 1.263 & \textbf{1.033} & 1.196 && 1.058 & 1.154 & \textbf{1.053} \\
+		0.6 & 1.491 & \textbf{1.013} & 1.246 && 1.124 & \textbf{1.030} & 1.069 && 1.029 & 1.135 & \textbf{1.024} \\
+		0.7 & 1.196 & \textbf{1.013} & 1.045 && 1.049 & 1.028 & \textbf{1.019} && 1.017 & 1.114 & \textbf{1.014} \\
+		0.8 & 1.050 & 1.012 & \textbf{1.008} && 1.016 & 1.027 & \textbf{1.008} && 1.013 & 1.091 & \textbf{1.012} \\
+		0.9 & 1.009 & 1.012 & \textbf{1.005} && 1.007 & 1.026 & \textbf{1.006} && 1.012 & 1.073 & \textbf{1.011} \\
+		1.0 & \textbf{1.004} & 1.012 & \textbf{1.004} && \textbf{1.006} & 1.026 & \textbf{1.006} && \textbf{1.011} & 1.065 & \textbf{1.011} \\
 		\bottomrule
 	\end{tabular}	
 	\label{table:n=500}
@@ -287,35 +273,34 @@ i.e. the ratio of the number of strips in the final solution $\mathcal{S}$ gener
 
 \begin{table}[!htb]
 	\centering
-	\ra{1.3}
-	\caption{Average optimality ratios for $n = 1000$. The average number of items per strip for $W = 5000$, 2500 and 1250 are 8.6207, 4.329 and 2.1692 respectively.}
-	\begin{tabular}{@{}c@{\hspace{25pt}}c@{\hspace{8pt}}c@{\hspace{8pt}}ccc@{\hspace{8pt}}c@{\hspace{8pt}}ccc@{\hspace{8pt}}c@{\hspace{8pt}}c@{}}\toprule
-		& \multicolumn{3}{c}{$W = 5000$, $t = 115.534$} & \phantom{abcd} & \multicolumn{3}{c}{$W = 2500$, $t = 230.563$} & \phantom{abcd} & \multicolumn{3}{c}{$W = 1250$, $t = 460.623$} \\
+	\caption{Average solution quality for $n = 1000$. The average number of items per strip for $W = 5000$, 2500 and 1250 are 8.621, 4.329 and 2.169 respectively.}
+	\begin{tabular}{@{}c@{\hspace{15pt}}c@{\hspace{7pt}}c@{\hspace{5pt}}ccc@{\hspace{7pt}}c@{\hspace{5pt}}ccc@{\hspace{7pt}}c@{\hspace{5pt}}c@{}}\toprule
+		& \multicolumn{3}{c}{$W = 5000$, $t = 115.534$} && \multicolumn{3}{c}{$W = 2500$, $t = 230.563$} && \multicolumn{3}{c}{$W = 1250$, $t = 460.623$} \\
 		\cmidrule{2-4} \cmidrule{6-8} \cmidrule{10-12}
 		$\delta$ & MFFD & PS & MFFD$^+$ && MFFD & PS & MFFD$^+$ && MFFD & PS & MFFD$^+$\\ \midrule
-		0.0 & 8.65711 & 8.65711 & 8.65711 && 4.33803 & 4.33803 & 4.33803 && 2.17138 & 2.17138 & 2.17138 \\
-		0.1 & 5.17263 & \textbf{4.84248} & 5.14027 && 2.63606 & \textbf{2.48111} & 2.64271 && 1.51056 & \textbf{1.46744} & 1.51121 \\
-		0.2 & 3.97565 & \textbf{3.46163} & 3.95164 && 2.09301 & \textbf{1.85824} & 2.10161 && 1.31785 & \textbf{1.31090} & 1.31876 \\
-		0.3 & 3.04866 & \textbf{2.35023} & 3.01260 && 1.69777 & \textbf{1.40862} & 1.68776 && \textbf{1.18304} & 1.22111 & 1.18344 \\
-		0.4 & 2.37436 & \textbf{1.52046} & 2.26560 && 1.42646 & \textbf{1.13101} & 1.38430 && 1.09722 & 1.17063 & \textbf{1.09614} \\
-		0.5 & 1.84748 & \textbf{1.02600} & 1.64169 && 1.22960 & \textbf{1.03017} & 1.16950 && 1.04411 & 1.14430 & \textbf{1.03986} \\
-		0.6 & 1.43331 & \textbf{1.01212} & 1.20264 && 1.09935 & \textbf{1.02738} & 1.05010 && 1.01971 & 1.12392 & \textbf{1.01480} \\
-		0.7 & 1.15500 & \textbf{1.01198} & 1.02574 && 1.03421 & 1.02569 & \textbf{1.01224} && 1.01150 & 1.10164 & \textbf{1.00926} \\
-		0.8 & 1.03182 & 1.01182 & \textbf{1.00587} && 1.01111 & 1.02454 & \textbf{1.00682} && 1.00861 & 1.07791 & \textbf{1.00804} \\
-		0.9 & 1.00707 & 1.01165 & \textbf{1.00419} && 1.00663 & 1.02406 & \textbf{1.00608} && 1.00784 & 1.05885 & \textbf{1.00774} \\
-		1.0 & \textbf{1.00399} & 1.01169 & \textbf{1.00399} && \textbf{1.00603} & 1.02400 & \textbf{1.00603} && \textbf{1.00770} & 1.05406 & \textbf{1.00770} \\
+		0.0 & 8.657 & 8.657 & 8.657 && 4.338 & 4.338 & 4.338 && 2.171 & 2.171 & 2.171 \\
+		0.1 & 5.173 & \textbf{4.842} & 5.140 && 2.636 & \textbf{2.481} & 2.643 && 1.511 & \textbf{1.467} & 1.511 \\
+		0.2 & 3.976 & \textbf{3.462} & 3.952 && 2.093 & \textbf{1.858} & 2.102 && 1.318 & \textbf{1.311} & 1.319 \\
+		0.3 & 3.047 & \textbf{2.350} & 3.013 && 1.698 & \textbf{1.409} & 1.688 && \textbf{1.183} & 1.221 & \textbf{1.183} \\
+		0.4 & 2.374 & \textbf{1.520} & 2.266 && 1.426 & \textbf{1.131} & 1.384 && 1.097 & 1.171 & \textbf{1.096} \\
+		0.5 & 1.847 & \textbf{1.026} & 1.642 && 1.230 & \textbf{1.030} & 1.170 && 1.044 & 1.144 & \textbf{1.040} \\
+		0.6 & 1.433 & \textbf{1.012} & 1.203 && 1.099 & \textbf{1.027} & 1.050 && 1.020 & 1.124 & \textbf{1.015} \\
+		0.7 & 1.155 & \textbf{1.012} & 1.026 && 1.034 & 1.026 & \textbf{1.012} && 1.012 & 1.102 & \textbf{1.009} \\
+		0.8 & 1.032 & 1.012 & \textbf{1.006} && 1.011 & 1.025 & \textbf{1.007} && 1.009 & 1.078 & \textbf{1.008} \\
+		0.9 & 1.007 & 1.012 & \textbf{1.004} && 1.007 & 1.024 & \textbf{1.006} && \textbf{1.008} & 1.059 & \textbf{1.008} \\
+		1.0 & \textbf{1.004} & 1.012 & \textbf{1.004} && \textbf{1.006} & 1.024 & \textbf{1.006} && \textbf{1.008} & 1.054 & \textbf{1.008} \\
 		\bottomrule
 	\end{tabular}
 	\label{table:n=1000}	
 \end{table}
 
-Tables \ref{table:n=500} and \ref{table:n=1000} compare the results obtained from the three heuristics using different values of $\delta$ and $W$ for $n = 500$ and 1000 respectively. Figures in bold indicate the best average optimality for the given combination of parameters. Initially, we can see that $r$ tends toward 1 as $\delta$ increases, since the proportion of score widths meet the vicinal sum constraint increases and more items can be packed onto one strip, reducing the number of strips required. Note that when $\delta = 1.0$ MFFD and MFFD$^+$ have identical optimality ratios, as the instances are equivalent to the original BPP ($\tau = 0$) and so they operate in the same fashion as the original FFD heuristic.
+Tables \ref{table:n=500} and \ref{table:n=1000} compare the results obtained from the three heuristics using the different values of $\delta$ and $W$ for $n = 500$ and 1000 respectively. Figures in bold indicate the best average solution quality for the given combination of parameters. We see that $q$ tends toward 1 as $\delta$ increases since the proportion of score widths meeting the vicinal sum constraint increases, allowing more items per strip and reducing the number of strips required. Note that when $\delta = 1.0$ MFFD and MFFD$^+$ have identical solution qualities, as the instances are equivalent to the original BPP ($\tau = 0$) and so they operate in the same fashion as the original FFD heuristic.
 
-Looking at results for both $n = 500$ and $n = 1000$, there is a clear pattern with respect to $r$ across all widths and proportion levels. PS has the best optimality ratio for a wider range of $\delta$ when the strips are wider, and a much smaller range when the strip width decreases. Conversely, MFFD$^+$ obtains better optimality ratios for a wider range of $\delta$ when $W = 1250$. Although PS does have the best optimality of the three heuristics for $\delta = 0.1$ and 0.2 using the smallest strip width, we can see that it only marginally superior to MFFD$^+$. For example, take $\delta = 0.2$ in Table \ref{table:n=500} for $W = 1250$. The difference between $r$ for PS and MFFD$^+$ is 0.00829, which translates to less than 2 strips difference between the average number of strips generated by each heuristic.
+Looking at results for both $n = 500$ and 1000, there is a clear pattern with respect to $q$ across all widths and proportion levels. PS has the best solution quality for a wider range of $\delta$ when the strips are wider, and a much smaller range when the strip width decreases. Conversely, MFFD$^+$ obtains better solution qualities for a wider range of $\delta$ when $W = 1250$. Although PS does have the best solution quality of the three heuristics for $\delta = 0.1$ and 0.2 using the smallest strip width, we can see that it only marginally superior to MFFD$^+$. For example, take $\delta = 0.2$ in Table \ref{table:n=500} for $W = 1250$. The difference between $q$ for PS and MFFD$^+$ is 0.00829, which translates to less than 2 strips difference between the average number of strips generated by each heuristic.
 
-One interesting feature is the reduction of $r$ between $\delta = 0.4$ and $\delta = 0.5$, which is much more significant for $W = 5000$ as opposed to $W = 1250$. The reduction occurs due to an increase in the number of feasible alignments of the items, as every score width is able to be paired with $n-1$ other score widths when $\delta = 0.5$. Thus, when $W = 5000$, more items can be packed onto a strip feasibly, resulting in fewer strips in the final solution. However, the difference in $r$ is less noticeable for $W = 1250$, as regardless of the increased proportion in possible pairings, the capacity of the strips is much smaller, preventing the collection of items from multiple strips onto one.
+One interesting feature is the reduction of $q$ between $\delta = 0.4$ and $\delta = 0.5$, which is much more significant for $W = 5000$ as opposed to $W = 1250$. The reduction occurs due to an increase in the number of feasible alignments of the items, as every score width is able to be paired with $n-1$ other score widths when $\delta = 0.5$. Thus, when $W = 5000$, more items can be packed onto a strip feasibly, resulting in fewer strips in the final solution. However, the difference in $q$ is less noticeable for $W = 1250$, as regardless of the increased proportion in possible pairings, the capacity of the strips is much smaller, preventing the collection of items from multiple strips onto one.
 
-Although using the average optmality from 1000 instances provides a useful overview of the efficiency of a heuristic, there are other characteristics that we can consider. Take, for example, the results obtained with parameters $\delta = 0.7$ and $W = 5000$ in Table \ref{table:n=1000}. Clearly PS obtains solutions with the fewest strips on average, however, we noted that out of the 1000 instances, PS did not produce a single solution containing $t$ strips. On the other hand, there were 152 instances in which MFFD$^+$ was able to generate a solution $S$ such that $|\mathcal{S}| = t$, thus implying that there are at least 152 solutions that can be solved to optimality. Despite this, MFFD$^+$ has a higher average optimality than PS, suggesting that the variance in the number of strips required is higher.
+Although using the average solution quality from 1000 instances provides a useful overview of the efficiency of a heuristic, there are other characteristics that we can consider. Take, for example, the results obtained with parameters $\delta = 0.7$ and $W = 5000$ in Table \ref{table:n=1000}. Clearly PS obtains solutions with the fewest strips on average, however, we noted that out of the 1000 instances, PS did not produce a single solution containing $t$ strips. On the other hand, there were 152 instances in which MFFD$^+$ was able to generate a solution $S$ such that $|\mathcal{S}| = t$, thus implying that there are at least 152 solutions that can be solved to optimality. Despite this, MFFD$^+$ has a higher average solution quality than PS, suggesting that the variance in the number of strips required is higher.
 
 
 \begin{enumerate}
@@ -482,7 +467,7 @@ Although using the average optmality from 1000 instances provides a useful overv
 
 
 
-\bibliographystyle{dcu}
+\bibliographystyle{splncs04}
 \bibliography{includes/bibliography}
 
 \end{document}
