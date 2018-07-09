@@ -1,10 +1,11 @@
-\documentclass[oribibl]{llncs}
+\documentclass[oribibl, runningheads]{llncs}
 \input{includes/preamble.tex}
 
 \begin{document}
 	
 \title{Heuristics for the Score-Constrained Strip-Packing Problem}
 \author{Asyl L. Hawa \and Rhyd M. R. Lewis \and Jonathan M. Thompson}
+\authorrunning{A. L. Hawa et al.}
 \institute{School of Mathematics, Cardiff University, Senghennydd Road, Cardiff, UK, CF24 4AG}
 \maketitle
 
@@ -36,7 +37,7 @@ A prominent application of the COP is in a strip-packing problem brought to ligh
 	\label{fig:itemsknife}
 \end{figure}
 
-Clearly, for two items to be placed alongside one another feasibly, the distance between the two score lines from adjacent items must equal or exceed the minimum scoring distance, else the knives will not be able to score the items in the correct locations. Thus, the problem consists of finding a suitable ordering and orientation of the items such that the sum of every pair of adjacent score widths is greater than or equal to the minimum scoring distance\footnote{Note that the left-hand score width of the first item and the right-hand score width of the last item on the strip are not adjacent to any other item, and are therefore ignored.}. It follows that there are $\frac{n!}{2}2^n$ distinct arrangements of items, and so complete enumeration can cause a combinatorial explosion.
+Clearly, for two items to be placed alongside one another feasibly, the distance between the two score lines from adjacent items must equal or exceed the minimum scoring distance, else the knives will not be able to score the items in the correct locations. Thus, the problem consists of finding a suitable ordering and orientation of the items such that the sum of every pair of adjacent score widths is greater than or equal to the minimum scoring distance.\footnote{Note that the left-hand score width of the first item and the right-hand score width of the last item on the strip are not adjacent to any other item, and are therefore ignored.} It follows that there are $\frac{n!}{2}2^n$ distinct arrangements of items, and so complete enumeration can cause a combinatorial explosion.
 
 It can be seen that this problem is in fact equal to the COP, where each unordered pair in an instance $\mathcal{M}$ contains the score widths of an item, and $\tau$ is the minimum scoring distance. It then follows that the vicinal sum constraint corresponds to the requirement for the sum of adjacent score widths to exceed $\tau$. Figure \ref{fig:items/aligned} shows the example instance $\mathcal{M}$ of the COP from above depicted as a packing problem.
 
