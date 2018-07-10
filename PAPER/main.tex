@@ -11,7 +11,7 @@
 \maketitle
 
 \begin{abstract}
-	This paper investigates the Score-Constrained Strip-Packing Problem (SCSPP), a combinatorial optimisation problem that generalises the one-dimensional bin-packing problem. In the construction of cardboard boxes rectangular items are packed onto strips to be scored by knives prior to being folded. The order and orientation of the items on the strips determine whether the knives are able to score the items correctly. Initially, we detail an exact polynomial-time algorithm for finding a feasible alignment of items on a single strip. We then integrate this algorithm with a packing heuristic to address the multi-strip problem and compare with two other greedy heuristics, discussing the circumstances in which each method is superior.
+	This paper investigates the Score-Constrained Strip-Packing Problem (SCSPP), a combinatorial optimisation problem that generalises the one-dimensional bin-packing problem. In the construction of cardboard boxes, rectangular items are packed onto strips to be scored by knives prior to being folded. The order and orientation of the items on the strips determine whether the knives are able to score the items correctly. Initially, we detail an exact polynomial-time algorithm for finding a feasible alignment of items on a single strip. We then integrate this algorithm with a packing heuristic to address the multi-strip problem and compare with two other greedy heuristics, discussing the circumstances in which each method is superior.
 \end{abstract}
 
 \section{Introduction}
@@ -126,29 +126,25 @@ Starting from the first edge in the list, BR then searches through the list to f
 \end{enumerate*}
 If these conditions are met, BR adds the current edge to a set $R_1$, and continues to add all succeeding edges in the list to $R_1$ provided that, for each edge, both conditions hold and the succeeding edge is not a member of a component of $G'$ that has an edge in $R_1$. Once there are no more valid edges available to add to $R_1$, BR resumes its search through the remaining edges in the list to find a new edge that meets the conditions, and can begin a new set $R_2$. The procedure terminates once the penultimate edge in the list has been assessed.
 
-Now, one of the following three conditions holds.
+Now, one of the following three cases occurs:
 \begin{enumerate}
 \item In the event that BR has produced no sets, there are no suitable edges that can combine the components $C_1, C_2, ..., C_l$ of $G'$, and therefore an alternating Hamiltonian cycle for $G$ cannot be created. Thus, no feasible solution exists for the corresponding COP.
 
 \item On the other hand, if there exists a set $R_i$ such that $|R_i| = l$, then all the components of $G'$ can be merged together to form a single alternating Hamiltonian cycle. This is achieved by adding the red edge from $R\backslash R'$ connecting the lower-indexed vertex of each edge in $R_i$ to the higher-indexed vertex of the next edge to $R'$ (for the final edge in $R_i$, add the red edge connecting its lower-indexed vertex to the higher-indexed vertex of the first edge). Any edges that appear in both $R_i$ and $R'$ are then removed from $R'$, so that $R'$ remains a perfect matching and $R_i \cap R' = \emptyset$. $G'$ then consists of a single alternating Hamiltonian cycle; hence a solution has been found.
 % add edges (v_i, m(v_{i+1})) for i \in {1, 2, ..., |R_i| -1} from R to R', and then the edge (v_{|R_i|}, m(v_1)) from R to R' 
 
-\item Otherwise, it may be that multiple sets need to be used to connect the components of $G'$. For two sets $R_i$ and $R_j$ to ``overlap'', each set must have exactly one edge from the same component in $G'$, with the other edges in each set being from different components. For example, if $R_1$ has two edges, one from component $C_1$ and one from component $C_2$, and $R_2$ has three edges that are members of components $C_2$, $C_3$ and $C_4$, then $R_1$ and $R_2$ are said to overlap, since they each possess an edge $C_2$ but the other edges in the sets are from different components. Therefore, a selection of sets need to be found such that each set overlaps with at least one other set, and each component has at least one edge in one of the selected sets. If such a collection of sets exists, then the components of $G'$ can be merged to create an alternating Hamiltonian cycle by applying the connecting procedure above to every set in the collection.
+\item Otherwise, it may be that multiple sets need to be used to connect the components of $G'$. For two edge sets $R_i$ and $R_j$ to ``overlap'', each set must have exactly one edge from the same component in $G'$, with the other edges in each set being from different components. A collection of sets $\mathcal{R}^{*}$ need to be found such that each set overlaps with at least one other set, and each component has at least one edge in one of the sets. If such a collection of sets exists, then the components of $G'$ can be merged to create an alternating Hamiltonian cycle by applying the connecting procedure above to every set in $\mathcal{R}^{*}$. 
+%For example, if $R_1$ has two edges, one from component $C_1$ and one from component $C_2$, and $R_2$ has three edges that are members of components $C_2$, $C_3$ and $C_4$, then $R_1$ and $R_2$ are said to overlap, since they each possess an edge $C_2$ but the other edges in the sets are from different components.
 \end{enumerate}
 
-\begin{itemize}
-	\item Choose set $R_i$ with the highest cardinality. Call this set $R^{*}_1$. Add this set to $\mathcal{R}$.
-	\item Take original sorted list from beginning of BR, remove edges from list that are in $\mathcal{R}$.
-	\item Go through list again, perform modified BR:
-	\begin{itemize}
-		\item (a) lower-indexed vertex of current edge and higher-indexed vertex of next edge in list are adj via red edge;
-		\item (b) The current edge and an edge in $\mathcal{R}$ are members of the same component, and the next edge is in a component that does not have an edge in $\mathcal{R}$, or vice versa.
-	\end{itemize}	
-	\item If found, add these two edges to set $R^{*}_2$ and add this set to $\mathcal{R}$. Continue to add succeeding edges in list to $R^{*}_2$, provided condition (a) holds, and the succeeding edge is a member of a component that does not have an edge in $\mathcal{R}$.
-	\item If no more valid edges, check to see if at least one edge from every component of $G'$ is in $\mathcal{R}$.
-	\item If not, remove edges from $R^{*}_2$ from sorted list, and start again. Continue until $\mathcal{R}$ contains sets that overlap and have an edge from every component, or until every edge in the list is assessed and no new set has been created. 
-	\item If not all components covered, infeasible, else apply connecting procedure to every individual set in $\mathcal{R}$.
-\end{itemize}
+To find these overlapping sets, the \textsc{Modified Bridge Recognition} (MBR) algorithm is used, which is based on BR. Firstly, a copy of the set $R_i$ with the highest cardinality generated by BR is created, called $R^{*}_1$, and is added to $\mathcal{R}^{*}$. Then, MBR takes the original sorted list used in BR and removes edges from the list that are already in $\mathcal{R}^{*}$. Similarly to BR, MBR proceeds through the list to find an edge that meets the following conditions:
+\begin{enumerate*}[label={(\alph*)}]
+	\item The lower-indexed vertex of the current edge and the higher-indexed vertex of the next edge in the list are adjacent via an edge in $R$; and
+	\item the current edge and an edge in $\mathcal{R}^{*}$ are members of the same component of $G'$, and the next edge is a member of a component that does not have an edge in $\mathcal{R}^{*}$, or vice versa.
+\end{enumerate*}
+If both conditions hold, the current edge is added to a new set $R^{*}_2$ which is then added to $\mathcal{R}^{*}$. MBR continues to add suceeding edges to $R^{*}_2$, provided condition (a) holds and the suceeding edge is a member of a component that does not have an edge in $\mathcal{R}^{*}$. 
+
+
 
 Using the instance illustrated in Figure \ref{fig:connect/cycle} as an example, the edges $(v_3, v_{12})$ and $(v_4, v_{11})$ are in the set $R_1$ formed by BR, as \begin{enumerate*}[label={(\alph*)}]
 	\item $(v_3, v_{11}) \in R$, i.e. the lower-indexed vertex of the first edge is adjacent to the higher-indexed vertex of the next edge; and
@@ -296,7 +292,7 @@ The heuristics were implemented in C++ and executed on a computer equipped with 
 
 Tables \ref{table:n=500} and \ref{table:n=1000} compare the results obtained from the three heuristics using the different values of $\delta$ and $W$ for $n = 500$ and 1000 respectively. Figures in bold indicate the best average solution quality for the given combination of parameters. We see that $q$ tends toward 1 as $\delta$ increases since the proportion of score widths meeting the vicinal sum constraint increases, allowing more items per strip and reducing the number of strips required. Note that when $\delta = 1.0$ MFFD and MFFD$^+$ have identical solution qualities, as the instances are equivalent to the original BPP ($\tau = 0$) and so they operate in the same fashion as the original FFD heuristic.
 
-Looking at results for both $n = 500$ and 1000, there is a clear pattern with respect to $q$ across all widths and proportion levels. PS has the best solution quality for a wider range of $\delta$ when the strips are wider, and a much smaller range when the strip width decreases. Conversely, MFFD$^+$ obtains better solution qualities for a wider range of $\delta$ when $W = 1250$. Although PS does have the best solution quality of the three heuristics for $\delta = 0.1$ and 0.2 using the smallest strip width, we can see that it only marginally superior to MFFD$^+$. For example, take $\delta = 0.2$ in Table \ref{table:n=500} for $W = 1250$. The difference between $q$ for PS and MFFD$^+$ is 0.00829, which translates to less than 2 strips difference between the average number of strips generated by each heuristic.
+Looking at results for both $n = 500$ and 1000, there is a clear pattern with respect to $q$ across all widths and proportion levels. PS has the best solution quality for a wider range of $\delta$ when the strips are wider, and a much smaller range when the strip width decreases. Conversely, MFFD$^+$ obtains better solution qualities for a wider range of $\delta$ when $W = 1250$. Although PS does have the best solution quality of the three heuristics for $\delta = 0.1$ and 0.2 using the smallest strip width, we can see that it only marginally superior to MFFD$^+$. For example, take $\delta = 0.2$ in Table \ref{table:n=500} for $W = 1250$. The difference between $q$ for PS and MFFD$^+$ is 0.008, which translates to less than 2 strips difference between the average number of strips generated by each heuristic.
 
 One interesting feature is the reduction of $q$ between $\delta = 0.4$ and $\delta = 0.5$, which is much more significant for $W = 5000$ as opposed to $W = 1250$. The reduction occurs due to an increase in the number of feasible alignments of the items, as every score width is able to be paired with $n-1$ other score widths when $\delta = 0.5$. Thus, when $W = 5000$, more items can be packed onto a strip feasibly, resulting in fewer strips in the final solution. However, the difference in $q$ is less noticeable for $W = 1250$, as regardless of the increased proportion in possible pairings, the capacity of the strips is much smaller, preventing the collection of items from multiple strips onto one.
 
@@ -369,7 +365,7 @@ Although using the average solution quality from 1000 instances provides a usefu
 
 \begin{comment}
 \begin{itemize}
-	\item ``BPP becomes easier to solve when the number of items per bin increases, and problems with two or less items per bin are trivial to solve. Triplets are proposed to be `the most difficult bin packing instances''' \cite{falkenauer1996}.
+	\item ``BPP becomes easier to solve when the number of items per bin increases, and problems with two or less items per bin are trivial to solve. Triplets are proposed to be `the most difficult bin packing instances''' Falkenauer
 	\item Fair comparison, running over 1000 instances (average of 1000 instances)
 	\item Note that MFFD and MFFD$^+$ perform identically when $\delta = 1.0$, as they both perform in exactly the same manner as the original FFD heuristic  
 	\item All instances completed in less than 160ms
@@ -458,7 +454,7 @@ Although using the average solution quality from 1000 instances provides a usefu
 	\item Significant difference in opt, $n = 1000$, $W = 1250$, $\delta = 0.6$, difference between MFFD$^+$ and PS opts is 0.10912 (MFFD$^+$ better), which amounts to an average difference of over 50 strips in solns produced.
 	\item Noticable drop in opts between $\delta = 0.4$ and $\delta = 0.5$ when $W$ high, as capacity not main concern, more items can now be placed next to one another, so number of strips reduces dramatically, however when $W = 1250$ there is still a capacity issue, regardless of the increased proportion of possible pairings.
 	\item anomaly MFFD $n = 1000$, $W = 1250$, $\delta = 0.3$
-	\item harder problems, \cite{falkenauer1996}, triplets, fewer items per strip.
+	\item harder problems, falkenauer, triplets, fewer items per strip.
 	\item cases when opt $\neq 1$: $t$ incorrect, solution produced is not optimal, or both.
 	\item less than 10\% past $\delta = 0.8$
 	\end{enumerate}
