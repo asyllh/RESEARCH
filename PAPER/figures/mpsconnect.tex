@@ -1,4 +1,7 @@
-\documentclass{standalone}
+\documentclass[usenames,dvipsnames,tikz]{standalone}
+\usepackage{xcolor}
+\colorlet{myBlue}{RoyalBlue!35!Cerulean}
+\colorlet{myRed}{Red!85!YellowOrange}
 \usepackage{tikz}
 \usepackage{standalone}
 \begin{document}
@@ -6,26 +9,26 @@
 \begin{tikzpicture}
 %\draw [help lines] (-1,-1) grid (25, 12);
 
-\draw [thick, cyan] (4,0) -- (7,2);
-\draw [thick, cyan] (4,7) -- (7,5);
-\draw [thick, cyan] (1,2) -- (1,5);
+\draw [ultra thick, myBlue] (4,0) -- (7,2);
+\draw [ultra thick, myBlue] (4,7) -- (7,5);
+\draw [ultra thick, myBlue] (1,2) -- (1,5);
 
-\draw [thick, cyan] (10,2) -- (12,0);
-\draw [thick, cyan] (15,0) -- (17,2);
-\draw [thick, cyan] (15,7) -- (17,5);
-\draw [thick, cyan] (12,7) -- (10,5);
+\draw [ultra thick, myBlue] (10,2) -- (12,0);
+\draw [ultra thick, myBlue] (15,0) -- (17,2);
+\draw [ultra thick, myBlue] (15,7) -- (17,5);
+\draw [ultra thick, myBlue] (12,7) -- (10,5);
 
-\draw [thick, red] (4,0) -- (1,2);
-\draw [thick, red] (4,7) -- (1,5);
-\draw [thick, red] (7,5) -- (7,2);
+\draw [myRed] (4,0) -- (1,2);
+\draw [myRed] (4,7) -- (1,5);
+\draw [myRed] (7,5) -- (7,2);
 
-\draw [thick, red] (10,2) -- (10,5);
-\draw [thick, red] (12,7) -- (15,7);
-\draw [thick, red] (17,5) -- (17,2);
-\draw [thick, red] (15,0) -- (12,0);
+\draw [myRed] (10,2) -- (10,5);
+\draw [myRed] (12,7) -- (15,7);
+\draw [myRed] (17,5) -- (17,2);
+\draw [myRed] (15,0) -- (12,0);
 
-\draw [thick, dashed, red] (7,2) -- (10,2);
-\draw [thick, dashed, red] (7,5) -- (10,5);
+\draw [dashed,myRed] (7,2) -- (10,2);
+\draw [dashed,myRed] (7,5) -- (10,5);
 
 \draw [fill=white, thick] (4,0) circle [radius = 0.1];
 \draw [fill=white, thick] (1,2) circle [radius = 0.1];
@@ -44,24 +47,24 @@
 \draw [fill=white, thick] (15,7) circle [radius = 0.1];
 
 
-\node [below] at (4,-0.1) {\LARGE{$v_2$}};
-\node [left] at (1,2) {\LARGE{$v_{13}$}};
-\node [left] at (1,5) {\LARGE{$v_{14}$}};
-\node [above] at (4,7) {\LARGE{$v_1$}};
-\node [above] at (7,5.1) {\LARGE{$v_3$}};
-\node [below] at (7.1,1.9) {\LARGE{$v_{12}$}};
+\node [below] at (4,-0.1) {\huge{$v_2$}};
+\node [left] at (1,2) {\huge{$v_{13}$}};
+\node [left] at (1,5) {\huge{$v_{14}$}};
+\node [above] at (4,7) {\huge{$v_1$}};
+\node [above] at (7,5.1) {\huge{$v_3$}};
+\node [below] at (7.1,1.9) {\huge{$v_{12}$}};
 
-\node [below] at (15,-0.1) {\LARGE{$v_8$}};
-\node [below] at (12,-0.1) {\LARGE{$v_7$}};
-\node [below] at (10,1.9) {\LARGE{$v_4$}};
-\node [above] at (9.9,5.1) {\LARGE{$v_{11}$}};
-\node [above] at (12,7) {\LARGE{$v_6$}};
-\node [above] at (15,7) {\LARGE{$v_{10}$}};
-\node [right] at (17,5) {\LARGE{$v_5$}};
-\node [right] at (17,2) {\LARGE{$v_9$}};
+\node [below] at (15,-0.1) {\huge{$v_8$}};
+\node [below] at (12,-0.1) {\huge{$v_7$}};
+\node [below] at (10,1.9) {\huge{$v_4$}};
+\node [above] at (9.9,5.1) {\huge{$v_{11}$}};
+\node [above] at (12,7) {\huge{$v_6$}};
+\node [above] at (15,7) {\huge{$v_{10}$}};
+\node [right] at (17,5) {\huge{$v_5$}};
+\node [right] at (17,2) {\huge{$v_9$}};
 
-\node at (4,3.5) {\LARGE{$C_1$}};
-\node at (13.5, 3.5) {\LARGE{$C_2$}};
+\node at (4,3.5) {\huge{$C_1$}};
+\node at (13.5, 3.5) {\huge{$C_2$}};
 
 \end{tikzpicture}
 	

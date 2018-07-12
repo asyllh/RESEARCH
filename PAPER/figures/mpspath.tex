@@ -1,23 +1,26 @@
-\documentclass{standalone}
+\documentclass[usenames,dvipsnames,tikz]{standalone}
+\usepackage{xcolor}
+\colorlet{myBlue}{RoyalBlue!35!Cerulean}
+\colorlet{myRed}{Red!85!YellowOrange}
 \usepackage{tikz}
 \usepackage{standalone}
-\begin{document}
+\begin{document}	
 	
 \begin{tikzpicture}
 %\draw [help lines] (-1,-1) grid (14, 6);
 
-\draw [thick, cyan] (1,3) -- (2,3);
-\draw [thick, cyan] (3,3) -- (4,3);
-\draw [thick, cyan] (5,3) -- (6,3);
-\draw [thick, cyan] (7,3) -- (8,3);
-\draw [thick, cyan] (9,3) -- (10,3);
-\draw [thick, cyan] (11,3) -- (12,3);
+\draw [ultra thick, myBlue] (1,3) -- (2,3);
+\draw [ultra thick, myBlue] (3,3) -- (4,3);
+\draw [ultra thick, myBlue] (5,3) -- (6,3);
+\draw [ultra thick, myBlue] (7,3) -- (8,3);
+\draw [ultra thick, myBlue] (9,3) -- (10,3);
+\draw [ultra thick, myBlue] (11,3) -- (12,3);
 
-\draw [thick, red] (2,3) -- (3,3);
-\draw [thick, red] (4,3) -- (5,3);
-\draw [thick, red] (6,3) -- (7,3);
-\draw [thick, red] (8,3) -- (9,3);
-\draw [thick, red] (10,3) -- (11,3);
+\draw [myRed] (2,3) -- (3,3);
+\draw [myRed] (4,3) -- (5,3);
+\draw [myRed] (6,3) -- (7,3);
+\draw [myRed] (8,3) -- (9,3);
+\draw [myRed] (10,3) -- (11,3);
 
 \draw [fill=white, thick] (1,3) circle [radius = 0.08];
 \draw [fill=white, thick] (2,3) circle [radius = 0.08];
