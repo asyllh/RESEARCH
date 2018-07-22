@@ -68,10 +68,10 @@ Observe that in this particular strip-packing problem the widths of the individu
 	Let $\mathcal{I}' \subseteq \mathcal{I}$ be a set of items whose total width is less than or equal to the capacity of a strip, (i.e. $\sum_{i\in \mathcal{I}'}w_i \leq W$). Given a minimum scoring distance $\tau$, the Score-Constrained Packing Sub-Problem (SCPSP) involves finding an arrangement of the items in $\mathcal{I}'$ such that the sum of every pair of adjacent score widths is greater than or equal to $\tau$.
 \end{definition}
 
-\noindent The remainder of this article is structured as follows: In Section 2, we will detail an exact polynomial-time algorithm for the COP, and show how it is applicable to the SCPSP. Section 3 then introduces three heuristics that can be used to find feasible solutions to the SCSPP, one of which makes particular use of the exact algorithm from the previous section, and their associated advantages and disadvantages. An analysis of results gained from extensive experiments and a comparison of the heuristics is provided in Section 4, and finally Section 5 concludes the paper and proposes some potential directions for future work.
+\noindent The remainder of this article is structured as follows: In Section \ref{sec:ahc}, we will detail an exact polynomial-time algorithm for the COP, and show how it is applicable to the SCPSP. Section \ref{sec:scsppsoln} then introduces three heuristics that can be used to find feasible solutions to the SCSPP, one of which makes particular use of the exact algorithm from the previous section, and their associated advantages and disadvantages. An analysis of results gained from extensive experiments and a comparison of the heuristics is provided in Section \ref{sec:expresults}, and finally Section \ref{sec:conclusion} concludes the paper and proposes some potential directions for future work.
 
 \section{Solving the COP}
-\label{sec:ahca}
+\label{sec:ahc}
 We now present an exact polynomial-time algorithm for the COP. The underlying algorithm was originally proposed by Becker in \cite{becker2010}, and is used to determine whether or not a solution exists for a given instance. Here, we extend this algorithm so that, if a solution does indeed exist, it is also able to formulate and present us with this final solution. This is especially useful for problems such as the strip-packing problem.
 
 Let $\mathcal{M}$ be an instance of the COP with cardinality $n$. It is useful to model $\mathcal{M}$ as a graph $G$ in which each vertex is associated with a single value in $\mathcal{M}$ in non-decreasing order. A pair of vertices, called ``dominating vertices'' are also added to the graph, both of which are assigned values equal to $\tau$. These dominating vertices aid the solution process, and are removed at the end. Thus, the graph $G$ has $2n+2$ vertices.
@@ -227,6 +227,7 @@ The last heuristic, Modified First-Fit Decreasing with AHC (MFFD$^+$), incorpora
 
 
 \section{Experimental Results}
+\label{sec:expresults}
 Benchmark instances currently do not exist for the SCSPP, and so artificial problem instances were produced to compare the performance of the three heuristics. For our experiments, we generated 1000 problem instances for $|\mathcal{I}| \in \{500, 100\}$. In each problem instance the items have varying widths $w_i \in [150,1000]$ and score widths $a_i, b_i \in [1, 70]$ to ensure that each item has exactly two score lines, all selected randomly from a uniform distribution. Strips of widths $W = 5000$, 2500 and 1250 were used to influence the number of items per strip. As the width of the strips decrease, the average number of items per strip also decreases, making the problem more constrained. Both the items and the strips have equal height of $H = 1$. Similarly to experiments performed in \cite{lewis2011}, we also introduced a parameter $\delta$ to denote the proportion of pairs of score widths from different items that meet the vicinal sum constraint, i.e. whose sum is greater than or equal to $\tau$. Values of $\delta$ from 0.0 to 1.0 were created by changing the value of $\tau$. Clearly, when $\delta = 0.0$, there are no items that can be packed together feasibly, and so $n$ strips will be required (one for each item), whereas if $\delta = 1.0$ all pairs of score widths meet the constraint, and the problem is equivalent to the BPP. 
 
 The heuristics were implemented in C++ and executed on a computer with an Intel Core i3-2120 3.30GHz processor. Our source code and all data is provided at \cite{hawa2018}. Since optimal solutions are not available, in our case solution quality $q$ is estimated by comparing each solution to the theoretical minimum, $q = |\mathcal{S}| / t$. For each heuristic, we calculated the average solution quality for every combination of $n$, $\delta$, and $W$ from 1000 instances. All individual trials were seen to complete in under 160ms.
@@ -287,10 +288,33 @@ Although using the average solution quality from 1000 instances provides a usefu
 
 
 \section{Conclusions and Further Work}
-This paper introduced a strip-packing problem with score constraints, where the order and orientation of the items is crucial to the feasibility of the solution. We shown that a solution can be found for the single-strip version of the problem in polynomial-time by modelling the problem graphically and using the concept of Hamiltonian cycles. Thus, our main problem was to tackle the multi-strip problem. Three heuristics, one of which included the exact algorithm for the single-strip problem, were described, and thorough experiments using a variety of parameters were executed. 
+\label{sec:conclusion}
+This paper has investigated the Score-Constrained Strip-Packing Problem (SCSPP), a packing problem in which the order and orientation of the items is crucial to the feasibility of the solution. We begun by introducing the Constrained Ordering Problem (COP), and described the Alternating Hamiltonian Construction (AHC) algorithm, an exact polynomial-time algorithm that operates by modelling the problem graphically and using the concept of Hamiltonian cycles. We then showed how AHC can be used to find a solution for the Score-Constrained Packing Sub-Problem (SCPSP), the single-strip version of the SCSPP. Thus, the main problem was to tackle the multi-strip problem. Three heuristics, one of which included the exact AHC algorithm, were described, and thorough experiments using a variety of parameters were executed. 
+
+A potential avenue for further research would be to adapt AHC in order to find feasible solutions for the SCSPP, rather than the single-strip sub-problem. One possible approach would be to introduce weighted edges on the graph $G$ formed during AHC, where blue edges between partners have a value corresponding to the item's width, and all red edges have a value of zero. Then, the problem involves producing the fewest number of alternating cycles such that the length of each cycle is less than some fixed value. It is clear that this problem is equivalent to the SCSPP, where the total width of items on each strip is less than or equal to $W$, and the number of strips is minimised. This can be seen as a variation of a generalisation of the TSP defined by Miller et al. \cite{miller1960}.
+
+\begin{comment}
+\begin{enumerate}
+	\item Paper investigated SCSPP, SPP with score-constraints, where order and orientation of items on strips is crucial to the feasibility of the solution.
+	\item We introduced the COP and described AHC, an exact p-time alg to solve it, which models problem graphically and uses concept of Hamiltonian cycles. 
+	\item Then showed that AHC can be used to find solution for single-strip version of SCSPP.
+	\item Thus main problem is multi-strip problem
+	\item Three heuristics, one which includes exact alg AHC for single-strip problem, were detailed/defined, and thorough experiments using a variety of parameters were executed. 
+	\item Showed that all heuristics able to find feasible solutions for large sets of items in very small amount of time
+	\item lower bound.
+	\item AHC can be used in conjucntion with other well known heuristics, ie NF, BF and decreasing versions
+	\item Extend concept of AHC to solve multi-strip problem, graph G has weighted edges, where blue edges between partners have value corresponding to item width and red edges = 0.
+	\item Then the problem involves producing the fewest number of alt cycles s.t. the length of each cycle is less than W, i.e. the total width of items on each strip is less than W and the number of strips is minimised.
+	\item Can be seen as a variation of a generalization of the TSP defined by miller where the salesman is required to visit each city exactly once, return to a base city a fixed number of times, given that they must visit no more than a fixed number of cities in each subtour. 
+\end{enumerate}	
+\end{comment}
+
 
 \begin{comment}
 \begin{itemize}
+	\item Showed that all heuristics able to find feasible solutions for large sets of items in very small amount of time
+	\item lower bound.
+	\item AHC can be used in conjucntion with other well known heuristics, ie NF, BF and decreasing versions
 	\item This paper introduced a SPP with score constraints, where the order and orientation of the items is crucial to the feasibility of the solution (for example).
 	\item We showed that a solution can be found for the single strip version of the problem (subproblem) in p-time/ we showed an exact p-time alg for the single strip version of the problem. 
 	\item exact p-time alg for COP used to solve subproblem
@@ -314,15 +338,9 @@ This paper introduced a strip-packing problem with score constraints, where the 
 	\item if sets dont have feasible solution, try swapping items between sets
 	\item initial tests, Becker theorem 6 2015 paper cite garraffa2016
 	\item minimise waste on each strip, not just number of strips
+	\item in conjunction with
 \end{itemize}
 \end{comment}
-
-
-
-
-
-
-
 
 
 \bibliographystyle{splncs04}
