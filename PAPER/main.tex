@@ -156,18 +156,15 @@ Note that since $v_4$ and $v_{11}$ are adjacent, $v_4$ must also be adjacent to 
 \begin{figure}[H]	
 	\centering
 	\begin{subfigure}[h]{0.65\textwidth}
-		\includestandalone[width=\textwidth]{figures/mpsconnect}
-		%\caption{Edges from $R\backslash R'$ can connect vertices from different cycles.}	
+		\includestandalone[width=\textwidth]{figures/mpsconnect}	
 		\label{fig:mpsconnect}
 	\end{subfigure}
 	\begin{subfigure}[h]{0.65\textwidth}
 		\includestandalone[width=\textwidth]{figures/mpscycle}
-		%\caption{Replacing edges connects the components and forms an alternating Hamiltonian cycle.}	
 		\label{fig:mpscycle}
 	\end{subfigure}
 	\begin{subfigure}[h]{0.75\textwidth}
 		\includestandalone[width=\textwidth]{figures/mpspath}
-		%\caption{Alternating Hamiltonian Path corresponding to feasible solution $\mathcal{T}$.}	
 		\label{fig:mpspath}
 	\end{subfigure}
 	\caption{Specific edges found using BR merge the components of $G'$ together, forming an alternating Hamiltonian cycle which corresponds to a solution.}
@@ -215,7 +212,6 @@ The first heuristic is the Modified First-Fit Decreasing (MFFD) heuristic which 
 The next heuristic is the Pair-Smallest (PS) heuristic, which is an extension of an inexact procedure defined by Lewis et al. \cite{lewis2011}. Unlike MFFD, which packs each item in turn, PS focusses on packing one strip at a time, only starting a new strip once the current strip is unable to accommodate any further items. Each strip is initialised by choosing the item from $\mathcal{I}$ with the smallest score width, and packing it in a regular orientation. PS then continues to fill the strip by selecting the item with the smallest score width that meets the vicinal sum constraint with the right-most score width on the strip, and whose width will not cause the strip to be overfilled. This heuristic aligns the smallest score widths with the largest ones, eliminating the possibility of placing larger score widths together unecessarily. Note that PS therefore prioritises the vicinal sum constraint over the item widths, choosing to fulfil this constraint first before considering whether the item can actually be accommodated. Consequently, there is no use for a procedure such as AHC to find a feasible arrangement of the items.
 
 The last heuristic, Modified First-Fit Decreasing with AHC (MFFD$^+$), incorporates the AHC algorithm from Section \ref{sec:ahc}. It operates in a similar fashion to the MFFD, placing items sorted in decreasing order onto the lowest-indexed strip. However, rather than attempting to place the item onto the right-most side of the strip, MFFD$^+$ executes AHC on all items on the strip. If AHC finds a feasible solution, the items are placed on the strip in the order of the solution, which includes the current item, else MFFD$^+$ attempts to pack the current item on the next strip. Using AHC means that if a feasible alignment of the items exists, there is a guarantee that it will be found. Unlike MFFD, where the current item can only be placed on the end of the strip, MFFD$^+$ allows the items to be entirely rearranged (see Figure \ref{fig:comparestrips}). This reduces the possibility of having to start a new strip for an item, thus preventing increasing the number of strips in the final solution. 
-%Since AHC is executed every time an item can fit onto a strip that already contains items, (up to $|\mathcal{S}|$ times per item, where $|\mathcal{S}|$ is the number of strips containing at least one item so far in the procedure) MFFD$^+$ is slower in comparison to the previous heuristics.  
 
 \begin{figure}[H]	
 	\centering
@@ -227,7 +223,7 @@ The last heuristic, Modified First-Fit Decreasing with AHC (MFFD$^+$), incorpora
 
 \section{Experimental Results}
 \label{sec:expresults}
-Benchmark instances currently do not exist for the SCSPP, and so artificial problem instances were produced to compare the performance of the three heuristics. For our experiments, we generated 1000 problem instances for $|\mathcal{I}| \in \{500, 100\}$. In each problem instance the items have varying widths $w_i \in [150,1000]$ and score widths $a_i, b_i \in [1, 70]$ to ensure that each item has exactly two score lines, all selected randomly from a uniform distribution. Strips of widths $W = 5000$, 2500 and 1250 were used to influence the number of items per strip. As the width of the strips decrease, the average number of items per strip also decreases, making the problem more constrained. Both the items and the strips have equal height of $H = 1$. Similarly to experiments performed in \cite{lewis2011}, we also introduced a parameter $\delta$ to denote the proportion of pairs of score widths from different items that meet the vicinal sum constraint, i.e. whose sum is greater than or equal to $\tau$. Values of $\delta$ from 0.0 to 1.0 were created by changing the value of $\tau$. Clearly, when $\delta = 0.0$, there are no items that can be packed together feasibly, and so $n$ strips will be required (one for each item), whereas if $\delta = 1.0$ all pairs of score widths meet the constraint, and the problem is equivalent to the BPP. 
+Benchmark instances currently do not exist for the SCSPP, and so artificial problem instances were produced to compare the performance of the three heuristics. For our experiments, we generated 1000 problem instances for $|\mathcal{I}| \in \{500, 1000\}$. In each problem instance the items have varying widths $w_i \in [150,1000]$ and score widths $a_i, b_i \in [1, 70]$ to ensure that each item has exactly two score lines, all selected randomly from a uniform distribution. Strips of widths $W = 5000$, 2500 and 1250 were used to influence the number of items per strip. As the width of the strips decrease, the average number of items per strip also decreases, making the problem more constrained. Both the items and the strips have equal height of $H = 1$. Similarly to experiments performed in \cite{lewis2011}, we also introduced a parameter $\delta$ to denote the proportion of pairs of score widths from different items that meet the vicinal sum constraint, i.e. whose sum is greater than or equal to $\tau$. Values of $\delta$ from 0.0 to 1.0 were created by changing the value of $\tau$. Clearly, when $\delta = 0.0$, there are no items that can be packed together feasibly, and so $n$ strips will be required (one for each item), whereas if $\delta = 1.0$ all pairs of score widths meet the constraint, and the problem is equivalent to the BPP. 
 
 The heuristics were implemented in C++ and executed on a computer with an Intel Core i3-2120 3.30GHz processor. Our source code and all data is provided at \cite{hawa2018}. Since optimal solutions are not available, in our case solution quality $q$ is estimated by comparing each solution to the theoretical minimum, $q = |\mathcal{S}| / t$. For each heuristic, we calculated the average solution quality for every combination of $n$, $\delta$, and $W$ from 1000 instances. All individual trials were seen to complete in under 160ms.
 
@@ -290,74 +286,9 @@ Although using the average solution quality from 1000 instances provides a usefu
 \label{sec:conclusion}
 This paper has investigated the Score-Constrained Strip-Packing Problem (SCSPP), a packing problem in which the order and orientation of the items is crucial to the feasibility of the solution. We begun by introducing the Constrained Ordering Problem (COP), and described the Alternating Hamiltonian Construction (AHC) algorithm, an exact polynomial-time algorithm that operates by modelling the problem graphically and using the concept of Hamiltonian cycles. We then showed how AHC can be used to find a solution for the Score-Constrained Packing Sub-Problem (SCPSP), the single-strip version of the SCSPP. Thus, the main problem was to tackle the multi-strip problem. Three heuristics, one of which included the exact AHC algorithm, were described, and thorough experiments using a variety of parameters were executed. 
 
-A potential avenue for further research would be to adapt AHC in order to find feasible solutions for the SCSPP, rather than the single-strip sub-problem. One possible approach would be to introduce weighted edges on the graph $G$ formed during AHC, where blue edges between partners have a value corresponding to the item's width, and all red edges have a value of zero. Then, the problem involves producing the fewest number of alternating cycles such that the length of each cycle is less than some fixed value. This can be seen as a variation of a generalisation of the TSP defined by Miller et al. \cite{miller1960}.It is clear that this problem is equivalent to the SCSPP, where the total width of items on each strip is less than or equal to $W$, and the number of strips is minimised. 
+A potential avenue for further research would be to produce an evolutionary algorithm (EA) for the SCSPP which incorporates AHC during local search. One possible addition would be to introduce an approach similar to one used in \cite{malaguti2008}. During each iteration of the evolutionary algorithm, high quality strips are chosen from each offspring solution and stored in separate set. On completion of the EA, a postoptimisation procedure based on the exact cover problem is executed. The procedure aims to find the fewest number of strips from the set of high quality strips that contains every item exactly once. 
 
 
-\begin{comment}
-\begin{enumerate}
-	\item Paper investigated SCSPP, SPP with score-constraints, where order and orientation of items on strips is crucial to the feasibility of the solution.
-	\item We introduced the COP and described AHC, an exact p-time alg to solve it, which models problem graphically and uses concept of Hamiltonian cycles. 
-	\item Then showed that AHC can be used to find solution for single-strip version of SCSPP.
-	\item Thus main problem is multi-strip problem
-	\item Three heuristics, one which includes exact alg AHC for single-strip problem, were detailed/defined, and thorough experiments using a variety of parameters were executed. 
-	\item Showed that all heuristics able to find feasible solutions for large sets of items in very small amount of time
-	\item lower bound.
-	\item AHC can be used in conjucntion with other well known heuristics, ie NF, BF and decreasing versions
-	\item Extend concept of AHC to solve multi-strip problem, graph G has weighted edges, where blue edges between partners have value corresponding to item width and red edges = 0.
-	\item Then the problem involves producing the fewest number of alt cycles s.t. the length of each cycle is less than W, i.e. the total width of items on each strip is less than W and the number of strips is minimised.
-	\item Can be seen as a variation of a generalization of the TSP defined by miller where the salesman is required to visit each city exactly once, return to a base city a fixed number of times, given that they must visit no more than a fixed number of cities in each subtour. 
-\end{enumerate}	
-\end{comment}
-
-
-\begin{comment}
-\begin{itemize}
-	\item Showed that all heuristics able to find feasible solutions for large sets of items in very small amount of time
-	\item lower bound.
-	\item AHC can be used in conjucntion with other well known heuristics, ie NF, BF and decreasing versions
-	\item This paper introduced a SPP with score constraints, where the order and orientation of the items is crucial to the feasibility of the solution (for example).
-	\item We showed that a solution can be found for the single strip version of the problem (subproblem) in p-time/ we showed an exact p-time alg for the single strip version of the problem. 
-	\item exact p-time alg for COP used to solve subproblem
-	\item Thus the main problem was finding solutions for the multistrip version
-	\item Created 3 heuristics, one which included the p-time alg. 
-	\item shown how AHC can be combined with well known heuristic to produce a method for tackling multistrip version of the problem, the SCSPP.
-	\item Experimental results show that ...
-	\item Further work.
-	\item items closer to practical applications, multiple items having same width and score widths
-	\item Genetic algorithm/EA
-	\item Operating theatre cleaning/scheduling
-	\item lower bound for the optimal number of strips SCSPP
-	\item cite miller1960 TSP returning to base
-	\item mffd+ items are packed one by one, could be a case where an items fits onto a strip but ahc cannot find a feasible solution, so item must be packed elsewhere, but if two new items could fit on the strip, ahc might be able to find a solution. 
-	\item include item width in ahc, so add values to the blue edges of the graph, weighted edges, red edges have value = 0.
-	\item Then the problem would be: find the minimum number of alternating cycles on $G$ such that the length of the cycle is less than or equal to some value $W$ (which is the strip width). The length of the cycle would be the sum of all the weighted edges, so the sum of all the blue edges, since red = 0. 
-	\item then could break and form edges to create new components of different sizes if some are too large, or join together if some are small, thus decreasing the number of cycles
-	\item or if possible, find a single alt Ham cycle, and break up into as few smaller cycles as possible such that the length of each cycle is less than or equal to $W$
-	\item another way, create as few feasible subsets $\mathcal{I}' \subseteq \mathcal{I}$ such that the total width of the items in each subset $\mathcal{I}$ is less than $W$, i.e. perform usual FFD alg, ignore score widths
-	\item then perform ahc on each set, try to find feasible solution.
-	\item if sets dont have feasible solution, try swapping items between sets
-	\item initial tests, Becker theorem 6 2015 paper cite garraffa2016
-	\item minimise waste on each strip, not just number of strips
-	\item in conjunction with
-\end{itemize}
-\end{comment}
-
-\begin{comment}
-\begin{enumerate}[noitemsep]
-\item copy of set $R_i$ with highest cardinality generated by BR is created called $R^{*}_1$ and added to $\mathcal{R}^*$
-\item remove edges from sorted list used in BR that are in $\mathcal{R}^*$
-\item go through list to find edge that meets following conditions:
-\begin{enumerate}[label={(\alph*)}]
-\item The lower-indexed vertex of the current edge and the higher-indexed vertex of the next edge in the list are adjacent via an edge in $R$; and
-\item the current edge and an edge in $\mathcal{R}^{*}$ are members of the same component of $G'$, and the next edge is a member of a component that does not have an edge in $\mathcal{R}^{*}$, or vice versa.
-\end{enumerate}
-\item if suitable edge found add current edge to new set $R^{*}_2$, add this set to $\mathcal{R}^*$
-\item continue to add succeeding edges to $R^{*}_2$ provided (a) holds and succeeding edge is member of component that does not have an edge in $\mathcal{R}^*$.
-\item If every component of $G'$ has an edge in one of the sets in $\mathcal{R}^*$, stop (the sets can connect all components together, MBR terminates)
-\item Else, edges in $R^{*}_2$ are removed from sorted list, MBR repeats search from beginning of list for suitable edges to start new set $R^{*}_3$
-\item (Outside bullet points) Procedure continues until either $\mathcal{R}^*$ contains overlapping sets that cover all components of $G'$ or until there are no more suitable edges in list to start a new set (or until no more sets can be made). If MBR has produced a feasible collection of overlapping sets then the components of $G'$ can be merged to create an alt Ham cycle by applying the connecting procedure described above to every set in $\mathcal{R}^*$.
-\end{enumerate}	
-\end{comment}
 
 
 
